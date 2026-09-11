@@ -1,0 +1,555 @@
+/* Esto va en tu archivo CSS (ej. src/css/jsgral.css o uno nuevo) */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  /* La ruta sube una carpeta y entra en font */
+  src: url('/src/font/material-symbols.woff2') format('woff2');
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* ==========================================================================
+   1. VARIABLES Y ESTILOS BASE (GLOBALES)
+   ========================================================================== */
+:root {
+    --font-size-base: 16px; /* Dinámico mediante JS */
+    --color-accent: #bc0009; /* Rojo principal */
+    --bg-modal-light: #ffffff;
+    --bg-modal-dark: #1c1c1e;
+    --text-light: #333333;
+    --text-dark: #ebebeb;
+    --bg-body-canto: #f4f4f4;
+
+}
+
+/* MODO OSCURO (Valores que camb0ian) */
+/*
+body.dark-theme {
+
+
+    --SangreDeCristo: #d01212;
+    --Acordes: #780606;
+    --vblancas: white;
+    --precat: rgb(51 51 51);
+    --liturgia: #FFFFCB;
+    --cat: #bde9ff;
+    --eleccion: #CEFFCF;
+
+    --bg-principal: #121212;
+    --bg-contenedores: #2c2c2e; 
+    --bg-header: #000000;
+    --bg-body-canto: #3a3a3c;
+
+    --texto-cantor: #ffffff;
+    --texto-principal: #f5f5f7;
+    --texto-secundario: #a1a1a6;
+    --texto-blanco: #ffffff;
+    --Indicador-Cantor-Asamble: #ccc;
+
+    
+    --Acordes: cyan;
+    --borde-divisor: #3a3a3c;
+    --accent: #ff453a;
+}
+
+*/
+/* Aplicación global del tamaño de fuente */
+body {
+    font-size: var(--font-size-base) !important;
+/*    background-color: #ffffff;*/
+    color: #000000;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Estado de bloqueo de scroll cuando el modal está abierto */
+body.modal-open {
+    overflow: hidden;
+    /*position: fixed;*/
+}
+
+/* Modo Oscuro Global */
+body.dark-theme {
+    background-color: var(--bg-body-canto);
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   2. CONTENEDOR PRINCIPAL (OVERLAY)
+   ========================================================================== */
+#modal-global-settings.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999999;
+    display: flex;
+    align-items: flex-end; /* Efecto hoja inferior (bottom sheet) */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s;
+    pointer-events: all;
+}
+
+#modal-global-settings.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ==========================================================================
+   3. EL FRAME (HOJA DE AJUSTES)
+   ========================================================================== */
+#modal-global-settings .settings-frame {
+    width: 100%;
+    margin: 0 auto;
+    background: var(--bg-modal-light);
+    border-radius: 24px 24px 0 0;
+    padding: 0;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.2);
+    overflow: hidden;
+
+    @media (min-width: 384px){max-width: 100%;}
+    @media (min-width: 768px){max-width: 100%;}
+    @media (min-width: 992px){max-width: 60%;}
+    
+}
+
+#modal-global-settings .settings-frame {
+}
+
+#modal-global-settings.active .settings-frame {
+    transform: translateY(0);
+}
+
+/* ==========================================================================
+   4. CABECERA
+   ========================================================================== */
+#modal-global-settings .settings-header {
+    background: #1a1a1b;
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#modal-global-settings .settings-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#modal-global-settings .btn-close-settings {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#modal-global-settings .btn-close-settings:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* ==========================================================================
+   5. CONTENIDO Y ITEMS DE AJUSTE
+   ========================================================================== */
+#modal-global-settings .settings-content {
+    padding: 0px 0px 20px 0px;
+    max-height: 70vh;
+    overflow-y: auto;
+    scrollbar-width: thin; /* Firefox */
+}
+
+/* Scrollbar personalizado */
+#modal-global-settings .settings-content::-webkit-scrollbar {
+    width: 4px;
+}
+#modal-global-settings .settings-content::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+#modal-global-settings .setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+#modal-global-settings .setting-item:active {
+    background-color: rgba(0,0,0,0.05);
+}
+
+#modal-global-settings .setting-item label {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   6. CONTROLES (SELECT Y SWITCH)
+   ========================================================================== */
+#modal-global-settings select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Switch Estilo iOS */
+#modal-global-settings .switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+#modal-global-settings .switch input {
+    opacity: 0; width: 0; height: 0;
+}
+
+#modal-global-settings .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+#modal-global-settings .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+#modal-global-settings input:checked + .slider {
+    background-color: var(--color-accent);
+}
+
+#modal-global-settings input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+/* ==========================================================================
+   7. ADAPTACIÓN A MODO OSCURO (UI INTERNA)
+   ========================================================================== */
+body.dark-theme #modal-global-settings .settings-frame {
+    background: var(--bg-modal-dark);
+    color: white;
+}
+
+body.dark-theme #modal-global-settings .settings-header {
+    background: #000000;
+    border-bottom: 1px solid #2c2c2e;
+}
+
+body.dark-theme #modal-global-settings .setting-item {
+    border-bottom: 1px solid #2c2c2e;
+}
+
+body.dark-theme #modal-global-settings .setting-item:active {
+    background-color: rgba(255,255,255,0.05);
+}
+
+body.dark-theme #modal-global-settings .setting-item label {
+    color: var(--text-dark);
+}
+
+body.dark-theme #modal-global-settings select {
+    background: #2c2c2e;
+    color: white;
+    border: 1px solid #3a3a3c;
+}
+
+body.dark-theme #modal-global-settings select option {
+    background: #2c2c2e;
+    color: white;
+}
+
+/* Barra de pestañas superior */
+.settings-tabs-bar {
+    display: flex;
+    overflow-x: auto;
+    background: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 1px;
+    border: none;
+    background: transparent;
+    background: lightskyblue;
+    border: 1px solid #83caf5;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 13px;
+    color: black;
+    gap: 4px;
+}
+
+.tab-btn.active {
+
+    color: white;
+    border-bottom: 3px solid #bc0009;
+    background: #eb0909;
+    border: 1px solid grey;
+}
+
+/* Paneles de contenido */
+.tab-panel {
+    display: none;
+    padding: 15px 20px;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.setting-row label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.material-symbols-outlined {
+    color: inherit;
+/*    color: black;*/
+    width: 40px;
+    height: 40px;
+    place-content: center;
+    text-align: center;
+}
+
+.home {color: white;}
+.home:hover {
+    color: black !important;
+    background-color: white !important;
+}
+
+.material-symbols-outlined:hover {
+    background: white;
+    background: #c42525;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    place-content: center;
+    text-align: center;
+}
+
+.material-symbols-outlined.close:hover {
+    height: 25px;
+}
+
+
+/* TAMAÑO DEL SETTING*/
+
+/* Ajuste de ancho del setting al 90% */
+.settings-frame {
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Estilo para los botones de limpieza y actualización */
+.btn-setting-action {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    text-transform: uppercase;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-setting-action:active {
+    transform: scale(0.95); /* Efecto de pulsado */
+    box-shadow: none;
+}
+
+
+/* DESPLAZAMIENTO DESDE ABAJO*/
+
+/* Contenedor del fondo */
+.settings-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0);
+    z-index: 10000;
+    display: flex;
+    align-items: flex-end; /* Lo pega abajo */
+    transition: background 0.3s ease;
+}
+
+.settings-overlay.active {
+    background: rgba(0,0,0,0.5);
+}
+
+/* El panel que sube */
+.settings-frame {
+    width: 90%;
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    /* Empieza abajo de todo */
+    transform: translateY(100%); 
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Clase que activa la subida */
+.settings-frame.up {
+    transform: translateY(0);
+}
+
+
+
+/*
+    width: 90% !important; /* Forzamos el 90% del ancho de pantalla */
+/*    max-width: 500px;      /* Pero le ponemos un tope para que en PC no sea gigante *//*
+*/
+
+
+/* NOTAS DE PIE DE PAGINA*/
+
+#nCan a {
+    text-decoration: none;
+    color: inherit; /* Mantiene el color del tema */
+    border-bottom: 1px dashed #bc0009; /* Línea discontinua roja debajo */
+    transition: all 0.3s ease;
+}
+
+#nCan a:hover {
+    color: #bc0009;
+    border-bottom: 1px solid #bc0009;
+}
+
+.nota-personal-label {
+    font-weight: bold;
+    color: #bc0009;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    margin-right: 4px;
+}
+
+
+/* */
+
+#btn-sync-cloud {
+    background: lightskyblue;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: none;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.spinning {
+    animation: rotation 2s infinite linear;
+}
+
+@keyframes rotation {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(359deg); }
+}
+
+/* Estilo general para los botones de acción en ajustes */
+.btn-setting-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Espacio entre icono y texto */
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-setting-action:active {
+    transform: scale(0.98);
+}
+
+/* Animación para el icono de carga */
+.spinning {
+    display: inline-block;
+    animation: rotate-sync 1.5s linear infinite;
+}
+
+@keyframes rotate-sync {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Estilo para botones deshabilitados en Ajustes */
+.settings-frame button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    pointer-events: none; /* Evita que el clic dispare nada */
+}

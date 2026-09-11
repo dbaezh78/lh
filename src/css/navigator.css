@@ -1,0 +1,318 @@
+:root {
+    --SangreDeCristo: #d01212;
+/*    --SangreDeCristo: #780606;*/
+    --vblancas: white;
+    --precat: white;
+    --liturgia: #FFFFCB;
+    --cat: #bde9ff;
+    --eleccion: #CEFFCF;
+}
+
+
+.nav-bottom-bar {
+    position: relative !important; /* Importante para que no flote sola */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 60px;
+    border-top: 1px solid var(--SangreDeCristo);
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px); /* Opcional: le da un toque moderno */
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    border-top: 1px solid rgba(128, 169, 230, 0.3);
+}
+
+
+.nav-item {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #555;
+    cursor: pointer;
+    position: relative;
+    background: none;
+    border: none;
+    padding: 2px;
+    width: 100%;
+    top: 0px;
+}
+
+.nav-item:hover {
+    background-color: #d4cdcd;
+    color: var(--SangreDeCristo);
+    font-weight: bolder;
+
+}
+
+
+.nav-item .material-symbols-outlined {
+    font-size: 2.5rem;
+    color: black;
+
+        @media(min-width: 384px){
+            font-size: 2rem;
+    }
+}
+
+.nav-item .material-symbols-outlined:hover {
+    background: white;
+    color: var(--SangreDeCristo);
+
+}
+
+/* Estilos del Menú Desplegable (Submenú) */
+.nav-submenu {
+    width: max-content;
+    position: absolute;
+    bottom: 70px;
+    
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
+    min-width: 180px;
+    overflow: hidden;
+}
+
+.nav-submenu.active {
+    display: flex;
+}
+
+.nav-submenu a {
+    padding: 15px 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+}
+
+.nav-submenu a:last-child { border-bottom: none; }
+.nav-submenu a:hover { 
+    background: var(--SangreDeCristo);
+    color: var(--precat);
+ }
+
+/* Espaciado para que el contenido de la web no quede tapado */
+body { padding-bottom: 70px; }
+
+
+
+/*  Para inicio de session de google    */ 
+
+/* Ajuste para el contenedor de auth en la barra */
+#nav-auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hacer que el botón de google de moduleGoogle se adapte */
+#nav-auth-container #btn-login-google {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: inherit;
+}
+
+/* Si quieres que debajo del avatar diga "Perfil" o "Cuenta" */
+#nav-auth-container #btn-login-google::after {
+    content: "Perfil";
+    margin-top: 2px;
+}
+
+.dbperfil {
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    border:1px solid #ccc;
+    object-fit: cover;
+}
+
+
+
+/* Overlay de fondo para Modal */
+.settings-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: flex-end; /* Lo pega abajo */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.settings-overlay.active { opacity: 1; }
+
+/* El frame que sube */
+.settings-frame {
+    width: 100%;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    transform: translateY(100%); /* Empieza fuera abajo */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.settings-overlay.active .settings-frame {
+    transform: translateY(0); /* Sube a su posición */
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 0px solid #eee;
+    padding-bottom: 10px;
+    /*margin-bottom: 20px;*/
+}
+
+.btn-close-settings {
+    background: none; border: none; cursor: pointer; color: #666;
+}
+
+.setting-item {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 15px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+
+/* MODAL*/
+
+/* Cabecera con fondo ligeramente oscuro */
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa; /* Gris muy claro/oscuro sutil */
+    padding: 15px 20px;
+    /*margin: -20px -20px 20px -20px; */ /* Expande al borde del modal */ 
+    border-radius: 20px 20px 0 0;
+    border-bottom: 0px solid #e9ecef;
+}
+
+.settings-header h2 {
+    font-size: 1.1rem;
+    color: white;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* El contenido con padding interno */
+.settings-content {
+    padding: 0 10px 20px 10px;
+}
+
+
+/* FOTOS*/
+
+.img-perfil-link {
+    width: 24px;         /* Tamaño similar al icono material */
+    height: 24px;
+    border-radius: 50%;  /* La hace circular */
+    object-fit: cover;
+    vertical-align: middle;
+    margin-right: 8px;   /* Espacio entre imagen y texto */
+    border: 1px solid #ccc;
+}
+
+/* Para asegurar que todo el enlace esté alineado */
+
+
+.nav-version-display {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 6px;
+    pointer-events: none; /* Para que no interfiera con los clics */
+    z-index: 10;
+
+
+}
+
+.ver {
+     position: absolute; 
+     top: 50px; 
+     left: 1px; 
+     font-size: 10px; 
+     color: #888; 
+     font-family: sans-serif;
+
+        @media(min-width: 384px){
+            font-size: 11px;
+            top: 0px; 
+            left: -5px;
+            background: transparent;
+
+        }
+
+        @media(min-width: 768px){
+            font-size: 12px;
+                 top: 45px; 
+                 left: 0px;
+
+        }
+        @media(min-width: 992px){
+            font-size: 11px;
+            top: 47px; 
+            left: -5px;
+        }
+
+}
+
+/* Este es el contenedor que se mueve hacia abajo */
+#nav-wrapper {
+    position: fixed;
+    bottom: 0 !important; /* Forzamos el pegado al fondo */
+    left: 0;
+    width: 100vw;
+    z-index: 9999;
+    margin: 0;
+    padding: 0;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Cuando añadimos la clase .hidden al wrapper, todo baja */
+#nav-wrapper.hidden {
+    transform: translateY(60px); /* 60px es la altura de tu nav-bottom-bar */
+}
+
+/* El botón de la flecha */
+/* Ajuste del botón de flecha para que no flote mal */
+#nav-toggle {
+    position: absolute;
+    top: -26px; /* Ajusta según el tamaño de tu botón */
+    right: 0px; 
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(128, 169, 230, 0.3);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    width: 52px;
+    height: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+
+#nav-toggle .material-symbols-outlined:hover {
+    background: transparent !important;
+}
+
+/* Estilo del icono y rotación */
+#toggle-icon {
+    transition: transform 0.3s ease;
+    color: var(--SangreDeCristo); /* Usando tu variable de color */
+    font-weight: bold;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+

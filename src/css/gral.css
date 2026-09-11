@@ -1,0 +1,182 @@
+:root {
+    --TituloSalmodia: #FF0000;
+    --LetraTitulo: Verdana, Arial, sans-serif;
+}
+
+body {
+    font-family: var(--LetraTitulo);
+    background-color: #ffffcc;
+}
+
+.Salmodia {
+    font-size: x-large;
+    font-family: var(--LetraTitulo);
+    font-weight: bold;
+    color: var(--TituloSalmodia);
+}
+
+.OraciondelaManana {
+    font-size: large;
+    font-family: var(--LetraTitulo);
+    font-style: italic;
+    color: var(--TituloSalmodia);
+
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}.titulo-hora {
+    color:var(--TituloSalmodia);
+    font-family: var(--LetraTitulo);
+}
+
+
+/* Colores de la Liturgia */
+.rubrica {
+    color: #FF0000 !important; /* Rojo para instrucciones y etiquetas */
+    /*font-weight: bold;*/
+}
+
+.instruccion {
+    font-weight: normal;
+    font-style: italic;
+    display: block;
+    margin: 10px 0;
+}
+
+.contenido-texto p {
+    color: #000000; /* Negro para el cuerpo del texto */
+    margin: 5px 0;
+}
+
+.titulo-salmo94 {
+    color: #FF0000;
+    font-family: var(--LetraTitulo);
+    /*font-size: 1.4em;*/
+    margin: 0;             /* Quitamos márgenes para que no se descuadren */
+    display: inline;       /* Refuerza que no ocupen toda la línea */
+    font-weight: 500;
+}
+
+/* Opcional: si quieres que el subtítulo sea un poco más discreto o itálico */
+.titulo-salmo94.subtitulo {
+    font-weight: normal;
+    font-style: italic;
+    /*font-size: 1.1em;*/
+}
+
+
+
+.subtitulo-salmo {
+    font-weight: normal;
+    margin-bottom: 15px;
+}
+
+.cuerpo-salmo {
+    line-height: 1.4;
+    white-space: pre-wrap; /* Mantiene los saltos de línea del JS */
+}
+
+.cuerpo-lectura{
+    line-height: 1.4;
+    white-space: pre-wrap;
+    text-align: justify ;
+
+}
+
+.Lectura-Breve, .Oracion {
+    text-align: justify;
+}
+
+
+.contenedor-titulos-salmo {
+    display: flex;         /* Alinea los hijos en horizontal */
+    align-items: baseline; /* Alinea los textos por su base */
+    gap: 10px;             /* Espacio entre el título y el subtítulo */
+    margin-top: 30px;
+}
+
+.salmo-Invitatorio {
+    padding: 0 0 15px 0;
+}
+
+
+.saudio {
+    width: 100%;
+    height: 30px;
+    background-color: #f1f3f4;
+    filter: sepia(20%) saturate(70%) hue-rotate(340deg); /* Opcional: le da un tono acorde a la app */
+    border-radius: 5px;
+}
+
+
+.audioFormato {
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px;
+}
+
+.Lect1Style {
+    font-size: 11px;
+    white-space: nowrap;
+    min-width: 69px;
+    background-color: #fffcf5;
+}
+
+.file-audio {
+    background-color: #fffcf5;
+}
+
+.maudio {
+    
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fffcf5;
+    border: 1px solid rgb(231, 228, 228);
+}
+
+.staudio {
+    display: flex; 
+    align-items: center; 
+    gap: 0px;
+    padding: 0 0 0 4px;
+}
+
+.titulo {
+    display: flex;
+    color: red;
+    margin-top: 25px !important;
+    margin-bottom: 25px !important;
+}
+
+.antifona {
+    display: flex;
+    margin-top: 25px !important;
+    margin-bottom: 25px !important;
+}
+
+.abajo {
+    display: flex;    
+    margin-bottom: 20px !important;
+}
+
+.verso-linea {
+ display: inline;       /* Refuerza que no ocupen toda la línea */   
+}
+
+.ant {
+    min-width: max-content;
+}
