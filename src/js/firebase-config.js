@@ -29,14 +29,26 @@ provider.setCustomParameters({
     prompt: 'select_account'
 });
 
+// Administrador autorizado para editar y eliminar
+export const ADMIN_EMAIL = "dbaezh78@gmail.com";
+
 // Exponer API global para el navegador y los ajustes
 window.firebaseAPI = {
     app,
     auth,
+    adminEmail: ADMIN_EMAIL,
     login: () => signInWithPopup(auth, provider),
     logout: () => signOut(auth),
-    onAuthReady: (callback) => onAuthStateChanged(auth, callback),
-    getCurrentUser: () => auth.currentUser
+    onAuthReady: (callback) => onAuthStateChanged(auth, (user) => {
+        const isAdmin = user && user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+        localStorage.setItem('lh_auth_is_admin', isAdmin ? 'true' : 'false');
+        if (callback) callback(user, isAdmin);
+    }),
+    getCurrentUser: () => auth.currentUser,
+    isAdmin: () => {
+        const user = auth.currentUser;
+        return !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+    }
 };
 
-console.log("🔥 [Firebase] Inicializado correctamente con CDN modular.");
+console.log("🔥 [Firebase] Inicializado correctamente con CDN modular. Admin autorizado:", ADMIN_EMAIL);

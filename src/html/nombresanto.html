@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Santos — Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <style>
+        :root {
+            --color-santo-azul: #0277bd;
+            --color-borde: #dce7ee;
+        }
+        body {
+            padding: 20px 12px 90px;
+            background: #f4f8fb;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #263238;
+        }
+        .container-form {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px 20px;
+            box-shadow: 0 4px 18px rgba(2, 119, 189, 0.12);
+            border: 1px solid var(--color-borde);
+        }
+        .header-form {
+            text-align: center;
+            border-bottom: 2px solid var(--color-santo-azul);
+            padding-bottom: 12px;
+            margin-bottom: 22px;
+        }
+        .header-form h1 {
+            margin: 0;
+            color: var(--color-santo-azul);
+            font-size: 1.6rem;
+        }
+        .header-form p {
+            margin: 6px 0 0;
+            color: #607d8b;
+            font-size: 0.95rem;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .form-full {
+            grid-column: 1 / -1;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .form-group label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #37474f;
+        }
+        .form-group input,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid var(--color-borde);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #263238;
+            outline: none;
+            box-sizing: border-box;
+            width: 100%;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--color-santo-azul);
+            box-shadow: 0 0 0 3px rgba(2, 119, 189, 0.15);
+        }
+        .date-input-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+        .date-input-container input[type="text"] {
+            padding-right: 42px;
+        }
+        .calendar-picker-helper {
+            position: absolute;
+            right: 8px;
+            width: 32px !important;
+            height: 32px !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            cursor: pointer;
+            outline: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .calendar-picker-helper:hover {
+            opacity: 1;
+        }
+        .seccion-hijos {
+            margin-top: 20px;
+            border-top: 1px solid var(--color-borde);
+            padding-top: 16px;
+        }
+        .seccion-hijos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .seccion-hijos-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--color-santo-azul);
+        }
+        .btn-add-hijo {
+            background: #e1f5fe;
+            color: #0277bd;
+            border: 1px solid #81d4fa;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .tabla-hijos {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+        }
+        .tabla-hijos th,
+        .tabla-hijos td {
+            border: 1px solid var(--color-borde);
+            padding: 8px 10px;
+            text-align: left;
+        }
+        .tabla-hijos th {
+            background: #eef5f9;
+            color: #37474f;
+        }
+        .tabla-hijos input {
+            width: 100%;
+            border: none;
+            padding: 4px;
+            font-size: 0.9rem;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .btn-delete-row {
+            background: #ffebee;
+            color: #c62828;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .form-actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn-guardar {
+            background: var(--color-santo-azul);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-cancelar {
+            background: #eceff1;
+            color: #455a64;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .lista-santos-guardados {
+            margin-top: 30px;
+            border-top: 2px solid var(--color-borde);
+            padding-top: 18px;
+        }
+        .lista-santos-guardados h3 {
+            margin: 0 0 14px;
+            color: var(--color-santo-azul);
+            font-size: 1.15rem;
+        }
+        .tabla-registrados-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--color-borde);
+            border-radius: 8px;
+            background: #fff;
+        }
+        .tabla-santos-registrados {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            min-width: 650px;
+        }
+        .tabla-santos-registrados th,
+        .tabla-santos-registrados td {
+            border-bottom: 1px solid #eef2f5;
+            padding: 9px 12px;
+            text-align: left;
+        }
+        .tabla-santos-registrados th {
+            background: #eef5f9;
+            color: #37474f;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tabla-santos-registrados tr:hover {
+            background: #f8fafc;
+        }
+        .tag-hijo {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0277bd;
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-size: 0.76rem;
+            margin: 2px 3px 2px 0;
+            font-weight: 500;
+        }
+        .btn-tbl-acciones {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+        .btn-editar-santo-tbl {
+            background: #e0f2fe;
+            color: #0277bd;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+        .btn-editar-santo-tbl:hover {
+            background: #b3e5fc;
+        }
+        .btn-eliminar-santo-tbl {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+        .btn-eliminar-santo-tbl:hover {
+            background: #fca5a5;
+        }
+        .admin-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .admin-toggle-btn {
+            background: #fff;
+            border: 1.5px solid var(--color-santo-azul);
+            color: var(--color-santo-azul);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .admin-toggle-btn.activo {
+            background: var(--color-santo-azul);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-form">
+        <div class="header-form">
+            <h1>Registro del Santo</h1>
+            <p>Formulario de alta para el catálogo de Santos (nombresanto.html)</p>
+        </div>
+
+        <form id="form-santo">
+            <input type="hidden" id="edit-index" value="-1">
+            <div class="form-grid">
+                <div class="form-group form-full">
+                    <label for="nombre">Nombre del Santo *</label>
+                    <input type="text" id="nombre" required placeholder="Ej. San Francisco de Asís">
+                </div>
+                <div class="form-group">
+                    <label for="nacimiento">Fecha de Nacimiento</label>
+                    <div class="date-input-container">
+                        <input type="text" id="nacimiento" placeholder="Ej. 1181 o selecciona fecha">
+                        <input type="date" id="nacimiento-picker" class="calendar-picker-helper" title="Abrir calendario" onchange="document.getElementById('nacimiento').value = this.value;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="muerte">Fecha de Mortalidad</label>
+                    <div class="date-input-container">
+                        <input type="text" id="muerte" placeholder="Ej. 1226 o selecciona fecha">
+                        <input type="date" id="muerte-picker" class="calendar-picker-helper" title="Abrir calendario" onchange="document.getElementById('muerte').value = this.value;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pais">País</label>
+                    <input type="text" id="pais" placeholder="Ej. Italia">
+                </div>
+                <div class="form-group">
+                    <label for="ciudad">Ciudad</label>
+                    <input type="text" id="ciudad" placeholder="Ej. Asís">
+                </div>
+                <div class="form-group form-full">
+                    <label for="realidad">Realidad</label>
+                    <input type="text" id="realidad" placeholder="Ej. Fundador de la Orden Franciscana">
+                </div>
+                <div class="form-group form-full">
+                    <label for="historia">Historia</label>
+                    <textarea id="historia" rows="3" placeholder="Breve historia de vida..."></textarea>
+                </div>
+                <div class="form-group form-full">
+                    <label for="detalle">Detalle</label>
+                    <textarea id="detalle" rows="2" placeholder="Detalles particulares, atributos..."></textarea>
+                </div>
+            </div>
+
+            <div class="seccion-hijos">
+                <div class="seccion-hijos-header">
+                    <h3>Hijos en la fe</h3>
+                    <button type="button" class="btn-add-hijo" id="btn-add-hijo">+ Agregar nombre</button>
+                </div>
+                <table class="tabla-hijos">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th style="width: 70px; text-align: center;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-hijos">
+                        <tr>
+                            <td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td>
+                            <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancelar" id="btn-cancelar-edicion" style="display: none;" onclick="cancelarEdicion()">Cancelar Edición</button>
+                <a href="santo.html" class="btn-cancelar">Ir al Calendario Anual</a>
+                <button type="submit" class="btn-guardar" id="btn-submit-form">Guardar Santo</button>
+            </div>
+        </form>
+
+        <div class="lista-santos-guardados">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                <h3 style="margin: 0;">Santos Registrados en el Sistema</h3>
+                <div class="admin-bar" style="margin-bottom: 0;">
+                    <button type="button" class="admin-toggle-btn activo" id="btn-toggle-admin" onclick="toggleModoAdmin()">
+                        <span class="material-symbols-outlined" style="font-size: 16px;">admin_panel_settings</span>
+                        <span id="texto-modo-admin">Modo Edición: Activo</span>
+                    </button>
+                </div>
+            </div>
+            <div class="tabla-registrados-wrapper">
+                <table class="tabla-santos-registrados">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Nacimiento</th>
+                            <th>Mortalidad</th>
+                            <th>País</th>
+                            <th>Ciudad</th>
+                            <th>Realidad</th>
+                            <th>Hijos en la fe</th>
+                            <th style="text-align: center; width: 130px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-santos-registrados"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/navigator.js" type="module"></script>
+    <script>
+        const STORAGE_KEY = 'lh_catalogo_nombres_santos';
+
+        function obtenerSantos() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function guardarSantos(lista) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+        }
+
+        if (!localStorage.getItem(STORAGE_KEY)) {
+            const predeterminados = [
+                {
+                    nombre: 'San Pedro y San Pablo',
+                    nacimiento: '1 a.C.',
+                    muerte: '67 d.C.',
+                    pais: 'Israel / Italia',
+                    ciudad: 'Roma',
+                    realidad: 'Apóstoles',
+                    historia: 'Columnas de la Iglesia.',
+                    detalle: 'Patronos de Roma.',
+                    hijos: ['San Lino', 'San Clemente']
+                },
+                {
+                    nombre: 'San José',
+                    nacimiento: 'Siglo I a.C.',
+                    muerte: 'Siglo I d.C.',
+                    pais: 'Israel',
+                    ciudad: 'Nazaret',
+                    realidad: 'Esposo de la Virgen María',
+                    historia: 'Custodio del Redentor.',
+                    detalle: 'Patrono de la Iglesia Universal.',
+                    hijos: []
+                },
+                {
+                    nombre: 'San Juan Bautista',
+                    nacimiento: 'Siglo I a.C.',
+                    muerte: 'Siglo I d.C.',
+                    pais: 'Israel',
+                    ciudad: 'Judea',
+                    realidad: 'Precursor del Señor',
+                    historia: 'Voz que clama en el desierto.',
+                    detalle: 'Profeta y mártir.',
+                    hijos: ['San Andrés']
+                }
+            ];
+            guardarSantos(predeterminados);
+        }
+
+        window.eliminarFila = function(btn) {
+            const tbody = document.getElementById('tbody-hijos');
+            if (tbody.children.length > 1) {
+                btn.closest('tr').remove();
+            } else {
+                btn.closest('tr').querySelector('input').value = '';
+            }
+        };
+
+        document.getElementById('btn-add-hijo').addEventListener('click', () => {
+            const tbody = document.getElementById('tbody-hijos');
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td>' +
+                           '<td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td>';
+            tbody.appendChild(tr);
+            tr.querySelector('input').focus();
+        });
+
+        let modoAdmin = localStorage.getItem('lh_modo_admin_santo') !== 'false'; // Por defecto activo para ti
+
+        window.toggleModoAdmin = function() {
+            modoAdmin = !modoAdmin;
+            localStorage.setItem('lh_modo_admin_santo', modoAdmin ? 'true' : 'false');
+            actualizarBotonAdmin();
+            renderTablaRegistrados();
+        };
+
+        function actualizarBotonAdmin() {
+            const btn = document.getElementById('btn-toggle-admin');
+            const txt = document.getElementById('texto-modo-admin');
+            if (!btn || !txt) return;
+            if (modoAdmin) {
+                btn.classList.add('activo');
+                txt.textContent = 'Modo Edición: Activo (Tú)';
+            } else {
+                btn.classList.remove('activo');
+                txt.textContent = 'Modo Lectura (Público)';
+            }
+        }
+
+        actualizarBotonAdmin();
+
+        function renderTablaRegistrados() {
+            const santos = obtenerSantos();
+            const tbody = document.getElementById('tbody-santos-registrados');
+            if (!tbody) return;
+
+            if (santos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888; padding:18px;">No hay santos registrados aún.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = santos.map((s, idx) => {
+                const hijosHtml = (s.hijos && s.hijos.length > 0)
+                    ? s.hijos.map(h => '<span class="tag-hijo">' + h + '</span>').join('')
+                    : '<span style="color:#9e9e9e;">—</span>';
+
+                let accionesHtml = '<span style="color:#b0bec5; font-size:0.8rem;">Solo lectura</span>';
+                if (modoAdmin) {
+                    accionesHtml = `
+                        <div class="btn-tbl-acciones">
+                            <button type="button" class="btn-editar-santo-tbl" onclick="editarSanto(${idx})" title="Editar este santo">Editar</button>
+                            <button type="button" class="btn-eliminar-santo-tbl" onclick="borrarSanto(${idx})" title="Eliminar este santo">Eliminar</button>
+                        </div>
+                    `;
+                }
+
+                return '<tr>' +
+                    '<td style="font-weight: 600; color: #0277bd;">' + (s.nombre || '') + '</td>' +
+                    '<td>' + (s.nacimiento || '—') + '</td>' +
+                    '<td>' + (s.muerte || '—') + '</td>' +
+                    '<td>' + (s.pais || '—') + '</td>' +
+                    '<td>' + (s.ciudad || '—') + '</td>' +
+                    '<td>' + (s.realidad || '—') + '</td>' +
+                    '<td>' + hijosHtml + '</td>' +
+                    '<td style="text-align: center;">' + accionesHtml + '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        window.editarSanto = function(index) {
+            if (!modoAdmin) {
+                alert('No tienes permisos de edición activados.');
+                return;
+            }
+            const santos = obtenerSantos();
+            const s = santos[index];
+            if (!s) return;
+
+            document.getElementById('edit-index').value = index;
+            document.getElementById('nombre').value = s.nombre || '';
+            document.getElementById('nacimiento').value = s.nacimiento || '';
+            document.getElementById('muerte').value = s.muerte || '';
+            document.getElementById('pais').value = s.pais || '';
+            document.getElementById('ciudad').value = s.ciudad || '';
+            document.getElementById('realidad').value = s.realidad || '';
+            document.getElementById('historia').value = s.historia || '';
+            document.getElementById('detalle').value = s.detalle || '';
+
+            // Hijos en la fe
+            const tbodyHijos = document.getElementById('tbody-hijos');
+            tbodyHijos.innerHTML = '';
+            if (s.hijos && s.hijos.length > 0) {
+                s.hijos.forEach(h => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td><input type="text" class="input-hijo" value="${h.replace(/"/g, '&quot;')}"></td>
+                                    <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td>`;
+                    tbodyHijos.appendChild(tr);
+                });
+            } else {
+                tbodyHijos.innerHTML = '<tr><td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
+            }
+
+            document.getElementById('btn-submit-form').textContent = 'Actualizar Santo';
+            document.getElementById('btn-cancelar-edicion').style.display = 'inline-block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.cancelarEdicion = function() {
+            document.getElementById('edit-index').value = '-1';
+            document.getElementById('form-santo').reset();
+            document.getElementById('tbody-hijos').innerHTML = '<tr><td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
+            document.getElementById('btn-submit-form').textContent = 'Guardar Santo';
+            document.getElementById('btn-cancelar-edicion').style.display = 'none';
+        };
+
+        window.borrarSanto = function(index) {
+            if (!modoAdmin) {
+                alert('No tienes permisos para eliminar registros.');
+                return;
+            }
+            const santos = obtenerSantos();
+            const santoNombre = santos[index] ? santos[index].nombre : 'este santo';
+            if (confirm('¿Deseas eliminar a ' + santoNombre + ' del catálogo?')) {
+                santos.splice(index, 1);
+                guardarSantos(santos);
+                renderTablaRegistrados();
+            }
+        };
+
+        document.getElementById('form-santo').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!modoAdmin) {
+                alert('No tienes permisos de guardado/edición.');
+                return;
+            }
+
+            const nombre = document.getElementById('nombre').value.trim();
+            if (!nombre) return;
+
+            const hijos = [];
+            document.querySelectorAll('.input-hijo').forEach(inp => {
+                const v = inp.value.trim();
+                if (v) hijos.push(v);
+            });
+
+            const nuevoSanto = {
+                nombre: nombre,
+                nacimiento: document.getElementById('nacimiento').value.trim(),
+                muerte: document.getElementById('muerte').value.trim(),
+                pais: document.getElementById('pais').value.trim(),
+                ciudad: document.getElementById('ciudad').value.trim(),
+                realidad: document.getElementById('realidad').value.trim(),
+                historia: document.getElementById('historia').value.trim(),
+                detalle: document.getElementById('detalle').value.trim(),
+                hijos: hijos
+            };
+
+            const santos = obtenerSantos();
+            const editIdx = parseInt(document.getElementById('edit-index').value, 10);
+
+            if (!isNaN(editIdx) && editIdx >= 0 && editIdx < santos.length) {
+                santos[editIdx] = nuevoSanto;
+            } else {
+                const idxExistente = santos.findIndex(s => s.nombre.toLowerCase() === nombre.toLowerCase());
+                if (idxExistente >= 0) {
+                    santos[idxExistente] = nuevoSanto;
+                } else {
+                    santos.push(nuevoSanto);
+                }
+            }
+
+            guardarSantos(santos);
+            renderTablaRegistrados();
+            alert('¡Santo guardado exitosamente!');
+            cancelarEdicion();
+        });
+
+        renderTablaRegistrados();
+    </script>
+</body>
+</html>

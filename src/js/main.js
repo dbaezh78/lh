@@ -107,6 +107,25 @@ function cargarPortada() {
         }
     }
 
+    // Obtener santo del día desde las asignaciones
+    let textoBotonSanto = "";
+    try {
+        const fechaActual = new Date();
+        const claveDiaMes = `${fechaActual.getDate()}/${fechaActual.getMonth() + 1}`;
+        const asignacionesSantos = JSON.parse(localStorage.getItem('lh_santos_calendario_anual')) || {};
+        
+        if (asignacionesSantos[claveDiaMes] && asignacionesSantos[claveDiaMes].trim()) {
+            textoBotonSanto = asignacionesSantos[claveDiaMes];
+        } else {
+            // Si no hay santo asignado, mostrar la fecha del día
+            const mesesEsp = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+            textoBotonSanto = `${fechaActual.getDate()} de ${mesesEsp[fechaActual.getMonth()]}`;
+        }
+    } catch (e) {
+        const f = new Date();
+        textoBotonSanto = `${f.getDate()}/${f.getMonth() + 1}/${f.getFullYear()}`;
+    }
+
     app.innerHTML = `
         <div class="background-overlay"></div>
         
@@ -123,14 +142,21 @@ function cargarPortada() {
                 ${tituloLiturgico}
             </div>
 
-            <!-- ===== BOTÓN PRINCIPAL SALMODIA DEL DÍA ===== -->
-            <div class="btn-group" style="margin: 8px 0 4px;">
+            <!-- ===== BOTONES PRINCIPALES: SALMODIA DEL DÍA Y SANTO DEL DÍA ===== -->
+            <div class="btn-group" style="margin: 8px 0 4px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;">
                 <button type="button" class="btn-pill ${claseColorHoy}" id="btn-salmodia-dia">
                     Salmodia del día
                     <span class="btn-pill-icon">
                         <span class="material-symbols-outlined" id="icono-salmodia">keyboard_arrow_down</span>
                     </span>
                 </button>
+
+                <a href="src/html/santo.html" class="btn-pill btn-santo" id="btn-santo-dia" title="Ver calendario de Santos">
+                    <span class="btn-pill-icon">
+                        <span class="material-symbols-outlined">person</span>
+                    </span>
+                    <span>${textoBotonSanto}</span>
+                </a>
             </div>
 
             <!-- ===== SUB-BOTONES DESPLEGABLES (Horas Litúrgicas) ===== -->

@@ -159,6 +159,9 @@
     color: #0277bd !important;
     border: 1.5px solid #0288d1;
     box-shadow: 0 4px 14px rgba(2, 119, 189, 0.25);
+    padding: 10px 22px 10px 10px;
+    gap: 12px;
+    justify-content: flex-start;
 }
 
 .btn-pill.btn-santo .btn-pill-icon {
@@ -321,4 +324,8 @@
         gap: 8px;
         padding: 6px 4px;
     }
+}
+
+@media (max-width: 384px) {
+        .btn-pill {width: 40%;}
 }

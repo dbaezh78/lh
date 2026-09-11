@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santos de la Iglesia Católica — Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+    <style>
+        :root {
+            --color-santo-azul: #0277bd;
+            --color-borde: #dce7ee;
+        }
+        body {
+            padding: 20px 10px 90px;
+            background: #f4f8fb;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #263238;
+        }
+        .contenedor-santo {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px 18px;
+            box-shadow: 0 4px 20px rgba(2, 119, 189, 0.12);
+            border: 1px solid var(--color-borde);
+        }
+        .header-santo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 2px solid var(--color-santo-azul);
+            padding-bottom: 14px;
+            margin-bottom: 18px;
+        }
+        .header-santo h1 {
+            margin: 0;
+            color: var(--color-santo-azul);
+            font-size: 1.6rem;
+        }
+        .header-santo p {
+            margin: 4px 0 0;
+            color: #607d8b;
+            font-size: 0.95rem;
+        }
+        .header-acciones {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-accion-santo {
+            background: var(--color-santo-azul);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-accion-santo:hover {
+            background: #01579b;
+        }
+        .btn-accion-secundario {
+            background: #eceff1;
+            color: #37474f;
+        }
+        .btn-accion-secundario:hover {
+            background: #cfd8dc;
+        }
+        .filtros-barra {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .filtros-barra select,
+        .filtros-barra input {
+            padding: 8px 12px;
+            border: 1px solid var(--color-borde);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .filtros-barra input {
+            flex: 1;
+            min-width: 200px;
+            max-width: 340px;
+        }
+        .tabla-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--color-borde);
+            border-radius: 10px;
+        }
+        table.tabla-santos-anual {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 900px;
+        }
+        table.tabla-santos-anual th,
+        table.tabla-santos-anual td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #edf2f6;
+        }
+        table.tabla-santos-anual th {
+            background: #eef6fa;
+            color: #0277bd;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        table.tabla-santos-anual tbody tr:hover {
+            background: #f7fafc;
+        }
+        table.tabla-santos-anual tbody tr.fila-hoy {
+            background: #e0f2fe !important;
+            font-weight: 600;
+        }
+        .badge-dia {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: #eceff1;
+            color: #455a64;
+        }
+        .badge-domingo {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .select-santo {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid var(--color-borde);
+            border-radius: 6px;
+            font-size: 0.88rem;
+            outline: none;
+            background: #ffffff;
+            color: #263238;
+        }
+        .select-santo:focus {
+            border-color: var(--color-santo-azul);
+        }
+        .dato-auto {
+            color: #546e7a;
+            font-size: 0.85rem;
+        }
+        .btn-guardar-flotante {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 22px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 99;
+        }
+        .btn-guardar-flotante:hover {
+            background: #1b5e20;
+        }
+        .admin-toggle-btn {
+            background: #fff;
+            border: 1.5px solid var(--color-santo-azul);
+            color: var(--color-santo-azul);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .admin-toggle-btn.activo {
+            background: var(--color-santo-azul);
+            color: #fff;
+        }
+        .auth-badge-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef5f9;
+            border: 1px solid var(--color-borde);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.82rem;
+        }
+        .btn-auth-action {
+            background: #fff;
+            border: 1px solid var(--color-santo-azul);
+            color: var(--color-santo-azul);
+            border-radius: 14px;
+            padding: 3px 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-auth-action:hover {
+            background: var(--color-santo-azul);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor-santo">
+        <div class="header-santo">
+            <div>
+                <h1>Santos de la Iglesia Católica</h1>
+                <p>Asignación de santos para cada día del año (1 de enero - 31 de diciembre)</p>
+            </div>
+            <div class="header-acciones">
+                <div class="auth-badge-container" id="auth-status-container">
+                    <span class="material-symbols-outlined" style="font-size: 16px; color: var(--color-santo-azul);">account_circle</span>
+                    <span id="auth-user-label" style="font-weight: 500;">Verificando...</span>
+                    <button type="button" class="btn-auth-action" id="btn-auth-login" onclick="iniciarSesionAdmin()" style="display: none;">Iniciar Sesión</button>
+                    <button type="button" class="btn-auth-action" id="btn-auth-logout" onclick="cerrarSesionAdmin()" style="display: none;">Salir</button>
+                </div>
+                <a href="nombresanto.html" class="btn-accion-santo" id="btn-ir-nombresanto" style="display: none;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">person_add</span>
+                    Crear / Editar Santo
+                </a>
+                <a href="../../index.html" class="btn-accion-santo btn-accion-secundario">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">home</span>
+                    Inicio
+                </a>
+            </div>
+        </div>
+
+        <div class="filtros-barra">
+            <div>
+                <label for="filtro-mes" style="font-weight: 600; margin-right: 6px;">Mes:</label>
+                <select id="filtro-mes">
+                    <option value="todos">Todo el año (365 días)</option>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+            <input type="text" id="buscador-santo" placeholder="Buscar fecha, día o santo...">
+        </div>
+
+        <div class="tabla-wrapper">
+            <table class="tabla-santos-anual">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Fecha</th>
+                        <th style="width: 120px;">Día</th>
+                        <th style="min-width: 220px;">Nombre del Santo (Select)</th>
+                        <th>País</th>
+                        <th>Realidad</th>
+                        <th style="width: 120px;">Nacimiento</th>
+                        <th style="width: 120px;">Mortalidad</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-santos-anual"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <button type="button" class="btn-guardar-flotante" id="btn-guardar-asignaciones">
+        <span class="material-symbols-outlined">save</span> Guardar Asignaciones
+    </button>
+
+    <script src="../js/navigator.js" type="module"></script>
+    <script>
+        const STORAGE_SANTOS_CATALOGO = 'lh_catalogo_nombres_santos';
+        const STORAGE_ASIGNACIONES = 'lh_santos_calendario_anual';
+
+        const mesesNombres = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+
+        const diasSemanaNombres = [
+            'DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'
+        ];
+
+        function obtenerCatalogoSantos() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_SANTOS_CATALOGO)) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function obtenerAsignaciones() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_ASIGNACIONES)) || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function guardarAsignaciones(mapa) {
+            localStorage.setItem(STORAGE_ASIGNACIONES, JSON.stringify(mapa));
+        }
+
+        const anioActual = 2026;
+        const diasDelAnio = [];
+        const inicio = new Date(anioActual, 0, 1);
+        const fin = new Date(anioActual, 11, 31);
+
+        for (let d = new Date(inicio); d <= fin; d.setDate(d.getDate() + 1)) {
+            const diaNum = d.getDate();
+            const mesNum = d.getMonth() + 1;
+            const diaSemanaIndex = d.getDay();
+            const diaSemana = diasSemanaNombres[diaSemanaIndex];
+            const clave = diaNum + '/' + mesNum;
+
+            diasDelAnio.push({
+                clave,
+                diaNum,
+                mesNum,
+                mesNombre: mesesNombres[mesNum - 1],
+                diaSemana,
+                esDomingo: diaSemanaIndex === 0,
+                fechaTexto: diaNum + ' de ' + mesesNombres[mesNum - 1]
+            });
+        }
+
+        let asignaciones = obtenerAsignaciones();
+
+        if (Object.keys(asignaciones).length === 0) {
+            asignaciones['19/3'] = 'San José';
+            asignaciones['24/6'] = 'San Juan Bautista';
+            asignaciones['29/6'] = 'San Pedro y San Pablo';
+            guardarAsignaciones(asignaciones);
+        }
+
+        const hoy = new Date();
+        const claveHoy = hoy.getDate() + '/' + (hoy.getMonth() + 1);
+
+        let modoAdminSanto = localStorage.getItem('lh_modo_admin_santo') !== 'false'; // Por defecto activo para ti
+
+        window.toggleModoAdminSanto = function() {
+            modoAdminSanto = !modoAdminSanto;
+            localStorage.setItem('lh_modo_admin_santo', modoAdminSanto ? 'true' : 'false');
+            actualizarEstadoAdmin();
+            renderTabla();
+        };
+
+        function actualizarEstadoAdmin() {
+            const btn = document.getElementById('btn-toggle-admin-santo');
+            const txt = document.getElementById('texto-modo-admin-santo');
+            const btnCrear = document.getElementById('btn-ir-nombresanto');
+            const btnGuardar = document.getElementById('btn-guardar-asignaciones');
+
+            if (modoAdminSanto) {
+                if (btn) btn.classList.add('activo');
+                if (txt) txt.textContent = 'Modo Edición: Activo (Tú)';
+                if (btnCrear) btnCrear.style.display = 'inline-flex';
+                if (btnGuardar) btnGuardar.style.display = 'flex';
+            } else {
+                if (btn) btn.classList.remove('activo');
+                if (txt) txt.textContent = 'Modo Lectura (Público)';
+                if (btnCrear) btnCrear.style.display = 'none';
+                if (btnGuardar) btnGuardar.style.display = 'none';
+            }
+        }
+
+        actualizarEstadoAdmin();
+
+        function renderTabla() {
+            const filtroMes = document.getElementById('filtro-mes').value;
+            const filtroBusqueda = document.getElementById('buscador-santo').value.toLowerCase().trim();
+            const tbody = document.getElementById('tbody-santos-anual');
+            const santosDisponibles = obtenerCatalogoSantos();
+
+            let html = '';
+
+            diasDelAnio.forEach(d => {
+                if (filtroMes !== 'todos' && String(d.mesNum) !== filtroMes) return;
+
+                const santoAsignadoNombre = asignaciones[d.clave] || '';
+                const santoObj = santosDisponibles.find(s => s.nombre.toLowerCase() === santoAsignadoNombre.toLowerCase());
+
+                const coincideBusqueda = !filtroBusqueda || 
+                    d.fechaTexto.toLowerCase().includes(filtroBusqueda) ||
+                    d.diaSemana.toLowerCase().includes(filtroBusqueda) ||
+                    santoAsignadoNombre.toLowerCase().includes(filtroBusqueda) ||
+                    (santoObj && (
+                        (santoObj.pais && santoObj.pais.toLowerCase().includes(filtroBusqueda)) ||
+                        (santoObj.realidad && santoObj.realidad.toLowerCase().includes(filtroBusqueda))
+                    ));
+
+                if (!coincideBusqueda) return;
+
+                const esHoy = d.clave === claveHoy;
+                const pais = santoObj ? (santoObj.pais || '-') : '-';
+                const realidad = santoObj ? (santoObj.realidad || '-') : '-';
+                const nacimiento = santoObj ? (santoObj.nacimiento || '-') : '-';
+                const muerte = santoObj ? (santoObj.muerte || '-') : '-';
+
+                let celdaSantoHtml = '';
+                if (modoAdminSanto) {
+                    const opcionesHtml = santosDisponibles.map(s => {
+                        const sel = s.nombre === santoAsignadoNombre ? 'selected' : '';
+                        return '<option value="' + s.nombre + '" ' + sel + '>' + s.nombre + '</option>';
+                    }).join('');
+
+                    celdaSantoHtml = '<select class="select-santo" data-clave="' + d.clave + '" onchange="cambiarSanto(this)">' +
+                                        '<option value="">-- Sin santo asignado --</option>' +
+                                        opcionesHtml +
+                                     '</select>';
+                } else {
+                    celdaSantoHtml = santoAsignadoNombre
+                        ? '<span class="santo-nombre-readonly">' + santoAsignadoNombre + '</span>'
+                        : '<span class="santo-sin-asignar">— Sin santo asignado —</span>';
+                }
+
+                html += '<tr class="' + (esHoy ? 'fila-hoy' : '') + '" data-clave="' + d.clave + '">' +
+                    '<td><strong>' + d.diaNum + ' ' + d.mesNombre.substring(0, 3) + '</strong></td>' +
+                    '<td><span class="badge-dia ' + (d.esDomingo ? 'badge-domingo' : '') + '">' + d.diaSemana + '</span></td>' +
+                    '<td>' + celdaSantoHtml + '</td>' +
+                    '<td class="dato-auto col-pais">' + pais + '</td>' +
+                    '<td class="dato-auto col-realidad">' + realidad + '</td>' +
+                    '<td class="dato-auto col-nacimiento">' + nacimiento + '</td>' +
+                    '<td class="dato-auto col-mortalidad">' + muerte + '</td>' +
+                '</tr>';
+            });
+
+            tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">No se encontraron resultados</td></tr>';
+        }
+
+        window.cambiarSanto = function(select) {
+            if (!modoAdminSanto) {
+                alert('No tienes permisos para modificar asignaciones.');
+                return;
+            }
+            const clave = select.getAttribute('data-clave');
+            const valor = select.value;
+            const fila = select.closest('tr');
+            const santosDisponibles = obtenerCatalogoSantos();
+            const santoObj = santosDisponibles.find(s => s.nombre === valor);
+
+            if (valor) {
+                asignaciones[clave] = valor;
+            } else {
+                delete asignaciones[clave];
+            }
+
+            fila.querySelector('.col-pais').textContent = santoObj ? (santoObj.pais || '-') : '-';
+            fila.querySelector('.col-realidad').textContent = santoObj ? (santoObj.realidad || '-') : '-';
+            fila.querySelector('.col-nacimiento').textContent = santoObj ? (santoObj.nacimiento || '-') : '-';
+            fila.querySelector('.col-mortalidad').textContent = santoObj ? (santoObj.muerte || '-') : '-';
+
+            guardarAsignaciones(asignaciones);
+        };
+
+        document.getElementById('btn-guardar-asignaciones').addEventListener('click', () => {
+            if (!modoAdminSanto) {
+                alert('No tienes permisos para guardar asignaciones.');
+                return;
+            }
+            guardarAsignaciones(asignaciones);
+            alert('✅ Asignaciones de santos guardadas correctamente.');
+        });
+
+        document.getElementById('filtro-mes').addEventListener('change', renderTabla);
+        document.getElementById('buscador-santo').addEventListener('input', renderTabla);
+
+        const mesActualNum = String(hoy.getMonth() + 1);
+        document.getElementById('filtro-mes').value = mesActualNum;
+
+        renderTabla();
+    </script>
+</body>
+</html>

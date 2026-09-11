@@ -88,9 +88,11 @@
 
                 <button class="nav-item" id="btn-nav-resucito">
                     <span class="material-symbols-outlined">menu_book</span>
-                    <span>Salmodias</span>
+                    <span>Liturgia</span>
                     <div class="nav-submenu" id="nav-submenu-resucito">
                         <a href="/src/html/añoliturgico.html"><span class="material-symbols-outlined">calendar_month</span>Año Litúrgico</a>
+                        <a href="/src/html/santo.html"><span class="material-symbols-outlined">calendar_today</span>Santo</a>
+                        <a href="/src/html/nombresanto.html"><span class="material-symbols-outlined">person_add</span>Nombre Santo</a>
                     </div>
                 </button>
 
