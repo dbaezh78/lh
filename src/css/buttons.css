@@ -1,0 +1,324 @@
+/**
+ * SISTEMA DE BOTONES — LITURGIA DE LAS HORAS
+ * Estilos inspirados en el design system de referencia:
+ * 1. .btn-icono : Icono cuadrado en bloque de color a la izquierda + texto gris
+ * 2. .btn-pill  : Pill totalmente redondeado con gradiente, texto en mayúsculas e icono a la derecha
+ * 3. .btn-flat  : Rectangular redondeado, color sólido con icono en bloque más oscuro a la derecha
+ * 4. .btn-square: Cuadrado para grid de accesos rápidos
+ */
+
+/* ============================================================
+   VARIABLES DE COLOR LITÚRGICO
+   ============================================================ */
+:root {
+    --btn-adviento:    #7B2FBE;   /* Morado */
+    --btn-navidad:     #8B0000;   /* Rojo oscuro / granate */
+    --btn-ordinario:   #2E7D32;   /* Verde */
+    --btn-cuaresma:    #4A0080;   /* Morado fuerte */
+    --btn-pascua:      #0288D1;   /* Azul celeste */
+    --btn-santos:      #1565C0;   /* Azul */
+    --btn-solemnidades:#B71C1C;   /* Rojo intenso */
+    --btn-text:        #555555;
+    --btn-shadow:      rgba(0,0,0,0.18);
+}
+
+/* ============================================================
+   ESTILO 1: ICONO IZQUIERDA + TEXTO (.btn-icono)
+   ============================================================ */
+.btn-icono {
+    display: inline-flex;
+    align-items: center;
+    background: #ffffff;
+    border: none;
+    border-radius: 28px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+    font-family: 'Caveat', cursive, sans-serif;
+    font-size: 1.3em;
+    color: #1a1a1a;
+    padding: 0;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    width: 100%;
+    max-width: 320px;
+    height: 52px;
+}
+
+.btn-icono:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.38);
+}
+
+.btn-icono:active {
+    transform: scale(0.97);
+}
+
+.btn-icono .btn-icon-box {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 28px 0 0 28px;
+    flex-shrink: 0;
+    color: #ffffff;
+    font-size: 1.45rem;
+}
+
+.btn-icono .btn-label {
+    padding: 0 16px 0 14px;
+    font-size: 1.05em;
+    color: #222222;
+    font-weight: bold;
+    flex: 1;
+    text-align: left;
+}
+
+/* Colores de ícono según tiempo litúrgico */
+.btn-icono.btn-adviento     .btn-icon-box { background: var(--btn-adviento); }
+.btn-icono.btn-navidad      .btn-icon-box { background: var(--btn-navidad); }
+.btn-icono.btn-ordinario    .btn-icon-box { background: var(--btn-ordinario); }
+.btn-icono.btn-cuaresma     .btn-icon-box { background: var(--btn-cuaresma); }
+.btn-icono.btn-pascua       .btn-icon-box { background: var(--btn-pascua); }
+.btn-icono.btn-santos       .btn-icon-box { background: var(--btn-santos); }
+.btn-icono.btn-solemnidades .btn-icon-box { background: var(--btn-solemnidades); }
+.btn-icono.btn-rojo         .btn-icon-box { background: #e53935; }
+.btn-icono.btn-verde        .btn-icon-box { background: #43a047; }
+.btn-icono.btn-azul         .btn-icon-box { background: #1e88e5; }
+.btn-icono.btn-naranja      .btn-icon-box { background: #fb8c00; }
+
+/* ============================================================
+   ESTILO 2: PILL GRADIENTE (.btn-pill)
+   ============================================================ */
+.btn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 10px 10px 22px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.95em;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: none;
+    color: #ffffff;
+    text-decoration: none;
+    min-width: 220px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.38);
+    filter: brightness(1.08);
+}
+
+.btn-pill:active {
+    transform: scale(0.97);
+}
+
+.btn-pill .btn-pill-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+/* Gradientes por tiempo */
+.btn-pill.btn-rojo         { background: linear-gradient(135deg, #e53935, #c62828); }
+.btn-pill.btn-verde        { background: linear-gradient(135deg, #43a047, #2e7d32); }
+.btn-pill.btn-azul         { background: linear-gradient(135deg, #1e88e5, #1565c0); }
+.btn-pill.btn-morado       { background: linear-gradient(135deg, #8e24aa, #6a1b9a); }
+.btn-pill.btn-naranja      { background: linear-gradient(135deg, #fb8c00, #e65100); }
+.btn-pill.btn-amarillo     { background: linear-gradient(135deg, #f9a825, #f57f17); color: #222; }
+.btn-pill.btn-celeste      { background: linear-gradient(135deg, #29b6f6, #0288d1); }
+.btn-pill.btn-adviento     { background: linear-gradient(135deg, #7B2FBE, #5c1b96); }
+.btn-pill.btn-navidad      { background: linear-gradient(135deg, #8B0000, #5a0000); }
+.btn-pill.btn-ordinario    { background: linear-gradient(135deg, #43a047, #1b5e20); }
+.btn-pill.btn-cuaresma     { background: linear-gradient(135deg, #4A0080, #2c004d); }
+.btn-pill.btn-pascua       { background: linear-gradient(135deg, #039be5, #01579b); }
+.btn-pill.btn-santos       { background: linear-gradient(135deg, #1565c0, #0d47a1); }
+.btn-pill.btn-solemnidades { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
+
+/* Botón Santo del Día (blanco con texto azul cielo oscuro) */
+.btn-pill.btn-santo {
+    background: #ffffff;
+    color: #0277bd !important;
+    border: 1.5px solid #0288d1;
+    box-shadow: 0 4px 14px rgba(2, 119, 189, 0.25);
+}
+
+.btn-pill.btn-santo .btn-pill-icon {
+    border-color: #0277bd;
+    color: #0277bd;
+    background: rgba(2, 119, 189, 0.08);
+}
+
+.btn-pill.btn-santo:hover {
+    background: #f4faff;
+    border-color: #01579b;
+}
+
+.btn-pill.btn-santo:hover .btn-pill-icon {
+    background: #0277bd;
+    color: #ffffff;
+}
+
+/* Color oscuro del icono en hover según el tiempo litúrgico */
+.btn-pill.btn-ordinario:hover .btn-pill-icon,
+.btn-pill.btn-verde:hover      .btn-pill-icon { background: #1b5e20; }
+.btn-pill.btn-adviento:hover   .btn-pill-icon { background: #4a1575; }
+.btn-pill.btn-cuaresma:hover   .btn-pill-icon { background: #260042; }
+.btn-pill.btn-navidad:hover    .btn-pill-icon { background: #4d0000; }
+.btn-pill.btn-pascua:hover     .btn-pill-icon { background: #014377; }
+.btn-pill.btn-santos:hover     .btn-pill-icon { background: #082d64; }
+.btn-pill.btn-solemnidades:hover .btn-pill-icon { background: #7f0000; }
+.btn-pill.btn-rojo:hover       .btn-pill-icon { background: #8e0000; }
+
+/* ============================================================
+   ESTILO 3: FLAT CON ICONO OSCURO A LA DERECHA (.btn-flat)
+   ============================================================ */
+.btn-flat {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    border: none;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.95em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: white;
+    text-decoration: none;
+    min-width: 180px;
+    height: 48px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.btn-flat:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btn-flat:active {
+    transform: scale(0.97);
+}
+
+.btn-flat .btn-flat-label {
+    flex: 1;
+    padding: 0 16px;
+    text-align: center;
+}
+
+.btn-flat .btn-flat-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(0,0,0,0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.3rem;
+    color: white;
+}
+
+.btn-flat.btn-rojo         { background: #e53935; }
+.btn-flat.btn-verde        { background: #43a047; }
+.btn-flat.btn-azul         { background: #1e88e5; }
+.btn-flat.btn-morado       { background: #8e24aa; }
+.btn-flat.btn-naranja      { background: #fb8c00; }
+.btn-flat.btn-amarillo     { background: #f9a825; color: #222; }
+.btn-flat.btn-celeste      { background: #29b6f6; }
+.btn-flat.btn-adviento     { background: #7B2FBE; }
+.btn-flat.btn-navidad      { background: #8B0000; }
+.btn-flat.btn-ordinario    { background: #2E7D32; }
+.btn-flat.btn-cuaresma     { background: #4A0080; }
+.btn-flat.btn-pascua       { background: #0288D1; }
+.btn-flat.btn-santos       { background: #1565C0; }
+.btn-flat.btn-solemnidades { background: #B71C1C; }
+
+/* ============================================================
+   ESTILO 4: CUADRADO (.btn-square)
+   ============================================================ */
+.btn-square {
+    width: 54px;
+    height: 54px;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 1.5rem;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.22);
+    transition: transform 0.15s ease, filter 0.15s ease;
+    text-decoration: none;
+}
+
+.btn-square:hover { filter: brightness(1.15); transform: scale(1.05); }
+.btn-square:active { transform: scale(0.95); }
+
+.btn-square.btn-rojo         { background: #e53935; }
+.btn-square.btn-verde        { background: #43a047; }
+.btn-square.btn-azul         { background: #1e88e5; }
+.btn-square.btn-morado       { background: #8e24aa; }
+.btn-square.btn-naranja      { background: #fb8c00; }
+.btn-square.btn-celeste      { background: #29b6f6; }
+
+/* ============================================================
+   LAYOUT HELPERS
+   ============================================================ */
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    padding: 10px 8px;
+}
+
+.btn-group-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    width: 100%;
+    max-width: 330px;
+    margin: 0 auto;
+    padding: 0 12px;
+}
+
+.btn-group-column .btn-icono,
+.btn-group-column .btn-flat,
+.btn-group-column .btn-pill {
+    width: 100%;
+    min-width: unset;
+}
+
+@media (max-width: 480px) {
+    .btn-pill {
+        min-width: unset;
+        width: 100%;
+    }
+    .btn-group {
+        gap: 8px;
+        padding: 6px 4px;
+    }
+}

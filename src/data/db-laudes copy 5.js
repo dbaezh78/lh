@@ -21,8 +21,8 @@ const s2Comun1 = {
         antifonaInvitatorio_Salida:tos2dmLAI,
 
 // Himno
-        himnot:                    htos2LAdmt,
-        himno:                     htos2LAdm,
+        himnot:                    htos2LAdot,
+        himno:                     htos2LAdo,
     },
 
 // Salmodia 1
@@ -95,8 +95,8 @@ const s3Comun1 = {
             antifonaInvitatorio_Salida:     inv_bautismo,
             
             // Himno
-            himnot:                         htos3LAdmt,
-            himno:                          htos3LAdm,
+            himnot:                         htos3LAdot,
+            himno:                          htos3LAdo,
         },
 
         // Salmodia 1, 2, 3
@@ -374,7 +374,7 @@ export const dbLaudes = [
 // Tiempo Ordinario Semana 1 DOMINGO 1 - BAUTISMO DEL SEÑOR
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos1LAdm",
+    {        id:                            "tos1LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -397,8 +397,8 @@ export const dbLaudes = [
             antifonaInvitatorio_Salida:     inv_bautismo,
             
             // Himno
-            himnot:                         htos1LAdmt,
-            himno:                          htos1LAdm,
+            himnot:                         htos1LAdot,
+            himno:                          htos1LAdo,
         },
 
         // Salmodia 1, 2, 3
@@ -451,15 +451,15 @@ export const dbLaudes = [
         },
     },  // ***********************************************************
 
-// ********* tos2LAdm: Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 Laudes DOMINGO *********
+// ********* tos2LAdo: Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 Laudes DOMINGO *********
 /*  TIEMPO ORDINARIO | DOMINGO DE LA SEMANA II, VI, X, XIV, XVIII, XXII, XXVI, XXX De la Feria. Salterio II    */
-    {id: "tos2LAdm", ...s2Comun1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos2dmLA_cE_A, tos2dmLA_cE_B, tos2dmLA_cE_C),...s2Comun2,}},
-// ********* tos2LAdm: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
+    {id: "tos2LAdo", ...s2Comun1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos2dmLA_cE_A, tos2dmLA_cE_B, tos2dmLA_cE_C),...s2Comun2,}},
+// ********* tos2LAdo: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
 
-// ********* tos3LAdm: Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 Laudes DOMINGO *********
+// ********* tos3LAdo: Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 Laudes DOMINGO *********
 /*  TIEMPO ORDINARIO | DOMINGO DE LA SEMANA II, VI, X, XIV, XVIII, XXII, XXVI, XXX De la Feria. Salterio II    */
-    {id: "tos3LAdm", ...s3Comun1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos3dmLA_cE_A, tos3dmLA_cE_B, tos3dmLA_cE_C),...s3Comun2,}},
-// ********* tos2LAdm: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
+    {id: "tos3LAdo", ...s3Comun1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos3dmLA_cE_A, tos3dmLA_cE_B, tos3dmLA_cE_C),...s3Comun2,}},
+// ********* tos2LAdo: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
 
 
 
@@ -469,7 +469,7 @@ export const dbLaudes = [
     De la Feria. Salterio III    */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos3LAdm",
+    {        id:                            "tos3LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -492,8 +492,8 @@ export const dbLaudes = [
             antifonaInvitatorio_Salida:     inv_bautismo,
             
             // Himno
-            himnot:                         htos3LAdmt,
-            himno:                          htos3LAdm,
+            himnot:                         htos3LAdot,
+            himno:                          htos3LAdo,
         },
 
         // Salmodia 1, 2, 3
@@ -553,7 +553,7 @@ De la Feria. Salterio IV
 */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos4LAdm",
+    {        id:                            "tos4LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -576,8 +576,8 @@ De la Feria. Salterio IV
             antifonaInvitatorio_Salida:     inv_bautismo,
             
             // Himno
-            himnot:                         htos4LAdmt,
-            himno:                          htos4LAdm,
+            himnot:                         htos4LAdot,
+            himno:                          htos4LAdo,
         },
 
         // Salmodia 1, 2, 3
@@ -637,7 +637,7 @@ De la Feria. Salterio V
 */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos5LAdm",
+    {        id:                            "tos5LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -660,8 +660,8 @@ De la Feria. Salterio V
             antifonaInvitatorio_Salida:     inv_bautismo,
             
             // Himno
-            himnot:                         htos5LAdmt,
-            himno:                          htos5LAdm,
+            himnot:                         htos5LAdot,
+            himno:                          htos5LAdo,
         },
 
         // Salmodia 1, 2, 3

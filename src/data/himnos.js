@@ -200,8 +200,8 @@ Porque el bautismo hoy empieza
 y ha comenzado por él. Amén.`
 
 
-const htos1LAdmt = "Himno: ES VERDAD QUE LAS LUCES DEL ALBA"
-const htos1LAdm = `Es verdad que las luces del alba
+const htos1LAdot = "Himno: ES VERDAD QUE LAS LUCES DEL ALBA"
+const htos1LAdo = `Es verdad que las luces del alba
 del día de hoy
 son más puras, radiantes y bellas,
 por gracia de Dios.
@@ -227,8 +227,8 @@ y que el santo Paráclito inflame
 nuestra alma en amor. Amén.`
 
 
-const htos2LAdmt = "Himno: CRISTO, EL SEÑOR"
-const htos2LAdm = `Cristo, el Señor,
+const htos2LAdot = "Himno: CRISTO, EL SEÑOR"
+const htos2LAdo = `Cristo, el Señor,
 como la primavera,
 como una nueva aurora,
 resucitó.
@@ -261,8 +261,8 @@ Gloria para siempre
 al Cordero humilde
 que nos redimió. Amén.`
 
-const htos3LAdmt = "Himno: LAS SOMBRAS OSCURAS HUYEN."
-const htos3LAdm = `Las sombras oscuras huyen,
+const htos3LAdot = "Himno: LAS SOMBRAS OSCURAS HUYEN."
+const htos3LAdo = `Las sombras oscuras huyen,
 ya va pasando la noche;
 y el sol, con su luz de fuego,
 nos disipa los temores.
@@ -285,8 +285,8 @@ ya sin sombras y sin noches!
 ¡Hermoso Cristo, el Cordero,
 entre collados y montes! Amén.`
 
-const htos4LAdmt = "Himno: ES LA PASCUA REAL, NO YA LA SOMBRA."
-const htos4LAdm = `Es la Pascua real, no ya la sombra,
+const htos4LAdot = "Himno: ES LA PASCUA REAL, NO YA LA SOMBRA."
+const htos4LAdo = `Es la Pascua real, no ya la sombra,
 la verdadera pascua del Señor;
 la sangre del pasado es solo un signo,
 la mera imagen de la gran unción.
@@ -311,8 +311,8 @@ que guardes con tus manos a tu Iglesia,
 que protejas y ayudes a tu pueblo
 y que venzas con él a las tinieblas. Amén.`
 
-const htos5LAdmt = "Himno: ES VERDAD QUE LAS LUCES DEL ALBA"
-const htos5LAdm = `Es verdad que las luces del alba
+const htos5LAdot = "Himno: ES VERDAD QUE LAS LUCES DEL ALBA"
+const htos5LAdo = `Es verdad que las luces del alba
 del día de hoy
 son más puras, radiantes y bellas,
 por gracia de Dios.
@@ -337,92 +337,92 @@ que al Hijo nos dio,
 y que el santo Paráclito inflame
 nuestra alma en amor. Amén.`
 
-const htos6LAdmt = ""
-const htos6LAdm = ``
+const htos6LAdot = ""
+const htos6LAdo = ``
 
-const htos7LAdmt = ""
-const htos7LAdm = ``
+const htos7LAdot = ""
+const htos7LAdo = ``
 
-const htos8LAdmt = ""
-const htos8LAdm = ``
+const htos8LAdot = ""
+const htos8LAdo = ``
 
-const htos9LAdmt = ""
-const htos9LAdm = ``
+const htos9LAdot = ""
+const htos9LAdo = ``
 
-const htos10LAdmt = ""
-const htos10LAdm = ``
+const htos10LAdot = ""
+const htos10LAdo = ``
 
-const htos11LAdmt = ""
-const htos11LAdm = ``
+const htos11LAdot = ""
+const htos11LAdo = ``
 
-const htos12LAdmt = ""
-const htos12LAdm = ``
+const htos12LAdot = ""
+const htos12LAdo = ``
 
-const htos13LAdmt = ""
-const htos13LAdm = ``
+const htos13LAdot = ""
+const htos13LAdo = ``
 
-const htos14LAdmt = ""
-const htos14LAdm = ``
+const htos14LAdot = ""
+const htos14LAdo = ``
 
-const htos15LAdmt = ""
-const htos15LAdm = ``
+const htos15LAdot = ""
+const htos15LAdo = ``
 
-const htos16LAdmt = ""
-const htos16LAdm = ``
+const htos16LAdot = ""
+const htos16LAdo = ``
 
-const htos17LAdmt = ""
-const htos17LAdm = ``
+const htos17LAdot = ""
+const htos17LAdo = ``
 
-const htos18LAdmt = ""
-const htos18LAdm = ``
+const htos18LAdot = ""
+const htos18LAdo = ``
 
-const htos19LAdmt = ""
-const htos19LAdm = ``
+const htos19LAdot = ""
+const htos19LAdo = ``
 
-const htos20LAdmt = ""
-const htos20LAdm = ``
+const htos20LAdot = ""
+const htos20LAdo = ``
 
-const htos21LAdmt = ""
-const htos21LAdm = ``
+const htos21LAdot = ""
+const htos21LAdo = ``
 
-const htos22LAdmt = ""
-const htos22LAdm = ``
+const htos22LAdot = ""
+const htos22LAdo = ``
 
-const htos23LAdmt = ""
-const htos23LAdm = ``
+const htos23LAdot = ""
+const htos23LAdo = ``
 
-const htos24LAdmt = ""
-const htos24LAdm = ``
+const htos24LAdot = ""
+const htos24LAdo = ``
 
-const htos25LAdmt = ""
-const htos25LAdm = ``
+const htos25LAdot = ""
+const htos25LAdo = ``
 
-const htos26LAdmt = ""
-const htos26LAdm = ``
+const htos26LAdot = ""
+const htos26LAdo = ``
 
-const htos27LAdmt = ""
-const htos27LAdm = ``
+const htos27LAdot = ""
+const htos27LAdo = ``
 
-const htos28LAdmt = ""
-const htos28LAdm = ``
+const htos28LAdot = ""
+const htos28LAdo = ``
 
-const htos29LAdmt = ""
-const htos29LAdm = ``
+const htos29LAdot = ""
+const htos29LAdo = ``
 
-const htos30LAdmt = ""
-const htos30LAdm = ``
+const htos30LAdot = ""
+const htos30LAdo = ``
 
-const htos31LAdmt = ""
-const htos31LAdm = ``
+const htos31LAdot = ""
+const htos31LAdo = ``
 
-const htos32LAdmt = ""
-const htos32LAdm = ``
+const htos32LAdot = ""
+const htos32LAdo = ``
 
-const htos33LAdmt = ""
-const htos33LAdm = ``
+const htos33LAdot = ""
+const htos33LAdo = ``
 
-const htos34LAdmt = ""
-const htos34LAdm = ``
+const htos34LAdot = ""
+const htos34LAdo = ``
 
 const htos1VIdmt = ""
 const htos1VIdm = ``
@@ -431,8 +431,8 @@ const htos2VIdmt = ""
 const htos2VIdm = ``
 
 // Himno Tiempo Ordinario, Semana 1 Laudes Lunes
-const htos1LAlnt = "Himno: DEJADO YA EL DESCANSO DE LA NOCHE"
-const htos1LAln = `Dejado ya el descanso de la noche,
+const htos1lalut = "Himno: DEJADO YA EL DESCANSO DE LA NOCHE"
+const htos1lalu = `Dejado ya el descanso de la noche,
 despierto en la alegría de tu amor,
 concédeme tu luz que me ilumine
 como ilumina el sol.
@@ -457,8 +457,8 @@ acoge por tu Hijo la oración
 que fluye del Espíritu en el alma
 que sabe de tu amor. Amén.`
 
-const htos2LAlnt = "Himno: ALFARERO DEL HOMBRE, MANO TRABAJADORA"
-const htos2LAln = `Alfarero del hombre, mano trabajadora
+const htos2lalut = "Himno: ALFARERO DEL HOMBRE, MANO TRABAJADORA"
+const htos2lalu = `Alfarero del hombre, mano trabajadora
 que, de los hondos limos iniciales,
 convocas a los pájaros a la primera aurora,
 al pasto los primeros animales.
@@ -483,8 +483,8 @@ dejar tanta hermosura en tanta guerra!
 Que el hombre no te obligue, Señor, a arrepentirte
 de haberle dado un día las llaves de la tierra. Amén.`
 
-const htos3LAlnt = "Himno: ERES LA LUZ Y SIEMBRAS CLARIDADES"
-const htos3LAln = `Eres la luz y siembras claridades;
+const htos3lalut = "Himno: ERES LA LUZ Y SIEMBRAS CLARIDADES"
+const htos3lalu = `Eres la luz y siembras claridades;
 abres los anchos cielos que sostienen,
 como un pilar, los brazos de tu Padre.
 
@@ -500,8 +500,8 @@ Eres la luz total, Día del Día,
 el Uno en todo, el Trino todo en Uno:
 ¡gloria a tu misteriosa teofanía! Amén.`
 
-const htos4LAlnt = "Himno: SEÑOR, COMO QUISIERA."
-const htos4LAln = `Señor, cómo quisiera
+const htos4lalut = "Himno: SEÑOR, COMO QUISIERA."
+const htos4lalu = `Señor, cómo quisiera
 en cada aurora aprisionar el día,
 y ser tu primavera
 en gracia y alegría,
@@ -526,8 +526,8 @@ a ti que eres mi Roca
 y en quien mi vida toda desemboca. Amén.`
 
 // MARTES
-const htos1LAmtt = `Himno: AL CANTO DE LOS GALLOS.`
-const htos1LAmt = `Al canto de los gallos
+const htos1lamat = `Himno: AL CANTO DE LOS GALLOS.`
+const htos1lama = `Al canto de los gallos
 viene la aurora;
 los temores se alejan
 como las sombras.
@@ -559,8 +559,8 @@ gloria a su nombre
 y al misterio divino
 que nos lo esconde. Amén.`
 
-const htos2LAmtt = "Himno: TE DAMOS GRACIAS, SEÑOR"
-const htos2LAmt = `Te damos gracias, Señor,
+const htos2lamat = "Himno: TE DAMOS GRACIAS, SEÑOR"
+const htos2lama = `Te damos gracias, Señor,
 porque has depuesto la ira
 y has detenido ante el pueblo
 la mano que lo castiga.
@@ -585,8 +585,8 @@ Cantemos sus maravillas.
 ¡Qué grande, en medio del pueblo
 el Dios que nos justifica!». Amén.`
 
-const htos3LAmtt = "Himno: GRACIAS, SEÑOR POR EL DÍA"
-const htos3LAmt = `Gracias, Señor, por el día,
+const htos3lamat = "Himno: GRACIAS, SEÑOR POR EL DÍA"
+const htos3lama = `Gracias, Señor, por el día,
 por tu mensaje de amor
 que nos das en cada flor;
 por esta luz de alegría,
@@ -617,8 +617,8 @@ que me devuelve a tu cruz.
 ¡Gracias, Señor, por vivir! Amén.`
 
 
-const htos4LAmtt = "Himno: ESTÁTE, SEÑOR, CONMIGO."
-const htos4LAmt = `Estáte, Señor, conmigo
+const htos4lamat = "Himno: ESTÁTE, SEÑOR, CONMIGO."
+const htos4lama = `Estáte, Señor, conmigo
 siempre, sin jamás partirte,
 y cuando decidas irte,
 llévame, Señor, contigo;
@@ -646,8 +646,8 @@ cuando yo sin ti me quedo,
 cuando tú sin mí te vas. Amén.`
 
 // MIERCOLES
-const htos1LAmlt = "Himno: SENTENCIA DE DIOS AL HOMBRE"
-const htos1LAml = `Sentencia de Dios al hombre
+const htos1lamit = "Himno: SENTENCIA DE DIOS AL HOMBRE"
+const htos1lami = `Sentencia de Dios al hombre
 antes que el día comience:
 «Que el pan no venga a tu mesa
 sin el sudor de tu frente.
@@ -678,8 +678,8 @@ a fuerza de gratitudes
 se vuelve la tierra estéril.» Amén.`
 
 
-const htos2LAmlt = "Himno: NACIDOS DE LA LUZ, HIJOS DEL DÍA."
-const htos2LAml = `Nacidos de la luz, hijos del día,
+const htos2lamit = "Himno: NACIDOS DE LA LUZ, HIJOS DEL DÍA."
+const htos2lami = `Nacidos de la luz, hijos del día,
 Vamos hacia el Señor de la mañana.
 Su claridad disipa nuestras sombras
 y alegra y regocija nuestras almas.
@@ -694,8 +694,8 @@ por medio de su Hijo Jesucristo,
 y al Don de toda luz, el Santo Espíritu,
 que vive por los siglos de los siglos. Amén.`
 
-const htos3LAmlt = "Himno: DETENTE, AURORA DE ESTE NUEVO DÍA."
-const htos3LAml = `¡Detente, aurora de este nuevo día,
+const htos3lamit = "Himno: DETENTE, AURORA DE ESTE NUEVO DÍA."
+const htos3lami = `¡Detente, aurora de este nuevo día,
 refleja en mis pupilas tu paisaje!
 Mensajera de amor, es tu equipaje
 la hermosura hecha luz y profecía.
@@ -713,8 +713,8 @@ Arrópanos, Señor, con la esperanza;
 endereza, Señor, los pies perdidos,
 y recibe esta aurora de alabanza. Amén.`
 
-const htos4LAmlt = "Himno: AL RETORNAR ESTE DÍA."
-const htos4LAml = `Al retornar este día,
+const htos4lamit = "Himno: AL RETORNAR ESTE DÍA."
+const htos4lami = `Al retornar este día,
 con voz alegre y canora,
 celebrando al Redentor,
 cantemos de Dios la gloria.
@@ -734,8 +734,8 @@ que vivamos hoy con loa,
 con que agrademos a Cristo,
 si tu Espíritu nos colma. Amén.`
 
-const htos1LAjst = "Himno: CRECE LA LUZ BAJO TU HERMOSA MANO."
-const htos1LAjs = `Crece la luz bajo tu hermosa mano,
+const htos1lajut = "Himno: CRECE LA LUZ BAJO TU HERMOSA MANO."
+const htos1laju = `Crece la luz bajo tu hermosa mano,
 Padre celeste, y suben
 los hombres matutinos al encuentro
 de Cristo Primogénito.
@@ -765,8 +765,8 @@ el soplo de tu Hijo,
 potencia de tu diestra y primogénito
 de todos los que mueren. Amén.`
 
-const htos2LAjst = "Himno: SEÑOR, TÚ ME LLAMASTE."
-const htos2LAjs = `Señor, tú me llamaste
+const htos2lajut = "Himno: SEÑOR, TÚ ME LLAMASTE."
+const htos2laju = `Señor, tú me llamaste
 para ser instrumento de tu gracia,
 para anunciar la buena nueva,
 para sanar las almas.
@@ -794,8 +794,8 @@ y aliviar la miseria y el pecado;
 hacer temblar las piedras
 y ahuyentar a los lobos del rebaño. Amén.`
 
-const htos3LAjst = "Himno: SEÑOR, CUANDO FLORECE UN NUEVO DÍA."
-const htos3LAjs = `Señor, cuando florece un nuevo día
+const htos3lajut = "Himno: SEÑOR, CUANDO FLORECE UN NUEVO DÍA."
+const htos3laju = `Señor, cuando florece un nuevo día
 en el jardín del tiempo,
 no dejes que la espina del pecado
 vierta en él su veneno.
@@ -810,8 +810,8 @@ de tu propio alimento;
 y que vuelvan al fuego de tu casa
 cansados y contentos. Amén.`
 
-const htos4LAjst = "Himno: OH DIOS, AUTOR DE LA LUZ."
-const htos4LAjs = `Oh Dios, autor de la luz,
+const htos4lajut = "Himno: OH DIOS, AUTOR DE LA LUZ."
+const htos4laju = `Oh Dios, autor de la luz,
 de los cielos la lumbrera,
 que el universo sostienes
 abriendo tu mano diestra.
@@ -836,8 +836,8 @@ inclinamos la cabeza,
 y ante el Padre y el Espíritu,
 dándote gloria perpetua. Amén.`
 
-const htos1LAvst = "Himno: EDIFICASTE UNA TORRE"
-const htos1LAvs = `Edificaste una torre
+const htos1lavit = "Himno: EDIFICASTE UNA TORRE"
+const htos1lavi = `Edificaste una torre
 para tu huerta florida;
 un lagar para tu vino
 y, para el vino, una viña.
@@ -868,8 +868,8 @@ cuando tu planta lo pise,
 y que tu mesa se endulce
 con el vino de tu viña. Amén.`
 
-const htos2LAvst = "Himno: TE DOY GRACIAS SEÑOR."
-const htos2LAvs = `Te doy gracias, Señor.
+const htos2lavit = "Himno: TE DOY GRACIAS SEÑOR."
+const htos2lavi = `Te doy gracias, Señor.
 ¡Tanto estabas enojado conmigo!
 Tú eres un Dios de amor,
 y ahora soy tu amigo,
@@ -893,8 +893,8 @@ con alegría y llanto!
 ¡Que mi vida futura
 espejo sea sin fin de tu hermosura! Amén.`
 
-const htos3LAvst = "Himno: CREADOR SEMPITERNO DE LAS COSAS."
-const htos3LAvs = `Creador sempiterno de las cosas,
+const htos3lavit = "Himno: CREADOR SEMPITERNO DE LAS COSAS."
+const htos3lavi = `Creador sempiterno de las cosas,
 que gobiernas las noches y los días,
 y, alternando la luz y las tinieblas,
 alivias el cansancio de la vida.
@@ -915,8 +915,8 @@ y así como el Espíritu Paráclito,
 ahora y por los siglos de los siglos. Amén.
 `
 
-const htos4LAvst = "Himno: POR EL DOLOR CREYENTE QUE BROTA DEL PECADO."
-const htos4LAvs = `Por el dolor creyente que brota del pecado,
+const htos4lavit = "Himno: POR EL DOLOR CREYENTE QUE BROTA DEL PECADO."
+const htos4lavi = `Por el dolor creyente que brota del pecado,
 por no haberte querido de todo corazón,
 por haberte, Dios mío, tantas veces negado,
 con súplicas te pido, de rodillas, perdón.
@@ -932,8 +932,8 @@ y que a ti, viejo tronco, poco a poco me enlace,
 y que mi vieja sombra se derrame a tus pies. Amén`
 
 // SABADO
-const htos1LAsbt = "Himno: EN EL NOMBRE DEL PADRE, DEL HIJO Y DEL ESPÍRITU."
-const htos1LAsb = `En el nombre del Padre, del Hijo y del Espíritu,
+const htos1lasat = "Himno: EN EL NOMBRE DEL PADRE, DEL HIJO Y DEL ESPÍRITU."
+const htos1lasa = `En el nombre del Padre, del Hijo y del Espíritu,
 salimos de la noche y estrenamos la aurora;
 saludamos el gozo de la luz que nos llega
 resucitada y resucitadora.
@@ -958,8 +958,8 @@ de tu presencia joven, en gloria y poderío,
 la serena certeza con que el día proclama
 que el sepulcro de Cristo está vacío! Amén.`
 
-const htos2LAsbt = "Himno: SEÑOR YO SÉ QUE EN LA MAÑANA PURA."
-const htos2LAsb = `Señor, yo sé que, en la mañana pura
+const htos2lasat = "Himno: SEÑOR YO SÉ QUE EN LA MAÑANA PURA."
+const htos2lasa = `Señor, yo sé que, en la mañana pura
 de este mundo, tu diestra generosa
 hizo la luz antes que toda cosa,
 porque todo tuviera su figura.
@@ -977,8 +977,8 @@ por eso yo te adoro, mudo y quieto,
 y por eso, Señor, el dolor mío
 para llegar hasta ti se hizo soneto. Amén.`
 
-const htos3LAsbt = "Himno: CANTEMOS AL SEÑOR CON INDECIBLE GOZO."
-const htos3LAsb = `Cantemos al Señor con indecible gozo,
+const htos3lasat = "Himno: CANTEMOS AL SEÑOR CON INDECIBLE GOZO."
+const htos3lasa = `Cantemos al Señor con indecible gozo,
 él guarde la esperanza de nuestro corazón,
 dejemos la inquietud posar entre sus manos,
 abramos nuestro espíritu a su infinito amor.
@@ -1003,8 +1003,8 @@ que a ti, por Jesucristo y por el Consolador,
 dirige en comunión tu amada y santa Iglesia;
 abramos nuestro espíritu a su infinito amor. Amén.`
 
-const htos4LAsbt = "Himno: DADOR DE LUZ ESPLÉNDIDO"
-const htos4LAsb = `Dador de luz espléndido,
+const htos4lasat = "Himno: DADOR DE LUZ ESPLÉNDIDO"
+const htos4lasa = `Dador de luz espléndido,
 A cuya luz serena,
 Pasada ya la noche,
 El día se despliega.

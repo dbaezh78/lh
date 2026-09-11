@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Año Litúrgico - Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/añoliturgico.css">
+</head>
+<body>
+
+    <div class="contenedor-año">
+        <header class="header-año">
+            <h1>Calendario Litúrgico</h1>
+            <p id="año-actual">Año Litúrgico 2026</p>
+        </header>
+
+        <div class="filtros-tabla">
+            <input type="text" id="buscador" placeholder="Buscar fecha, tiempo o semana...">
+        </div>
+
+        <div class="tabla-responsive">
+            <table id="tabla-liturgica">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tiempo</th>
+                        <th>Semana</th>
+                        <th>Día</th>
+                        <th>ID Litúrgico</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-tabla">
+                    <!-- Filas generadas dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="../js/añoliturgico.js" type="module"></script>
+    <script src="../js/navigator.js"></script>
+</body>
+</html>

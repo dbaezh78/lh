@@ -221,7 +221,7 @@ export const dbLaudes = [
 // Tiempo Ordinario Semana 1 DOMINGO 1 - BAUTISMO DEL SEÑOR
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos1LAdm",
+    {        id:                            "tos1LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -244,8 +244,8 @@ export const dbLaudes = [
             antifonaInvitatorio_Salida:     inv_bautismo,
             
             // Himno
-            himnot:                         htos1LAdmt,
-            himno:                          htos1LAdm,
+            himnot:                         htos1LAdot,
+            himno:                          htos1LAdo,
         },
 
         // Salmodia 1, 2, 3
@@ -303,7 +303,7 @@ export const dbLaudes = [
     De la Feria. Salterio II    */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos2LAdm",
+    {        id:                            "tos2LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -326,8 +326,8 @@ export const dbLaudes = [
             antifonaInvitatorio_Salida:     tos2dmLAI,
             
             // Himno
-            himnot:                         htos2LAdmt,
-            himno:                          htos2LAdm,
+            himnot:                         htos2LAdot,
+            himno:                          htos2LAdo,
         },
 
         // Salmodia 1, 2, 3
@@ -385,7 +385,7 @@ export const dbLaudes = [
     De la Feria. Salterio III    */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos3LAdm",
+    {        id:                            "tos3LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -408,8 +408,8 @@ export const dbLaudes = [
             antifonaInvitatorio_Salida:     inv_bautismo,
             
             // Himno
-            himnot:                         htos3LAdmt,
-            himno:                          htos3LAdm,
+            himnot:                         htos3LAdot,
+            himno:                          htos3LAdo,
         },
 
         // Salmodia 1, 2, 3
@@ -469,7 +469,7 @@ De la Feria. Salterio IV
 */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos4LAdm",
+    {        id:                            "tos4LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -492,8 +492,8 @@ De la Feria. Salterio IV
             antifonaInvitatorio_Salida:     inv_bautismo,
             
             // Himno
-            himnot:                         htos4LAdmt,
-            himno:                          htos4LAdm,
+            himnot:                         htos4LAdot,
+            himno:                          htos4LAdo,
         },
 
         // Salmodia 1, 2, 3
@@ -553,7 +553,7 @@ De la Feria. Salterio V
 */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos5LAdm",
+    {        id:                            "tos5LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -576,8 +576,8 @@ De la Feria. Salterio V
             antifonaInvitatorio_Salida:     inv_bautismo,
             
             // Himno
-            himnot:                         htos5LAdmt,
-            himno:                          htos5LAdm,
+            himnot:                         htos5LAdot,
+            himno:                          htos5LAdo,
         },
 
         // Salmodia 1, 2, 3

@@ -102,10 +102,13 @@ body.dark-theme {
     backdrop-filter: blur(4px);
     z-index: 999999;
     display: flex;
-    align-items: flex-end; /* Efecto hoja inferior (bottom sheet) */
+    align-items: center; /* Centrado vertical en pantalla */
+    justify-content: center; /* Centrado horizontal en pantalla */
+    padding: 16px;
+    box-sizing: border-box;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
     pointer-events: all;
 }
 
@@ -115,30 +118,28 @@ body.dark-theme {
 }
 
 /* ==========================================================================
-   3. EL FRAME (HOJA DE AJUSTES)
+   3. EL FRAME (MODAL EN EL CENTRO)
    ========================================================================== */
 #modal-global-settings .settings-frame {
     width: 100%;
-    margin: 0 auto;
+    max-width: 520px;
+    margin: auto;
     background: var(--bg-modal-light);
-    border-radius: 24px 24px 0 0;
+    border-radius: 18px; /* Bordes redondeados en todas las esquinas */
     padding: 0;
-    transform: translateY(100%);
-    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    box-shadow: 0 -10px 25px rgba(0,0,0,0.2);
+    transform: scale(0.92);
+    opacity: 0;
+    transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.35);
     overflow: hidden;
-
-    @media (min-width: 384px){max-width: 100%;}
-    @media (min-width: 768px){max-width: 100%;}
-    @media (min-width: 992px){max-width: 60%;}
-    
-}
-
-#modal-global-settings .settings-frame {
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
 }
 
 #modal-global-settings.active .settings-frame {
-    transform: translateY(0);
+    transform: scale(1);
+    opacity: 1;
 }
 
 /* ==========================================================================
@@ -380,11 +381,11 @@ body.dark-theme #modal-global-settings select option {
 
 .material-symbols-outlined:hover {
     background: white;
-    background: #c42525;
-    color: white;
+    background: white;
+    color: black;
     border-radius: 50%;
     width: 40px;
-    height: 40px;
+    height: 36px;
     place-content: center;
     text-align: center;
 }

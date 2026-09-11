@@ -209,17 +209,38 @@ window.cambioEnExpandir = false;
                     }
                 },
 
+    // MODO TIPOGRAFIA - TEMA
+                { 
+                    id: 'global-set-font-family',
+                    label: 'Tipo de Fuente', 
+                    tipo: 'select', 
+                    storageKey: 'pref-font-family',
+                    default: 'Verdana, Arial, sans-serif',
+                    options: [
+                        { val: 'Verdana, Arial, sans-serif', text: 'Verdana (Resucitó/Salterios)' },
+                        { val: "'Caveat', cursive", text: 'Caveat (Manuscrita Portada)' },
+                        { val: "'Crimson Pro', Georgia, serif", text: 'Crimson Pro (Litúrgica Serif)' },
+                        { val: 'system-ui, -apple-system, sans-serif', text: 'Sistema (Moderna)' }
+                    ],
+                    accion: (val) => {
+                        document.documentElement.style.setProperty('--fuente-portada', val);
+                        document.body.style.fontFamily = val;
+                        localStorage.setItem('pref-font-family', val);
+                    }
+                },
+
     // MODO FUENTE - TEMA
                 { 
                     id: 'global-set-font',
-                    label: 'Fuente', 
+                    label: 'Tamaño de Fuente', 
                     tipo: 'select', 
                     storageKey: 'pref-font-size',
                     default: '16px',
                     options: [
+                        { val: '14px', text: 'Pequeño' },
                         { val: '16px', text: 'Normal' },
                         { val: '18px', text: 'Grande' },
-                        { val: '20px', text: 'Muy Grande' }
+                        { val: '22px', text: 'Muy Grande' }
                     ],
                     accion: (val) => {
                         document.documentElement.style.setProperty('--font-size-base', val);
@@ -244,10 +265,15 @@ window.cambioEnExpandir = false;
     // MODULO: MOTOR DE GENERACION DE HTML
     // ==========================================
     window.generarContenidoSettings = function() {
+        const tabGuardado = localStorage.getItem('pref-active-tab');
+        const activeTabId = (tabGuardado && tabsConfig.some(t => t.id === tabGuardado)) 
+                            ? tabGuardado 
+                            : tabsConfig[0].id;
+
         const tabsHeader = `
             <div class="settings-tabs-bar">
-                ${tabsConfig.map((tab, index) => `
-                    <button class="tab-btn ${index === 0 ? 'active' : ''}" onclick="window.cambiarTab('${tab.id}')">
+                ${tabsConfig.map((tab) => `
+                    <button class="tab-btn ${tab.id === activeTabId ? 'active' : ''}" onclick="window.cambiarTab('${tab.id}')">
                         <span class="material-symbols-outlined">${tab.icon}</span>
                         <span>${tab.label}</span>
                     </button>
@@ -255,8 +281,8 @@ window.cambioEnExpandir = false;
             </div>
         `;
 
-        const tabsContent = tabsConfig.map((tab, index) => `
-            <div id="${tab.id}" class="tab-panel ${index === 0 ? 'active' : ''}">
+        const tabsContent = tabsConfig.map((tab) => `
+            <div id="${tab.id}" class="tab-panel ${tab.id === activeTabId ? 'active' : ''}">
                 ${tab.secciones.filter(opt => !opt.hidden).map(opt => {
                     // 1. Intentar obtener el valor del LocalStorage
                     const valorGuardado = opt.storageKey ? localStorage.getItem(opt.storageKey) : null;
@@ -380,7 +406,8 @@ window.cambioEnExpandir = false;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         const targetTab = document.getElementById(tabId);
         if(targetTab) targetTab.classList.add('active');
-        if(event) event.currentTarget.classList.add('active');
+        if(window.event && window.event.currentTarget) window.event.currentTarget.classList.add('active');
+        localStorage.setItem('pref-active-tab', tabId);
     };
 
     window.ejecutarAccionTabs = (id, valor, esManual = false) => {

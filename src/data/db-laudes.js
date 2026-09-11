@@ -18,42 +18,42 @@ sb = Sabado
             v:                              invitatorio1,
             r:                              invitatorio2,       },
 // Invitatorio
-        antifonaInvitatorio:                tos1LAdmI,
+        antifonaInvitatorio:                tos1LAdoI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos1LAdmI,
-            antifonaInvitatorio_Salida:     tos1LAdmI,
+            antifonaInvitatorio:            tos1LAdoI,
+            antifonaInvitatorio_Salida:     tos1LAdoI,
 // Himno
-            himnot:                         htos1LAdmt,
-            himno:                          htos1LAdm,          },
+            himnot:                         htos1LAdot,
+            himno:                          htos1LAdo,          },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos1LAdm1,
+            Ant1:                           tos1LAdo1,
             SalmoUNOt:                      salmo117t,
             SalmoUNO:                       salmo117,
 // Salmodia 2    
-            Ant2:                           tos1LAdm2,
+            Ant2:                           tos1LAdo2,
             SalmoDOSt:                      dn_3_57_88_56t,
             SalmoDOS:                       dn_3_57_88_56,
 // Salmodia 3
-            Ant3:                           tos1LAdm3,
+            Ant3:                           tos1LAdo3,
             SalmoTRESt:                     salmo150t,
             SalmoTRES:                      salmo150,           },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos1LAdm_lbt,
-            LecturaTexto:                   tos1LAdm_lb,
+            LecturaCita:                    tos1LAdo_lbt,
+            LecturaTexto:                   tos1LAdo_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos1LAdm_rb,
-            responsorio2:                   tos1LAdm_rb,
-            responsorio3:                   tos1LAdm_rb1,
-            responsorio4:                   tos1LAdm_rb2,
+            responsorio1:                   tos1LAdo_rb,
+            responsorio2:                   tos1LAdo_rb,
+            responsorio3:                   tos1LAdo_rb1,
+            responsorio4:                   tos1LAdo_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos1LAdm_rb,        }};
+            responsorio5:                   tos1LAdo_rb,        }};
 
     // 2. El denominador común para el bloque de conclusión (Zacarías, Padre Nuestro, Final)
     const s1TO2 = {
@@ -61,11 +61,11 @@ sb = Sabado
         canticoZacariast: canticoZacariast,
         canticoZacarias:  canticoZacarias,
 // PRECES
-        preces1:          tos1LAdm_preces1,
-        preces2:          tos1LAdm_preces2,
+        preces1:          tos1LAdo_preces1,
+        preces2:          tos1LAdo_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
         Padren:           "Padre nuestro...",
-        oracion:          tos1LAdm_oracion,
+        oracion:          tos1LAdo_oracion,
         Conclusion1:      Conclusion1,
         Conclusion2:      Conclusion2                           };
 
@@ -80,43 +80,43 @@ sb = Sabado
             v:                         invitatorio1,
             r:                         invitatorio2,            },
 // Invitatorio
-        antifonaInvitatorio:           tos2LAdmI,
+        antifonaInvitatorio:           tos2LAdoI,
         salmoInvitatorio: {
             titulo:                    salmo94t,
             subtitulo:                 invitacion,
             contentInv:                salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:       tos2LAdmI,
-            antifonaInvitatorio_Salida:tos2LAdmI,
+            antifonaInvitatorio:       tos2LAdoI,
+            antifonaInvitatorio_Salida:tos2LAdoI,
 // Himno
-            himnot:                    htos2LAdmt,
-            himno:                     htos2LAdm,
+            himnot:                    htos2LAdot,
+            himno:                     htos2LAdo,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                      tos2LAdm1,
+            Ant1:                      tos2LAdo1,
             SalmoUNOt:                 salmo117t,
             SalmoUNO:                  salmo117,
 // Salmodia 2    
-            Ant2:                      tos2LAdm2,
+            Ant2:                      tos2LAdo2,
             SalmoDOSt:                 dn_3_57_88_56t,
             SalmoDOS:                  dn_3_57_88_56,
 // Salmodia 3
-            Ant3:                      tos2LAdm3,
+            Ant3:                      tos2LAdo3,
             SalmoTRESt:                salmo150t,
             SalmoTRES:                 salmo150,        },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:               tos2LAdm_lbt,
-            LecturaTexto:              tos2LAdm_lb,
+            LecturaCita:               tos2LAdo_lbt,
+            LecturaTexto:              tos2LAdo_lb,
 //RESPONSORIO BREVE
-            responsorio1:              tos2LAdm_rb,
-            responsorio2:              tos2LAdm_rb,
-            responsorio3:              tos2LAdm_rb1,
-            responsorio4:              tos2LAdm_rb2,
+            responsorio1:              tos2LAdo_rb,
+            responsorio2:              tos2LAdo_rb,
+            responsorio3:              tos2LAdo_rb1,
+            responsorio4:              tos2LAdo_rb2,
             gloria:                    gloria,
-            responsorio5:              tos2LAdm_rb,         }};
+            responsorio5:              tos2LAdo_rb,         }};
 
     // 2. El denominador común para el bloque de conclusión (Zacarías, Padre Nuestro, Final)
     const s2TO2 = {
@@ -124,11 +124,11 @@ sb = Sabado
         canticoZacariast: canticoZacariast,
         canticoZacarias:  canticoZacarias,
 // PRECES
-        preces1:          tos2LAdm_preces1,
-        preces2:          tos2LAdm_preces2,
+        preces1:          tos2LAdo_preces1,
+        preces2:          tos2LAdo_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
         Padren:           "Padre nuestro...",
-        oracion:          tos2LAdm_oracion,
+        oracion:          tos2LAdo_oracion,
         Conclusion1:      Conclusion1,
         Conclusion2:      Conclusion2           };
 
@@ -142,43 +142,43 @@ const s3TO1 = {
               v:                            invitatorio1,   
               r:                            invitatorio2,          },
 // Invitatorio
-        antifonaInvitatorio:                tos3LAdmI,
+        antifonaInvitatorio:                tos3LAdoI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos1LAdmI,
-            antifonaInvitatorio_Salida:     tos1LAdmI,  
+            antifonaInvitatorio:            tos1LAdoI,
+            antifonaInvitatorio_Salida:     tos1LAdoI,  
 // Himno
-            himnot:                         htos3LAdmt,
-            himno:                          htos3LAdm,
+            himnot:                         htos3LAdot,
+            himno:                          htos3LAdo,
         },
         Salmodias: {
 // Salmodia 1
-            Ant1:                           tos3LAdm1,
+            Ant1:                           tos3LAdo1,
             SalmoUNOt:                      salmo92t,
             SalmoUNO:                       salmo92,
 // Salmodia 2
-            Ant2:                           tos3LAdm2,
+            Ant2:                           tos3LAdo2,
             SalmoDOSt:                      dn_3_57_88_56t,
             SalmoDOS:                       dn_3_57_88_56,
 // Salmodia 3
-            Ant3:                           tos3LAdm3,
+            Ant3:                           tos3LAdo3,
             SalmoTRESt:                     salmo148t,
             SalmoTRES:                      salmo148,
         },
 //LECTURA BREVE
         LecturaBreve: {
-            LecturaCita:                    tos3LAdm_lbt,
-            LecturaTexto:                   tos3LAdm_lb,
+            LecturaCita:                    tos3LAdo_lbt,
+            LecturaTexto:                   tos3LAdo_lb,
 //RESPONSORIO BREVE
-            responsorio1:                    tos3LAdm_rb,
-            responsorio2:                    tos3LAdm_rb,
-            responsorio3:                    tos3LAdm_rb1,
-            responsorio4:                    tos3LAdm_rb2,
+            responsorio1:                    tos3LAdo_rb,
+            responsorio2:                    tos3LAdo_rb,
+            responsorio3:                    tos3LAdo_rb1,
+            responsorio4:                    tos3LAdo_rb2,
             gloria:                          gloria,
-            responsorio5:                    tos3LAdm_rb,
+            responsorio5:                    tos3LAdo_rb,
         }
     };
 
@@ -188,11 +188,11 @@ const s3TO1 = {
         canticoZacariast:               canticoZacariast,
         canticoZacarias:                canticoZacarias,
 //PRECES
-        preces1:                        tos3LAdm_preces1,
-        preces2:                        tos3LAdm_preces2,
+        preces1:                        tos3LAdo_preces1,
+        preces2:                        tos3LAdo_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
         Padren:                         "Padre nuestro...",
-        oracion:                        tos3LAdm_oracion,
+        oracion:                        tos3LAdo_oracion,
         Conclusion1:                    Conclusion1,
         Conclusion2:                    Conclusion2,
     };
@@ -210,43 +210,43 @@ const s3TO1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos4LAdmI,
+        antifonaInvitatorio:                tos4LAdoI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos4LAdmI,
-            antifonaInvitatorio_Salida:     tos4LAdmI,
+            antifonaInvitatorio:            tos4LAdoI,
+            antifonaInvitatorio_Salida:     tos4LAdoI,
 // Himno
-            himnot:                         htos4LAdmt,
-            himno:                          htos4LAdm,
+            himnot:                         htos4LAdot,
+            himno:                          htos4LAdo,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos4LAdm1,
+            Ant1:                           tos4LAdo1,
             SalmoUNOt:                      salmo117t,
             SalmoUNO:                       salmo117,
 // Salmodia 2
-            Ant2:                           tos4LAdm2,
+            Ant2:                           tos4LAdo2,
             SalmoDOSt:                      dn_3_57_88_56t,
             SalmoDOS:                       dn_3_57_88_56,
 // Salmodia 3
-            Ant3:                           tos4LAdm3,
+            Ant3:                           tos4LAdo3,
             SalmoTRESt:                     salmo150t,
             SalmoTRES:                      salmo150,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos4LAdm_lbt,
-            LecturaTexto:                   tos4LAdm_lb,
+            LecturaCita:                    tos4LAdo_lbt,
+            LecturaTexto:                   tos4LAdo_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos4LAdm_rb,
-            responsorio2:                   tos4LAdm_rb,
-            responsorio3:                   tos4LAdm_rb1,
-            responsorio4:                   tos4LAdm_rb2,
+            responsorio1:                   tos4LAdo_rb,
+            responsorio2:                   tos4LAdo_rb,
+            responsorio3:                   tos4LAdo_rb1,
+            responsorio4:                   tos4LAdo_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos4LAdm_rb,
+            responsorio5:                   tos4LAdo_rb,
         }};
 
     // 2. El denominador común para el bloque de conclusión (Zacarías, Padre Nuestro, Final)
@@ -255,11 +255,11 @@ const s3TO1 = {
         canticoZacariast: canticoZacariast,
         canticoZacarias:  canticoZacarias,
 // PRECES
-        preces1:          tos4LAdm_preces1,
-        preces2:          tos4LAdm_preces2,
+        preces1:          tos4LAdo_preces1,
+        preces2:          tos4LAdo_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
         Padren:           "Padre nuestro...",
-        oracion:          tos4LAdm_oracion,
+        oracion:          tos4LAdo_oracion,
         Conclusion1:      Conclusion1,
         Conclusion2:      Conclusion2           };
 
@@ -278,57 +278,57 @@ const s1TOln1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos1LAlnI,
+        antifonaInvitatorio:                tos1laluI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos1LAlnI,
-            antifonaInvitatorio_Salida:     tos1LAlnI,
+            antifonaInvitatorio:            tos1laluI,
+            antifonaInvitatorio_Salida:     tos1laluI,
 // Himno
-            himnot:                         htos1LAlnt,
-            himno:                          htos1LAln,
+            himnot:                         htos1lalut,
+            himno:                          htos1lalu,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos1LAln1,
+            Ant1:                           tos1lalu1,
             SalmoUNOt:                      salmo_5_2_10_12_13t,
             SalmoUNO:                       salmo_5_2_10_12_13,
 // Salmodia 2
-            Ant2:                           tos1LAln2,
+            Ant2:                           tos1lalu2,
             SalmoDOSt:                      ICro29_10_13t,
             SalmoDOS:                       ICro29_10_13,
 // Salmodia 3
-            Ant3:                           tos1LAln3,
+            Ant3:                           tos1lalu3,
             SalmoTRESt:                     salmo28t,
             SalmoTRES:                      salmo28,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos1LAln_lbt,
-            LecturaTexto:                   tos1LAln_lb,
+            LecturaCita:                    tos1lalu_lbt,
+            LecturaTexto:                   tos1lalu_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos1LAln_rb,
-            responsorio2:                   tos1LAln_rb,
-            responsorio3:                   tos1LAln_rb1,
-            responsorio4:                   tos1LAln_rb2,
+            responsorio1:                   tos1lalu_rb,
+            responsorio2:                   tos1lalu_rb,
+            responsorio3:                   tos1lalu_rb1,
+            responsorio4:                   tos1lalu_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos1LAln_rb,    },
+            responsorio5:                   tos1lalu_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos1LAln_cE,
+            cEvangelicoAnt:                 tos1lalu_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos1LAln_preces1,
-            preces2:                        tos1LAln_preces2,
+            preces1:                        tos1lalu_preces1,
+            preces2:                        tos1lalu_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos1LAln_oracion,
+            oracion:                        tos1lalu_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -348,57 +348,57 @@ const s2TOln1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos2LAlnI,
+        antifonaInvitatorio:                tos2laluI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos2LAlnI,
-            antifonaInvitatorio_Salida:     tos2LAlnI,
+            antifonaInvitatorio:            tos2laluI,
+            antifonaInvitatorio_Salida:     tos2laluI,
 // Himno
-            himnot:                         htos2LAlnt,
-            himno:                          htos2LAln,
+            himnot:                         htos2lalut,
+            himno:                          htos2lalu,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos2LAln1,
+            Ant1:                           tos2lalu1,
             SalmoUNOt:                      salmo_5_2_10_12_13t,
             SalmoUNO:                       salmo_5_2_10_12_13,
 // Salmodia 2
-            Ant2:                           tos2LAln2,
+            Ant2:                           tos2lalu2,
             SalmoDOSt:                      ICro29_10_13t,
             SalmoDOS:                       ICro29_10_13,
 // Salmodia 3
-            Ant3:                           tos2LAln3,
+            Ant3:                           tos2lalu3,
             SalmoTRESt:                     salmo28t,
             SalmoTRES:                      salmo28,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos2LAln_lbt,
-            LecturaTexto:                   tos2LAln_lb,
+            LecturaCita:                    tos2lalu_lbt,
+            LecturaTexto:                   tos2lalu_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos2LAln_rb,
-            responsorio2:                   tos2LAln_rb,
-            responsorio3:                   tos2LAln_rb1,
-            responsorio4:                   tos2LAln_rb2,
+            responsorio1:                   tos2lalu_rb,
+            responsorio2:                   tos2lalu_rb,
+            responsorio3:                   tos2lalu_rb1,
+            responsorio4:                   tos2lalu_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos2LAln_rb,    },
+            responsorio5:                   tos2lalu_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos2LAln_cE,
+            cEvangelicoAnt:                 tos2lalu_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos2LAln_preces1,
-            preces2:                        tos2LAln_preces2,
+            preces1:                        tos2lalu_preces1,
+            preces2:                        tos2lalu_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos2LAln_oracion,
+            oracion:                        tos2lalu_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -422,57 +422,57 @@ const s3TOln1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos3LAlnI,
+        antifonaInvitatorio:                tos3laluI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos3LAlnI,
-            antifonaInvitatorio_Salida:     tos3LAlnI,
+            antifonaInvitatorio:            tos3laluI,
+            antifonaInvitatorio_Salida:     tos3laluI,
 // Himno
-            himnot:                         htos3LAlnt,
-            himno:                          htos3LAln,
+            himnot:                         htos3lalut,
+            himno:                          htos3lalu,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos3LAln1,
+            Ant1:                           tos3lalu1,
             SalmoUNOt:                      salmo_5_2_10_12_13t,
             SalmoUNO:                       salmo_5_2_10_12_13,
 // Salmodia 2
-            Ant2:                           tos3LAln2,
+            Ant2:                           tos3lalu2,
             SalmoDOSt:                      ICro29_10_13t,
             SalmoDOS:                       ICro29_10_13,
 // Salmodia 3
-            Ant3:                           tos3LAln3,
+            Ant3:                           tos3lalu3,
             SalmoTRESt:                     salmo28t,
             SalmoTRES:                      salmo28,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos3LAln_lbt,
-            LecturaTexto:                   tos3LAln_lb,
+            LecturaCita:                    tos3lalu_lbt,
+            LecturaTexto:                   tos3lalu_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos3LAln_rb,
-            responsorio2:                   tos3LAln_rb,
-            responsorio3:                   tos3LAln_rb1,
-            responsorio4:                   tos3LAln_rb2,
+            responsorio1:                   tos3lalu_rb,
+            responsorio2:                   tos3lalu_rb,
+            responsorio3:                   tos3lalu_rb1,
+            responsorio4:                   tos3lalu_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos3LAln_rb,    },
+            responsorio5:                   tos3lalu_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos3LAln_cE,
+            cEvangelicoAnt:                 tos3lalu_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos3LAln_preces1,
-            preces2:                        tos3LAln_preces2,
+            preces1:                        tos3lalu_preces1,
+            preces2:                        tos3lalu_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos3LAln_oracion,
+            oracion:                        tos3lalu_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -496,57 +496,57 @@ const s4TOln1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos4LAlnI,
+        antifonaInvitatorio:                tos4laluI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos4LAlnI,
-            antifonaInvitatorio_Salida:     tos4LAlnI,
+            antifonaInvitatorio:            tos4laluI,
+            antifonaInvitatorio_Salida:     tos4laluI,
 // Himno
-            himnot:                         htos4LAlnt,
-            himno:                          htos4LAln,
+            himnot:                         htos4lalut,
+            himno:                          htos4lalu,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos4LAln1,
+            Ant1:                           tos4lalu1,
             SalmoUNOt:                      salmo_5_2_10_12_13t,
             SalmoUNO:                       salmo_5_2_10_12_13,
 // Salmodia 2
-            Ant2:                           tos4LAln2,
+            Ant2:                           tos4lalu2,
             SalmoDOSt:                      ICro29_10_13t,
             SalmoDOS:                       ICro29_10_13,
 // Salmodia 3
-            Ant3:                           tos4LAln3,
+            Ant3:                           tos4lalu3,
             SalmoTRESt:                     salmo28t,
             SalmoTRES:                      salmo28,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos4LAln_lbt,
-            LecturaTexto:                   tos4LAln_lb,
+            LecturaCita:                    tos4lalu_lbt,
+            LecturaTexto:                   tos4lalu_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos4LAln_rb,
-            responsorio2:                   tos4LAln_rb,
-            responsorio3:                   tos4LAln_rb1,
-            responsorio4:                   tos4LAln_rb2,
+            responsorio1:                   tos4lalu_rb,
+            responsorio2:                   tos4lalu_rb,
+            responsorio3:                   tos4lalu_rb1,
+            responsorio4:                   tos4lalu_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos4LAln_rb,    },
+            responsorio5:                   tos4lalu_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos4LAln_cE,
+            cEvangelicoAnt:                 tos4lalu_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos4LAln_preces1,
-            preces2:                        tos4LAln_preces2,
+            preces1:                        tos4lalu_preces1,
+            preces2:                        tos4lalu_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos4LAln_oracion,
+            oracion:                        tos4lalu_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -572,57 +572,57 @@ const s1TOmt1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos1LAmtI,
+        antifonaInvitatorio:                tos1lamaI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos1LAmtI,
-            antifonaInvitatorio_Salida:     tos1LAmtI,
+            antifonaInvitatorio:            tos1lamaI,
+            antifonaInvitatorio_Salida:     tos1lamaI,
 // Himno
-            himnot:                         htos1LAmtt,
-            himno:                          htos1LAmt,
+            himnot:                         htos1lamat,
+            himno:                          htos1lama,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos1LAmt1,
+            Ant1:                           tos1lama1,
             SalmoUNOt:                      salmo23t,
             SalmoUNO:                       salmo23,
 // Salmodia 2
-            Ant2:                           tos1LAmt2,
+            Ant2:                           tos1lama2,
             SalmoDOSt:                      tb_13_1_10t,
             SalmoDOS:                       tb_13_1_10,
 // Salmodia 3
-            Ant3:                           tos1LAmt3,
+            Ant3:                           tos1lama3,
             SalmoTRESt:                     salmo32t,
             SalmoTRES:                      salmo32,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos1LAmt_lbt,
-            LecturaTexto:                   tos1LAmt_lb,
+            LecturaCita:                    tos1lama_lbt,
+            LecturaTexto:                   tos1lama_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos1LAmt_rb,
-            responsorio2:                   tos1LAmt_rb,
-            responsorio3:                   tos1LAmt_rb1,
-            responsorio4:                   tos1LAmt_rb2,
+            responsorio1:                   tos1lama_rb,
+            responsorio2:                   tos1lama_rb,
+            responsorio3:                   tos1lama_rb1,
+            responsorio4:                   tos1lama_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos1LAmt_rb,    },
+            responsorio5:                   tos1lama_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos1LAmt_cE,
+            cEvangelicoAnt:                 tos1lama_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos1LAmt_preces1,
-            preces2:                        tos1LAmt_preces2,
+            preces1:                        tos1lama_preces1,
+            preces2:                        tos1lama_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos1LAmt_oracion,
+            oracion:                        tos1lama_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -642,57 +642,57 @@ const s2TOmt1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos2LAmtI,
+        antifonaInvitatorio:                tos2lamaI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos2LAmtI,
-            antifonaInvitatorio_Salida:     tos2LAmtI,
+            antifonaInvitatorio:            tos2lamaI,
+            antifonaInvitatorio_Salida:     tos2lamaI,
 // Himno
-            himnot:                         htos2LAmtt,
-            himno:                          htos2LAmt,
+            himnot:                         htos2lamat,
+            himno:                          htos2lama,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos2LAmt1,
+            Ant1:                           tos2lama1,
             SalmoUNOt:                      salmo42t,
             SalmoUNO:                       salmo42,
 // Salmodia 2
-            Ant2:                           tos2LAmt2,
+            Ant2:                           tos2lama2,
             SalmoDOSt:                      is_38_10_14_17_20t,
             SalmoDOS:                       is_38_10_14_17_20,
 // Salmodia 3
-            Ant3:                           tos2LAmt3,
+            Ant3:                           tos2lama3,
             SalmoTRESt:                     salmo64t,
             SalmoTRES:                      salmo64,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos2LAmt_lbt,
-            LecturaTexto:                   tos2LAmt_lb,
+            LecturaCita:                    tos2lama_lbt,
+            LecturaTexto:                   tos2lama_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos2LAmt_rb,
-            responsorio2:                   tos2LAmt_rb,
-            responsorio3:                   tos2LAmt_rb1,
-            responsorio4:                   tos2LAmt_rb2,
+            responsorio1:                   tos2lama_rb,
+            responsorio2:                   tos2lama_rb,
+            responsorio3:                   tos2lama_rb1,
+            responsorio4:                   tos2lama_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos2LAmt_rb,    },
+            responsorio5:                   tos2lama_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos2LAmt_cE,
+            cEvangelicoAnt:                 tos2lama_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos2LAmt_preces1,
-            preces2:                        tos2LAmt_preces2,
+            preces1:                        tos2lama_preces1,
+            preces2:                        tos2lama_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos2LAmt_oracion,
+            oracion:                        tos2lama_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -716,57 +716,57 @@ const s3TOmt1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos3LAmtI,
+        antifonaInvitatorio:                tos3lamaI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos3LAmtI,
-            antifonaInvitatorio_Salida:     tos3LAmtI,
+            antifonaInvitatorio:            tos3lamaI,
+            antifonaInvitatorio_Salida:     tos3lamaI,
 // Himno
-            himnot:                         htos3LAmtt,
-            himno:                          htos3LAmt,
+            himnot:                         htos3lamat,
+            himno:                          htos3lama,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos3LAmt1,
+            Ant1:                           tos3lama1,
             SalmoUNOt:                      salmo84t,
             SalmoUNO:                       salmo84,
 // Salmodia 2
-            Ant2:                           tos3LAmt2,
+            Ant2:                           tos3lama2,
             SalmoDOSt:                      is_26_1_4_7_9_12t,
             SalmoDOS:                       is_26_1_4_7_9_12,
 // Salmodia 3
-            Ant3:                           tos3LAmt3,
+            Ant3:                           tos3lama3,
             SalmoTRESt:                     salmo66t,
             SalmoTRES:                      salmo66,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos3LAmt_lbt,
-            LecturaTexto:                   tos3LAmt_lb,
+            LecturaCita:                    tos3lama_lbt,
+            LecturaTexto:                   tos3lama_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos3LAmt_rb,
-            responsorio2:                   tos3LAmt_rb,
-            responsorio3:                   tos3LAmt_rb1,
-            responsorio4:                   tos3LAmt_rb2,
+            responsorio1:                   tos3lama_rb,
+            responsorio2:                   tos3lama_rb,
+            responsorio3:                   tos3lama_rb1,
+            responsorio4:                   tos3lama_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos3LAmt_rb,    },
+            responsorio5:                   tos3lama_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos3LAmt_cE,
+            cEvangelicoAnt:                 tos3lama_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos3LAmt_preces1,
-            preces2:                        tos3LAmt_preces2,
+            preces1:                        tos3lama_preces1,
+            preces2:                        tos3lama_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos3LAmt_oracion,
+            oracion:                        tos3lama_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -790,57 +790,57 @@ const s4TOmt1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos4LAmtI,
+        antifonaInvitatorio:                tos4lamaI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos4LAmtI,
-            antifonaInvitatorio_Salida:     tos4LAmtI,
+            antifonaInvitatorio:            tos4lamaI,
+            antifonaInvitatorio_Salida:     tos4lamaI,
 // Himno
-            himnot:                         htos4LAmtt,
-            himno:                          htos4LAmt,
+            himnot:                         htos4lamat,
+            himno:                          htos4lama,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos4LAmt1,
+            Ant1:                           tos4lama1,
             SalmoUNOt:                      salmo100t,
             SalmoUNO:                       salmo100,
 // Salmodia 2
-            Ant2:                           tos4LAmt2,
+            Ant2:                           tos4lama2,
             SalmoDOSt:                      dn_3_26_27_29_34_41t,
             SalmoDOS:                       dn_3_26_27_29_34_41,
 // Salmodia 3
-            Ant3:                           tos4LAmt3,
+            Ant3:                           tos4lama3,
             SalmoTRESt:                     salmo143_1_10t,
             SalmoTRES:                      salmo143_1_10,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos4LAmt_lbt,
-            LecturaTexto:                   tos4LAmt_lb,
+            LecturaCita:                    tos4lama_lbt,
+            LecturaTexto:                   tos4lama_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos4LAmt_rb,
-            responsorio2:                   tos4LAmt_rb,
-            responsorio3:                   tos4LAmt_rb1,
-            responsorio4:                   tos4LAmt_rb2,
+            responsorio1:                   tos4lama_rb,
+            responsorio2:                   tos4lama_rb,
+            responsorio3:                   tos4lama_rb1,
+            responsorio4:                   tos4lama_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos4LAmt_rb,    },
+            responsorio5:                   tos4lama_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos4LAmt_cE,
+            cEvangelicoAnt:                 tos4lama_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos4LAmt_preces1,
-            preces2:                        tos4LAmt_preces2,
+            preces1:                        tos4lama_preces1,
+            preces2:                        tos4lama_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos4LAmt_oracion,
+            oracion:                        tos4lama_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -870,57 +870,57 @@ const s1TOml1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos1LAmlI,
+        antifonaInvitatorio:                tos1lamiI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos1LAmlI,
-            antifonaInvitatorio_Salida:     tos1LAmlI,
+            antifonaInvitatorio:            tos1lamiI,
+            antifonaInvitatorio_Salida:     tos1lamiI,
 // Himno
-            himnot:                         htos1LAmlt,
-            himno:                          htos1LAml,
+            himnot:                         htos1lamit,
+            himno:                          htos1lami,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos1LAml1,
+            Ant1:                           tos1lami1,
             SalmoUNOt:                      salmo35t,
             SalmoUNO:                       salmo35,
 // Salmodia 2
-            Ant2:                           tos1LAml2,
+            Ant2:                           tos1lami2,
             SalmoDOSt:                      Jdt_16_2_3_15_19t,
             SalmoDOS:                       Jdt_16_2_3_15_19,
 // Salmodia 3
-            Ant3:                           tos1LAml3,
+            Ant3:                           tos1lami3,
             SalmoTRESt:                     salmo46t,
             SalmoTRES:                      salmo46,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos1LAml_lbt,
-            LecturaTexto:                   tos1LAml_lb,
+            LecturaCita:                    tos1lami_lbt,
+            LecturaTexto:                   tos1lami_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos1LAml_rb,
-            responsorio2:                   tos1LAml_rb,
-            responsorio3:                   tos1LAml_rb1,
-            responsorio4:                   tos1LAml_rb2,
+            responsorio1:                   tos1lami_rb,
+            responsorio2:                   tos1lami_rb,
+            responsorio3:                   tos1lami_rb1,
+            responsorio4:                   tos1lami_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos1LAml_rb,    },
+            responsorio5:                   tos1lami_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos1LAml_cE,
+            cEvangelicoAnt:                 tos1lami_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos1LAml_preces1,
-            preces2:                        tos1LAml_preces2,
+            preces1:                        tos1lami_preces1,
+            preces2:                        tos1lami_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos1LAml_oracion,
+            oracion:                        tos1lami_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -940,57 +940,57 @@ const s2TOml1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos2LAmlI,
+        antifonaInvitatorio:                tos2lamiI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos2LAmlI,
-            antifonaInvitatorio_Salida:     tos2LAmlI,
+            antifonaInvitatorio:            tos2lamiI,
+            antifonaInvitatorio_Salida:     tos2lamiI,
 // Himno
-            himnot:                         htos2LAmlt,
-            himno:                          htos2LAml,
+            himnot:                         htos2lamit,
+            himno:                          htos2lami,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos2LAml1,
+            Ant1:                           tos2lami1,
             SalmoUNOt:                      salmo76t,
             SalmoUNO:                       salmo76,
 // Salmodia 2
-            Ant2:                           tos2LAml2,
+            Ant2:                           tos2lami2,
             SalmoDOSt:                      ISa2_1_10t,
             SalmoDOS:                       ISa2_1_10,
 // Salmodia 3
-            Ant3:                           tos2LAml3,
+            Ant3:                           tos2lami3,
             SalmoTRESt:                     salmo96t,
             SalmoTRES:                      salmo96,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos2LAml_lbt,
-            LecturaTexto:                   tos2LAml_lb,
+            LecturaCita:                    tos2lami_lbt,
+            LecturaTexto:                   tos2lami_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos2LAml_rb,
-            responsorio2:                   tos2LAml_rb,
-            responsorio3:                   tos2LAml_rb1,
-            responsorio4:                   tos2LAml_rb2,
+            responsorio1:                   tos2lami_rb,
+            responsorio2:                   tos2lami_rb,
+            responsorio3:                   tos2lami_rb1,
+            responsorio4:                   tos2lami_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos2LAml_rb,    },
+            responsorio5:                   tos2lami_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos2LAml_cE,
+            cEvangelicoAnt:                 tos2lami_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos2LAml_preces1,
-            preces2:                        tos2LAml_preces2,
+            preces1:                        tos2lami_preces1,
+            preces2:                        tos2lami_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos2LAml_oracion,
+            oracion:                        tos2lami_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1014,57 +1014,57 @@ const s3TOml1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos3LAmlI,
+        antifonaInvitatorio:                tos3lamiI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos3LAmlI,
-            antifonaInvitatorio_Salida:     tos3LAmlI,
+            antifonaInvitatorio:            tos3lamiI,
+            antifonaInvitatorio_Salida:     tos3lamiI,
 // Himno
-            himnot:                         htos3LAmlt,
-            himno:                          htos3LAml,
+            himnot:                         htos3lamit,
+            himno:                          htos3lami,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos3LAml1,
+            Ant1:                           tos3lami1,
             SalmoUNOt:                      salmo85t,
             SalmoUNO:                       salmo85,
 // Salmodia 2
-            Ant2:                           tos3LAml2,
+            Ant2:                           tos3lami2,
             SalmoDOSt:                      is_33_13_16t,
             SalmoDOS:                       is_33_13_16,
 // Salmodia 3
-            Ant3:                           tos3LAml3,
+            Ant3:                           tos3lami3,
             SalmoTRESt:                     salmo97t,
             SalmoTRES:                      salmo97,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos3LAml_lbt,
-            LecturaTexto:                   tos3LAml_lb,
+            LecturaCita:                    tos3lami_lbt,
+            LecturaTexto:                   tos3lami_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos3LAml_rb,
-            responsorio2:                   tos3LAml_rb,
-            responsorio3:                   tos3LAml_rb1,
-            responsorio4:                   tos3LAml_rb2,
+            responsorio1:                   tos3lami_rb,
+            responsorio2:                   tos3lami_rb,
+            responsorio3:                   tos3lami_rb1,
+            responsorio4:                   tos3lami_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos3LAml_rb,    },
+            responsorio5:                   tos3lami_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos3LAml_cE,
+            cEvangelicoAnt:                 tos3lami_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos3LAml_preces1,
-            preces2:                        tos3LAml_preces2,
+            preces1:                        tos3lami_preces1,
+            preces2:                        tos3lami_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos3LAml_oracion,
+            oracion:                        tos3lami_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1088,57 +1088,57 @@ const s4TOml1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos4LAmlI,
+        antifonaInvitatorio:                tos4lamiI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos4LAmlI,
-            antifonaInvitatorio_Salida:     tos4LAmlI,
+            antifonaInvitatorio:            tos4lamiI,
+            antifonaInvitatorio_Salida:     tos4lamiI,
 // Himno
-            himnot:                         htos4LAmlt,
-            himno:                          htos4LAml,
+            himnot:                         htos4lamit,
+            himno:                          htos4lami,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos4LAml1,
+            Ant1:                           tos4lami1,
             SalmoUNOt:                      salmo107t,
             SalmoUNO:                       salmo107,
 // Salmodia 2
-            Ant2:                           tos4LAml2,
+            Ant2:                           tos4lami2,
             SalmoDOSt:                      is_61_10_62_5t,
             SalmoDOS:                       is_61_10_62_5,
 // Salmodia 3
-            Ant3:                           tos4LAml3,
+            Ant3:                           tos4lami3,
             SalmoTRESt:                     salmo145t,
             SalmoTRES:                      salmo145,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos4LAml_lbt,
-            LecturaTexto:                   tos4LAml_lb,
+            LecturaCita:                    tos4lami_lbt,
+            LecturaTexto:                   tos4lami_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos4LAml_rb,
-            responsorio2:                   tos4LAml_rb,
-            responsorio3:                   tos4LAml_rb1,
-            responsorio4:                   tos4LAml_rb2,
+            responsorio1:                   tos4lami_rb,
+            responsorio2:                   tos4lami_rb,
+            responsorio3:                   tos4lami_rb1,
+            responsorio4:                   tos4lami_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos4LAml_rb,    },
+            responsorio5:                   tos4lami_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos4LAml_cE,
+            cEvangelicoAnt:                 tos4lami_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos4LAml_preces1,
-            preces2:                        tos4LAml_preces2,
+            preces1:                        tos4lami_preces1,
+            preces2:                        tos4lami_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos4LAml_oracion,
+            oracion:                        tos4lami_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1165,57 +1165,57 @@ const s1TOjs1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos1LAjsI,
+        antifonaInvitatorio:                tos1lajuI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos1LAjsI,
-            antifonaInvitatorio_Salida:     tos1LAjsI,
+            antifonaInvitatorio:            tos1lajuI,
+            antifonaInvitatorio_Salida:     tos1lajuI,
 // Himno
-            himnot:                         htos1LAjst,
-            himno:                          htos1LAjs,
+            himnot:                         htos1lajut,
+            himno:                          htos1laju,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos1LAjs1,
+            Ant1:                           tos1laju1,
             SalmoUNOt:                      salmo56t,
             SalmoUNO:                       salmo56,
 // Salmodia 2
-            Ant2:                           tos1LAjs2,
+            Ant2:                           tos1laju2,
             SalmoDOSt:                      jr_31_10_14t,
             SalmoDOS:                       jr_31_10_14,
 // Salmodia 3
-            Ant3:                           tos1LAjs3,
+            Ant3:                           tos1laju3,
             SalmoTRESt:                     salmo47t,
             SalmoTRES:                      salmo47,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos1LAjs_lbt,
-            LecturaTexto:                   tos1LAjs_lb,
+            LecturaCita:                    tos1laju_lbt,
+            LecturaTexto:                   tos1laju_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos1LAjs_rb,
-            responsorio2:                   tos1LAjs_rb,
-            responsorio3:                   tos1LAjs_rb1,
-            responsorio4:                   tos1LAjs_rb2,
+            responsorio1:                   tos1laju_rb,
+            responsorio2:                   tos1laju_rb,
+            responsorio3:                   tos1laju_rb1,
+            responsorio4:                   tos1laju_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos1LAjs_rb,    },
+            responsorio5:                   tos1laju_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos1LAjs_cE,
+            cEvangelicoAnt:                 tos1laju_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos1LAjs_preces1,
-            preces2:                        tos1LAjs_preces2,
+            preces1:                        tos1laju_preces1,
+            preces2:                        tos1laju_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos1LAjs_oracion,
+            oracion:                        tos1laju_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1235,57 +1235,57 @@ const s2TOjs1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos2LAjsI,
+        antifonaInvitatorio:                tos2lajuI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos2LAjsI,
-            antifonaInvitatorio_Salida:     tos2LAjsI,
+            antifonaInvitatorio:            tos2lajuI,
+            antifonaInvitatorio_Salida:     tos2lajuI,
 // Himno
-            himnot:                         htos2LAjst,
-            himno:                          htos2LAjs,
+            himnot:                         htos2lajut,
+            himno:                          htos2laju,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos2LAjs1,
+            Ant1:                           tos2laju1,
             SalmoUNOt:                      salmo79t,
             SalmoUNO:                       salmo79,
 // Salmodia 2
-            Ant2:                           tos2LAjs2,
+            Ant2:                           tos2laju2,
             SalmoDOSt:                      is_12_1_6t,
             SalmoDOS:                       is_12_1_6,
 // Salmodia 3
-            Ant3:                           tos2LAjs3,
+            Ant3:                           tos2laju3,
             SalmoTRESt:                     salmo80t,
             SalmoTRES:                      salmo80,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos2LAjs_lbt,
-            LecturaTexto:                   tos2LAjs_lb,
+            LecturaCita:                    tos2laju_lbt,
+            LecturaTexto:                   tos2laju_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos2LAjs_rb,
-            responsorio2:                   tos2LAjs_rb,
-            responsorio3:                   tos2LAjs_rb1,
-            responsorio4:                   tos2LAjs_rb2,
+            responsorio1:                   tos2laju_rb,
+            responsorio2:                   tos2laju_rb,
+            responsorio3:                   tos2laju_rb1,
+            responsorio4:                   tos2laju_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos2LAjs_rb,    },
+            responsorio5:                   tos2laju_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos2LAjs_cE,
+            cEvangelicoAnt:                 tos2laju_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos2LAjs_preces1,
-            preces2:                        tos2LAjs_preces2,
+            preces1:                        tos2laju_preces1,
+            preces2:                        tos2laju_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos2LAjs_oracion,
+            oracion:                        tos2laju_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1309,57 +1309,57 @@ const s3TOjs1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos3LAjsI,
+        antifonaInvitatorio:                tos3lajuI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos3LAjsI,
-            antifonaInvitatorio_Salida:     tos3LAjsI,
+            antifonaInvitatorio:            tos3lajuI,
+            antifonaInvitatorio_Salida:     tos3lajuI,
 // Himno
-            himnot:                         htos3LAjst,
-            himno:                          htos3LAjs,
+            himnot:                         htos3lajut,
+            himno:                          htos3laju,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos3LAjs1,
+            Ant1:                           tos3laju1,
             SalmoUNOt:                      salmo86t,
             SalmoUNO:                       salmo86,
 // Salmodia 2
-            Ant2:                           tos3LAjs2,
+            Ant2:                           tos3laju2,
             SalmoDOSt:                      is_40_10_17t,
             SalmoDOS:                       is_40_10_17,
 // Salmodia 3
-            Ant3:                           tos3LAjs3,
+            Ant3:                           tos3laju3,
             SalmoTRESt:                     salmo98t,
             SalmoTRES:                      salmo98,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos3LAjs_lbt,
-            LecturaTexto:                   tos3LAjs_lb,
+            LecturaCita:                    tos3laju_lbt,
+            LecturaTexto:                   tos3laju_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos3LAjs_rb,
-            responsorio2:                   tos3LAjs_rb,
-            responsorio3:                   tos3LAjs_rb1,
-            responsorio4:                   tos3LAjs_rb2,
+            responsorio1:                   tos3laju_rb,
+            responsorio2:                   tos3laju_rb,
+            responsorio3:                   tos3laju_rb1,
+            responsorio4:                   tos3laju_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos3LAjs_rb,    },
+            responsorio5:                   tos3laju_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos3LAjs_cE,
+            cEvangelicoAnt:                 tos3laju_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos3LAjs_preces1,
-            preces2:                        tos3LAjs_preces2,
+            preces1:                        tos3laju_preces1,
+            preces2:                        tos3laju_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos3LAjs_oracion,
+            oracion:                        tos3laju_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1383,57 +1383,57 @@ const s4TOjs1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos4LAjsI,
+        antifonaInvitatorio:                tos4lajuI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos4LAjsI,
-            antifonaInvitatorio_Salida:     tos4LAjsI,
+            antifonaInvitatorio:            tos4lajuI,
+            antifonaInvitatorio_Salida:     tos4lajuI,
 // Himno
-            himnot:                         htos4LAjst,
-            himno:                          htos4LAjs,
+            himnot:                         htos4lajut,
+            himno:                          htos4laju,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos4LAjs1,
+            Ant1:                           tos4laju1,
             SalmoUNOt:                      salmo142_1_11t,
             SalmoUNO:                       salmo142_1_11,
 // Salmodia 2
-            Ant2:                           tos4LAjs2,
+            Ant2:                           tos4laju2,
             SalmoDOSt:                      is_66_10_14at,
             SalmoDOS:                       is_66_10_14a,
 // Salmodia 3
-            Ant3:                           tos4LAjs3,
+            Ant3:                           tos4laju3,
             SalmoTRESt:                     salmo146t,
             SalmoTRES:                      salmo146,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos4LAjs_lbt,
-            LecturaTexto:                   tos4LAjs_lb,
+            LecturaCita:                    tos4laju_lbt,
+            LecturaTexto:                   tos4laju_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos4LAjs_rb,
-            responsorio2:                   tos4LAjs_rb,
-            responsorio3:                   tos4LAjs_rb1,
-            responsorio4:                   tos4LAjs_rb2,
+            responsorio1:                   tos4laju_rb,
+            responsorio2:                   tos4laju_rb,
+            responsorio3:                   tos4laju_rb1,
+            responsorio4:                   tos4laju_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos4LAjs_rb,    },
+            responsorio5:                   tos4laju_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos4LAjs_cE,
+            cEvangelicoAnt:                 tos4laju_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos4LAjs_preces1,
-            preces2:                        tos4LAjs_preces2,
+            preces1:                        tos4laju_preces1,
+            preces2:                        tos4laju_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos4LAjs_oracion,
+            oracion:                        tos4laju_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1460,57 +1460,57 @@ const s1TOvs1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos1LAvsI,
+        antifonaInvitatorio:                tos1laviI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos1LAvsI,
-            antifonaInvitatorio_Salida:     tos1LAvsI,
+            antifonaInvitatorio:            tos1laviI,
+            antifonaInvitatorio_Salida:     tos1laviI,
 // Himno
-            himnot:                         htos1LAvst,
-            himno:                          htos1LAvs,
+            himnot:                         htos1lavit,
+            himno:                          htos1lavi,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos1LAvs1,
+            Ant1:                           tos1lavi1,
             SalmoUNOt:                      salmo50t,
             SalmoUNO:                       salmo50,
 // Salmodia 2
-            Ant2:                           tos1LAvs2,
+            Ant2:                           tos1lavi2,
             SalmoDOSt:                      is_45_15_25t,
             SalmoDOS:                       is_45_15_25,
 // Salmodia 3
-            Ant3:                           tos1LAvs3,
+            Ant3:                           tos1lavi3,
             SalmoTRESt:                     salmo99t,
             SalmoTRES:                      salmo99,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos1LAvs_lbt,
-            LecturaTexto:                   tos1LAvs_lb,
+            LecturaCita:                    tos1lavi_lbt,
+            LecturaTexto:                   tos1lavi_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos1LAvs_rb,
-            responsorio2:                   tos1LAvs_rb,
-            responsorio3:                   tos1LAvs_rb1,
-            responsorio4:                   tos1LAvs_rb2,
+            responsorio1:                   tos1lavi_rb,
+            responsorio2:                   tos1lavi_rb,
+            responsorio3:                   tos1lavi_rb1,
+            responsorio4:                   tos1lavi_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos1LAvs_rb,    },
+            responsorio5:                   tos1lavi_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos1LAvs_cE,
+            cEvangelicoAnt:                 tos1lavi_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos1LAvs_preces1,
-            preces2:                        tos1LAvs_preces2,
+            preces1:                        tos1lavi_preces1,
+            preces2:                        tos1lavi_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos1LAvs_oracion,
+            oracion:                        tos1lavi_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1530,57 +1530,57 @@ const s2TOvs1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos2LAvsI,
+        antifonaInvitatorio:                tos2laviI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos2LAvsI,
-            antifonaInvitatorio_Salida:     tos2LAvsI,
+            antifonaInvitatorio:            tos2laviI,
+            antifonaInvitatorio_Salida:     tos2laviI,
 // Himno
-            himnot:                         htos2LAvst,
-            himno:                          htos2LAvs,
+            himnot:                         htos2lavit,
+            himno:                          htos2lavi,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos2LAvs1,
+            Ant1:                           tos2lavi1,
             SalmoUNOt:                      salmo50t,
             SalmoUNO:                       salmo50,
 // Salmodia 2
-            Ant2:                           tos2LAvs2,
+            Ant2:                           tos2lavi2,
             SalmoDOSt:                      ha3_2_4_13a_15_19t,
             SalmoDOS:                       ha3_2_4_13a_15_19,
 // Salmodia 3
-            Ant3:                           tos2LAvs3,
+            Ant3:                           tos2lavi3,
             SalmoTRESt:                     salmo147t,
             SalmoTRES:                      salmo147,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos2LAvs_lbt,
-            LecturaTexto:                   tos2LAvs_lb,
+            LecturaCita:                    tos2lavi_lbt,
+            LecturaTexto:                   tos2lavi_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos2LAvs_rb,
-            responsorio2:                   tos2LAvs_rb,
-            responsorio3:                   tos2LAvs_rb1,
-            responsorio4:                   tos2LAvs_rb2,
+            responsorio1:                   tos2lavi_rb,
+            responsorio2:                   tos2lavi_rb,
+            responsorio3:                   tos2lavi_rb1,
+            responsorio4:                   tos2lavi_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos2LAvs_rb,    },
+            responsorio5:                   tos2lavi_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos2LAvs_cE,
+            cEvangelicoAnt:                 tos2lavi_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos2LAvs_preces1,
-            preces2:                        tos2LAvs_preces2,
+            preces1:                        tos2lavi_preces1,
+            preces2:                        tos2lavi_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos2LAvs_oracion,
+            oracion:                        tos2lavi_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1604,57 +1604,57 @@ const s3TOvs1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos3LAvsI,
+        antifonaInvitatorio:                tos3laviI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos3LAvsI,
-            antifonaInvitatorio_Salida:     tos3LAvsI,
+            antifonaInvitatorio:            tos3laviI,
+            antifonaInvitatorio_Salida:     tos3laviI,
 // Himno
-            himnot:                         htos3LAvst,
-            himno:                          htos3LAvs,
+            himnot:                         htos3lavit,
+            himno:                          htos3lavi,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos3LAvs1,
+            Ant1:                           tos3lavi1,
             SalmoUNOt:                      salmo50t,
             SalmoUNO:                       salmo50,
 // Salmodia 2
-            Ant2:                           tos3LAvs2,
+            Ant2:                           tos3lavi2,
             SalmoDOSt:                      jr_14_17_21t,
             SalmoDOS:                       jr_14_17_21,
 // Salmodia 3
-            Ant3:                           tos3LAvs3,
+            Ant3:                           tos3lavi3,
             SalmoTRESt:                     salmo99t,
             SalmoTRES:                      salmo99,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos3LAvs_lbt,
-            LecturaTexto:                   tos3LAvs_lb,
+            LecturaCita:                    tos3lavi_lbt,
+            LecturaTexto:                   tos3lavi_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos3LAvs_rb,
-            responsorio2:                   tos3LAvs_rb,
-            responsorio3:                   tos3LAvs_rb1,
-            responsorio4:                   tos3LAvs_rb2,
+            responsorio1:                   tos3lavi_rb,
+            responsorio2:                   tos3lavi_rb,
+            responsorio3:                   tos3lavi_rb1,
+            responsorio4:                   tos3lavi_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos3LAvs_rb,    },
+            responsorio5:                   tos3lavi_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos3LAvs_cE,
+            cEvangelicoAnt:                 tos3lavi_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos3LAvs_preces1,
-            preces2:                        tos3LAvs_preces2,
+            preces1:                        tos3lavi_preces1,
+            preces2:                        tos3lavi_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos3LAvs_oracion,
+            oracion:                        tos3lavi_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1678,57 +1678,57 @@ const s4TOvs1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos4LAvsI,
+        antifonaInvitatorio:                tos4laviI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos4LAvsI,
-            antifonaInvitatorio_Salida:     tos4LAvsI,
+            antifonaInvitatorio:            tos4laviI,
+            antifonaInvitatorio_Salida:     tos4laviI,
 // Himno
-            himnot:                         htos4LAvst,
-            himno:                          htos4LAvs,
+            himnot:                         htos4lavit,
+            himno:                          htos4lavi,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos4LAvs1,
+            Ant1:                           tos4lavi1,
             SalmoUNOt:                      salmo50t,
             SalmoUNO:                       salmo50,
 // Salmodia 2
-            Ant2:                           tos4LAvs2,
+            Ant2:                           tos4lavi2,
             SalmoDOSt:                      tb_13_10_15_17_19t,
             SalmoDOS:                       tb_13_10_15_17_19,
 // Salmodia 3
-            Ant3:                           tos4LAvs3,
+            Ant3:                           tos4lavi3,
             SalmoTRESt:                     salmo147t,
             SalmoTRES:                      salmo147,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos4LAvs_lbt,
-            LecturaTexto:                   tos4LAvs_lb,
+            LecturaCita:                    tos4lavi_lbt,
+            LecturaTexto:                   tos4lavi_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos4LAvs_rb,
-            responsorio2:                   tos4LAvs_rb,
-            responsorio3:                   tos4LAvs_rb1,
-            responsorio4:                   tos4LAvs_rb2,
+            responsorio1:                   tos4lavi_rb,
+            responsorio2:                   tos4lavi_rb,
+            responsorio3:                   tos4lavi_rb1,
+            responsorio4:                   tos4lavi_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos4LAvs_rb,    },
+            responsorio5:                   tos4lavi_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos4LAvs_cE,
+            cEvangelicoAnt:                 tos4lavi_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos4LAvs_preces1,
-            preces2:                        tos4LAvs_preces2,
+            preces1:                        tos4lavi_preces1,
+            preces2:                        tos4lavi_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos4LAvs_oracion,
+            oracion:                        tos4lavi_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1754,57 +1754,57 @@ const s1TOsb1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos1LAsbI,
+        antifonaInvitatorio:                tos1lasaI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos1LAsbI,
-            antifonaInvitatorio_Salida:     tos1LAsbI,
+            antifonaInvitatorio:            tos1lasaI,
+            antifonaInvitatorio_Salida:     tos1lasaI,
 // Himno
-            himnot:                         htos1LAsbt,
-            himno:                          htos1LAsb,
+            himnot:                         htos1lasat,
+            himno:                          htos1lasa,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos1LAsb1,
+            Ant1:                           tos1lasa1,
             SalmoUNOt:                      salmo_118_145_152t,
             SalmoUNO:                       salmo_118_145_152,
 // Salmodia 2
-            Ant2:                           tos1LAsb2,
+            Ant2:                           tos1lasa2,
             SalmoDOSt:                      Ex_15_1_4_8_13_17_18t,
             SalmoDOS:                       Ex_15_1_4_8_13_17_18,
 // Salmodia 3
-            Ant3:                           tos1LAsb3,
+            Ant3:                           tos1lasa3,
             SalmoTRESt:                     salmo116t,
             SalmoTRES:                      salmo116,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos1LAsb_lbt,
-            LecturaTexto:                   tos1LAsb_lb,
+            LecturaCita:                    tos1lasa_lbt,
+            LecturaTexto:                   tos1lasa_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos1LAsb_rb,
-            responsorio2:                   tos1LAsb_rb,
-            responsorio3:                   tos1LAsb_rb1,
-            responsorio4:                   tos1LAsb_rb2,
+            responsorio1:                   tos1lasa_rb,
+            responsorio2:                   tos1lasa_rb,
+            responsorio3:                   tos1lasa_rb1,
+            responsorio4:                   tos1lasa_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos1LAsb_rb,    },
+            responsorio5:                   tos1lasa_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos1LAsb_cE,
+            cEvangelicoAnt:                 tos1lasa_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos1LAsb_preces1,
-            preces2:                        tos1LAsb_preces2,
+            preces1:                        tos1lasa_preces1,
+            preces2:                        tos1lasa_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos1LAsb_oracion,
+            oracion:                        tos1lasa_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1824,57 +1824,57 @@ const s2TOsb1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos2LAsbI,
+        antifonaInvitatorio:                tos2lasaI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos2LAsbI,
-            antifonaInvitatorio_Salida:     tos2LAsbI,
+            antifonaInvitatorio:            tos2lasaI,
+            antifonaInvitatorio_Salida:     tos2lasaI,
 // Himno
-            himnot:                         htos2LAsbt,
-            himno:                          htos2LAsb,
+            himnot:                         htos2lasat,
+            himno:                          htos2lasa,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos2LAsb1,
+            Ant1:                           tos2lasa1,
             SalmoUNOt:                      salmo91t,
             SalmoUNO:                       salmo91,
 // Salmodia 2
-            Ant2:                           tos2LAsb2,
+            Ant2:                           tos2lasa2,
             SalmoDOSt:                      dt_32_1_12t,
             SalmoDOS:                       dt_32_1_12,
 // Salmodia 3
-            Ant3:                           tos2LAsb3,
+            Ant3:                           tos2lasa3,
             SalmoTRESt:                     salmo8t,
             SalmoTRES:                      salmo8,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos2LAsb_lbt,
-            LecturaTexto:                   tos2LAsb_lb,
+            LecturaCita:                    tos2lasa_lbt,
+            LecturaTexto:                   tos2lasa_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos2LAsb_rb,
-            responsorio2:                   tos2LAsb_rb,
-            responsorio3:                   tos2LAsb_rb1,
-            responsorio4:                   tos2LAsb_rb2,
+            responsorio1:                   tos2lasa_rb,
+            responsorio2:                   tos2lasa_rb,
+            responsorio3:                   tos2lasa_rb1,
+            responsorio4:                   tos2lasa_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos2LAsb_rb,    },
+            responsorio5:                   tos2lasa_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos2LAsb_cE,
+            cEvangelicoAnt:                 tos2lasa_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos2LAsb_preces1,
-            preces2:                        tos2LAsb_preces2,
+            preces1:                        tos2lasa_preces1,
+            preces2:                        tos2lasa_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos2LAsb_oracion,
+            oracion:                        tos2lasa_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1898,57 +1898,57 @@ const s3TOsb1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos3LAsbI,
+        antifonaInvitatorio:                tos3lasaI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos3LAsbI,
-            antifonaInvitatorio_Salida:     tos3LAsbI,
+            antifonaInvitatorio:            tos3lasaI,
+            antifonaInvitatorio_Salida:     tos3lasaI,
 // Himno
-            himnot:                         htos3LAsbt,
-            himno:                          htos3LAsb,
+            himnot:                         htos3lasat,
+            himno:                          htos3lasa,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos3LAsb1,
+            Ant1:                           tos3lasa1,
             SalmoUNOt:                      salmo_118_145_152t,
             SalmoUNO:                       salmo_118_145_152,
 // Salmodia 2
-            Ant2:                           tos3LAsb2,
+            Ant2:                           tos3lasa2,
             SalmoDOSt:                      sb_9_1_6_9_11t,
             SalmoDOS:                       sb_9_1_6_9_11,
 // Salmodia 3
-            Ant3:                           tos3LAsb3,
+            Ant3:                           tos3lasa3,
             SalmoTRESt:                     salmo116t,
             SalmoTRES:                      salmo116,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos3LAsb_lbt,
-            LecturaTexto:                   tos3LAsb_lb,
+            LecturaCita:                    tos3lasa_lbt,
+            LecturaTexto:                   tos3lasa_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos3LAsb_rb,
-            responsorio2:                   tos3LAsb_rb,
-            responsorio3:                   tos3LAsb_rb1,
-            responsorio4:                   tos3LAsb_rb2,
+            responsorio1:                   tos3lasa_rb,
+            responsorio2:                   tos3lasa_rb,
+            responsorio3:                   tos3lasa_rb1,
+            responsorio4:                   tos3lasa_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos3LAsb_rb,    },
+            responsorio5:                   tos3lasa_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos3LAsb_cE,
+            cEvangelicoAnt:                 tos3lasa_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos3LAsb_preces1,
-            preces2:                        tos3LAsb_preces2,
+            preces1:                        tos3lasa_preces1,
+            preces2:                        tos3lasa_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos3LAsb_oracion,
+            oracion:                        tos3lasa_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -1972,57 +1972,57 @@ const s4TOsb1 = {
         },
 
 // Invitatorio
-        antifonaInvitatorio:                tos4LAsbI,
+        antifonaInvitatorio:                tos4lasaI,
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
 // Antifona de Entrada
-            antifonaInvitatorio:            tos4LAsbI,
-            antifonaInvitatorio_Salida:     tos4LAsbI,
+            antifonaInvitatorio:            tos4lasaI,
+            antifonaInvitatorio_Salida:     tos4lasaI,
 // Himno
-            himnot:                         htos4LAsbt,
-            himno:                          htos4LAsb,
+            himnot:                         htos4lasat,
+            himno:                          htos4lasa,
         },
 
         Salmodias: {
 // Salmodia 1    
-            Ant1:                           tos4LAsb1,
+            Ant1:                           tos4lasa1,
             SalmoUNOt:                      salmo91t,
             SalmoUNO:                       salmo91,
 // Salmodia 2
-            Ant2:                           tos4LAsb2,
+            Ant2:                           tos4lasa2,
             SalmoDOSt:                      ez_36_24_28t,
             SalmoDOS:                       ez_36_24_28,
 // Salmodia 3
-            Ant3:                           tos4LAsb3,
+            Ant3:                           tos4lasa3,
             SalmoTRESt:                     salmo8t,
             SalmoTRES:                      salmo8,       },
 // Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos4LAsb_lbt,
-            LecturaTexto:                   tos4LAsb_lb,
+            LecturaCita:                    tos4lasa_lbt,
+            LecturaTexto:                   tos4lasa_lb,
 //RESPONSORIO BREVE
-            responsorio1:                   tos4LAsb_rb,
-            responsorio2:                   tos4LAsb_rb,
-            responsorio3:                   tos4LAsb_rb1,
-            responsorio4:                   tos4LAsb_rb2,
+            responsorio1:                   tos4lasa_rb,
+            responsorio2:                   tos4lasa_rb,
+            responsorio3:                   tos4lasa_rb1,
+            responsorio4:                   tos4lasa_rb2,
             gloria:                         gloria,
-            responsorio5:                   tos4LAsb_rb,    },
+            responsorio5:                   tos4lasa_rb,    },
 
 //CANTICO EVANGELICO
 
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 tos4LAsb_cE,
+            cEvangelicoAnt:                 tos4lasa_cE,
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
 
 // PRECES
-            preces1:                        tos4LAsb_preces1,
-            preces2:                        tos4LAsb_preces2,
+            preces1:                        tos4lasa_preces1,
+            preces2:                        tos4lasa_preces2,
 // PADRE NUESTRO Y ORACIONES CONCUSIVAS
             Padren:                         "Padre nuestro...",
-            oracion:                        tos4LAsb_oracion,
+            oracion:                        tos4lasa_oracion,
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
         }};
@@ -2312,7 +2312,7 @@ export const dbLaudes = [
 
         //Cantico Evangelico
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 window.antifonaDomingo(tos1LAdm_cE_A, tos1LAdm_cE_B, tos1LAdm_cE_C),
+            cEvangelicoAnt:                 window.antifonaDomingo(tos1LAdo_cE_A, tos1LAdo_cE_B, tos1LAdo_cE_C),
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
             
@@ -2329,96 +2329,96 @@ export const dbLaudes = [
         },
     },  // ***********************************************************
 
-    // ********* TOS1LADM: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 LAUDES DOMINGO *********
+    // ********* TOS1LAdo: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 LAUDES DOMINGO *********
     /*  TIEMPO ORDINARIO | DOMINGO DE LA SEMANA II, VI, X, XIV, XVIII, XXII, XXVI, XXX De la Feria. Salterio II    */
-    {id: "tos1LAdm",  ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos1LAdm_cE_A,  tos1LAdm_cE_B,  tos1LAdm_cE_C),...s1TO2,}},
-    {id: "tos5LAdm",  ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos5LAdm_cE_A,  tos5LAdm_cE_B,  tos5LAdm_cE_C),...s1TO2,}},
-    {id: "tos9LAdm",  ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos9LAdm_cE_A,  tos9LAdm_cE_B,  tos9LAdm_cE_C),...s1TO2,}},
-    {id: "tos13LAdm", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos13LAdm_cE_A, tos13LAdm_cE_B, tos13LAdm_cE_C),...s1TO2,}},
-    {id: "tos17LAdm", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos17LAdm_cE_A, tos17LAdm_cE_B, tos17LAdm_cE_C),...s1TO2,}},
-    {id: "tos21LAdm", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos21LAdm_cE_A, tos21LAdm_cE_B, tos21LAdm_cE_C),...s1TO2,}},
-    {id: "tos25LAdm", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos25LAdm_cE_A, tos25LAdm_cE_B, tos25LAdm_cE_C),...s1TO2,}},
-    {id: "tos29LAdm", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos29LAdm_cE_A, tos29LAdm_cE_B, tos29LAdm_cE_C),...s1TO2,}},
-    {id: "tos33LAdm", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos33LAdm_cE_A, tos33LAdm_cE_B, tos33LAdm_cE_C),...s1TO2,}},
-    // ********* tos2LAdm: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes DOMINGO *********
-// ********* TOS2LADM: Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 Laudes DOMINGO *********
+    {id: "tos1LAdo",  ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos1LAdo_cE_A,  tos1LAdo_cE_B,  tos1LAdo_cE_C),...s1TO2,}},
+    {id: "tos5LAdo",  ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos5LAdo_cE_A,  tos5LAdo_cE_B,  tos5LAdo_cE_C),...s1TO2,}},
+    {id: "tos9LAdo",  ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos9LAdo_cE_A,  tos9LAdo_cE_B,  tos9LAdo_cE_C),...s1TO2,}},
+    {id: "tos13LAdo", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos13LAdo_cE_A, tos13LAdo_cE_B, tos13LAdo_cE_C),...s1TO2,}},
+    {id: "tos17LAdo", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos17LAdo_cE_A, tos17LAdo_cE_B, tos17LAdo_cE_C),...s1TO2,}},
+    {id: "tos21LAdo", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos21LAdo_cE_A, tos21LAdo_cE_B, tos21LAdo_cE_C),...s1TO2,}},
+    {id: "tos25LAdo", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos25LAdo_cE_A, tos25LAdo_cE_B, tos25LAdo_cE_C),...s1TO2,}},
+    {id: "tos29LAdo", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos29LAdo_cE_A, tos29LAdo_cE_B, tos29LAdo_cE_C),...s1TO2,}},
+    {id: "tos33LAdo", ...s1TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos33LAdo_cE_A, tos33LAdo_cE_B, tos33LAdo_cE_C),...s1TO2,}},
+    // ********* tos2LAdo: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes DOMINGO *********
+// ********* TOS2LAdo: Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 Laudes DOMINGO *********
 /*  TIEMPO ORDINARIO | DOMINGO DE LA SEMANA II, VI, X, XIV, XVIII, XXII, XXVI, XXX De la Feria. Salterio II    */
-    {id: "tos2LAdm",  ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos2LAdm_cE_A,  tos2LAdm_cE_B,  tos2LAdm_cE_C),...s2TO2,}},
-    {id: "tos6LAdm",  ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos6LAdm_cE_A,  tos6LAdm_cE_B,  tos6LAdm_cE_C),...s2TO2,}},
-    {id: "tos10LAdm", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos10LAdm_cE_A, tos10LAdm_cE_B, tos10LAdm_cE_C),...s2TO2,}},
-    {id: "tos14LAdm", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos14LAdm_cE_A, tos14LAdm_cE_B, tos14LAdm_cE_C),...s2TO2,}},
-    {id: "tos18LAdm", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos18LAdm_cE_A, tos18LAdm_cE_B, tos18LAdm_cE_C),...s2TO2,}},
-    {id: "tos22LAdm", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos22LAdm_cE_A, tos22LAdm_cE_B, tos22LAdm_cE_C),...s2TO2,}},
-    {id: "tos26LAdm", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos26LAdm_cE_A, tos26LAdm_cE_B, tos26LAdm_cE_C),...s2TO2,}},
-    {id: "tos30LAdm", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos30LAdm_cE_A, tos30LAdm_cE_B, tos30LAdm_cE_C),...s2TO2,}},
-// ********* tos2LAdm: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
-// ********* TOS3LADM: Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 Laudes DOMINGO *********
+    {id: "tos2LAdo",  ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos2LAdo_cE_A,  tos2LAdo_cE_B,  tos2LAdo_cE_C),...s2TO2,}},
+    {id: "tos6LAdo",  ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos6LAdo_cE_A,  tos6LAdo_cE_B,  tos6LAdo_cE_C),...s2TO2,}},
+    {id: "tos10LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos10LAdo_cE_A, tos10LAdo_cE_B, tos10LAdo_cE_C),...s2TO2,}},
+    {id: "tos14LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos14LAdo_cE_A, tos14LAdo_cE_B, tos14LAdo_cE_C),...s2TO2,}},
+    {id: "tos18LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos18LAdo_cE_A, tos18LAdo_cE_B, tos18LAdo_cE_C),...s2TO2,}},
+    {id: "tos22LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos22LAdo_cE_A, tos22LAdo_cE_B, tos22LAdo_cE_C),...s2TO2,}},
+    {id: "tos26LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos26LAdo_cE_A, tos26LAdo_cE_B, tos26LAdo_cE_C),...s2TO2,}},
+    {id: "tos30LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos30LAdo_cE_A, tos30LAdo_cE_B, tos30LAdo_cE_C),...s2TO2,}},
+// ********* tos2LAdo: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
+// ********* TOS3LAdo: Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 Laudes DOMINGO *********
 /*  TIEMPO ORDINARIO | DOMINGO DE LA SEMANA II, VI, X, XIV, XVIII, XXII, XXVI, XXX De la Feria. Salterio II    */
-    {id: "tos3LAdm",  ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos3LAdm_cE_A,  tos3LAdm_cE_B,  tos3LAdm_cE_C),...s3TO2,}},
-    {id: "tos7LAdm",  ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos7LAdm_cE_A,  tos7LAdm_cE_B,  tos7LAdm_cE_C),...s3TO2,}},
-    {id: "tos11LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos11LAdm_cE_A, tos11LAdm_cE_B, tos11LAdm_cE_C),...s3TO2,}},
-    {id: "tos15LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos15LAdm_cE_A, tos15LAdm_cE_B, tos15LAdm_cE_C),...s3TO2,}},
-    {id: "tos19LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos19LAdm_cE_A, tos19LAdm_cE_B, tos19LAdm_cE_C),...s3TO2,}},
-    {id: "tos23LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos23LAdm_cE_A, tos23LAdm_cE_B, tos23LAdm_cE_C),...s3TO2,}},
-    {id: "tos27LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos27LAdm_cE_A, tos27LAdm_cE_B, tos27LAdm_cE_C),...s3TO2,}},
-    {id: "tos31LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos31LAdm_cE_A, tos31LAdm_cE_B, tos31LAdm_cE_C),...s3TO2,}},
-// ********* tos2LAdm: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
-// ********* TOS4LADM: Tiempo Ordinario, Semana 4,8,12,16,20,24,28,32 Laudes DOMINGO *********
+    {id: "tos3LAdo",  ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos3LAdo_cE_A,  tos3LAdo_cE_B,  tos3LAdo_cE_C),...s3TO2,}},
+    {id: "tos7LAdo",  ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos7LAdo_cE_A,  tos7LAdo_cE_B,  tos7LAdo_cE_C),...s3TO2,}},
+    {id: "tos11LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos11LAdo_cE_A, tos11LAdo_cE_B, tos11LAdo_cE_C),...s3TO2,}},
+    {id: "tos15LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos15LAdo_cE_A, tos15LAdo_cE_B, tos15LAdo_cE_C),...s3TO2,}},
+    {id: "tos19LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos19LAdo_cE_A, tos19LAdo_cE_B, tos19LAdo_cE_C),...s3TO2,}},
+    {id: "tos23LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos23LAdo_cE_A, tos23LAdo_cE_B, tos23LAdo_cE_C),...s3TO2,}},
+    {id: "tos27LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos27LAdo_cE_A, tos27LAdo_cE_B, tos27LAdo_cE_C),...s3TO2,}},
+    {id: "tos31LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos31LAdo_cE_A, tos31LAdo_cE_B, tos31LAdo_cE_C),...s3TO2,}},
+// ********* tos2LAdo: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
+// ********* TOS4LAdo: Tiempo Ordinario, Semana 4,8,12,16,20,24,28,32 Laudes DOMINGO *********
 /*  TIEMPO ORDINARIO | DOMINGO DE LA SEMANA II, VI, X, XIV, XVIII, XXII, XXVI, XXX De la Feria. Salterio II    */
-    {id: "tos4LAdm",  ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos4LAdm_cE_A,  tos3LAdm_cE_B,  tos4LAdm_cE_C),...s3TO2,}},
-    {id: "tos8LAdm",  ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos8LAdm_cE_A,  tos7LAdm_cE_B,  tos8LAdm_cE_C),...s3TO2,}},
-    {id: "tos12LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos12LAdm_cE_A, tos11LAdm_cE_B, tos12LAdm_cE_C),...s3TO2,}},
-    {id: "tos16LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos16LAdm_cE_A, tos15LAdm_cE_B, tos16LAdm_cE_C),...s3TO2,}},
-    {id: "tos20LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos20LAdm_cE_A, tos19LAdm_cE_B, tos20LAdm_cE_C),...s3TO2,}},
-    {id: "tos24LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos24LAdm_cE_A, tos23LAdm_cE_B, tos24LAdm_cE_C),...s3TO2,}},
-    {id: "tos28LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos28LAdm_cE_A, tos27LAdm_cE_B, tos28LAdm_cE_C),...s3TO2,}},
-    {id: "tos32LAdm", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos32LAdm_cE_A, tos31LAdm_cE_B, tos32LAdm_cE_C),...s3TO2,}},
-// ********* tos2LAdm: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
+    {id: "tos4LAdo",  ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos4LAdo_cE_A,  tos3LAdo_cE_B,  tos4LAdo_cE_C),...s3TO2,}},
+    {id: "tos8LAdo",  ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos8LAdo_cE_A,  tos7LAdo_cE_B,  tos8LAdo_cE_C),...s3TO2,}},
+    {id: "tos12LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos12LAdo_cE_A, tos11LAdo_cE_B, tos12LAdo_cE_C),...s3TO2,}},
+    {id: "tos16LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos16LAdo_cE_A, tos15LAdo_cE_B, tos16LAdo_cE_C),...s3TO2,}},
+    {id: "tos20LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos20LAdo_cE_A, tos19LAdo_cE_B, tos20LAdo_cE_C),...s3TO2,}},
+    {id: "tos24LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos24LAdo_cE_A, tos23LAdo_cE_B, tos24LAdo_cE_C),...s3TO2,}},
+    {id: "tos28LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos28LAdo_cE_A, tos27LAdo_cE_B, tos28LAdo_cE_C),...s3TO2,}},
+    {id: "tos32LAdo", ...s3TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos32LAdo_cE_A, tos31LAdo_cE_B, tos32LAdo_cE_C),...s3TO2,}},
+// ********* tos2LAdo: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
 
     /****************************************************************************************
     ******************************************** LUNES **************************************
     ****************************************************************************************/
    // Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 LAUDES LUNES *********
-    {id: "tos1LAln",  ...s1TOln1,},
-    {id: "tos5LAln",  ...s1TOln1,},
-    {id: "tos9LAln",  ...s1TOln1,},
-    {id: "tos13LAln", ...s1TOln1,},
-    {id: "tos17LAln", ...s1TOln1,},
-    {id: "tos21LAln", ...s1TOln1,},
-    {id: "tos25LAln", ...s1TOln1,},
-    {id: "tos29LAln", ...s1TOln1,},
-    {id: "tos33LAln", ...s1TOln1,},
-    // ********* tos2LAdm: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes DOMINGO *********
+    {id: "tos1lalu",  ...s1TOln1,},
+    {id: "tos5lalu",  ...s1TOln1,},
+    {id: "tos9lalu",  ...s1TOln1,},
+    {id: "tos13lalu", ...s1TOln1,},
+    {id: "tos17lalu", ...s1TOln1,},
+    {id: "tos21lalu", ...s1TOln1,},
+    {id: "tos25lalu", ...s1TOln1,},
+    {id: "tos29lalu", ...s1TOln1,},
+    {id: "tos33lalu", ...s1TOln1,},
+    // ********* tos2LAdo: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes DOMINGO *********
     
     // Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 LAUDES LUNES *********
-    {id: "tos2LAln",  ...s2TOln1,},
-    {id: "tos6LAln",  ...s2TOln1,},
-    {id: "tos10LAln", ...s2TOln1,},
-    {id: "tos14LAln", ...s2TOln1,},
-    {id: "tos18LAln", ...s2TOln1,},
-    {id: "tos22LAln", ...s2TOln1,},
-    {id: "tos26LAln", ...s2TOln1,},
-    {id: "tos30LAln", ...s2TOln1,},
+    {id: "tos2lalu",  ...s2TOln1,},
+    {id: "tos6lalu",  ...s2TOln1,},
+    {id: "tos10lalu", ...s2TOln1,},
+    {id: "tos14lalu", ...s2TOln1,},
+    {id: "tos18lalu", ...s2TOln1,},
+    {id: "tos22lalu", ...s2TOln1,},
+    {id: "tos26lalu", ...s2TOln1,},
+    {id: "tos30lalu", ...s2TOln1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES LUNES *********
-    {id: "tos3LAln",  ...s3TOln1,},
-    {id: "tos7LAln",  ...s3TOln1,},
-    {id: "tos11LAln", ...s3TOln1,},
-    {id: "tos15LAln", ...s3TOln1,},
-    {id: "tos19LAln", ...s3TOln1,},
-    {id: "tos23LAln", ...s3TOln1,},
-    {id: "tos27LAln", ...s3TOln1,},
-    {id: "tos31LAln", ...s3TOln1,},
+    {id: "tos3lalu",  ...s3TOln1,},
+    {id: "tos7lalu",  ...s3TOln1,},
+    {id: "tos11lalu", ...s3TOln1,},
+    {id: "tos15lalu", ...s3TOln1,},
+    {id: "tos19lalu", ...s3TOln1,},
+    {id: "tos23lalu", ...s3TOln1,},
+    {id: "tos27lalu", ...s3TOln1,},
+    {id: "tos31lalu", ...s3TOln1,},
 
         // Tiempo Ordinario, Semana 4,8,12,16,20,24,28,32 LAUDES LUNES *********
-    {id: "tos4LAln",  ...s4TOln1,},
-    {id: "tos8LAln",  ...s4TOln1,},
-    {id: "tos12LAln", ...s4TOln1,},
-    {id: "tos16LAln", ...s4TOln1,},
-    {id: "tos20LAln", ...s4TOln1,},
-    {id: "tos24LAln", ...s4TOln1,},
-    {id: "tos28LAln", ...s4TOln1,},
-    {id: "tos32LAln", ...s4TOln1,},
+    {id: "tos4lalu",  ...s4TOln1,},
+    {id: "tos8lalu",  ...s4TOln1,},
+    {id: "tos12lalu", ...s4TOln1,},
+    {id: "tos16lalu", ...s4TOln1,},
+    {id: "tos20lalu", ...s4TOln1,},
+    {id: "tos24lalu", ...s4TOln1,},
+    {id: "tos28lalu", ...s4TOln1,},
+    {id: "tos32lalu", ...s4TOln1,},
     /****************************************************************************************
     ******************************************** LUNES **************************************
     ****************************************************************************************/
@@ -2429,46 +2429,46 @@ export const dbLaudes = [
     ******************************************** MARTES **************************************
     ****************************************************************************************/
    // Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 LAUDES MARTES *********
-    {id: "tos1LAmt",  ...s1TOmt1,},
-    {id: "tos5LAmt",  ...s1TOmt1,},
-    {id: "tos9LAmt",  ...s1TOmt1,},
-    {id: "tos13LAmt", ...s1TOmt1,},
-    {id: "tos17LAmt", ...s1TOmt1,},
-    {id: "tos21LAmt", ...s1TOmt1,},
-    {id: "tos25LAmt", ...s1TOmt1,},
-    {id: "tos29LAmt", ...s1TOmt1,},
-    {id: "tos33LAmt", ...s1TOmt1,},
-    // ********* tos2LAdm: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes MARTES *********
+    {id: "tos1lama",  ...s1TOmt1,},
+    {id: "tos5lama",  ...s1TOmt1,},
+    {id: "tos9lama",  ...s1TOmt1,},
+    {id: "tos13lama", ...s1TOmt1,},
+    {id: "tos17lama", ...s1TOmt1,},
+    {id: "tos21lama", ...s1TOmt1,},
+    {id: "tos25lama", ...s1TOmt1,},
+    {id: "tos29lama", ...s1TOmt1,},
+    {id: "tos33lama", ...s1TOmt1,},
+    // ********* tos2LAdo: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes MARTES *********
     
     // Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 LAUDES MARTES *********
-    {id: "tos2LAmt",  ...s2TOmt1,},
-    {id: "tos6LAmt",  ...s2TOmt1,},
-    {id: "tos10LAmt", ...s2TOmt1,},
-    {id: "tos14LAmt", ...s2TOmt1,},
-    {id: "tos18LAmt", ...s2TOmt1,},
-    {id: "tos22LAmt", ...s2TOmt1,},
-    {id: "tos26LAmt", ...s2TOmt1,},
-    {id: "tos30LAmt", ...s2TOmt1,},
+    {id: "tos2lama",  ...s2TOmt1,},
+    {id: "tos6lama",  ...s2TOmt1,},
+    {id: "tos10lama", ...s2TOmt1,},
+    {id: "tos14lama", ...s2TOmt1,},
+    {id: "tos18lama", ...s2TOmt1,},
+    {id: "tos22lama", ...s2TOmt1,},
+    {id: "tos26lama", ...s2TOmt1,},
+    {id: "tos30lama", ...s2TOmt1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES MARTES *********
-    {id: "tos3LAmt",  ...s3TOmt1,},
-    {id: "tos7LAmt",  ...s3TOmt1,},
-    {id: "tos11LAmt", ...s3TOmt1,},
-    {id: "tos15LAmt", ...s3TOmt1,},
-    {id: "tos19LAmt", ...s3TOmt1,},
-    {id: "tos23LAmt", ...s3TOmt1,},
-    {id: "tos27LAmt", ...s3TOmt1,},
-    {id: "tos31LAmt", ...s3TOmt1,},
+    {id: "tos3lama",  ...s3TOmt1,},
+    {id: "tos7lama",  ...s3TOmt1,},
+    {id: "tos11lama", ...s3TOmt1,},
+    {id: "tos15lama", ...s3TOmt1,},
+    {id: "tos19lama", ...s3TOmt1,},
+    {id: "tos23lama", ...s3TOmt1,},
+    {id: "tos27lama", ...s3TOmt1,},
+    {id: "tos31lama", ...s3TOmt1,},
 
         // Tiempo Ordinario, Semana 4,8,12,16,20,24,28,32 LAUDES MARTES *********
-    {id: "tos4LAmt",  ...s4TOmt1,},
-    {id: "tos8LAmt",  ...s4TOmt1,},
-    {id: "tos12LAmt", ...s4TOmt1,},
-    {id: "tos16LAmt", ...s4TOmt1,},
-    {id: "tos20LAmt", ...s4TOmt1,},
-    {id: "tos24LAmt", ...s4TOmt1,},
-    {id: "tos28LAmt", ...s4TOmt1,},
-    {id: "tos32LAmt", ...s4TOmt1,},
+    {id: "tos4lama",  ...s4TOmt1,},
+    {id: "tos8lama",  ...s4TOmt1,},
+    {id: "tos12lama", ...s4TOmt1,},
+    {id: "tos16lama", ...s4TOmt1,},
+    {id: "tos20lama", ...s4TOmt1,},
+    {id: "tos24lama", ...s4TOmt1,},
+    {id: "tos28lama", ...s4TOmt1,},
+    {id: "tos32lama", ...s4TOmt1,},
     /****************************************************************************************
     ******************************************** MARTES **************************************
     ****************************************************************************************/
@@ -2480,46 +2480,46 @@ export const dbLaudes = [
     ******************************************** MIERCOLES **************************************
     ****************************************************************************************/
    // Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 LAUDES MIERCOLES *********
-    {id: "tos1LAml",  ...s1TOml1,},
-    {id: "tos5LAml",  ...s1TOml1,},
-    {id: "tos9LAml",  ...s1TOml1,},
-    {id: "tos13LAml", ...s1TOml1,},
-    {id: "tos17LAml", ...s1TOml1,},
-    {id: "tos21LAml", ...s1TOml1,},
-    {id: "tos25LAml", ...s1TOml1,},
-    {id: "tos29LAml", ...s1TOml1,},
-    {id: "tos33LAml", ...s1TOml1,},
-    // ********* tos2LAdm: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes MIERCOLES *********
+    {id: "tos1lami",  ...s1TOml1,},
+    {id: "tos5lami",  ...s1TOml1,},
+    {id: "tos9lami",  ...s1TOml1,},
+    {id: "tos13lami", ...s1TOml1,},
+    {id: "tos17lami", ...s1TOml1,},
+    {id: "tos21lami", ...s1TOml1,},
+    {id: "tos25lami", ...s1TOml1,},
+    {id: "tos29lami", ...s1TOml1,},
+    {id: "tos33lami", ...s1TOml1,},
+    // ********* tos2LAdo: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes MIERCOLES *********
     
     // Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 LAUDES MIERCOLES *********
-    {id: "tos2LAml",  ...s2TOml1,},
-    {id: "tos6LAml",  ...s2TOml1,},
-    {id: "tos10LAml", ...s2TOml1,},
-    {id: "tos14LAml", ...s2TOml1,},
-    {id: "tos18LAml", ...s2TOml1,},
-    {id: "tos22LAml", ...s2TOml1,},
-    {id: "tos26LAml", ...s2TOml1,},
-    {id: "tos30LAml", ...s2TOml1,},
+    {id: "tos2lami",  ...s2TOml1,},
+    {id: "tos6lami",  ...s2TOml1,},
+    {id: "tos10lami", ...s2TOml1,},
+    {id: "tos14lami", ...s2TOml1,},
+    {id: "tos18lami", ...s2TOml1,},
+    {id: "tos22lami", ...s2TOml1,},
+    {id: "tos26lami", ...s2TOml1,},
+    {id: "tos30lami", ...s2TOml1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES MIERCOLES *********
-    {id: "tos3LAml",  ...s3TOml1,},
-    {id: "tos7LAml",  ...s3TOml1,},
-    {id: "tos11LAml", ...s3TOml1,},
-    {id: "tos15LAml", ...s3TOml1,},
-    {id: "tos19LAml", ...s3TOml1,},
-    {id: "tos23LAml", ...s3TOml1,},
-    {id: "tos27LAml", ...s3TOml1,},
-    {id: "tos31LAml", ...s3TOml1,},
+    {id: "tos3lami",  ...s3TOml1,},
+    {id: "tos7lami",  ...s3TOml1,},
+    {id: "tos11lami", ...s3TOml1,},
+    {id: "tos15lami", ...s3TOml1,},
+    {id: "tos19lami", ...s3TOml1,},
+    {id: "tos23lami", ...s3TOml1,},
+    {id: "tos27lami", ...s3TOml1,},
+    {id: "tos31lami", ...s3TOml1,},
 
         // Tiempo Ordinario, Semana 4,8,12,16,20,24,28,32 LAUDES MIERCOLES *********
-    {id: "tos4LAml",  ...s4TOml1,},
-    {id: "tos8LAml",  ...s4TOml1,},
-    {id: "tos12LAml", ...s4TOml1,},
-    {id: "tos16LAml", ...s4TOml1,},
-    {id: "tos20LAml", ...s4TOml1,},
-    {id: "tos24LAml", ...s4TOml1,},
-    {id: "tos28LAml", ...s4TOml1,},
-    {id: "tos32LAml", ...s4TOml1,},
+    {id: "tos4lami",  ...s4TOml1,},
+    {id: "tos8lami",  ...s4TOml1,},
+    {id: "tos12lami", ...s4TOml1,},
+    {id: "tos16lami", ...s4TOml1,},
+    {id: "tos20lami", ...s4TOml1,},
+    {id: "tos24lami", ...s4TOml1,},
+    {id: "tos28lami", ...s4TOml1,},
+    {id: "tos32lami", ...s4TOml1,},
     /****************************************************************************************
     ******************************************** MIERCOLES **************************************
     ****************************************************************************************/
@@ -2530,46 +2530,46 @@ export const dbLaudes = [
     ******************************************** JUEVES **************************************
     ****************************************************************************************/
    // Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 LAUDES JUEVES *********
-    {id: "tos1LAjs",  ...s1TOjs1,},
-    {id: "tos5LAjs",  ...s1TOjs1,},
-    {id: "tos9LAjs",  ...s1TOjs1,},
-    {id: "tos13LAjs", ...s1TOjs1,},
-    {id: "tos17LAjs", ...s1TOjs1,},
-    {id: "tos21LAjs", ...s1TOjs1,},
-    {id: "tos25LAjs", ...s1TOjs1,},
-    {id: "tos29LAjs", ...s1TOjs1,},
-    {id: "tos33LAjs", ...s1TOjs1,},
-    // ********* tos2LAdm: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes JUEVES *********
+    {id: "tos1laju",  ...s1TOjs1,},
+    {id: "tos5laju",  ...s1TOjs1,},
+    {id: "tos9laju",  ...s1TOjs1,},
+    {id: "tos13laju", ...s1TOjs1,},
+    {id: "tos17laju", ...s1TOjs1,},
+    {id: "tos21laju", ...s1TOjs1,},
+    {id: "tos25laju", ...s1TOjs1,},
+    {id: "tos29laju", ...s1TOjs1,},
+    {id: "tos33laju", ...s1TOjs1,},
+    // ********* tos2LAdo: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes JUEVES *********
     
     // Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 LAUDES JUEVES *********
-    {id: "tos2LAjs",  ...s2TOjs1,},
-    {id: "tos6LAjs",  ...s2TOjs1,},
-    {id: "tos10LAjs", ...s2TOjs1,},
-    {id: "tos14LAjs", ...s2TOjs1,},
-    {id: "tos18LAjs", ...s2TOjs1,},
-    {id: "tos22LAjs", ...s2TOjs1,},
-    {id: "tos26LAjs", ...s2TOjs1,},
-    {id: "tos30LAjs", ...s2TOjs1,},
+    {id: "tos2laju",  ...s2TOjs1,},
+    {id: "tos6laju",  ...s2TOjs1,},
+    {id: "tos10laju", ...s2TOjs1,},
+    {id: "tos14laju", ...s2TOjs1,},
+    {id: "tos18laju", ...s2TOjs1,},
+    {id: "tos22laju", ...s2TOjs1,},
+    {id: "tos26laju", ...s2TOjs1,},
+    {id: "tos30laju", ...s2TOjs1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES JUEVES *********
-    {id: "tos3LAjs",  ...s3TOjs1,},
-    {id: "tos7LAjs",  ...s3TOjs1,},
-    {id: "tos11LAjs", ...s3TOjs1,},
-    {id: "tos15LAjs", ...s3TOjs1,},
-    {id: "tos19LAjs", ...s3TOjs1,},
-    {id: "tos23LAjs", ...s3TOjs1,},
-    {id: "tos27LAjs", ...s3TOjs1,},
-    {id: "tos31LAjs", ...s3TOjs1,},
+    {id: "tos3laju",  ...s3TOjs1,},
+    {id: "tos7laju",  ...s3TOjs1,},
+    {id: "tos11laju", ...s3TOjs1,},
+    {id: "tos15laju", ...s3TOjs1,},
+    {id: "tos19laju", ...s3TOjs1,},
+    {id: "tos23laju", ...s3TOjs1,},
+    {id: "tos27laju", ...s3TOjs1,},
+    {id: "tos31laju", ...s3TOjs1,},
 
         // Tiempo Ordinario, Semana 4,8,12,16,20,24,28,32 LAUDES JUEVES *********
-    {id: "tos4LAjs",  ...s4TOjs1,},
-    {id: "tos8LAjs",  ...s4TOjs1,},
-    {id: "tos12LAjs", ...s4TOjs1,},
-    {id: "tos16LAjs", ...s4TOjs1,},
-    {id: "tos20LAjs", ...s4TOjs1,},
-    {id: "tos24LAjs", ...s4TOjs1,},
-    {id: "tos28LAjs", ...s4TOjs1,},
-    {id: "tos32LAjs", ...s4TOjs1,},
+    {id: "tos4laju",  ...s4TOjs1,},
+    {id: "tos8laju",  ...s4TOjs1,},
+    {id: "tos12laju", ...s4TOjs1,},
+    {id: "tos16laju", ...s4TOjs1,},
+    {id: "tos20laju", ...s4TOjs1,},
+    {id: "tos24laju", ...s4TOjs1,},
+    {id: "tos28laju", ...s4TOjs1,},
+    {id: "tos32laju", ...s4TOjs1,},
     /****************************************************************************************
     ******************************************** JUEVES **************************************
     ****************************************************************************************/
@@ -2580,46 +2580,46 @@ export const dbLaudes = [
     ******************************************** VIERNES **************************************
     ****************************************************************************************/
    // Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 LAUDES VIERNES *********
-    {id: "tos1LAvs",  ...s1TOvs1,},
-    {id: "tos5LAvs",  ...s1TOvs1,},
-    {id: "tos9LAvs",  ...s1TOvs1,},
-    {id: "tos13LAvs", ...s1TOvs1,},
-    {id: "tos17LAvs", ...s1TOvs1,},
-    {id: "tos21LAvs", ...s1TOvs1,},
-    {id: "tos25LAvs", ...s1TOvs1,},
-    {id: "tos29LAvs", ...s1TOvs1,},
-    {id: "tos33LAvs", ...s1TOvs1,},
-    // ********* tos2LAdm: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes VIERNES *********
+    {id: "tos1lavi",  ...s1TOvs1,},
+    {id: "tos5lavi",  ...s1TOvs1,},
+    {id: "tos9lavi",  ...s1TOvs1,},
+    {id: "tos13lavi", ...s1TOvs1,},
+    {id: "tos17lavi", ...s1TOvs1,},
+    {id: "tos21lavi", ...s1TOvs1,},
+    {id: "tos25lavi", ...s1TOvs1,},
+    {id: "tos29lavi", ...s1TOvs1,},
+    {id: "tos33lavi", ...s1TOvs1,},
+    // ********* tos2LAdo: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes VIERNES *********
     
     // Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 LAUDES VIERNES *********
-    {id: "tos2LAvs",  ...s2TOvs1,},
-    {id: "tos6LAvs",  ...s2TOvs1,},
-    {id: "tos10LAvs", ...s2TOvs1,},
-    {id: "tos14LAvs", ...s2TOvs1,},
-    {id: "tos18LAvs", ...s2TOvs1,},
-    {id: "tos22LAvs", ...s2TOvs1,},
-    {id: "tos26LAvs", ...s2TOvs1,},
-    {id: "tos30LAvs", ...s2TOvs1,},
+    {id: "tos2lavi",  ...s2TOvs1,},
+    {id: "tos6lavi",  ...s2TOvs1,},
+    {id: "tos10lavi", ...s2TOvs1,},
+    {id: "tos14lavi", ...s2TOvs1,},
+    {id: "tos18lavi", ...s2TOvs1,},
+    {id: "tos22lavi", ...s2TOvs1,},
+    {id: "tos26lavi", ...s2TOvs1,},
+    {id: "tos30lavi", ...s2TOvs1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES VIERNES *********
-    {id: "tos3LAvs",  ...s3TOvs1,},
-    {id: "tos7LAvs",  ...s3TOvs1,},
-    {id: "tos11LAvs", ...s3TOvs1,},
-    {id: "tos15LAvs", ...s3TOvs1,},
-    {id: "tos19LAvs", ...s3TOvs1,},
-    {id: "tos23LAvs", ...s3TOvs1,},
-    {id: "tos27LAvs", ...s3TOvs1,},
-    {id: "tos31LAvs", ...s3TOvs1,},
+    {id: "tos3lavi",  ...s3TOvs1,},
+    {id: "tos7lavi",  ...s3TOvs1,},
+    {id: "tos11lavi", ...s3TOvs1,},
+    {id: "tos15lavi", ...s3TOvs1,},
+    {id: "tos19lavi", ...s3TOvs1,},
+    {id: "tos23lavi", ...s3TOvs1,},
+    {id: "tos27lavi", ...s3TOvs1,},
+    {id: "tos31lavi", ...s3TOvs1,},
 
         // Tiempo Ordinario, Semana 4,8,12,16,20,24,28,32 LAUDES VIERNES *********
-    {id: "tos4LAvs",  ...s4TOvs1,},
-    {id: "tos8LAvs",  ...s4TOvs1,},
-    {id: "tos12LAvs", ...s4TOvs1,},
-    {id: "tos16LAvs", ...s4TOvs1,},
-    {id: "tos20LAvs", ...s4TOvs1,},
-    {id: "tos24LAvs", ...s4TOvs1,},
-    {id: "tos28LAvs", ...s4TOvs1,},
-    {id: "tos32LAvs", ...s4TOvs1,},
+    {id: "tos4lavi",  ...s4TOvs1,},
+    {id: "tos8lavi",  ...s4TOvs1,},
+    {id: "tos12lavi", ...s4TOvs1,},
+    {id: "tos16lavi", ...s4TOvs1,},
+    {id: "tos20lavi", ...s4TOvs1,},
+    {id: "tos24lavi", ...s4TOvs1,},
+    {id: "tos28lavi", ...s4TOvs1,},
+    {id: "tos32lavi", ...s4TOvs1,},
     /****************************************************************************************
     ******************************************** VIERNES **************************************
     ****************************************************************************************/
@@ -2630,46 +2630,46 @@ export const dbLaudes = [
     ******************************************** SABADO **************************************
     ****************************************************************************************/
    // Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 LAUDES SABADO *********
-    {id: "tos1LAsb",  ...s1TOsb1,},
-    {id: "tos5LAsb",  ...s1TOsb1,},
-    {id: "tos9LAsb",  ...s1TOsb1,},
-    {id: "tos13LAsb", ...s1TOsb1,},
-    {id: "tos17LAsb", ...s1TOsb1,},
-    {id: "tos21LAsb", ...s1TOsb1,},
-    {id: "tos25LAsb", ...s1TOsb1,},
-    {id: "tos29LAsb", ...s1TOsb1,},
-    {id: "tos33LAsb", ...s1TOsb1,},
-    // ********* tos2LAdm: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes SABADO *********
+    {id: "tos1lasa",  ...s1TOsb1,},
+    {id: "tos5lasa",  ...s1TOsb1,},
+    {id: "tos9lasa",  ...s1TOsb1,},
+    {id: "tos13lasa", ...s1TOsb1,},
+    {id: "tos17lasa", ...s1TOsb1,},
+    {id: "tos21lasa", ...s1TOsb1,},
+    {id: "tos25lasa", ...s1TOsb1,},
+    {id: "tos29lasa", ...s1TOsb1,},
+    {id: "tos33lasa", ...s1TOsb1,},
+    // ********* tos2LAdo: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes SABADO *********
     
     // Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 LAUDES SABADO *********
-    {id: "tos2LAsb",  ...s2TOsb1,},
-    {id: "tos6LAsb",  ...s2TOsb1,},
-    {id: "tos10LAsb", ...s2TOsb1,},
-    {id: "tos14LAsb", ...s2TOsb1,},
-    {id: "tos18LAsb", ...s2TOsb1,},
-    {id: "tos22LAsb", ...s2TOsb1,},
-    {id: "tos26LAsb", ...s2TOsb1,},
-    {id: "tos30LAsb", ...s2TOsb1,},
+    {id: "tos2lasa",  ...s2TOsb1,},
+    {id: "tos6lasa",  ...s2TOsb1,},
+    {id: "tos10lasa", ...s2TOsb1,},
+    {id: "tos14lasa", ...s2TOsb1,},
+    {id: "tos18lasa", ...s2TOsb1,},
+    {id: "tos22lasa", ...s2TOsb1,},
+    {id: "tos26lasa", ...s2TOsb1,},
+    {id: "tos30lasa", ...s2TOsb1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES SABADO *********
-    {id: "tos3LAsb",  ...s3TOsb1,},
-    {id: "tos7LAsb",  ...s3TOsb1,},
-    {id: "tos11LAsb", ...s3TOsb1,},
-    {id: "tos15LAsb", ...s3TOsb1,},
-    {id: "tos19LAsb", ...s3TOsb1,},
-    {id: "tos23LAsb", ...s3TOsb1,},
-    {id: "tos27LAsb", ...s3TOsb1,},
-    {id: "tos31LAsb", ...s3TOsb1,},
+    {id: "tos3lasa",  ...s3TOsb1,},
+    {id: "tos7lasa",  ...s3TOsb1,},
+    {id: "tos11lasa", ...s3TOsb1,},
+    {id: "tos15lasa", ...s3TOsb1,},
+    {id: "tos19lasa", ...s3TOsb1,},
+    {id: "tos23lasa", ...s3TOsb1,},
+    {id: "tos27lasa", ...s3TOsb1,},
+    {id: "tos31lasa", ...s3TOsb1,},
 
         // Tiempo Ordinario, Semana 4,8,12,16,20,24,28,32 LAUDES SABADO *********
-    {id: "tos4LAsb",  ...s4TOsb1,},
-    {id: "tos8LAsb",  ...s4TOsb1,},
-    {id: "tos12LAsb", ...s4TOsb1,},
-    {id: "tos16LAsb", ...s4TOsb1,},
-    {id: "tos20LAsb", ...s4TOsb1,},
-    {id: "tos24LAsb", ...s4TOsb1,},
-    {id: "tos28LAsb", ...s4TOsb1,},
-    {id: "tos32LAsb", ...s4TOsb1,},
+    {id: "tos4lasa",  ...s4TOsb1,},
+    {id: "tos8lasa",  ...s4TOsb1,},
+    {id: "tos12lasa", ...s4TOsb1,},
+    {id: "tos16lasa", ...s4TOsb1,},
+    {id: "tos20lasa", ...s4TOsb1,},
+    {id: "tos24lasa", ...s4TOsb1,},
+    {id: "tos28lasa", ...s4TOsb1,},
+    {id: "tos32lasa", ...s4TOsb1,},
     /****************************************************************************************
     ******************************************** SABADO **************************************
     ****************************************************************************************/
@@ -2682,7 +2682,7 @@ export const dbLaudes = [
     De la Feria. Salterio III    */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos3LAdm",
+    {        id:                            "tos3LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -2692,67 +2692,67 @@ export const dbLaudes = [
               r:                            invitatorio2,   // R. y mi boca proclamará tu alabanza
         },
         
-        antifonaInvitatorio:                tos3LAdmI,
+        antifonaInvitatorio:                tos3LAdoI,
 
         // datos.salmoInvitatorio.VARIABLE
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
-            antifonaInvitatorio:            tos3LAdmI,
+            antifonaInvitatorio:            tos3LAdoI,
 
             // Antifona de Entrada
-            antifonaInvitatorio_Salida:     tos3LAdmI,
+            antifonaInvitatorio_Salida:     tos3LAdoI,
             
             // Himno
-            himnot:                         htos3LAdmt,
-            himno:                          htos3LAdm,
+            himnot:                         htos3LAdot,
+            himno:                          htos3LAdo,
         },
 
         // Salmodia 1, 2, 3
         Salmodias: {
-            Ant1:                           tos3LAdm1,
+            Ant1:                           tos3LAdo1,
             SalmoUNOt:                      salmo92t,
             SalmoUNO:                       salmo92,
 
-            Ant2:                           tos3LAdm2,
+            Ant2:                           tos3LAdo2,
             SalmoDOSt:                      dn_3_57_88_56t,
             SalmoDOS:                       dn_3_57_88_56,
 
-            Ant3:                           tos3LAdm3,
+            Ant3:                           tos3LAdo3,
             SalmoTRESt:                     salmo148t,
             SalmoTRES:                      salmo148,
         },
 
         //Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos3LAdm_lbt,
-            LecturaTexto:                   tos3LAdm_lb,
+            LecturaCita:                    tos3LAdo_lbt,
+            LecturaTexto:                   tos3LAdo_lb,
             
         //RESPONSORIO BREVE    
-            responsorio1:                    tos3LAdm_rb,
-            responsorio2:                    tos3LAdm_rb,
-            responsorio3:                    tos3LAdm_rb1,
-            responsorio4:                    tos3LAdm_rb2,
+            responsorio1:                    tos3LAdo_rb,
+            responsorio2:                    tos3LAdo_rb,
+            responsorio3:                    tos3LAdo_rb1,
+            responsorio4:                    tos3LAdo_rb2,
             gloria:                          gloria,
-            responsorio5:                    tos3LAdm_rb,
+            responsorio5:                    tos3LAdo_rb,
         },
 
 
         //Cantico Evangelico
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 window.antifonaDomingo(tos3LAdm_cE_A, tos3LAdm_cE_B, tos3LAdm_cE_C),
+            cEvangelicoAnt:                 window.antifonaDomingo(tos3LAdo_cE_A, tos3LAdo_cE_B, tos3LAdo_cE_C),
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
             
             
         //PRECES
-            preces1:                        tos3LAdm_preces1,
-            preces2:                        tos3LAdm_preces2,
+            preces1:                        tos3LAdo_preces1,
+            preces2:                        tos3LAdo_preces2,
     
             Padren:                         "Padre nuestro...",
     
-            oracion:                        tos3LAdm_oracion,
+            oracion:                        tos3LAdo_oracion,
 
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
@@ -2766,7 +2766,7 @@ De la Feria. Salterio IV
 */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos4LAdm",
+    {        id:                            "tos4LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -2776,67 +2776,67 @@ De la Feria. Salterio IV
               r:                            invitatorio2,   // R. y mi boca proclamará tu alabanza
         },
         
-        antifonaInvitatorio:                tos4LAdmI,
+        antifonaInvitatorio:                tos4LAdoI,
 
         // datos.salmoInvitatorio.VARIABLE
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
-            antifonaInvitatorio:            tos4LAdmI,
+            antifonaInvitatorio:            tos4LAdoI,
 
             // Antifona de Entrada
-            antifonaInvitatorio_Salida:     tos4LAdmI,
+            antifonaInvitatorio_Salida:     tos4LAdoI,
             
             // Himno
-            himnot:                         htos4LAdmt,
-            himno:                          htos4LAdm,
+            himnot:                         htos4LAdot,
+            himno:                          htos4LAdo,
         },
 
         // Salmodia 1, 2, 3
         Salmodias: {
-            Ant1:                           tos4LAdm1,
+            Ant1:                           tos4LAdo1,
             SalmoUNOt:                      salmo92t,
             SalmoUNO:                       salmo92,
 
-            Ant2:                           tos4LAdm2,
+            Ant2:                           tos4LAdo2,
             SalmoDOSt:                      dn_3_57_88_56t,
             SalmoDOS:                       dn_3_57_88_56,
 
-            Ant3:                           tos4LAdm3,
+            Ant3:                           tos4LAdo3,
             SalmoTRESt:                     salmo148t,
             SalmoTRES:                      salmo148,
         },
 
         //Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos4LAdm_lbt,
-            LecturaTexto:                   tos4LAdm_lb,
+            LecturaCita:                    tos4LAdo_lbt,
+            LecturaTexto:                   tos4LAdo_lb,
             
         //RESPONSORIO BREVE    
-            responsorio1:                    tos4LAdm_rb,
-            responsorio2:                    tos4LAdm_rb,
-            responsorio3:                    tos4LAdm_rb1,
-            responsorio4:                    tos4LAdm_rb2,
+            responsorio1:                    tos4LAdo_rb,
+            responsorio2:                    tos4LAdo_rb,
+            responsorio3:                    tos4LAdo_rb1,
+            responsorio4:                    tos4LAdo_rb2,
             gloria:                          gloria,
-            responsorio5:                    tos4LAdm_rb,
+            responsorio5:                    tos4LAdo_rb,
         },
 
 
         //Cantico Evangelico
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 window.antifonaDomingo(tos4LAdm_cE_A, tos4LAdm_cE_B, tos4LAdm_cE_C),
+            cEvangelicoAnt:                 window.antifonaDomingo(tos4LAdo_cE_A, tos4LAdo_cE_B, tos4LAdo_cE_C),
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
             
             
         //PRECES
-            preces1:                        tos4LAdm_preces1,
-            preces2:                        tos4LAdm_preces2,
+            preces1:                        tos4LAdo_preces1,
+            preces2:                        tos4LAdo_preces2,
     
             Padren:                         "Padre nuestro...",
     
-            oracion:                        tos4LAdm_oracion,
+            oracion:                        tos4LAdo_oracion,
 
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,
@@ -2850,7 +2850,7 @@ De la Feria. Salterio V
 */
 
 // ********* tps1js: Tiempo Pascual, Semana 1 Jueves Oficio de Lectura*********
-    {        id:                            "tos5LAdm",
+    {        id:                            "tos5LAdo",
              tt:                            "LAUDES",
             sub:                            "(Oración de la mañana)",
     invitatorio: {
@@ -2860,67 +2860,67 @@ De la Feria. Salterio V
               r:                            invitatorio2,   // R. y mi boca proclamará tu alabanza
         },
         
-        antifonaInvitatorio:                tos5LAdmI,
+        antifonaInvitatorio:                tos5LAdoI,
 
         // datos.salmoInvitatorio.VARIABLE
         salmoInvitatorio: {
             titulo:                         salmo94t,
             subtitulo:                      invitacion,
             contentInv:                     salmo94,
-            antifonaInvitatorio:            tos5LAdmI,
+            antifonaInvitatorio:            tos5LAdoI,
 
             // Antifona de Entrada
-            antifonaInvitatorio_Salida:     tos5LAdmI,
+            antifonaInvitatorio_Salida:     tos5LAdoI,
             
             // Himno
-            himnot:                         htos5LAdmt,
-            himno:                          htos5LAdm,
+            himnot:                         htos5LAdot,
+            himno:                          htos5LAdo,
         },
 
         // Salmodia 1, 2, 3
         Salmodias: {
-            Ant1:                           tos5LAdm1,
+            Ant1:                           tos5LAdo1,
             SalmoUNOt:                      salmo62_2_9t,
             SalmoUNO:                       salmo62_2_9,
 
-            Ant2:                           tos5LAdm2,
+            Ant2:                           tos5LAdo2,
             SalmoDOSt:                      dn_3_57_88_56t,
             SalmoDOS:                       dn_3_57_88_56,
 
-            Ant3:                           tos5LAdm3,
+            Ant3:                           tos5LAdo3,
             SalmoTRESt:                     salmo149t,
             SalmoTRES:                      salmo149,
         },
 
         //Lectura Breve
         LecturaBreve: {
-            LecturaCita:                    tos5LAdm_lbt,
-            LecturaTexto:                   tos5LAdm_lb,
+            LecturaCita:                    tos5LAdo_lbt,
+            LecturaTexto:                   tos5LAdo_lb,
             
         //RESPONSORIO BREVE    
-            responsorio1:                    tos5LAdm_rb,
-            responsorio2:                    tos5LAdm_rb,
-            responsorio3:                    tos5LAdm_rb1,
-            responsorio4:                    tos5LAdm_rb2,
+            responsorio1:                    tos5LAdo_rb,
+            responsorio2:                    tos5LAdo_rb,
+            responsorio3:                    tos5LAdo_rb1,
+            responsorio4:                    tos5LAdo_rb2,
             gloria:                          gloria,
-            responsorio5:                    tos5LAdm_rb,
+            responsorio5:                    tos5LAdo_rb,
         },
 
 
         //Cantico Evangelico
         cEvan_Conclusion: {
-            cEvangelicoAnt:                 window.antifonaDomingo(tos5LAdm_cE_A, tos5LAdm_cE_B, tos5LAdm_cE_C),
+            cEvangelicoAnt:                 window.antifonaDomingo(tos5LAdo_cE_A, tos5LAdo_cE_B, tos5LAdo_cE_C),
             canticoZacariast:               canticoZacariast,
             canticoZacarias:                canticoZacarias,
             
             
         //PRECES
-            preces1:                        tos5LAdm_preces1,
-            preces2:                        tos5LAdm_preces2,
+            preces1:                        tos5LAdo_preces1,
+            preces2:                        tos5LAdo_preces2,
     
             Padren:                         "Padre nuestro...",
     
-            oracion:                        tos5LAdm_oracion,
+            oracion:                        tos5LAdo_oracion,
 
             Conclusion1:                    Conclusion1,
             Conclusion2:                    Conclusion2,

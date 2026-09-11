@@ -273,17 +273,19 @@ function construirUrlLiturgica(datos) {
 
 
 
+import { obtenerIdLaudesPorFecha } from '../data/calendario2026.js';
+
 // Para probarlo de inmediato, puedes ejecutarlo al cargar (luego se hará por evento)
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     
-    // Intenta obtener 'oficio', y si no existe, intenta con 'laudes'
-    const idUrl = params.get('oficio') || params.get('laudes');
+    // Intenta obtener 'oficio' o 'laudes' de la URL, o bien calcula el del día actual
+    const idUrl = params.get('oficio') || params.get('laudes') || obtenerIdLaudesPorFecha();
 
     const container = document.getElementById('contenido-dinamico');
 
     if (idUrl) {
-        // Buscamos en la base de datos el ID que llegó por URL
+        // Buscamos en la base de datos el ID correspondiente
         const datosLaudes = dbLaudes.find(item => item.id === idUrl);
 
         if (datosLaudes) {
@@ -293,7 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = `<h2>El ID "${idUrl}" no existe en la base de datos</h2>`;
         }
     } else {
-        // Si no hay ID en la URL, no carga el Jueves, muestra este mensaje:
         container.innerHTML = `<h2>Por favor, selecciona un oficio del menú.</h2>`;
     }
 });

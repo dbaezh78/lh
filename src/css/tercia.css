@@ -1,0 +1,6 @@
+@import url('gral.css');
+
+/* Estilos específicos para Hora Tercia */
+.pagina-oracion.tercia {
+    --color-hora: #7B2FBE;
+}

@@ -1,0 +1,6 @@
+@import url('gral.css');
+
+/* Estilos específicos para Hora Sexta */
+.pagina-oracion.sexta {
+    --color-hora: #0288D1;
+}

@@ -12,6 +12,7 @@
 
 // 2. Inyectar archivos JS de ajustes y Firebase
     const scriptsToLoad = [
+        { src: '/src/js/firebase-config.js', type: 'module' },
         { src: '/src/js/setting.js', type: 'text/javascript' }
     ];
 
@@ -89,13 +90,7 @@
                     <span class="material-symbols-outlined">menu_book</span>
                     <span>Salmodias</span>
                     <div class="nav-submenu" id="nav-submenu-resucito">
-                        <a href="/"><span class="material-symbols-outlined">flare</span>Adviento</a>
-                        <a href="/index-joven.html"><span class="material-symbols-outlined">auto_awesome</span>Navidad</a>
-                        <a href="/index-ae.html"><span class="material-symbols-outlined">eco</span>Ordinario</a>
-                        <a href="/perfil.html"><span class="material-symbols-outlined">church</span>Cuaresma</a>
-                        <a href="/src/select.html"><span class="material-symbols-outlined">brightness_5</span>Pascua</a>
-                        <a href="/src/html/intro.html"><span class="material-symbols-outlined">workspace_premium</span>Solemnidades</a>
-                        <a href="/src/catequesis.html"><span class="material-symbols-outlined">face_6</span>Santos</a>
+                        <a href="/src/html/añoliturgico.html"><span class="material-symbols-outlined">calendar_month</span>Año Litúrgico</a>
                     </div>
                 </button>
 
@@ -368,6 +363,7 @@ function cerrarModalConfiguracion() {
 function toggleNavbar() {
     const wrapper = document.getElementById('nav-wrapper');
     const icon = document.getElementById('toggle-icon');
+    if (!wrapper || !icon) return;
     
     // Ocultamos el wrapper completo
     wrapper.classList.toggle('hidden');
@@ -375,3 +371,6 @@ function toggleNavbar() {
     // Giramos la flecha
     icon.classList.toggle('rotate-180');
 }
+
+// Hacerla accesible globalmente para el onclick="toggleNavbar()"
+window.toggleNavbar = toggleNavbar;

@@ -83,6 +83,16 @@ body.portada-body {
   -webkit-font-smoothing: antialiased;
 }
 
+.material-symbols-outlined:hover {
+    background: white;
+    color: black;
+    border-radius: 50%;
+    width: 40px;
+    height: 36px;
+    place-content: center;
+    text-align: center;
+}
+
 /* El fondo desenfocado */
 .fondo-index {
             position: fixed;
@@ -159,9 +169,253 @@ body.portada-body {
     border: 3px double black; /* Marco doble */
 }
 
-/* Sección Evangelio */
-.evangelio-section {
-    margin-bottom: 20px;
+/* Indicador de Tiempo Litúrgico superior */
+.portada-liturgia-titulo {
+    color: #ffcc00;
+    font-size: 1.35em;
+    font-weight: 700;
+    text-align: center;
+    margin: 8px 10px 4px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    letter-spacing: 0.03em;
+}
+
+/* Contenedor desplegable de las Horas Litúrgicas */
+.sub-horas-container {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 320px;
+}
+
+.sub-horas-container.desplegado {
+    max-height: 500px;
+    opacity: 1;
+    margin: 10px auto 16px;
+}
+
+.sub-horas-container .btn-flat {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+/* Contenedor desplegable de Liturgia de las Horas (todos los tiempos) */
+.sub-tiempos-container {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 340px;
+}
+
+.sub-tiempos-container.desplegado {
+    max-height: 2000px;
+    opacity: 1;
+    margin: 10px auto 16px;
+}
+
+/* Acordeón genérico para sub-botones (semanas, meses, solemnidades) */
+.sub-acordeon {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 340px;
+}
+
+.sub-acordeon.desplegado {
+    max-height: 1200px;
+    opacity: 1;
+    margin: 8px auto 14px;
+}
+
+/* 1. Grid numérico para semanas (1, 2, 3, 4, 5, 6 ...) */
+.sub-acordeon-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    padding: 6px 2px;
+}
+
+.btn-sub-semana {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 8px;
+    color: #333333;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-sub-semana:hover {
+    background: #f0f0f0;
+    transform: scale(1.05);
+}
+
+.btn-sub-semana:active {
+    transform: scale(0.95);
+}
+
+.btn-sub-semana.activo {
+    background: var(--color-tiempo, #2e7d32) !important;
+    color: #ffffff !important;
+    border-color: var(--color-tiempo, #1b5e20) !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+
+/* Panel de las 7 horas bajo la fila del número pulsado */
+.semana-horas-panel {
+    grid-column: 1 / -1;
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 12px;
+    padding: 10px 8px;
+    margin: 6px 0 10px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    border: 2px solid var(--color-tiempo, #2e7d32);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeInSlide 0.25s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.semana-horas-panel-header {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--color-tiempo, #333);
+    text-align: center;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.semana-horas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.btn-semana-hora {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    color: #333333;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.btn-semana-hora:hover,
+.btn-semana-hora:active {
+    background: var(--color-tiempo, #2e7d32) !important;
+    color: #ffffff !important;
+    border-color: var(--color-tiempo, #2e7d32) !important;
+    transform: translateY(-1px);
+}
+
+.btn-semana-hora .material-symbols-outlined {
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+/* Para la última opción (Completas) que ocupe las dos columnas si es impar */
+.btn-semana-hora:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-content: center;
+}
+
+/* 2. Horizontal para los Santos (meses del año) */
+.sub-acordeon-h {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    padding: 6px 2px;
+}
+
+.btn-sub-mes {
+    padding: 7px 12px;
+    background: #ffffff;
+    border: 1px solid rgba(21, 101, 192, 0.3);
+    border-radius: 16px;
+    color: #1565c0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: all 0.15s ease;
+}
+
+.btn-sub-mes:hover {
+    background: #1565c0;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* 3. Vertical para Solemnidades */
+.sub-acordeon-v {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 6px 2px;
+}
+
+.btn-sub-solem {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background: #ffffff;
+    border: 1px solid rgba(183, 28, 28, 0.25);
+    border-radius: 10px;
+    color: #b71c1c;
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.18);
+    transition: all 0.15s ease;
+}
+
+.btn-sub-solem:hover {
+    background: #b71c1c;
+    color: #ffffff;
+    transform: translateX(4px);
+}
+
+.btn-sub-solem .material-symbols-outlined {
+    margin-right: 10px;
+    font-size: 1.25rem;
 }
 .section-title {
     color: #ffcc00;

@@ -1,0 +1,6 @@
+@import url('gral.css');
+
+/* Estilos específicos para Completas */
+.pagina-oracion.completas {
+    --color-hora: #1a237e;
+}

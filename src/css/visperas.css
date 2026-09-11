@@ -1,0 +1,6 @@
+@import url('gral.css');
+
+/* Estilos específicos para Vísperas */
+.pagina-oracion.visperas {
+    --color-hora: #e65100;
+}

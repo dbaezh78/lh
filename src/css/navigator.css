@@ -56,10 +56,15 @@
     }
 }
 
-.nav-item .material-symbols-outlined:hover {
+.nav-item .material-symbols-outlined:hover,
+.material-symbols-outlined:hover {
     background: white;
-    color: var(--SangreDeCristo);
-
+    color: black;
+    border-radius: 50%;
+    width: 40px;
+    height: 36px;
+    place-content: center;
+    text-align: center;
 }
 
 /* Estilos del Menú Desplegable (Submenú) */
@@ -282,24 +287,36 @@ body { padding-bottom: 70px; }
     transform: translateY(60px); /* 60px es la altura de tu nav-bottom-bar */
 }
 
-/* El botón de la flecha */
-/* Ajuste del botón de flecha para que no flote mal */
+/* El botón de la pestaña pequeña (pestaña flotante estilo pestaña de archivo) */
 #nav-toggle {
     position: absolute;
-    top: -26px; /* Ajusta según el tamaño de tu botón */
-    right: 0px; 
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(128, 169, 230, 0.3);
+    top: -24px;
+    right: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
+    border: 1px solid rgba(0, 0, 0, 0.18);
     border-bottom: none;
     border-radius: 8px 8px 0 0;
-    width: 52px;
-    height: 28px;
+    width: 44px;
+    height: 25px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.08);
+    transition: background 0.2s ease, transform 0.15s ease;
+    z-index: 10000;
 }
 
+#nav-toggle:hover {
+    background: #ffffff;
+}
+
+#nav-toggle .material-symbols-outlined {
+    font-size: 20px !important;
+    line-height: 1;
+    color: var(--SangreDeCristo);
+    font-weight: 900;
+}
 
 #nav-toggle .material-symbols-outlined:hover {
     background: transparent !important;
@@ -307,9 +324,8 @@ body { padding-bottom: 70px; }
 
 /* Estilo del icono y rotación */
 #toggle-icon {
-    transition: transform 0.3s ease;
-    color: var(--SangreDeCristo); /* Usando tu variable de color */
-    font-weight: bold;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--SangreDeCristo);
 }
 
 .rotate-180 {
