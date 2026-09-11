@@ -362,35 +362,82 @@
         const hoy = new Date();
         const claveHoy = hoy.getDate() + '/' + (hoy.getMonth() + 1);
 
-        let modoAdminSanto = localStorage.getItem('lh_modo_admin_santo') !== 'false'; // Por defecto activo para ti
+        const ADMIN_EMAIL = 'dbaezh78@gmail.com';
+        let modoAdminSanto = false; // Solo true si está logueado dbaezh78@gmail.com
 
-        window.toggleModoAdminSanto = function() {
-            modoAdminSanto = !modoAdminSanto;
-            localStorage.setItem('lh_modo_admin_santo', modoAdminSanto ? 'true' : 'false');
-            actualizarEstadoAdmin();
-            renderTabla();
-        };
-
-        function actualizarEstadoAdmin() {
-            const btn = document.getElementById('btn-toggle-admin-santo');
-            const txt = document.getElementById('texto-modo-admin-santo');
+        function actualizarEstadoAdmin(user) {
+            const label = document.getElementById('auth-user-label');
+            const btnLogin = document.getElementById('btn-auth-login');
+            const btnLogout = document.getElementById('btn-auth-logout');
             const btnCrear = document.getElementById('btn-ir-nombresanto');
             const btnGuardar = document.getElementById('btn-guardar-asignaciones');
 
-            if (modoAdminSanto) {
-                if (btn) btn.classList.add('activo');
-                if (txt) txt.textContent = 'Modo Edición: Activo (Tú)';
-                if (btnCrear) btnCrear.style.display = 'inline-flex';
-                if (btnGuardar) btnGuardar.style.display = 'flex';
+            if (user && user.email) {
+                const esAdmin = user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+                modoAdminSanto = esAdmin;
+                if (label) {
+                    label.textContent = esAdmin ? `Admin: ${user.email}` : `Lector: ${user.email}`;
+                    label.style.color = esAdmin ? '#0277bd' : '#546e7a';
+                }
+                if (btnLogin) btnLogin.style.display = 'none';
+                if (btnLogout) btnLogout.style.display = 'inline-block';
+                if (btnCrear) btnCrear.style.display = esAdmin ? 'inline-flex' : 'none';
+                if (btnGuardar) btnGuardar.style.display = esAdmin ? 'flex' : 'none';
             } else {
-                if (btn) btn.classList.remove('activo');
-                if (txt) txt.textContent = 'Modo Lectura (Público)';
+                modoAdminSanto = false;
+                if (label) {
+                    label.textContent = 'Modo Lectura (Público)';
+                    label.style.color = '#546e7a';
+                }
+                if (btnLogin) btnLogin.style.display = 'inline-block';
+                if (btnLogout) btnLogout.style.display = 'none';
                 if (btnCrear) btnCrear.style.display = 'none';
                 if (btnGuardar) btnGuardar.style.display = 'none';
             }
         }
 
-        actualizarEstadoAdmin();
+        window.iniciarSesionAdmin = async function() {
+            if (window.firebaseAPI && window.firebaseAPI.login) {
+                try {
+                    const res = await window.firebaseAPI.login();
+                    const u = res.user;
+                    if (u && u.email && u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                        alert(`¡Bienvenido Administrador (${u.email})! Modo edición activado.`);
+                    } else {
+                        alert(`Sesión iniciada como ${u ? u.email : 'usuario'}. Permisos en Modo Lectura.`);
+                    }
+                } catch (err) {
+                    console.error("Error al iniciar sesión:", err);
+                    alert("Error al iniciar sesión: " + (err.message || err));
+                }
+            } else {
+                alert("El servicio de Firebase aún se está cargando, por favor intenta en unos segundos.");
+            }
+        };
+
+        window.cerrarSesionAdmin = async function() {
+            if (window.firebaseAPI && window.firebaseAPI.logout) {
+                try {
+                    await window.firebaseAPI.logout();
+                    alert("Sesión cerrada. Regresando a Modo Lectura.");
+                } catch (err) {
+                    console.error("Error al salir:", err);
+                }
+            }
+        };
+
+        // Escuchar estado de autenticación
+        function verificarAuthInicial() {
+            if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
+                window.firebaseAPI.onAuthReady((user) => {
+                    actualizarEstadoAdmin(user);
+                    renderTabla();
+                });
+            } else {
+                setTimeout(verificarAuthInicial, 300);
+            }
+        }
+        verificarAuthInicial();
 
         function renderTabla() {
             const filtroMes = document.getElementById('filtro-mes').value;

@@ -242,32 +242,14 @@ body { padding-bottom: 70px; }
 
 .ver {
      position: absolute; 
-     top: 50px; 
-     left: 1px; 
-     font-size: 10px; 
+     bottom: 2px; 
+     left: 4px; 
+     font-size: 9px; 
      color: #888; 
      font-family: sans-serif;
-
-        @media(min-width: 384px){
-            font-size: 11px;
-            top: 0px; 
-            left: -5px;
-            background: transparent;
-
-        }
-
-        @media(min-width: 768px){
-            font-size: 12px;
-                 top: 45px; 
-                 left: 0px;
-
-        }
-        @media(min-width: 992px){
-            font-size: 11px;
-            top: 47px; 
-            left: -5px;
-        }
-
+     pointer-events: none;
+     background: transparent;
+     z-index: 12;
 }
 
 /* Este es el contenedor que se mueve hacia abajo */

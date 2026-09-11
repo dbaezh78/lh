@@ -36,7 +36,7 @@
 
             <div class="nav-bottom-bar" id="main-navbar">
                 <div class="nav-version-display ver">
-                    v${window.APP_VERSION}
+                    v${window.APP_VERSION || '1.0.0'}
                 </div>
 
                 <a href="/" class="nav-item">
@@ -101,6 +101,15 @@
                     <span>Ajustes</span>
                 </button>
 
+                <button class="nav-item" id="nav-google-auth">
+                    <span class="material-symbols-outlined" id="nav-auth-icon">account_circle</span>
+                    <span id="nav-auth-text">Entrar</span>
+                </button>
+
+                <button class="nav-item" id="nav-logout" style="display: none;" title="Cerrar sesión">
+                    <span class="material-symbols-outlined" style="color: #d01212;">logout</span>
+                    <span>Salir</span>
+                </button>
             </div>
         </div>
     `;
@@ -246,32 +255,7 @@ function cerrarModalConfiguracion() {
         return;
     }
 
-    console.log("🎬 %cIniciando proceso de cierre y sincronización...", "color: #007bff; font-weight: bold;");
-
-    // 1. GUARDAR EN FIREBASE (Subida a la nube)
-    // Esto asegura que 'global-set-dark', 'syncToggle' y 'pref-expandir-todo' suban a la base de datos
-    if (window.guardarPreferenciasGlobales) {
-        console.log("☁️ %cSincronizando preferencias con Firebase...", "color: #28a745;");
-        window.guardarPreferenciasGlobales();
-    } else {
-        console.error("❌ %cError: 'window.guardarPreferenciasGlobales' no está definida.", "color: red;");
-    }
-
-    // 2. REFRESCAR INTERFAZ (Sin recargar página)
-    // Refresco de Notas/Acordes
-    if (window.renderizarNotasCanto) {
-        console.log("🎸 %cRefrescando acordes y visualización de notas...", "color: #6f42c1;");
-        window.renderizarNotasCanto();
-    }
-    
-    // Refresco de Expansión de Estrofas (La nueva lógica)
-    if (window.aplicarExpansionVisual) {
-        console.log("📖 %cAplicando estado de expansión (Expandir Todo)...", "color: #fd7e14;");
-        window.aplicarExpansionVisual();
-    }
-
-    // 3. ANIMACIÓN DE CIERRE VISUAL
-    console.log("⏳ %cAplicando animaciones de salida...", "color: #6c757d;");
+    // 1. ANIMACIÓN DE CIERRE VISUAL
     modal.classList.remove('active');
     const frame = modal.querySelector('.settings-frame');
     if (frame) {

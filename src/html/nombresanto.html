@@ -278,6 +278,31 @@
             gap: 10px;
             margin-bottom: 12px;
         }
+        .auth-badge-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef5f9;
+            border: 1px solid var(--color-borde);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.82rem;
+        }
+        .btn-auth-action {
+            background: #fff;
+            border: 1px solid var(--color-santo-azul);
+            color: var(--color-santo-azul);
+            border-radius: 14px;
+            padding: 3px 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-auth-action:hover {
+            background: var(--color-santo-azul);
+            color: #fff;
+        }
         .admin-toggle-btn {
             background: #fff;
             border: 1.5px solid var(--color-santo-azul);
@@ -380,10 +405,12 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
                 <h3 style="margin: 0;">Santos Registrados en el Sistema</h3>
                 <div class="admin-bar" style="margin-bottom: 0;">
-                    <button type="button" class="admin-toggle-btn activo" id="btn-toggle-admin" onclick="toggleModoAdmin()">
-                        <span class="material-symbols-outlined" style="font-size: 16px;">admin_panel_settings</span>
-                        <span id="texto-modo-admin">Modo Edición: Activo</span>
-                    </button>
+                    <div class="auth-badge-container" id="auth-status-container-ns">
+                        <span class="material-symbols-outlined" style="font-size: 16px; color: var(--color-santo-azul);">account_circle</span>
+                        <span id="auth-user-label-ns" style="font-weight: 500;">Verificando...</span>
+                        <button type="button" class="btn-auth-action" id="btn-auth-login-ns" onclick="iniciarSesionAdmin()" style="display: none;">Iniciar Sesión</button>
+                        <button type="button" class="btn-auth-action" id="btn-auth-logout-ns" onclick="cerrarSesionAdmin()" style="display: none;">Salir</button>
+                    </div>
                 </div>
             </div>
             <div class="tabla-registrados-wrapper">
@@ -479,29 +506,87 @@
             tr.querySelector('input').focus();
         });
 
-        let modoAdmin = localStorage.getItem('lh_modo_admin_santo') !== 'false'; // Por defecto activo para ti
+        const ADMIN_EMAIL = 'dbaezh78@gmail.com';
+        let modoAdmin = false; // Solo true si está logueado dbaezh78@gmail.com
 
-        window.toggleModoAdmin = function() {
-            modoAdmin = !modoAdmin;
-            localStorage.setItem('lh_modo_admin_santo', modoAdmin ? 'true' : 'false');
-            actualizarBotonAdmin();
-            renderTablaRegistrados();
-        };
+        function actualizarEstadoAdmin(user) {
+            const label = document.getElementById('auth-user-label-ns');
+            const btnLogin = document.getElementById('btn-auth-login-ns');
+            const btnLogout = document.getElementById('btn-auth-logout-ns');
+            const formSanto = document.getElementById('form-santo');
+            const btnSubmit = document.getElementById('btn-submit-form');
 
-        function actualizarBotonAdmin() {
-            const btn = document.getElementById('btn-toggle-admin');
-            const txt = document.getElementById('texto-modo-admin');
-            if (!btn || !txt) return;
-            if (modoAdmin) {
-                btn.classList.add('activo');
-                txt.textContent = 'Modo Edición: Activo (Tú)';
+            if (user && user.email) {
+                const esAdmin = user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+                modoAdmin = esAdmin;
+                if (label) {
+                    label.textContent = esAdmin ? `Admin: ${user.email}` : `Lector: ${user.email}`;
+                    label.style.color = esAdmin ? '#0277bd' : '#546e7a';
+                }
+                if (btnLogin) btnLogin.style.display = 'none';
+                if (btnLogout) btnLogout.style.display = 'inline-block';
+                if (btnSubmit) {
+                    btnSubmit.disabled = !esAdmin;
+                    btnSubmit.style.opacity = esAdmin ? '1' : '0.5';
+                    btnSubmit.title = esAdmin ? '' : 'Solo el administrador puede guardar cambios';
+                }
             } else {
-                btn.classList.remove('activo');
-                txt.textContent = 'Modo Lectura (Público)';
+                modoAdmin = false;
+                if (label) {
+                    label.textContent = 'Modo Lectura (Público)';
+                    label.style.color = '#546e7a';
+                }
+                if (btnLogin) btnLogin.style.display = 'inline-block';
+                if (btnLogout) btnLogout.style.display = 'none';
+                if (btnSubmit) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.style.opacity = '0.5';
+                    btnSubmit.title = 'Solo el administrador puede guardar cambios';
+                }
             }
         }
 
-        actualizarBotonAdmin();
+        window.iniciarSesionAdmin = async function() {
+            if (window.firebaseAPI && window.firebaseAPI.login) {
+                try {
+                    const res = await window.firebaseAPI.login();
+                    const u = res.user;
+                    if (u && u.email && u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                        alert(`¡Bienvenido Administrador (${u.email})! Modo edición y eliminación habilitado.`);
+                    } else {
+                        alert(`Sesión iniciada como ${u ? u.email : 'usuario'}. Permisos en Modo Lectura.`);
+                    }
+                } catch (err) {
+                    console.error("Error al iniciar sesión:", err);
+                    alert("Error al iniciar sesión: " + (err.message || err));
+                }
+            } else {
+                alert("El servicio de Firebase aún se está cargando, por favor intenta en unos segundos.");
+            }
+        };
+
+        window.cerrarSesionAdmin = async function() {
+            if (window.firebaseAPI && window.firebaseAPI.logout) {
+                try {
+                    await window.firebaseAPI.logout();
+                    alert("Sesión cerrada. Regresando a Modo Lectura.");
+                } catch (err) {
+                    console.error("Error al salir:", err);
+                }
+            }
+        };
+
+        function verificarAuthInicialNS() {
+            if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
+                window.firebaseAPI.onAuthReady((user) => {
+                    actualizarEstadoAdmin(user);
+                    renderTablaRegistrados();
+                });
+            } else {
+                setTimeout(verificarAuthInicialNS, 300);
+            }
+        }
+        verificarAuthInicialNS();
 
         function renderTablaRegistrados() {
             const santos = obtenerSantos();
