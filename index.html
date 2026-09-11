@@ -4,11 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liturgia de las Horas</title>
-      <LINK rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
-    <link rel="stylesheet" href="src/css/main.css">
+    <LINK rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
+
+    <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Symbols (local) -->
+    <link rel="stylesheet" href="src/css/main.css">
+
+    <!-- Sistema de Botones Unificado -->
+    <link rel="stylesheet" href="src/css/buttons.css">
 </head>
 <body>
+
+    <script>
+        // Verificamos si el usuario está entrando estrictamente por el subdominio deseado
+        if (window.location.hostname === "lh.resucito.do") {
+            // Si viene de ahí, redirige a los salterios
+            window.location.replace("https://dbaezh78.github.io/salterios/");
+        } else {
+            // Si entra por otro lado (ej. la URL de GitHub Pages directa), muestra mantenimiento
+            document.write("<h1>Sitio en mantenimiento</h1><p>Estamos trabajando en esta sección. Por favor, vuelva más tarde.</p>");
+        }
+    </script>
     
     <div id="app"></div>
 
@@ -16,3 +34,6 @@
     <script src="src/js/navigator.js" type="module"></script>
 </body>
 </html>
+
+
+
