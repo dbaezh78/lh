@@ -158,7 +158,52 @@
         .dato-auto {
             color: #546e7a;
             font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90px; /* Alrededor de 10-12 caracteres */
         }
+        .santo-info-link {
+            color: var(--color-santo-azul);
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: transparent;
+            transition: text-decoration-color 0.2s;
+        }
+        .santo-info-link:hover {
+            text-decoration-color: var(--color-santo-azul);
+        }
+        /* Modal Detalle Santo */
+        .modal-overlay-santo {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .modal-content-santo {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 550px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .modal-close-santo {
+            position: absolute;
+            top: 14px; right: 16px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #78909c;
+            line-height: 1;
+        }
+        .modal-close-santo:hover { color: #37474f; }
         .btn-guardar-flotante {
             position: fixed;
             bottom: 80px;
@@ -238,6 +283,10 @@
                     <button type="button" class="btn-auth-action" id="btn-auth-login" onclick="iniciarSesionAdmin()" style="display: none;">Iniciar Sesión</button>
                     <button type="button" class="btn-auth-action" id="btn-auth-logout" onclick="cerrarSesionAdmin()" style="display: none;">Salir</button>
                 </div>
+                <button type="button" class="btn-accion-santo" onclick="subirAsignacionesAFirebaseDirecto()" title="Subir catálogo y asignaciones a Firebase Cloud Firestore" style="background: #0288d1; color: white;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">cloud_upload</span>
+                    Subir a Firebase
+                </button>
                 <a href="nombresanto.html" class="btn-accion-santo" id="btn-ir-nombresanto" style="display: none;">
                     <span class="material-symbols-outlined" style="font-size: 18px;">person_add</span>
                     Crear / Editar Santo
@@ -289,12 +338,23 @@
         </div>
     </div>
 
+    <!-- Modal Lectura Detalle del Santo -->
+    <div class="modal-overlay-santo" id="modal-detalle-santo" onclick="if(event.target===this) cerrarModalDetalleSanto()">
+        <div class="modal-content-santo">
+            <span class="modal-close-santo" onclick="cerrarModalDetalleSanto()">&times;</span>
+            <h2 id="modal-santo-nombre" style="margin-top: 0; color: var(--color-santo-azul); font-size: 1.35rem; border-bottom: 2px solid #e1f5fe; padding-bottom: 8px;"></h2>
+            <div id="modal-santo-cuerpo" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.93rem; color: #37474f;"></div>
+        </div>
+    </div>
+
     <button type="button" class="btn-guardar-flotante" id="btn-guardar-asignaciones">
         <span class="material-symbols-outlined">save</span> Guardar Asignaciones
     </button>
 
     <script src="../js/navigator.js" type="module"></script>
-    <script>
+    <script type="module">
+        import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+
         const STORAGE_SANTOS_CATALOGO = 'lh_catalogo_nombres_santos';
         const STORAGE_ASIGNACIONES = 'lh_santos_calendario_anual';
 
@@ -308,11 +368,27 @@
         ];
 
         function obtenerCatalogoSantos() {
-            try {
-                return JSON.parse(localStorage.getItem(STORAGE_SANTOS_CATALOGO)) || [];
-            } catch (e) {
-                return [];
+            const mapa = new Map();
+            // 1. Cargar santos predeterminados del catálogo litúrgico anual
+            if (Array.isArray(catalogoSantosAnual)) {
+                catalogoSantosAnual.forEach(s => {
+                    if (s && s.nombre) mapa.set(s.nombre.toLowerCase().trim(), s);
+                });
             }
+            // 2. Cargar/sobrescribir con lo almacenado en LocalStorage (modificaciones, fotos subidas, etc.)
+            try {
+                const locales = JSON.parse(localStorage.getItem(STORAGE_SANTOS_CATALOGO)) || [];
+                locales.forEach(s => {
+                    if (s && s.nombre) {
+                        const clave = s.nombre.toLowerCase().trim();
+                        const previo = mapa.get(clave);
+                        mapa.set(clave, previo ? { ...previo, ...s, imagen: s.imagen || previo.imagen || '' } : s);
+                    }
+                });
+            } catch (e) {
+                console.warn("Error al leer STORAGE_SANTOS_CATALOGO:", e);
+            }
+            return Array.from(mapa.values());
         }
 
         function obtenerAsignaciones() {
@@ -325,6 +401,26 @@
 
         function guardarAsignaciones(mapa) {
             localStorage.setItem(STORAGE_ASIGNACIONES, JSON.stringify(mapa));
+            if (window.firebaseAPI && window.firebaseAPI.guardarAsignacionesFirestore && modoAdminSanto) {
+                window.firebaseAPI.guardarAsignacionesFirestore(mapa).then(() => {
+                    console.log("☁️ [Firestore] Asignaciones de santos subidas a Firebase.");
+                }).catch(err => {
+                    console.error("❌ Error al guardar asignaciones en Firebase:", err);
+                });
+            }
+        }
+
+        function normalizarClaveFecha(str) {
+            if (!str || typeof str !== 'string') return null;
+            const m = str.trim().match(/^(\d{1,2})[\/\-](\d{1,2})/);
+            if (m) {
+                const dia = parseInt(m[1], 10);
+                const mes = parseInt(m[2], 10);
+                if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12) {
+                    return dia + '/' + mes;
+                }
+            }
+            return null;
         }
 
         const anioActual = 2026;
@@ -352,12 +448,31 @@
 
         let asignaciones = obtenerAsignaciones();
 
-        if (Object.keys(asignaciones).length === 0) {
-            asignaciones['19/3'] = 'San José';
-            asignaciones['24/6'] = 'San Juan Bautista';
-            asignaciones['29/6'] = 'San Pedro y San Pablo';
-            guardarAsignaciones(asignaciones);
+        // Cargar asignaciones automáticas basadas en fechaFestividad o mortalidad del catálogo de santos
+        function autoAsignarSantosPorFecha() {
+            const catalogoCompleto = obtenerCatalogoSantos();
+            if (!catalogoCompleto || catalogoCompleto.length === 0) return false;
+
+            let huboCambios = false;
+            catalogoCompleto.forEach(s => {
+                if (!s || !s.nombre) return;
+                const claveFest = normalizarClaveFecha(s.fechaFestividad);
+                const claveMuerte = normalizarClaveFecha(s.muerte);
+                const claveDestino = claveFest || claveMuerte;
+
+                if (claveDestino && !asignaciones[claveDestino]) {
+                    asignaciones[claveDestino] = s.nombre;
+                    huboCambios = true;
+                }
+            });
+
+            if (huboCambios) {
+                guardarAsignaciones(asignaciones);
+            }
+            return huboCambios;
         }
+
+        autoAsignarSantosPorFecha();
 
         const hoy = new Date();
         const claveHoy = hoy.getDate() + '/' + (hoy.getMonth() + 1);
@@ -415,6 +530,26 @@
             }
         };
 
+        window.subirAsignacionesAFirebaseDirecto = async function() {
+            if (!window.firebaseAPI || !window.firebaseAPI.guardarAsignacionesFirestore) {
+                alert("⚠️ Firebase no se ha cargado totalmente. Espera un momento y reintenta.");
+                return;
+            }
+            try {
+                // 1. Subir asignaciones
+                await window.firebaseAPI.guardarAsignacionesFirestore(asignaciones);
+                // 2. Subir también catálogo de santos si está disponible
+                const catalogo = obtenerCatalogoSantos();
+                if (window.firebaseAPI.guardarSantosFirestore && catalogo && catalogo.length > 0) {
+                    await window.firebaseAPI.guardarSantosFirestore(catalogo);
+                }
+                alert("🎉 ¡Éxito total! Catálogo y Asignaciones subidas correctamente a la base de datos de Firebase Cloud Firestore.");
+            } catch (err) {
+                alert("❌ Error al subir a Firebase: " + (err.message || err));
+                console.error("Firebase Sync Error:", err);
+            }
+        };
+
         window.cerrarSesionAdmin = async function() {
             if (window.firebaseAPI && window.firebaseAPI.logout) {
                 try {
@@ -429,8 +564,20 @@
         // Escuchar estado de autenticación
         function verificarAuthInicial() {
             if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
-                window.firebaseAPI.onAuthReady((user) => {
+                window.firebaseAPI.onAuthReady(async (user) => {
                     actualizarEstadoAdmin(user);
+                    if (window.firebaseAPI.cargarAsignacionesFirestore) {
+                        try {
+                            const asigRemotas = await window.firebaseAPI.cargarAsignacionesFirestore();
+                            if (asigRemotas && typeof asigRemotas === 'object') {
+                                asignaciones = asigRemotas;
+                                localStorage.setItem(STORAGE_ASIGNACIONES, JSON.stringify(asigRemotas));
+                            }
+                        } catch(e) {
+                            console.warn("⚠️ No se pudieron cargar asignaciones desde Firestore:", e);
+                        }
+                    }
+                    autoAsignarSantosPorFecha();
                     renderTabla();
                 });
             } else {
@@ -483,23 +630,59 @@
                                      '</select>';
                 } else {
                     celdaSantoHtml = santoAsignadoNombre
-                        ? '<span class="santo-nombre-readonly">' + santoAsignadoNombre + '</span>'
+                        ? '<span class="santo-info-link" onclick="verDetallePorNombre(\'' + santoAsignadoNombre.replace(/'/g, "\\'") + '\')">' + santoAsignadoNombre + '</span>'
                         : '<span class="santo-sin-asignar">— Sin santo asignado —</span>';
                 }
+
+                const clickModal = santoObj ? 'onclick="verDetallePorNombre(\'' + santoAsignadoNombre.replace(/'/g, "\\'") + '\')"' : '';
 
                 html += '<tr class="' + (esHoy ? 'fila-hoy' : '') + '" data-clave="' + d.clave + '">' +
                     '<td><strong>' + d.diaNum + ' ' + d.mesNombre.substring(0, 3) + '</strong></td>' +
                     '<td><span class="badge-dia ' + (d.esDomingo ? 'badge-domingo' : '') + '">' + d.diaSemana + '</span></td>' +
                     '<td>' + celdaSantoHtml + '</td>' +
-                    '<td class="dato-auto col-pais">' + pais + '</td>' +
-                    '<td class="dato-auto col-realidad">' + realidad + '</td>' +
-                    '<td class="dato-auto col-nacimiento">' + nacimiento + '</td>' +
-                    '<td class="dato-auto col-mortalidad">' + muerte + '</td>' +
+                    '<td class="dato-auto col-pais ' + (santoObj ? 'santo-info-link' : '') + '" ' + clickModal + '>' + pais + '</td>' +
+                    '<td class="dato-auto col-realidad ' + (santoObj ? 'santo-info-link' : '') + '" ' + clickModal + '>' + realidad + '</td>' +
+                    '<td class="dato-auto col-nacimiento ' + (santoObj ? 'santo-info-link' : '') + '" ' + clickModal + '>' + nacimiento + '</td>' +
+                    '<td class="dato-auto col-mortalidad ' + (santoObj ? 'santo-info-link' : '') + '" ' + clickModal + '>' + muerte + '</td>' +
                 '</tr>';
             });
 
             tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">No se encontraron resultados</td></tr>';
         }
+
+        window.verDetallePorNombre = function(nombreSanto) {
+            const santos = obtenerCatalogoSantos();
+            const s = santos.find(item => item.nombre.toLowerCase() === nombreSanto.toLowerCase());
+            if (!s) return;
+
+            document.getElementById('modal-santo-nombre').textContent = s.nombre || 'Detalle del Santo';
+            
+            const hijosList = (s.hijos && s.hijos.length > 0)
+                ? s.hijos.map(h => `<span class="tag-hijo">${h}</span>`).join(' ')
+                : '—';
+
+            const imgModal = s.imagen 
+                ? `<div style="text-align:center; margin-bottom:12px;"><img src="${s.imagen}" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${s.nombre}"></div>` 
+                : '';
+
+            document.getElementById('modal-santo-cuerpo').innerHTML = `
+                ${imgModal}
+                <div><strong>Nacimiento:</strong> ${s.nacimiento || '—'}</div>
+                <div><strong>Mortalidad:</strong> ${s.muerte || '—'}</div>
+                <div><strong>País:</strong> ${s.pais || '—'}</div>
+                <div><strong>Ciudad:</strong> ${s.ciudad || '—'}</div>
+                <div><strong>Realidad:</strong> ${s.realidad || '—'}</div>
+                <div><strong>Hijos en la fe:</strong> <div style="margin-top:4px;">${hijosList}</div></div>
+                ${s.historia ? `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.historia}</p></div>` : ''}
+                ${s.detalle ? `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.detalle}</p></div>` : ''}
+            `;
+
+            document.getElementById('modal-detalle-santo').style.display = 'flex';
+        };
+
+        window.cerrarModalDetalleSanto = function() {
+            document.getElementById('modal-detalle-santo').style.display = 'none';
+        };
 
         window.cambiarSanto = function(select) {
             if (!modoAdminSanto) {

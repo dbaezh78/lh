@@ -11,9 +11,10 @@
     document.head.appendChild(linkSettings);
 
 // 2. Inyectar archivos JS de ajustes y Firebase
+    const v = window.APP_VERSION || Date.now();
     const scriptsToLoad = [
-        { src: '/src/js/firebase-config.js', type: 'module' },
-        { src: '/src/js/setting.js', type: 'text/javascript' }
+        { src: `/src/js/firebase-config.js?v=${v}`, type: 'module' },
+        { src: `/src/js/setting.js?v=${v}`, type: 'text/javascript' }
     ];
 
     scriptsToLoad.forEach(s => {

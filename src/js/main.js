@@ -1,4 +1,5 @@
 import { obtenerInfoLiturgica } from '../data/calendarioLiturgico.js';
+import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 
 const app = document.getElementById('app');
 
@@ -107,24 +108,81 @@ function cargarPortada() {
         }
     }
 
-    // Obtener santo del día desde las asignaciones
+    // Obtener santo del día desde las asignaciones y catálogo
     let textoBotonSanto = "";
+    let imagenBotonSanto = "";
     try {
         const fechaActual = new Date();
-        const claveDiaMes = `${fechaActual.getDate()}/${fechaActual.getMonth() + 1}`;
+        const diaActual = fechaActual.getDate();
+        const mesActual = fechaActual.getMonth() + 1;
+        const claveDiaMes = `${diaActual}/${mesActual}`;
         const asignacionesSantos = JSON.parse(localStorage.getItem('lh_santos_calendario_anual')) || {};
         
+        // Catálogo local y predeterminado
+        let catalogo = [];
+        try {
+            catalogo = JSON.parse(localStorage.getItem('lh_catalogo_nombres_santos')) || [];
+        } catch (_) {}
+        if (!Array.isArray(catalogo)) catalogo = [];
+
+        // Combinar catálogo predeterminado si no está en el local
+        const mapaCatalogo = new Map();
+        if (Array.isArray(catalogoSantosAnual)) {
+            catalogoSantosAnual.forEach(s => {
+                if (s && s.nombre) mapaCatalogo.set(s.nombre.toLowerCase().trim(), s);
+            });
+        }
+        catalogo.forEach(s => {
+            if (s && s.nombre) {
+                const clave = s.nombre.toLowerCase().trim();
+                const prev = mapaCatalogo.get(clave);
+                mapaCatalogo.set(clave, prev ? { ...prev, ...s, imagen: s.imagen || prev.imagen || '' } : s);
+            }
+        });
+
+        // Determinar nombre del santo asignado o buscar por fecha en catálogo
         if (asignacionesSantos[claveDiaMes] && asignacionesSantos[claveDiaMes].trim()) {
-            textoBotonSanto = asignacionesSantos[claveDiaMes];
+            textoBotonSanto = asignacionesSantos[claveDiaMes].trim();
         } else {
-            // Si no hay santo asignado, mostrar la fecha del día
-            const mesesEsp = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-            textoBotonSanto = `${fechaActual.getDate()} de ${mesesEsp[fechaActual.getMonth()]}`;
+            // Buscar si hay un santo cuya festividad coincida con hoy
+            const santoPorFecha = Array.from(mapaCatalogo.values()).find(s => {
+                if (!s) return false;
+                if (s.fechaFestividad === claveDiaMes) return true;
+                if (s.muerte && typeof s.muerte === 'string') {
+                    const m = s.muerte.trim().match(/^(\d{1,2})[\/\-](\d{1,2})/);
+                    if (m && parseInt(m[1], 10) === diaActual && parseInt(m[2], 10) === mesActual) return true;
+                }
+                return false;
+            });
+            if (santoPorFecha) {
+                textoBotonSanto = santoPorFecha.nombre;
+            } else {
+                const mesesEsp = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+                textoBotonSanto = `${diaActual} de ${mesesEsp[fechaActual.getMonth()]}`;
+            }
+        }
+
+        // Buscar imagen del santo
+        if (textoBotonSanto) {
+            const santoEncontrado = mapaCatalogo.get(textoBotonSanto.toLowerCase().trim());
+            if (santoEncontrado && santoEncontrado.imagen && santoEncontrado.imagen.trim()) {
+                let imgPath = santoEncontrado.imagen.trim();
+                // Si la ruta en el catálogo empieza con ../img/, en la raíz (index.html) es src/img/
+                if (imgPath.startsWith('../img/')) {
+                    imgPath = 'src/' + imgPath.substring(3);
+                }
+                imagenBotonSanto = imgPath;
+            }
         }
     } catch (e) {
+        console.warn("Error al resolver santo del día:", e);
         const f = new Date();
         textoBotonSanto = `${f.getDate()}/${f.getMonth() + 1}/${f.getFullYear()}`;
     }
+
+    const iconoBotonSantoHtml = imagenBotonSanto
+        ? `<img src="${imagenBotonSanto}" alt="${textoBotonSanto}" class="img-santo-pill" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'material-symbols-outlined\\'>person</span>';">`
+        : `<span class="material-symbols-outlined">person</span>`;
 
     app.innerHTML = `
         <div class="background-overlay"></div>
@@ -153,7 +211,7 @@ function cargarPortada() {
 
                 <a href="src/html/santo.html" class="btn-pill btn-santo" id="btn-santo-dia" title="Ver calendario de Santos">
                     <span class="btn-pill-icon">
-                        <span class="material-symbols-outlined">person</span>
+                        ${iconoBotonSantoHtml}
                     </span>
                     <span>${textoBotonSanto}</span>
                 </a>

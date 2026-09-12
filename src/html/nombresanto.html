@@ -84,28 +84,25 @@
         }
         .date-input-container {
             display: flex;
+            gap: 6px;
             align-items: center;
-            position: relative;
-            width: 100%;
         }
-        .date-input-container input[type="text"] {
-            padding-right: 42px;
-        }
-        .calendar-picker-helper {
-            position: absolute;
-            right: 8px;
-            width: 32px !important;
-            height: 32px !important;
-            padding: 0 !important;
-            border: none !important;
-            background: transparent !important;
-            cursor: pointer;
+        .date-input-container input[type="date"] {
+            padding: 9px 10px;
+            border: 1px solid var(--color-borde);
+            border-radius: 8px;
+            font-size: 0.93rem;
+            color: #263238;
             outline: none;
-            opacity: 0.8;
-            transition: opacity 0.2s;
+            box-sizing: border-box;
+            font-family: inherit;
+            background: #fff;
+            flex: 1;
+            min-width: 140px;
         }
-        .calendar-picker-helper:hover {
-            opacity: 1;
+        .date-input-container input[type="date"]:focus {
+            border-color: var(--color-santo-azul);
+            box-shadow: 0 0 0 3px rgba(2, 119, 189, 0.15);
         }
         .seccion-hijos {
             margin-top: 20px;
@@ -213,12 +210,69 @@
             font-size: 0.88rem;
             min-width: 650px;
         }
-        .tabla-santos-registrados th,
         .tabla-santos-registrados td {
             border-bottom: 1px solid #eef2f5;
-            padding: 9px 12px;
+            padding: 7px 12px;
             text-align: left;
+            vertical-align: middle;
+            white-space: nowrap;
         }
+        .col-nombre-santo {
+            min-width: 220px;
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .texto-recortado {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 140px;
+            display: block;
+        }
+        .nombre-santo-link {
+            color: #0277bd;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: transparent;
+            transition: text-decoration-color 0.2s;
+        }
+        .nombre-santo-link:hover {
+            text-decoration-color: #0277bd;
+        }
+        /* Modal Ver Detalle */
+        .modal-overlay-santo {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .modal-content-santo {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 550px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .modal-close-santo {
+            position: absolute;
+            top: 14px; right: 16px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #78909c;
+            line-height: 1;
+        }
+        .modal-close-santo:hover { color: #37474f; }
         .tabla-santos-registrados th {
             background: #eef5f9;
             color: #37474f;
@@ -317,9 +371,60 @@
             gap: 5px;
             transition: all 0.2s;
         }
-        .admin-toggle-btn.activo {
-            background: var(--color-santo-azul);
-            color: #fff;
+        .imagen-paste-zone {
+            border: 2px dashed #b0bec5;
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .imagen-paste-zone:hover, .imagen-paste-zone.dragover {
+            border-color: var(--color-santo-azul);
+            background: #e0f2fe;
+        }
+        .imagen-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .imagen-preview-img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--color-borde);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .img-avatar-tabla {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #b0bec5;
+            vertical-align: middle;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+        .img-avatar-tabla:hover {
+            transform: scale(1.15);
+            border-color: var(--color-santo-azul);
+        }
+        .icon-avatar-sin-foto {
+            vertical-align: middle;
+            margin-right: 6px;
+            color: #90a4ae;
+            font-size: 22px;
+            cursor: pointer;
+            transition: transform 0.15s, color 0.15s;
+        }
+        .icon-avatar-sin-foto:hover {
+            color: var(--color-santo-azul);
+            transform: scale(1.2);
         }
     </style>
 </head>
@@ -340,15 +445,15 @@
                 <div class="form-group">
                     <label for="nacimiento">Fecha de Nacimiento</label>
                     <div class="date-input-container">
-                        <input type="text" id="nacimiento" placeholder="Ej. 1181 o selecciona fecha">
-                        <input type="date" id="nacimiento-picker" class="calendar-picker-helper" title="Abrir calendario" onchange="document.getElementById('nacimiento').value = this.value;">
+                        <input type="text" id="nacimiento" placeholder="dd/mm/aaaa o ej. 1181">
+                        <input type="date" id="nacimiento-picker" title="Seleccionar fecha" onchange="sincronizarFechaPickerATexto('nacimiento-picker', 'nacimiento')">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="muerte">Fecha de Mortalidad</label>
                     <div class="date-input-container">
-                        <input type="text" id="muerte" placeholder="Ej. 1226 o selecciona fecha">
-                        <input type="date" id="muerte-picker" class="calendar-picker-helper" title="Abrir calendario" onchange="document.getElementById('muerte').value = this.value;">
+                        <input type="text" id="muerte" placeholder="dd/mm/aaaa o ej. 1226">
+                        <input type="date" id="muerte-picker" title="Seleccionar fecha" onchange="sincronizarFechaPickerATexto('muerte-picker', 'muerte')">
                     </div>
                 </div>
                 <div class="form-group">
@@ -370,6 +475,18 @@
                 <div class="form-group form-full">
                     <label for="detalle">Detalle</label>
                     <textarea id="detalle" rows="2" placeholder="Detalles particulares, atributos..."></textarea>
+                </div>
+                <div class="form-group form-full">
+                    <label for="imagen-base64">Foto / Imagen del Santo</label>
+                    <input type="hidden" id="imagen-base64">
+                    <div class="imagen-paste-zone" id="paste-zone" tabindex="0">
+                        <span class="material-symbols-outlined" style="font-size: 32px; color: #78909c; display: block; margin: 0 auto 4px;">photo_camera</span>
+                        <span style="font-size: 0.9rem; color: #546e7a;">Haz clic aquí y <strong>presiona Ctrl+V</strong> (Pegar imagen) o arrastra un archivo de imagen</span>
+                    </div>
+                    <div class="imagen-preview-container" id="preview-container" style="display: none;">
+                        <img id="img-preview" class="imagen-preview-img" alt="Vista previa">
+                        <button type="button" class="btn-delete-row" onclick="quitarImagen()">Quitar imagen</button>
+                    </div>
                 </div>
             </div>
 
@@ -403,7 +520,19 @@
 
         <div class="lista-santos-guardados">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
-                <h3 style="margin: 0;">Santos Registrados en el Sistema</h3>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <h3 style="margin: 0; margin-right: 6px;">Santos Registrados en el Sistema</h3>
+                    <input type="file" id="input-importar-csv" accept=".csv" style="display: none;" onchange="procesarImportacionCSV(event)">
+                    <button type="button" class="btn-auth-action" style="background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7;" onclick="document.getElementById('input-importar-csv').click()" title="Importar archivo CSV con datos de santos">
+                        📥 Importar Archivo CSV
+                    </button>
+                    <button type="button" class="btn-auth-action" onclick="descargarCSVActual()" title="Descargar catálogo completo en formato CSV para Excel">
+                        📊 Exportar / Descargar CSV
+                    </button>
+                    <button type="button" class="btn-auth-action" onclick="subirCatalogoAFirebaseDirecto()" title="Subir catálogo completo a la base de datos de Firebase">
+                        ☁️ Sincronizar / Subir a Firebase
+                    </button>
+                </div>
                 <div class="admin-bar" style="margin-bottom: 0;">
                     <div class="auth-badge-container" id="auth-status-container-ns">
                         <span class="material-symbols-outlined" style="font-size: 16px; color: var(--color-santo-azul);">account_circle</span>
@@ -413,6 +542,26 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Filtros de Búsqueda y de Foto -->
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; background: #f8fafc; border: 1px solid var(--color-borde); padding: 10px 14px; border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 200px;">
+                    <span class="material-symbols-outlined" style="color: var(--color-santo-azul); font-size: 20px;">search</span>
+                    <input type="text" id="filtro-nombre-santo" placeholder="Buscar santo por nombre, país o realidad..." oninput="renderTablaRegistrados()" style="width: 100%; padding: 6px 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.88rem;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label for="filtro-foto-santo" style="font-weight: 600; font-size: 0.88rem; color: #37474f; margin: 0; display: flex; align-items: center; gap: 4px;">
+                        <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-santo-azul);">photo_camera</span> Foto:
+                    </label>
+                    <select id="filtro-foto-santo" onchange="renderTablaRegistrados()" style="padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--color-santo-azul); font-size: 0.88rem; font-weight: 500; background: #fff; cursor: pointer; color: #263238;">
+                        <option value="todos">Todos los santos</option>
+                        <option value="con_foto">📷 Con foto</option>
+                        <option value="sin_foto">🚫 Sin foto</option>
+                    </select>
+                    <span id="contador-santos-filtrados" style="font-size: 0.82rem; color: #546e7a; font-weight: 600; margin-left: 4px;"></span>
+                </div>
+            </div>
+
             <div class="tabla-registrados-wrapper">
                 <table class="tabla-santos-registrados">
                     <thead>
@@ -433,9 +582,22 @@
         </div>
     </div>
 
+    <!-- Modal Lectura Detalle del Santo -->
+    <div class="modal-overlay-santo" id="modal-detalle-santo" onclick="if(event.target===this) cerrarModalDetalleSanto()">
+        <div class="modal-content-santo">
+            <span class="modal-close-santo" onclick="cerrarModalDetalleSanto()">&times;</span>
+            <h2 id="modal-santo-nombre" style="margin-top: 0; color: var(--color-santo-azul); font-size: 1.35rem; border-bottom: 2px solid #e1f5fe; padding-bottom: 8px;"></h2>
+            <div id="modal-santo-cuerpo" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.93rem; color: #37474f;"></div>
+        </div>
+    </div>
+
     <script src="../js/navigator.js" type="module"></script>
-    <script>
+    <script type="module">
+        import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+
         const STORAGE_KEY = 'lh_catalogo_nombres_santos';
+        const ADMIN_EMAIL = 'dbaezh78@gmail.com';
+        let modoAdmin = false;
 
         function obtenerSantos() {
             try {
@@ -445,47 +607,263 @@
             }
         }
 
-        function guardarSantos(lista) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+        async function guardarSantos(lista, forzarNube = false) {
+            console.log("💾 [guardarSantos] Guardando en LocalStorage. Total:", lista.length);
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+                console.log("✅ [guardarSantos] Guardado con éxito en LocalStorage.");
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.code === 22) {
+                    alert('⚠️ El almacenamiento local del navegador se ha llenado. Se recomienda quitar o comprimir imágenes de algunos registros.');
+                } else {
+                    console.error('Error al guardar en almacenamiento local:', e);
+                }
+            }
+
+            // Sincronizar en la base de datos remota de Firebase Cloud Firestore si hay sesión activa o se fuerza
+            if (window.firebaseAPI && window.firebaseAPI.guardarSantosFirestore && (modoAdmin || forzarNube)) {
+                try {
+                    console.log("☁️ [guardarSantos] Invocando window.firebaseAPI.guardarSantosFirestore...");
+                    await window.firebaseAPI.guardarSantosFirestore(lista);
+                    console.log("🎉 [Firestore] Catálogo de santos subido correctamente a Firebase.");
+                    return true;
+                } catch (err) {
+                    console.error("❌ Error al guardar en Firebase:", err);
+                    alert("❌ Error al guardar en Firebase: " + (err.message || err));
+                    throw err;
+                }
+            } else {
+                console.log("ℹ️ [guardarSantos] No se sube a Firebase porque modoAdmin=", modoAdmin, "y forzarNube=", forzarNube);
+            }
+            return false;
         }
 
-        if (!localStorage.getItem(STORAGE_KEY)) {
-            const predeterminados = [
-                {
-                    nombre: 'San Pedro y San Pablo',
-                    nacimiento: '1 a.C.',
-                    muerte: '67 d.C.',
-                    pais: 'Israel / Italia',
-                    ciudad: 'Roma',
-                    realidad: 'Apóstoles',
-                    historia: 'Columnas de la Iglesia.',
-                    detalle: 'Patronos de Roma.',
-                    hijos: ['San Lino', 'San Clemente']
-                },
-                {
-                    nombre: 'San José',
-                    nacimiento: 'Siglo I a.C.',
-                    muerte: 'Siglo I d.C.',
-                    pais: 'Israel',
-                    ciudad: 'Nazaret',
-                    realidad: 'Esposo de la Virgen María',
-                    historia: 'Custodio del Redentor.',
-                    detalle: 'Patrono de la Iglesia Universal.',
-                    hijos: []
-                },
-                {
-                    nombre: 'San Juan Bautista',
-                    nacimiento: 'Siglo I a.C.',
-                    muerte: 'Siglo I d.C.',
-                    pais: 'Israel',
-                    ciudad: 'Judea',
-                    realidad: 'Precursor del Señor',
-                    historia: 'Voz que clama en el desierto.',
-                    detalle: 'Profeta y mártir.',
-                    hijos: ['San Andrés']
+        window.subirCatalogoAFirebaseDirecto = async function() {
+            console.log("🔘 [subirCatalogoAFirebaseDirecto] Botón presionado.");
+            if (!window.firebaseAPI || !window.firebaseAPI.guardarSantosFirestore) {
+                console.warn("⚠️ window.firebaseAPI o guardarSantosFirestore no disponible aún:", window.firebaseAPI);
+                alert("⚠️ Firebase aún no ha cargado los módulos. Reintenta en unos segundos.");
+                return;
+            }
+
+            const currentUser = window.firebaseAPI.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
+            console.log("👤 [subirCatalogoAFirebaseDirecto] Usuario actual en Firebase Auth:", currentUser ? currentUser.email : "null");
+
+            if (!currentUser) {
+                alert("⚠️ No hay una sesión activa de Google en Firebase. Por favor inicia sesión como administrador (dbaezh78@gmail.com) usando el botón de 'Iniciar Sesión Admin'.");
+                return;
+            }
+
+            if (currentUser.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                alert(`⚠️ La cuenta actual (${currentUser.email}) no tiene permisos de administrador (${ADMIN_EMAIL}).`);
+                return;
+            }
+
+            try {
+                const listaActual = obtenerSantos();
+                const mapaExistentes = new Map();
+                listaActual.forEach(s => {
+                    if (s && s.nombre) mapaExistentes.set(s.nombre.toLowerCase().trim(), s);
+                });
+
+                catalogoSantosAnual.forEach(sNuevo => {
+                    const clave = sNuevo.nombre.toLowerCase().trim();
+                    if (!mapaExistentes.has(clave)) {
+                        mapaExistentes.set(clave, sNuevo);
+                    } else {
+                        // Combinar conservando imagenes si la previa tenia foto
+                        const previo = mapaExistentes.get(clave);
+                        mapaExistentes.set(clave, { ...sNuevo, ...previo, imagen: previo.imagen || sNuevo.imagen || '' });
+                    }
+                });
+
+                const listaCombinada = Array.from(mapaExistentes.values());
+                console.log(`📦 [subirCatalogoAFirebaseDirecto] Subiendo ${listaCombinada.length} santos a Firestore...`);
+                await guardarSantos(listaCombinada, true);
+                renderTablaRegistrados();
+                alert("🎉 ¡Éxito! Se ha creado la colección y subido el catálogo completo (" + listaCombinada.length + " registros) a Firebase Cloud Firestore.");
+            } catch (err) {
+                alert("⚠️ Error al subir a Firebase: " + (err.message || err));
+                console.error("Firestore Upload Error:", err);
+            }
+        };
+
+        // ==========================================
+        // FUNCIONALIDAD DE IMPORTACIÓN Y EXPORTACIÓN CSV
+        // ==========================================
+        function parsearLineaCSV(linea) {
+            const resultado = [];
+            let dentroComillas = false;
+            let valorActual = '';
+            for (let i = 0; i < linea.length; i++) {
+                const char = linea[i];
+                if (char === '"') {
+                    if (dentroComillas && linea[i + 1] === '"') {
+                        valorActual += '"';
+                        i++;
+                    } else {
+                        dentroComillas = !dentroComillas;
+                    }
+                } else if (char === ',' && !dentroComillas) {
+                    resultado.push(valorActual.trim());
+                    valorActual = '';
+                } else {
+                    valorActual += char;
                 }
-            ];
-            guardarSantos(predeterminados);
+            }
+            resultado.push(valorActual.trim());
+            return resultado;
+        }
+
+        window.procesarImportacionCSV = function(event) {
+            const archivo = event.target.files && event.target.files[0];
+            if (!archivo) return;
+
+            const lector = new FileReader();
+            lector.onload = async function(e) {
+                try {
+                    const texto = e.target.result;
+                    const lineas = texto.split(/\r?\n/).filter(l => l.trim().length > 0);
+                    if (lineas.length <= 1) {
+                        alert("⚠️ El archivo CSV parece estar vacío o no tiene registros válidos.");
+                        return;
+                    }
+
+                    // Identificar encabezados
+                    const encabezados = parsearLineaCSV(lineas[0]).map(h => h.toLowerCase().trim());
+                    console.log("📑 [CSV Encabezados detectados]:", encabezados);
+
+                    // Índices de columnas
+                    const idxNombre = encabezados.findIndex(h => h.includes('nombre'));
+                    const idxFechaFest = encabezados.findIndex(h => h.includes('fecha liturgica') || h.includes('festividad') || h.includes('fecha'));
+                    const idxNac = encabezados.findIndex(h => h.includes('nacimiento'));
+                    const idxMuerte = encabezados.findIndex(h => h.includes('mortalidad') || h.includes('muerte'));
+                    const idxPais = encabezados.findIndex(h => h.includes('pais') || h.includes('país'));
+                    const idxCiudad = encabezados.findIndex(h => h.includes('ciudad') || h.includes('region') || h.includes('región'));
+                    const idxRealidad = encabezados.findIndex(h => h.includes('realidad'));
+                    const idxHistoria = encabezados.findIndex(h => h.includes('historia') || h.includes('biografia') || h.includes('biografía'));
+                    const idxDetalle = encabezados.findIndex(h => h.includes('detalle') || h.includes('curioso'));
+                    const idxHijos = encabezados.findIndex(h => h.includes('hijos'));
+
+                    if (idxNombre === -1) {
+                        alert("❌ Formato de CSV incompatible: no se encontró la columna 'Nombre del Santo'.");
+                        return;
+                    }
+
+                    const listaActual = obtenerSantos();
+                    const mapa = new Map();
+                    listaActual.forEach(s => {
+                        if (s && s.nombre) mapa.set(s.nombre.toLowerCase().trim(), s);
+                    });
+
+                    let importados = 0;
+                    for (let i = 1; i < lineas.length; i++) {
+                        const col = parsearLineaCSV(lineas[i]);
+                        const nombre = col[idxNombre] ? col[idxNombre].trim() : '';
+                        if (!nombre) continue;
+
+                        const clave = nombre.toLowerCase().trim();
+                        const hijosStr = (idxHijos >= 0 && col[idxHijos] && col[idxHijos] !== '—') ? col[idxHijos] : '';
+                        const hijosArr = hijosStr ? hijosStr.split(',').map(h => h.trim()).filter(h => h.length > 0) : [];
+
+                        const santoObj = {
+                            nombre: nombre,
+                            fechaFestividad: (idxFechaFest >= 0 && col[idxFechaFest]) ? col[idxFechaFest] : '',
+                            nacimiento: (idxNac >= 0 && col[idxNac] && col[idxNac] !== '—') ? col[idxNac] : '',
+                            muerte: (idxMuerte >= 0 && col[idxMuerte] && col[idxMuerte] !== '—') ? col[idxMuerte] : '',
+                            pais: (idxPais >= 0 && col[idxPais] && col[idxPais] !== '—') ? col[idxPais] : '',
+                            ciudad: (idxCiudad >= 0 && col[idxCiudad] && col[idxCiudad] !== '—') ? col[idxCiudad] : '',
+                            realidad: (idxRealidad >= 0 && col[idxRealidad] && col[idxRealidad] !== '—') ? col[idxRealidad] : '',
+                            historia: (idxHistoria >= 0 && col[idxHistoria] && col[idxHistoria] !== '—') ? col[idxHistoria] : '',
+                            detalle: (idxDetalle >= 0 && col[idxDetalle] && col[idxDetalle] !== '—') ? col[idxDetalle] : '',
+                            hijos: hijosArr
+                        };
+
+                        if (mapa.has(clave)) {
+                            const prev = mapa.get(clave);
+                            mapa.set(clave, { ...santoObj, imagen: prev.imagen || '' });
+                        } else {
+                            santoObj.imagen = '';
+                            mapa.set(clave, santoObj);
+                        }
+                        importados++;
+                    }
+
+                    const listaNueva = Array.from(mapa.values());
+                    await guardarSantos(listaNueva);
+                    renderTablaRegistrados();
+                    event.target.value = ''; // Limpiar input file
+                    alert(`✅ ¡Importación completada! Se procesaron ${importados} registros del archivo CSV.`);
+                } catch (err) {
+                    console.error("Error al procesar archivo CSV:", err);
+                    alert("❌ Ocurrió un error al leer el archivo CSV: " + (err.message || err));
+                }
+            };
+            lector.readAsText(archivo, 'UTF-8');
+        };
+
+        window.descargarCSVActual = function() {
+            const santos = obtenerSantos();
+            if (!santos || santos.length === 0) {
+                alert("⚠️ No hay santos registrados para exportar.");
+                return;
+            }
+
+            function esc(val) {
+                if (val === null || val === undefined) return '""';
+                const s = String(val).replace(/"/g, '""');
+                return `"${s}"`;
+            }
+
+            const encabezados = [
+                "ID", "Fecha Liturgica / Mortalidad", "Nombre del Santo", "Fecha de Nacimiento",
+                "Fecha de Mortalidad", "Pais de Origen", "Ciudad o Region",
+                "Realidad a la que pertenecio", "Historia y Biografia", "Detalles Curiosos o Significativos", "Hijos en la fe"
+            ].join(",");
+
+            const filas = santos.map((s, i) => [
+                esc(i + 1),
+                esc(s.fechaFestividad || ''),
+                esc(s.nombre || ''),
+                esc(s.nacimiento || '—'),
+                esc(s.muerte || '—'),
+                esc(s.pais || '—'),
+                esc(s.ciudad || '—'),
+                esc(s.realidad || '—'),
+                esc(s.historia || '—'),
+                esc(s.detalle || '—'),
+                esc((s.hijos && s.hijos.length > 0) ? s.hijos.join(', ') : '—')
+            ].join(","));
+
+            const contenido = "\uFEFF" + [encabezados, ...filas].join("\r\n");
+            const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `santos_iglesia_catolica_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        // Asegurar que todos los santos de catalogoSantosAnual se incorporen al catálogo
+        const listaLocalInicial = obtenerSantos();
+        const mapaInit = new Map();
+        listaLocalInicial.forEach(s => {
+            if (s && s.nombre) mapaInit.set(s.nombre.toLowerCase().trim(), s);
+        });
+        let nuevosAgregados = 0;
+        catalogoSantosAnual.forEach(sNuevo => {
+            const clave = sNuevo.nombre.toLowerCase().trim();
+            if (!mapaInit.has(clave)) {
+                mapaInit.set(clave, sNuevo);
+                nuevosAgregados++;
+            }
+        });
+        if (nuevosAgregados > 0) {
+            console.log(`✨ Incorporando ${nuevosAgregados} nuevos santos preconfigurados al almacenamiento local.`);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(mapaInit.values())));
         }
 
         window.eliminarFila = function(btn) {
@@ -505,9 +883,6 @@
             tbody.appendChild(tr);
             tr.querySelector('input').focus();
         });
-
-        const ADMIN_EMAIL = 'dbaezh78@gmail.com';
-        let modoAdmin = false; // Solo true si está logueado dbaezh78@gmail.com
 
         function actualizarEstadoAdmin(user) {
             const label = document.getElementById('auth-user-label-ns');
@@ -576,10 +951,123 @@
             }
         };
 
-        function verificarAuthInicialNS() {
+        // Escuchar cambios de autenticación en Firebase
+        function verificarAuthInicial() {
             if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
                 window.firebaseAPI.onAuthReady((user) => {
+                    console.log("🔑 [Auth State Changed]:", user ? user.email : "Sin sesión activa");
                     actualizarEstadoAdmin(user);
+                });
+            } else {
+                setTimeout(verificarAuthInicial, 300);
+            }
+        }
+        verificarAuthInicial();
+
+        window.sincronizarFechaPickerATexto = function(pickerId, textId) {
+            const picker = document.getElementById(pickerId);
+            const textInput = document.getElementById(textId);
+            if (picker && picker.value && textInput) {
+                const parts = picker.value.split('-');
+                if (parts.length === 3) {
+                    textInput.value = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            }
+        };
+
+        window.sincronizarTextoAPicker = function(textId, pickerId) {
+            const textInput = document.getElementById(textId);
+            const picker = document.getElementById(pickerId);
+            if (!textInput || !picker) return;
+            const match = textInput.value.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (match) {
+                const d = match[1].padStart(2, '0');
+                const m = match[2].padStart(2, '0');
+                const y = match[3];
+                picker.value = `${y}-${m}-${d}`;
+            } else {
+                picker.value = '';
+            }
+        };
+
+        function extraerAnio(str) {
+            if (!str) return null;
+            const match = str.match(/\b(\d{1,4})\b/);
+            if (!match) return null;
+            let anio = parseInt(match[1], 10);
+            if (/a\.?\s*c\.?/i.test(str)) {
+                anio = -anio;
+            }
+            return anio;
+        }
+
+        function calcularEdadSanto(nacStr, mueStr) {
+            if (!nacStr || !mueStr) return null;
+            // Caso 1: Fechas exactas dd/mm/aaaa
+            const matchNac = nacStr.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            const matchMue = mueStr.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            
+            if (matchNac && matchMue) {
+                const d1 = parseInt(matchNac[1], 10), m1 = parseInt(matchNac[2], 10), y1 = parseInt(matchNac[3], 10);
+                const d2 = parseInt(matchMue[1], 10), m2 = parseInt(matchMue[2], 10), y2 = parseInt(matchMue[3], 10);
+                
+                let edad = y2 - y1;
+                if (m2 < m1 || (m2 === m1 && d2 < d1)) {
+                    edad--;
+                }
+                return edad >= 0 ? edad : null;
+            }
+            
+            // Caso 2: Años (ej. 1181 y 1226)
+            const yNac = extraerAnio(nacStr);
+            const yMue = extraerAnio(mueStr);
+            if (yNac !== null && yMue !== null) {
+                let edad = yMue - yNac;
+                return edad >= 0 ? edad : null;
+            }
+            
+            return null;
+        }
+
+        function aplicarMascaraFecha(input, pickerId) {
+            input.addEventListener('input', function(e) {
+                let v = this.value;
+                if (/^[a-zA-Z\s]/.test(v)) return;
+                
+                let clean = v.replace(/\D/g, '');
+                if (clean.length > 8) clean = clean.substring(0, 8);
+                
+                if (clean.length >= 5) {
+                    this.value = `${clean.substring(0,2)}/${clean.substring(2,4)}/${clean.substring(4)}`;
+                } else if (clean.length >= 3) {
+                    this.value = `${clean.substring(0,2)}/${clean.substring(2)}`;
+                } else {
+                    this.value = clean;
+                }
+                sincronizarTextoAPicker(this.id, pickerId);
+            });
+        }
+
+        const inputNac = document.getElementById('nacimiento');
+        const inputMue = document.getElementById('muerte');
+        if (inputNac) aplicarMascaraFecha(inputNac, 'nacimiento-picker');
+        if (inputMue) aplicarMascaraFecha(inputMue, 'muerte-picker');
+
+        function verificarAuthInicialNS() {
+            if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
+                window.firebaseAPI.onAuthReady(async (user) => {
+                    actualizarEstadoAdmin(user);
+                    if (window.firebaseAPI.cargarSantosFirestore) {
+                        try {
+                            const datosRemotos = await window.firebaseAPI.cargarSantosFirestore();
+                            if (datosRemotos && Array.isArray(datosRemotos) && datosRemotos.length > 0) {
+                                guardarSantos(datosRemotos);
+                                console.log("☁️ [Firestore] Catálogo sincronizado desde la nube.");
+                            }
+                        } catch (err) {
+                            console.warn("⚠️ No se pudo descargar desde Cloud Firestore (usando copia local):", err);
+                        }
+                    }
                     renderTablaRegistrados();
                 });
             } else {
@@ -588,17 +1076,51 @@
         }
         verificarAuthInicialNS();
 
-        function renderTablaRegistrados() {
-            const santos = obtenerSantos();
+        window.renderTablaRegistrados = function() {
+            const todosLosSantos = obtenerSantos();
             const tbody = document.getElementById('tbody-santos-registrados');
             if (!tbody) return;
 
-            if (santos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888; padding:18px;">No hay santos registrados aún.</td></tr>';
+            const inputBusqueda = document.getElementById('filtro-nombre-santo');
+            const selectFoto = document.getElementById('filtro-foto-santo');
+            const contadorEl = document.getElementById('contador-santos-filtrados');
+
+            const query = inputBusqueda ? inputBusqueda.value.toLowerCase().trim() : '';
+            const filtroFoto = selectFoto ? selectFoto.value : 'todos';
+
+            // Filtrar santos
+            const santosFiltrados = todosLosSantos.map((s, originalIdx) => ({ s, originalIdx })).filter(item => {
+                const s = item.s;
+                // Filtro por foto
+                const tieneFoto = !!(s.imagen && s.imagen.trim().length > 0);
+                if (filtroFoto === 'con_foto' && !tieneFoto) return false;
+                if (filtroFoto === 'sin_foto' && tieneFoto) return false;
+
+                // Filtro por texto (nombre, país, realidad, ciudad)
+                if (query) {
+                    const matchNombre = (s.nombre || '').toLowerCase().includes(query);
+                    const matchPais = (s.pais || '').toLowerCase().includes(query);
+                    const matchRealidad = (s.realidad || '').toLowerCase().includes(query);
+                    const matchCiudad = (s.ciudad || '').toLowerCase().includes(query);
+                    if (!matchNombre && !matchPais && !matchRealidad && !matchCiudad) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            if (contadorEl) {
+                contadorEl.textContent = `Mostrando ${santosFiltrados.length} de ${todosLosSantos.length}`;
+            }
+
+            if (santosFiltrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888; padding:18px;">No se encontraron santos con los filtros seleccionados.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = santos.map((s, idx) => {
+            tbody.innerHTML = santosFiltrados.map(item => {
+                const s = item.s;
+                const idx = item.originalIdx;
                 const hijosHtml = (s.hijos && s.hijos.length > 0)
                     ? s.hijos.map(h => '<span class="tag-hijo">' + h + '</span>').join('')
                     : '<span style="color:#9e9e9e;">—</span>';
@@ -613,17 +1135,112 @@
                     `;
                 }
 
+                let imgHtml = '';
+                if (s.imagen && s.imagen.trim().length > 0) {
+                    imgHtml = `<img src="${s.imagen}" class="img-avatar-tabla" alt="${s.nombre}" title="${s.nombre}">`;
+                } else {
+                    imgHtml = `<span class="material-symbols-outlined icon-avatar-sin-foto" title="Buscar imagen de ${s.nombre} en Google" onclick="buscarOVerImagenSanto(${idx}, event)">account_circle</span>`;
+                }
+
+                const edad = calcularEdadSanto(s.nacimiento, s.muerte);
+                const edadTag = (edad !== null) ? `<span style="font-size: 0.78rem; color: #546e7a; font-weight: 500; margin-left: 4px;">(${edad} años)</span>` : '';
+
                 return '<tr>' +
-                    '<td style="font-weight: 600; color: #0277bd;">' + (s.nombre || '') + '</td>' +
-                    '<td>' + (s.nacimiento || '—') + '</td>' +
-                    '<td>' + (s.muerte || '—') + '</td>' +
-                    '<td>' + (s.pais || '—') + '</td>' +
-                    '<td>' + (s.ciudad || '—') + '</td>' +
-                    '<td>' + (s.realidad || '—') + '</td>' +
-                    '<td>' + hijosHtml + '</td>' +
+                    '<td class="col-nombre-santo">' + imgHtml + '<span class="nombre-santo-link" onclick="verDetalleSanto(' + idx + ')" title="Ver detalle completo">' + (s.nombre || '') + '</span>' + edadTag + '</td>' +
+                    '<td><div class="texto-recortado">' + (s.nacimiento || '—') + '</div></td>' +
+                    '<td><div class="texto-recortado">' + (s.muerte || '—') + '</div></td>' +
+                    '<td><div class="texto-recortado">' + (s.pais || '—') + '</div></td>' +
+                    '<td><div class="texto-recortado">' + (s.ciudad || '—') + '</div></td>' +
+                    '<td><div class="texto-recortado">' + (s.realidad || '—') + '</div></td>' +
+                    '<td><div class="texto-recortado">' + hijosHtml + '</div></td>' +
                     '<td style="text-align: center;">' + accionesHtml + '</td>' +
                 '</tr>';
             }).join('');
+        }
+
+        // Manejo de la Zona Pegar Imagen (Copy-Paste y Drag & Drop)
+        const pasteZone = document.getElementById('paste-zone');
+        const imgBase64Input = document.getElementById('imagen-base64');
+        const previewContainer = document.getElementById('preview-container');
+        const imgPreview = document.getElementById('img-preview');
+
+        function procesarArchivoImagen(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Por favor selecciona o pega un archivo de imagen válido.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Comprimir imagen a maximo 400px de ancho/alto y calidad JPEG 0.75
+                    const MAX_SIZE = 400;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                    imgBase64Input.value = compressedBase64;
+                    imgPreview.src = compressedBase64;
+                    previewContainer.style.display = 'flex';
+                    pasteZone.style.display = 'none';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        window.quitarImagen = function() {
+            imgBase64Input.value = '';
+            imgPreview.src = '';
+            previewContainer.style.display = 'none';
+            pasteZone.style.display = 'block';
+        };
+
+        if (pasteZone) {
+            // Pegar con Ctrl+V en la página o zona
+            document.addEventListener('paste', function(e) {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        procesarArchivoImagen(blob);
+                        break;
+                    }
+                }
+            });
+
+            // Arrastrar y Soltar (Drag & Drop)
+            pasteZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                pasteZone.classList.add('dragover');
+            });
+            pasteZone.addEventListener('dragleave', () => pasteZone.classList.remove('dragover'));
+            pasteZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                pasteZone.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    procesarArchivoImagen(e.dataTransfer.files[0]);
+                }
+            });
         }
 
         window.editarSanto = function(index) {
@@ -644,6 +1261,18 @@
             document.getElementById('realidad').value = s.realidad || '';
             document.getElementById('historia').value = s.historia || '';
             document.getElementById('detalle').value = s.detalle || '';
+
+            sincronizarTextoAPicker('nacimiento', 'nacimiento-picker');
+            sincronizarTextoAPicker('muerte', 'muerte-picker');
+
+            if (s.imagen) {
+                imgBase64Input.value = s.imagen;
+                imgPreview.src = s.imagen;
+                previewContainer.style.display = 'flex';
+                pasteZone.style.display = 'none';
+            } else {
+                quitarImagen();
+            }
 
             // Hijos en la fe
             const tbodyHijos = document.getElementById('tbody-hijos');
@@ -667,6 +1296,9 @@
         window.cancelarEdicion = function() {
             document.getElementById('edit-index').value = '-1';
             document.getElementById('form-santo').reset();
+            quitarImagen();
+            sincronizarTextoAPicker('nacimiento', 'nacimiento-picker');
+            sincronizarTextoAPicker('muerte', 'muerte-picker');
             document.getElementById('tbody-hijos').innerHTML = '<tr><td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
             document.getElementById('btn-submit-form').textContent = 'Guardar Santo';
             document.getElementById('btn-cancelar-edicion').style.display = 'none';
@@ -702,15 +1334,21 @@
                 if (v) hijos.push(v);
             });
 
+            const getVal = (id) => {
+                const el = document.getElementById(id);
+                return el ? el.value.trim() : '';
+            };
+
             const nuevoSanto = {
                 nombre: nombre,
-                nacimiento: document.getElementById('nacimiento').value.trim(),
-                muerte: document.getElementById('muerte').value.trim(),
-                pais: document.getElementById('pais').value.trim(),
-                ciudad: document.getElementById('ciudad').value.trim(),
-                realidad: document.getElementById('realidad').value.trim(),
-                historia: document.getElementById('historia').value.trim(),
-                detalle: document.getElementById('detalle').value.trim(),
+                nacimiento: getVal('nacimiento'),
+                muerte: getVal('muerte'),
+                pais: getVal('pais'),
+                ciudad: getVal('ciudad'),
+                realidad: getVal('realidad'),
+                historia: getVal('historia'),
+                detalle: getVal('detalle'),
+                imagen: (imgBase64Input ? imgBase64Input.value : '') || '',
                 hijos: hijos
             };
 
@@ -733,6 +1371,62 @@
             alert('¡Santo guardado exitosamente!');
             cancelarEdicion();
         });
+
+        window.verDetalleSanto = function(index) {
+            const santos = obtenerSantos();
+            const s = santos[index];
+            if (!s) return;
+
+            const edad = calcularEdadSanto(s.nacimiento, s.muerte);
+            const edadTexto = (edad !== null) ? ` (${edad} años)` : '';
+
+            document.getElementById('modal-santo-nombre').textContent = (s.nombre || 'Detalle del Santo') + edadTexto;
+            
+            const hijosList = (s.hijos && s.hijos.length > 0)
+                ? s.hijos.map(h => `<span class="tag-hijo">${h}</span>`).join(' ')
+                : '—';
+
+            const imgModal = s.imagen 
+                ? `<div style="text-align:center; margin-bottom:12px;"><img src="${s.imagen}" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${s.nombre}"></div>` 
+                : '';
+
+            document.getElementById('modal-santo-cuerpo').innerHTML = `
+                ${imgModal}
+                <div><strong>Nacimiento:</strong> ${s.nacimiento || '—'}</div>
+                <div><strong>Mortalidad:</strong> ${s.muerte || '—'}</div>
+                ${edad !== null ? `<div><strong>Edad al fallecer:</strong> ${edad} años</div>` : ''}
+                <div><strong>País:</strong> ${s.pais || '—'}</div>
+                <div><strong>Ciudad:</strong> ${s.ciudad || '—'}</div>
+                <div><strong>Realidad:</strong> ${s.realidad || '—'}</div>
+                <div><strong>Hijos en la fe:</strong> <div style="margin-top:4px;">${hijosList}</div></div>
+                ${s.historia ? `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.historia}</p></div>` : ''}
+                ${s.detalle ? `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.detalle}</p></div>` : ''}
+            `;
+
+            document.getElementById('modal-detalle-santo').style.display = 'flex';
+        };
+
+        window.cerrarModalDetalleSanto = function() {
+            document.getElementById('modal-detalle-santo').style.display = 'none';
+        };
+
+        window.buscarOVerImagenSanto = function(index, event) {
+            if (event) event.stopPropagation();
+            const santos = obtenerSantos();
+            const s = santos[index];
+            if (!s || !s.nombre) return;
+
+            // Condición: solo buscar si NO tiene imagen
+            if (!s.imagen || s.imagen.trim().length === 0) {
+                const nombreLimpio = s.nombre.trim();
+                const busquedaQuery = encodeURIComponent(nombreLimpio + ' imagen catolico');
+                const urlGoogle = `https://www.google.com/search?tbm=isch&q=${busquedaQuery}`;
+                window.open(urlGoogle, '_blank');
+                if (modoAdmin) {
+                    editarSanto(index);
+                }
+            }
+        };
 
         renderTablaRegistrados();
     </script>
