@@ -140,9 +140,18 @@ function cargarPortada() {
             }
         });
 
+        // Determinar si hoy es el primer domingo después del 6 de enero (Bautismo del Señor)
+        const fechaBautismo = new Date(fechaActual.getFullYear(), 0, 7);
+        while (fechaBautismo.getDay() !== 0) {
+            fechaBautismo.setDate(fechaBautismo.getDate() + 1);
+        }
+        const claveBautismoHoy = `${fechaBautismo.getDate()}/${fechaBautismo.getMonth() + 1}`;
+
         // Determinar nombre del santo asignado o buscar por fecha en catálogo
         if (asignacionesSantos[claveDiaMes] && asignacionesSantos[claveDiaMes].trim()) {
             textoBotonSanto = asignacionesSantos[claveDiaMes].trim();
+        } else if (claveDiaMes === claveBautismoHoy) {
+            textoBotonSanto = "El Bautismo del Señor";
         } else {
             // Buscar si hay un santo cuya festividad coincida con hoy
             const santoPorFecha = Array.from(mapaCatalogo.values()).find(s => {

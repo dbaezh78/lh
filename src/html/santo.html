@@ -155,6 +155,116 @@
         .select-santo:focus {
             border-color: var(--color-santo-azul);
         }
+        /* Dropdown con buscador interactivo para la tabla */
+        .custom-select-santo {
+            position: relative;
+            width: 100%;
+            min-width: 200px;
+        }
+        tr:has(.custom-select-dropdown.abierto) {
+            position: relative;
+            z-index: 100;
+        }
+        td:has(.custom-select-dropdown.abierto) {
+            position: relative;
+            z-index: 101;
+        }
+        .custom-select-trigger {
+            width: 100%;
+            padding: 6px 28px 6px 10px;
+            border: 1px solid var(--color-borde);
+            border-radius: 6px;
+            font-size: 0.88rem;
+            background: #ffffff;
+            color: #263238;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            user-select: none;
+            text-align: left;
+            box-sizing: border-box;
+        }
+        .custom-select-trigger:after {
+            content: "▼";
+            font-size: 0.65rem;
+            color: #78909c;
+            position: absolute;
+            right: 9px;
+            pointer-events: none;
+        }
+        .custom-select-trigger.activo {
+            border-color: var(--color-santo-azul);
+            box-shadow: 0 0 0 2px rgba(2, 119, 189, 0.15);
+        }
+        .custom-select-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 100%;
+            min-width: 270px;
+            background: #ffffff;
+            border: 1.5px solid var(--color-santo-azul);
+            border-radius: 8px;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.22);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        .custom-select-dropdown.abierto {
+            display: flex;
+        }
+        .custom-select-search-box {
+            padding: 8px;
+            background: #f4f8fb;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .custom-select-search-box input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--color-borde);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .custom-select-search-box input:focus {
+            border-color: var(--color-santo-azul);
+        }
+        .custom-select-opciones {
+            max-height: 220px;
+            overflow-y: auto;
+            margin: 0;
+            padding: 4px 0;
+            list-style: none;
+        }
+        .custom-select-opcion {
+            padding: 7px 12px;
+            font-size: 0.86rem;
+            cursor: pointer;
+            color: #263238;
+            transition: background 0.15s;
+        }
+        .custom-select-opcion:hover {
+            background: #e1f5fe;
+            color: var(--color-santo-azul);
+        }
+        .custom-select-opcion.seleccionado {
+            background: #b3e5fc;
+            font-weight: 600;
+            color: #01579b;
+        }
+        .custom-select-opcion.opcion-vacia {
+            color: #78909c;
+            font-style: italic;
+            border-bottom: 1px dashed #e0e0e0;
+        }
         .dato-auto {
             color: #546e7a;
             font-size: 0.85rem;
@@ -299,23 +409,31 @@
         </div>
 
         <div class="filtros-barra">
-            <div>
-                <label for="filtro-mes" style="font-weight: 600; margin-right: 6px;">Mes:</label>
-                <select id="filtro-mes">
-                    <option value="todos">Todo el año (365 días)</option>
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                </select>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+                <div>
+                    <label for="filtro-mes" style="font-weight: 600; margin-right: 6px;">Mes:</label>
+                    <select id="filtro-mes">
+                        <option value="todos">Todo el año (365 días)</option>
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filtro-santo-select" style="font-weight: 600; margin-right: 6px;">Santo:</label>
+                    <select id="filtro-santo-select" style="max-width: 250px;">
+                        <option value="todos">Todos los santos</option>
+                    </select>
+                </div>
             </div>
             <input type="text" id="buscador-santo" placeholder="Buscar fecha, día o santo...">
         </div>
@@ -448,14 +566,44 @@
 
         let asignaciones = obtenerAsignaciones();
 
+        // Regla móvil: El Bautismo del Señor se celebra siempre el primer domingo después del 6 de enero (Epifanía)
+        function calcularClaveBautismoDelSenor(anio) {
+            const f = new Date(anio, 0, 7); // Comenzar a partir del 7 de enero
+            while (f.getDay() !== 0) { // 0 = Domingo
+                f.setDate(f.getDate() + 1);
+            }
+            return f.getDate() + '/' + (f.getMonth() + 1);
+        }
+
         // Cargar asignaciones automáticas basadas en fechaFestividad o mortalidad del catálogo de santos
         function autoAsignarSantosPorFecha() {
             const catalogoCompleto = obtenerCatalogoSantos();
             if (!catalogoCompleto || catalogoCompleto.length === 0) return false;
 
             let huboCambios = false;
+
+            // 1. Aplicar regla litúrgica móvil para "El Bautismo del Señor"
+            const claveBautismo = calcularClaveBautismoDelSenor(anioActual);
+            const santoBautismo = catalogoCompleto.find(s => s && s.nombre && s.nombre.toLowerCase().includes('bautismo del se'));
+            const nombreBautismo = santoBautismo ? santoBautismo.nombre : 'El Bautismo del Señor';
+
+            // Quitar asignación previa si estaba en otra fecha distinta a la que toca según la regla del domingo
+            for (const [clave, nombre] of Object.entries(asignaciones)) {
+                if (nombre && nombre.toLowerCase().includes('bautismo del se') && clave !== claveBautismo) {
+                    delete asignaciones[clave];
+                    huboCambios = true;
+                }
+            }
+            if (asignaciones[claveBautismo] !== nombreBautismo) {
+                asignaciones[claveBautismo] = nombreBautismo;
+                huboCambios = true;
+            }
+
+            // 2. Asignar el resto de santos por festividad o mortalidad
             catalogoCompleto.forEach(s => {
                 if (!s || !s.nombre) return;
+                if (s.nombre.toLowerCase().includes('bautismo del se')) return; // Ya asignado por regla dinámica arriba
+
                 const claveFest = normalizarClaveFecha(s.fechaFestividad);
                 const claveMuerte = normalizarClaveFecha(s.muerte);
                 const claveDestino = claveFest || claveMuerte;
@@ -578,6 +726,7 @@
                         }
                     }
                     autoAsignarSantosPorFecha();
+                    actualizarSelectorFiltroSantos();
                     renderTabla();
                 });
             } else {
@@ -586,8 +735,28 @@
         }
         verificarAuthInicial();
 
+        function actualizarSelectorFiltroSantos() {
+            const selectFiltro = document.getElementById('filtro-santo-select');
+            if (!selectFiltro) return;
+            const valorActual = selectFiltro.value || 'todos';
+            const santos = obtenerCatalogoSantos();
+            
+            // Ordenar alfabéticamente
+            santos.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+
+            let opciones = '<option value="todos">Todos los santos (' + santos.length + ')</option>';
+            opciones += '<option value="__sin_santo__">— Días sin santo asignado —</option>';
+            santos.forEach(s => {
+                if (!s || !s.nombre) return;
+                const sel = (s.nombre === valorActual) ? 'selected' : '';
+                opciones += '<option value="' + s.nombre.replace(/"/g, '&quot;') + '" ' + sel + '>' + s.nombre + '</option>';
+            });
+            selectFiltro.innerHTML = opciones;
+        }
+
         function renderTabla() {
             const filtroMes = document.getElementById('filtro-mes').value;
+            const filtroSanto = document.getElementById('filtro-santo-select') ? document.getElementById('filtro-santo-select').value : 'todos';
             const filtroBusqueda = document.getElementById('buscador-santo').value.toLowerCase().trim();
             const tbody = document.getElementById('tbody-santos-anual');
             const santosDisponibles = obtenerCatalogoSantos();
@@ -595,11 +764,22 @@
             let html = '';
 
             diasDelAnio.forEach(d => {
-                if (filtroMes !== 'todos' && String(d.mesNum) !== filtroMes) return;
-
                 const santoAsignadoNombre = asignaciones[d.clave] || '';
                 const santoObj = santosDisponibles.find(s => s.nombre.toLowerCase() === santoAsignadoNombre.toLowerCase());
 
+                // 1. Filtro por santo seleccionado
+                if (filtroSanto !== 'todos') {
+                    if (filtroSanto === '__sin_santo__') {
+                        if (santoAsignadoNombre) return;
+                    } else {
+                        if (!santoAsignadoNombre || santoAsignadoNombre.toLowerCase() !== filtroSanto.toLowerCase()) return;
+                    }
+                }
+
+                // 2. Filtro por mes (si hay un santo específico seleccionado, mostramos su día independientemente del mes o según corresponda)
+                if (filtroSanto === 'todos' && filtroMes !== 'todos' && String(d.mesNum) !== filtroMes) return;
+
+                // 3. Filtro por texto de búsqueda
                 const coincideBusqueda = !filtroBusqueda || 
                     d.fechaTexto.toLowerCase().includes(filtroBusqueda) ||
                     d.diaSemana.toLowerCase().includes(filtroBusqueda) ||
@@ -619,15 +799,31 @@
 
                 let celdaSantoHtml = '';
                 if (modoAdminSanto) {
-                    const opcionesHtml = santosDisponibles.map(s => {
-                        const sel = s.nombre === santoAsignadoNombre ? 'selected' : '';
-                        return '<option value="' + s.nombre + '" ' + sel + '>' + s.nombre + '</option>';
-                    }).join('');
-
-                    celdaSantoHtml = '<select class="select-santo" data-clave="' + d.clave + '" onchange="cambiarSanto(this)">' +
-                                        '<option value="">-- Sin santo asignado --</option>' +
-                                        opcionesHtml +
-                                     '</select>';
+                    const textoMostrado = santoAsignadoNombre || '-- Sin santo asignado --';
+                    const estiloColor = santoAsignadoNombre ? 'color:#0277bd; font-weight:600;' : 'color:#78909c; font-style:italic;';
+                    
+                    celdaSantoHtml = `
+                        <div class="custom-select-santo" id="custom-sel-${d.clave.replace('/', '-')}">
+                            <div class="custom-select-trigger" style="${estiloColor}" onclick="toggleDropdownSanto('${d.clave}', event)">
+                                <span class="custom-select-label">${textoMostrado}</span>
+                            </div>
+                            <div class="custom-select-dropdown" id="dropdown-${d.clave.replace('/', '-')}">
+                                <div class="custom-select-search-box" onclick="event.stopPropagation()">
+                                    <span class="material-symbols-outlined" style="font-size:16px; color:#78909c;">search</span>
+                                    <input type="text" placeholder="Buscar santo..." oninput="filtrarOpcionesDropdownSanto('${d.clave}', this.value)" onclick="event.stopPropagation()">
+                                </div>
+                                <ul class="custom-select-opciones">
+                                    <li class="custom-select-opcion opcion-vacia ${!santoAsignadoNombre ? 'seleccionado' : ''}" onclick="seleccionarSantoOpcion('${d.clave}', '', event)">
+                                        -- Sin santo asignado --
+                                    </li>
+                                    ${santosDisponibles.map(s => {
+                                        const sel = s.nombre === santoAsignadoNombre ? 'seleccionado' : '';
+                                        return `<li class="custom-select-opcion ${sel}" data-nombre="${s.nombre.toLowerCase().replace(/"/g, '&quot;')}" onclick="seleccionarSantoOpcion('${d.clave}', '${s.nombre.replace(/'/g, "\\'")}', event)">${s.nombre}</li>`;
+                                    }).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     celdaSantoHtml = santoAsignadoNombre
                         ? '<span class="santo-info-link" onclick="verDetallePorNombre(\'' + santoAsignadoNombre.replace(/'/g, "\\'") + '\')">' + santoAsignadoNombre + '</span>'
@@ -684,6 +880,119 @@
             document.getElementById('modal-detalle-santo').style.display = 'none';
         };
 
+        window.toggleDropdownSanto = function(clave, event) {
+            if (!modoAdminSanto) {
+                alert('Inicia sesión como Administrador para asignar o modificar santos.');
+                return;
+            }
+            if (event) event.stopPropagation();
+            const idDropdown = 'dropdown-' + clave.replace('/', '-');
+            const targetDropdown = document.getElementById(idDropdown);
+            const targetTrigger = targetDropdown ? targetDropdown.previousElementSibling : null;
+
+            // Cerrar cualquier otro dropdown abierto
+            document.querySelectorAll('.custom-select-dropdown.abierto').forEach(dd => {
+                if (dd !== targetDropdown) {
+                    dd.classList.remove('abierto');
+                    if (dd.previousElementSibling) dd.previousElementSibling.classList.remove('activo');
+                }
+            });
+
+            if (targetDropdown) {
+                const abrir = !targetDropdown.classList.contains('abierto');
+                if (abrir) {
+                    targetDropdown.classList.add('abierto');
+                    if (targetTrigger) targetTrigger.classList.add('activo');
+                    // Reiniciar buscador y enfocar
+                    const searchInput = targetDropdown.querySelector('input');
+                    if (searchInput) {
+                        searchInput.value = '';
+                        filtrarOpcionesDropdownSanto(clave, '');
+                        setTimeout(() => searchInput.focus(), 50);
+                    }
+                } else {
+                    targetDropdown.classList.remove('abierto');
+                    if (targetTrigger) targetTrigger.classList.remove('activo');
+                }
+            }
+        };
+
+        window.filtrarOpcionesDropdownSanto = function(clave, texto) {
+            const idDropdown = 'dropdown-' + clave.replace('/', '-');
+            const dropdown = document.getElementById(idDropdown);
+            if (!dropdown) return;
+            const term = (texto || '').toLowerCase().trim();
+            const opciones = dropdown.querySelectorAll('.custom-select-opcion');
+            opciones.forEach(op => {
+                if (op.classList.contains('opcion-vacia')) {
+                    op.style.display = !term ? 'block' : 'none';
+                    return;
+                }
+                const nombre = op.getAttribute('data-nombre') || '';
+                op.style.display = nombre.includes(term) ? 'block' : 'none';
+            });
+        };
+
+        window.seleccionarSantoOpcion = function(clave, valor, event) {
+            if (event) event.stopPropagation();
+            if (!modoAdminSanto) {
+                alert('No tienes permisos para modificar asignaciones.');
+                return;
+            }
+
+            const idDropdown = 'dropdown-' + clave.replace('/', '-');
+            const dropdown = document.getElementById(idDropdown);
+            if (dropdown) {
+                dropdown.classList.remove('abierto');
+                if (dropdown.previousElementSibling) dropdown.previousElementSibling.classList.remove('activo');
+            }
+
+            const fila = document.querySelector('tr[data-clave="' + clave + '"]');
+            const santosDisponibles = obtenerCatalogoSantos();
+            const santoObj = santosDisponibles.find(s => s.nombre === valor);
+
+            if (valor) {
+                asignaciones[clave] = valor;
+            } else {
+                delete asignaciones[clave];
+            }
+
+            if (fila) {
+                const label = fila.querySelector('.custom-select-label');
+                const trigger = fila.querySelector('.custom-select-trigger');
+                if (label) {
+                    label.textContent = valor || '-- Sin santo asignado --';
+                }
+                if (trigger) {
+                    if (valor) {
+                        trigger.style.color = '#0277bd';
+                        trigger.style.fontWeight = '600';
+                        trigger.style.fontStyle = 'normal';
+                    } else {
+                        trigger.style.color = '#78909c';
+                        trigger.style.fontWeight = 'normal';
+                        trigger.style.fontStyle = 'italic';
+                    }
+                }
+
+                fila.querySelector('.col-pais').textContent = santoObj ? (santoObj.pais || '-') : '-';
+                fila.querySelector('.col-realidad').textContent = santoObj ? (santoObj.realidad || '-') : '-';
+                fila.querySelector('.col-nacimiento').textContent = santoObj ? (santoObj.nacimiento || '-') : '-';
+                fila.querySelector('.col-mortalidad').textContent = santoObj ? (santoObj.muerte || '-') : '-';
+            }
+
+            guardarAsignaciones(asignaciones);
+            actualizarSelectorFiltroSantos();
+        };
+
+        // Cerrar cualquier dropdown al hacer clic fuera
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-select-dropdown.abierto').forEach(dd => {
+                dd.classList.remove('abierto');
+                if (dd.previousElementSibling) dd.previousElementSibling.classList.remove('activo');
+            });
+        });
+
         window.cambiarSanto = function(select) {
             if (!modoAdminSanto) {
                 alert('No tienes permisos para modificar asignaciones.');
@@ -718,12 +1027,24 @@
             alert('✅ Asignaciones de santos guardadas correctamente.');
         });
 
-        document.getElementById('filtro-mes').addEventListener('change', renderTabla);
+        document.getElementById('filtro-mes').addEventListener('change', () => {
+            renderTabla();
+        });
+
+        const selectFiltroSantoEl = document.getElementById('filtro-santo-select');
+        if (selectFiltroSantoEl) {
+            selectFiltroSantoEl.addEventListener('change', () => {
+                // Si selecciona un santo específico, permitir verlo cambiando mes a 'todos' automáticamente si no está en el mes actual
+                renderTabla();
+            });
+        }
+
         document.getElementById('buscador-santo').addEventListener('input', renderTabla);
 
         const mesActualNum = String(hoy.getMonth() + 1);
         document.getElementById('filtro-mes').value = mesActualNum;
 
+        actualizarSelectorFiltroSantos();
         renderTabla();
     </script>
 </body>

@@ -1,5 +1,17 @@
 export const catalogoSantosAnual = [
     {
+        "fechaFestividad": "11/1",
+        "nombre": "El Bautismo del Señor",
+        "nacimiento": "—",
+        "muerte": "—",
+        "pais": "Tierra Santa",
+        "ciudad": "Río Jordán",
+        "realidad": "Fiesta del Señor",
+        "historia": "Celebración de la manifestación de Jesucristo en las aguas del río Jordán al ser bautizado por Juan el Bautista. Los cielos se abrieron, el Espíritu Santo descendió en forma de paloma y la voz del Padre proclamó: 'Este es mi Hijo amado, en quien me complazco'. Con esta fiesta concluye el Tiempo de Navidad y comienza el Tiempo Ordinario.",
+        "detalle": "Se celebra siempre el domingo siguiente después de la Epifanía (6 de enero).",
+        "hijos": []
+    },
+    {
         "fechaFestividad": "28/1",
         "nombre": "Santo Tomás de Aquino",
         "nacimiento": "1225",
