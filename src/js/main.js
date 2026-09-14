@@ -347,6 +347,58 @@ function cargarPortada() {
     `;
 
     vincularEventos();
+
+    // Actualizar icono con la imagen de IndexedDB si no estaba disponible sincrónicamente
+    if (textoBotonSanto) {
+        cargarImagenSantoDesdeIndexedDB(textoBotonSanto).then(imgSrc => {
+            if (imgSrc) {
+                const btnSantoIcon = document.querySelector('#btn-santo-dia .btn-pill-icon');
+                if (btnSantoIcon) {
+                    btnSantoIcon.innerHTML = `<img src="${imgSrc}" alt="${textoBotonSanto}" class="img-santo-pill" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'material-symbols-outlined\\'>person</span>';">`;
+                }
+            }
+        });
+    }
+}
+
+async function cargarImagenSantoDesdeIndexedDB(nombreSanto) {
+    if (!window.indexedDB || !nombreSanto) return null;
+    try {
+        const db = await new Promise((resolve) => {
+            const req = indexedDB.open('LH_Santos_DB', 1);
+            req.onsuccess = (e) => resolve(e.target.result);
+            req.onerror = () => resolve(null);
+        });
+        if (!db || !db.objectStoreNames.contains('catalogo')) return null;
+        const lista = await new Promise((resolve) => {
+            const tx = db.transaction('catalogo', 'readonly');
+            const req = tx.objectStore('catalogo').get('santos');
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+        });
+        if (Array.isArray(lista)) {
+            const normalizar = (str) => (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            const claveBuscada = normalizar(nombreSanto);
+            
+            // 1. Coincidencia exacta o normalizada
+            let encontrado = lista.find(s => s && s.nombre && normalizar(s.nombre) === claveBuscada);
+            // 2. Coincidencia si contiene el término clave
+            if (!encontrado && claveBuscada.length > 3) {
+                encontrado = lista.find(s => s && s.nombre && (normalizar(s.nombre).includes(claveBuscada) || claveBuscada.includes(normalizar(s.nombre))));
+            }
+
+            if (encontrado && encontrado.imagen && encontrado.imagen.trim()) {
+                let img = encontrado.imagen.trim();
+                if (img.startsWith('../img/')) {
+                    img = 'src/' + img.substring(3);
+                }
+                return img;
+            }
+        }
+    } catch (e) {
+        console.warn("Error leyendo imagen de IndexedDB en main.js:", e);
+    }
+    return null;
 }
 
 // =========================================================

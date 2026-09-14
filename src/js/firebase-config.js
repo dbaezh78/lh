@@ -17,6 +17,7 @@ import {
     setDoc,
     getDoc,
     getDocs,
+    deleteDoc,
     writeBatch
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
@@ -100,6 +101,22 @@ window.firebaseAPI = {
         }
 
         console.log(`🎉 [Firebase] ¡Éxito total! Se guardaron ${count} santos en la colección 'santos'.`);
+    },
+    guardarUnSantoFirestore: async (santo) => {
+        if (!auth.currentUser) return;
+        if (!santo || !santo.nombre) return;
+        const docId = santo.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+        const docRef = doc(db, "santos", docId);
+        await setDoc(docRef, { ...santo, ultimaActualizacion: new Date().toISOString() });
+        console.log(`☁️ [Firebase] Documento '${docId}' guardado individualmente en Firestore.`);
+    },
+    eliminarSantoFirestore: async (nombreSanto) => {
+        if (!auth.currentUser) return;
+        if (!nombreSanto) return;
+        const docId = nombreSanto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+        const docRef = doc(db, "santos", docId);
+        await deleteDoc(docRef);
+        console.log(`🗑️ [Firebase] Documento '${docId}' eliminado de Firestore.`);
     },
     cargarSantosFirestore: async () => {
         const querySnapshot = await getDocs(collection(db, "santos"));

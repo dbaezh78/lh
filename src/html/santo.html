@@ -485,6 +485,30 @@
             'DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'
         ];
 
+        let catalogoIDBCache = [];
+        async function cargarCatalogoDeIndexedDB() {
+            if (!window.indexedDB) return;
+            try {
+                const db = await new Promise((resolve) => {
+                    const req = indexedDB.open('LH_Santos_DB', 1);
+                    req.onsuccess = (e) => resolve(e.target.result);
+                    req.onerror = () => resolve(null);
+                });
+                if (!db || !db.objectStoreNames.contains('catalogo')) return;
+                const lista = await new Promise((resolve) => {
+                    const tx = db.transaction('catalogo', 'readonly');
+                    const req = tx.objectStore('catalogo').get('santos');
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => resolve(null);
+                });
+                if (Array.isArray(lista) && lista.length > 0) {
+                    catalogoIDBCache = lista;
+                    renderTabla();
+                }
+            } catch (_) {}
+        }
+        cargarCatalogoDeIndexedDB();
+
         function obtenerCatalogoSantos() {
             const mapa = new Map();
             // 1. Cargar santos predeterminados del catálogo litúrgico anual
@@ -493,7 +517,7 @@
                     if (s && s.nombre) mapa.set(s.nombre.toLowerCase().trim(), s);
                 });
             }
-            // 2. Cargar/sobrescribir con lo almacenado en LocalStorage (modificaciones, fotos subidas, etc.)
+            // 2. Cargar/sobrescribir con lo almacenado en LocalStorage
             try {
                 const locales = JSON.parse(localStorage.getItem(STORAGE_SANTOS_CATALOGO)) || [];
                 locales.forEach(s => {
@@ -505,6 +529,16 @@
                 });
             } catch (e) {
                 console.warn("Error al leer STORAGE_SANTOS_CATALOGO:", e);
+            }
+            // 3. Cargar/sobrescribir con lo almacenado en IndexedDB (imágenes completas)
+            if (Array.isArray(catalogoIDBCache)) {
+                catalogoIDBCache.forEach(s => {
+                    if (s && s.nombre) {
+                        const clave = s.nombre.toLowerCase().trim();
+                        const previo = mapa.get(clave);
+                        mapa.set(clave, previo ? { ...previo, ...s, imagen: s.imagen || (previo ? previo.imagen : '') } : s);
+                    }
+                });
             }
             return Array.from(mapa.values());
         }

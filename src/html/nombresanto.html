@@ -7,453 +7,45 @@
     <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/buttons.css">
-    <style>
-        :root {
-            --color-santo-azul: #0277bd;
-            --color-borde: #dce7ee;
-        }
-        body {
-            padding: 20px 12px 90px;
-            background: #f4f8fb;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: #263238;
-        }
-        .container-form {
-            max-width: 900px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 24px 20px;
-            box-shadow: 0 4px 18px rgba(2, 119, 189, 0.12);
-            border: 1px solid var(--color-borde);
-        }
-        .header-form {
-            text-align: center;
-            border-bottom: 2px solid var(--color-santo-azul);
-            padding-bottom: 12px;
-            margin-bottom: 22px;
-        }
-        .header-form h1 {
-            margin: 0;
-            color: var(--color-santo-azul);
-            font-size: 1.6rem;
-        }
-        .header-form p {
-            margin: 6px 0 0;
-            color: #607d8b;
-            font-size: 0.95rem;
-        }
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-        .form-full {
-            grid-column: 1 / -1;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .form-group label {
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: #37474f;
-        }
-        .form-group input,
-        .form-group textarea {
-            padding: 10px 12px;
-            border: 1px solid var(--color-borde);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            color: #263238;
-            outline: none;
-            box-sizing: border-box;
-            width: 100%;
-            font-family: inherit;
-        }
-        .form-group textarea {
-            resize: vertical;
-            min-height: 70px;
-        }
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: var(--color-santo-azul);
-            box-shadow: 0 0 0 3px rgba(2, 119, 189, 0.15);
-        }
-        .date-input-container {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-        .date-input-container input[type="date"] {
-            padding: 9px 10px;
-            border: 1px solid var(--color-borde);
-            border-radius: 8px;
-            font-size: 0.93rem;
-            color: #263238;
-            outline: none;
-            box-sizing: border-box;
-            font-family: inherit;
-            background: #fff;
-            flex: 1;
-            min-width: 140px;
-        }
-        .date-input-container input[type="date"]:focus {
-            border-color: var(--color-santo-azul);
-            box-shadow: 0 0 0 3px rgba(2, 119, 189, 0.15);
-        }
-        .seccion-hijos {
-            margin-top: 20px;
-            border-top: 1px solid var(--color-borde);
-            padding-top: 16px;
-        }
-        .seccion-hijos-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .seccion-hijos-header h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            color: var(--color-santo-azul);
-        }
-        .btn-add-hijo {
-            background: #e1f5fe;
-            color: #0277bd;
-            border: 1px solid #81d4fa;
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .tabla-hijos {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 6px;
-        }
-        .tabla-hijos th,
-        .tabla-hijos td {
-            border: 1px solid var(--color-borde);
-            padding: 8px 10px;
-            text-align: left;
-        }
-        .tabla-hijos th {
-            background: #eef5f9;
-            color: #37474f;
-        }
-        .tabla-hijos input {
-            width: 100%;
-            border: none;
-            padding: 4px;
-            font-size: 0.9rem;
-            outline: none;
-            box-sizing: border-box;
-        }
-        .btn-delete-row {
-            background: #ffebee;
-            color: #c62828;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .form-actions {
-            margin-top: 24px;
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        .btn-guardar {
-            background: var(--color-santo-azul);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 22px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-cancelar {
-            background: #eceff1;
-            color: #455a64;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 18px;
-            font-size: 0.95rem;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .lista-santos-guardados {
-            margin-top: 30px;
-            border-top: 2px solid var(--color-borde);
-            padding-top: 18px;
-        }
-        .lista-santos-guardados h3 {
-            margin: 0 0 14px;
-            color: var(--color-santo-azul);
-            font-size: 1.15rem;
-        }
-        .tabla-registrados-wrapper {
-            overflow-x: auto;
-            border: 1px solid var(--color-borde);
-            border-radius: 8px;
-            background: #fff;
-        }
-        .tabla-santos-registrados {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.88rem;
-            min-width: 650px;
-        }
-        .tabla-santos-registrados td {
-            border-bottom: 1px solid #eef2f5;
-            padding: 7px 12px;
-            text-align: left;
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-        .col-nombre-santo {
-            min-width: 220px;
-            max-width: 280px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .texto-recortado {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 140px;
-            display: block;
-        }
-        .nombre-santo-link {
-            color: #0277bd;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: underline;
-            text-decoration-color: transparent;
-            transition: text-decoration-color 0.2s;
-        }
-        .nombre-santo-link:hover {
-            text-decoration-color: #0277bd;
-        }
-        /* Modal Ver Detalle */
-        .modal-overlay-santo {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
-        }
-        .modal-content-santo {
-            background: #fff;
-            border-radius: 12px;
-            max-width: 550px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative;
-        }
-        .modal-close-santo {
-            position: absolute;
-            top: 14px; right: 16px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #78909c;
-            line-height: 1;
-        }
-        .modal-close-santo:hover { color: #37474f; }
-        .tabla-santos-registrados th {
-            background: #eef5f9;
-            color: #37474f;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-        .tabla-santos-registrados tr:hover {
-            background: #f8fafc;
-        }
-        .tag-hijo {
-            display: inline-block;
-            background: #e0f2fe;
-            color: #0277bd;
-            padding: 2px 7px;
-            border-radius: 12px;
-            font-size: 0.76rem;
-            margin: 2px 3px 2px 0;
-            font-weight: 500;
-        }
-        .btn-tbl-acciones {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-        }
-        .btn-editar-santo-tbl {
-            background: #e0f2fe;
-            color: #0277bd;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: background 0.15s;
-        }
-        .btn-editar-santo-tbl:hover {
-            background: #b3e5fc;
-        }
-        .btn-eliminar-santo-tbl {
-            background: #fee2e2;
-            color: #dc2626;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: background 0.15s;
-        }
-        .btn-eliminar-santo-tbl:hover {
-            background: #fca5a5;
-        }
-        .admin-bar {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        .auth-badge-container {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #eef5f9;
-            border: 1px solid var(--color-borde);
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 0.82rem;
-        }
-        .btn-auth-action {
-            background: #fff;
-            border: 1px solid var(--color-santo-azul);
-            color: var(--color-santo-azul);
-            border-radius: 14px;
-            padding: 3px 10px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-auth-action:hover {
-            background: var(--color-santo-azul);
-            color: #fff;
-        }
-        .admin-toggle-btn {
-            background: #fff;
-            border: 1.5px solid var(--color-santo-azul);
-            color: var(--color-santo-azul);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.2s;
-        }
-        .imagen-paste-zone {
-            border: 2px dashed #b0bec5;
-            border-radius: 8px;
-            padding: 14px;
-            text-align: center;
-            background: #fafafa;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-        .imagen-paste-zone:hover, .imagen-paste-zone.dragover {
-            border-color: var(--color-santo-azul);
-            background: #e0f2fe;
-        }
-        .imagen-preview-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 10px;
-        }
-        .imagen-preview-img {
-            width: 70px;
-            height: 70px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid var(--color-borde);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .img-avatar-tabla {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid #b0bec5;
-            vertical-align: middle;
-            margin-right: 8px;
-            cursor: pointer;
-            transition: transform 0.15s, border-color 0.15s;
-        }
-        .img-avatar-tabla:hover {
-            transform: scale(1.15);
-            border-color: var(--color-santo-azul);
-        }
-        .icon-avatar-sin-foto {
-            vertical-align: middle;
-            margin-right: 6px;
-            color: #90a4ae;
-            font-size: 22px;
-            cursor: pointer;
-            transition: transform 0.15s, color 0.15s;
-        }
-        .icon-avatar-sin-foto:hover {
-            color: var(--color-santo-azul);
-            transform: scale(1.2);
-        }
-    </style>
+    <link rel="stylesheet" href="../css/nombresanto.css">
+
 </head>
 <body>
     <div class="container-form">
-        <div class="header-form">
-            <h1>Registro del Santo</h1>
-            <p>Formulario de alta para el catálogo de Santos (nombresanto.html)</p>
+        <div class="header-form" id="header-form-santo" onclick="toggleFormularioSanto()" title="Haz clic para expandir o contraer el formulario">
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                <div style="text-align: left;">
+                    <h1 style="display: flex; align-items: center; gap: 8px;">
+                        <span>Registro del Santo</span>
+                        <span id="badge-modo-form" style="font-size: 0.75rem; background: #e1f5fe; color: var(--color-santo-azul); padding: 2px 8px; border-radius: 12px; font-weight: 600; display: none;">Nuevo Registro</span>
+                    </h1>
+                    <p style="margin: 4px 0 0;">Formulario de alta y edición para el catálogo de Santos</p>
+                </div>
+                <button type="button" id="btn-toggle-form" style="background: #e1f5fe; border: 1px solid #b3e5fc; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-santo-azul); transition: transform 0.25s ease;">
+                    <span class="material-symbols-outlined" id="icon-toggle-form" style="font-size: 22px;">expand_more</span>
+                </button>
+            </div>
         </div>
 
-        <form id="form-santo">
+        <form id="form-santo" style="display: none;">
             <input type="hidden" id="edit-index" value="-1">
             <div class="form-grid">
                 <div class="form-group form-full">
                     <label for="nombre">Nombre del Santo *</label>
                     <input type="text" id="nombre" required placeholder="Ej. San Francisco de Asís">
                 </div>
-                <div class="form-group">
-                    <label for="nacimiento">Fecha de Nacimiento</label>
-                    <div class="date-input-container">
-                        <input type="text" id="nacimiento" placeholder="dd/mm/aaaa o ej. 1181">
-                        <input type="date" id="nacimiento-picker" title="Seleccionar fecha" onchange="sincronizarFechaPickerATexto('nacimiento-picker', 'nacimiento')">
+                <div class="form-fechas-fila">
+                    <div class="form-group">
+                        <label for="nacimiento">Fecha de Nacimiento</label>
+                        <input type="date" id="nacimiento" title="Seleccionar fecha de nacimiento">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="muerte">Fecha de Mortalidad</label>
-                    <div class="date-input-container">
-                        <input type="text" id="muerte" placeholder="dd/mm/aaaa o ej. 1226">
-                        <input type="date" id="muerte-picker" title="Seleccionar fecha" onchange="sincronizarFechaPickerATexto('muerte-picker', 'muerte')">
+                    <div class="form-group">
+                        <label for="muerte">Fecha de Mortalidad</label>
+                        <input type="date" id="muerte" title="Seleccionar fecha de mortalidad">
+                    </div>
+                    <div class="form-group">
+                        <label for="celebracion">Fecha Celebración (dd/mm)</label>
+                        <input type="text" id="celebracion" placeholder="dd/mm" maxlength="5" title="Día y mes de celebración (ej. 28/01)">
                     </div>
                 </div>
                 <div class="form-group">
@@ -545,9 +137,12 @@
 
             <!-- Filtros de Búsqueda y de Foto -->
             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; background: #f8fafc; border: 1px solid var(--color-borde); padding: 10px 14px; border-radius: 8px;">
-                <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 200px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 200px; position: relative;">
                     <span class="material-symbols-outlined" style="color: var(--color-santo-azul); font-size: 20px;">search</span>
-                    <input type="text" id="filtro-nombre-santo" placeholder="Buscar santo por nombre, país o realidad..." oninput="renderTablaRegistrados()" style="width: 100%; padding: 6px 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.88rem;">
+                    <input type="text" id="filtro-nombre-santo" placeholder="Buscar santo por nombre, país o realidad..." oninput="actualizarBotonLimpiarBusqueda(); renderTablaRegistrados();" style="width: 100%; padding: 6px 30px 6px 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;">
+                    <button type="button" id="btn-limpiar-busqueda" onclick="limpiarBusquedaSantos()" title="Limpiar búsqueda" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #90a4ae; cursor: pointer; padding: 2px; font-size: 18px; line-height: 1; border-radius: 50%;" onmouseover="this.style.color='#d32f2f'" onmouseout="this.style.color='#90a4ae'">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
+                    </button>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <label for="filtro-foto-santo" style="font-weight: 600; font-size: 0.88rem; color: #37474f; margin: 0; display: flex; align-items: center; gap: 4px;">
@@ -569,6 +164,7 @@
                             <th>Nombre</th>
                             <th>Nacimiento</th>
                             <th>Mortalidad</th>
+                            <th>Celebración</th>
                             <th>País</th>
                             <th>Ciudad</th>
                             <th>Realidad</th>
@@ -596,34 +192,146 @@
         import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 
         const STORAGE_KEY = 'lh_catalogo_nombres_santos';
+        const ELIMINADOS_KEY = 'lh_santos_eliminados';
         const ADMIN_EMAIL = 'dbaezh78@gmail.com';
+        const IDB_NAME = 'LH_Santos_DB';
+        const IDB_STORE = 'catalogo';
         let modoAdmin = false;
+        let santosMemoria = [];
+
+        // ==========================================
+        // MOTOR DE ALMACENAMIENTO HÍBRIDO (IndexedDB + RAM)
+        // Elimina por completo el error QuotaExceededError (límite 5MB de LocalStorage)
+        // ==========================================
+        function abrirIndexedDB() {
+            return new Promise((resolve) => {
+                if (!window.indexedDB) return resolve(null);
+                const req = indexedDB.open(IDB_NAME, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(IDB_STORE)) {
+                        db.createObjectStore(IDB_STORE);
+                    }
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = () => resolve(null);
+            });
+        }
+
+        async function guardarEnIndexedDB(lista) {
+            try {
+                const db = await abrirIndexedDB();
+                if (!db) return false;
+                return new Promise((resolve) => {
+                    const tx = db.transaction(IDB_STORE, 'readwrite');
+                    const store = tx.objectStore(IDB_STORE);
+                    store.put(lista, 'santos');
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                });
+            } catch (err) {
+                console.warn("⚠️ Error guardando en IndexedDB:", err);
+                return false;
+            }
+        }
+
+        async function cargarDeIndexedDB() {
+            try {
+                const db = await abrirIndexedDB();
+                if (!db) return null;
+                return new Promise((resolve) => {
+                    const tx = db.transaction(IDB_STORE, 'readonly');
+                    const store = tx.objectStore(IDB_STORE);
+                    const req = store.get('santos');
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => resolve(null);
+                });
+            } catch (err) {
+                console.warn("⚠️ Error leyendo de IndexedDB:", err);
+                return null;
+            }
+        }
+
+        function intentarGuardarLocalStorage(lista) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.code === 22) {
+                    // Si las imágenes en base64 llenaron los 5MB de LocalStorage,
+                    // guardamos una copia ligera sin las imágenes en LocalStorage
+                    // mientras IndexedDB y Firestore mantienen todas las imágenes completas.
+                    try {
+                        const listaLigera = lista.map(s => {
+                            if (s && s.imagen && s.imagen.length > 500) {
+                                const { imagen, ...resto } = s;
+                                return { ...resto, imagen: '' };
+                            }
+                            return s;
+                        });
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(listaLigera));
+                        console.log("ℹ️ [Almacenamiento] Copia ligera guardada en LocalStorage (imágenes completas en IndexedDB y Firestore).");
+                    } catch (e2) {
+                        console.warn("⚠️ LocalStorage saturado. Catálogo preservado sin límites en IndexedDB.");
+                    }
+                }
+            }
+        }
+
+        function guardarSantosLocal(lista) {
+            santosMemoria = Array.isArray(lista) ? lista : [];
+            guardarEnIndexedDB(santosMemoria);
+            intentarGuardarLocalStorage(santosMemoria);
+        }
+
+        // Carga inicial sincrónica desde LocalStorage para renderizado inmediato
+        try {
+            const cacheLocal = localStorage.getItem(STORAGE_KEY);
+            if (cacheLocal) {
+                santosMemoria = JSON.parse(cacheLocal) || [];
+            }
+        } catch (_) {}
 
         function obtenerSantos() {
+            return santosMemoria;
+        }
+
+        function obtenerEliminados() {
             try {
-                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                return JSON.parse(localStorage.getItem(ELIMINADOS_KEY)) || [];
             } catch (e) {
                 return [];
             }
         }
 
-        async function guardarSantos(lista, forzarNube = false) {
-            console.log("💾 [guardarSantos] Guardando en LocalStorage. Total:", lista.length);
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
-                console.log("✅ [guardarSantos] Guardado con éxito en LocalStorage.");
-            } catch (e) {
-                if (e.name === 'QuotaExceededError' || e.code === 22) {
-                    alert('⚠️ El almacenamiento local del navegador se ha llenado. Se recomienda quitar o comprimir imágenes de algunos registros.');
-                } else {
-                    console.error('Error al guardar en almacenamiento local:', e);
-                }
+        function registrarEliminado(nombre) {
+            if (!nombre) return;
+            const eliminados = obtenerEliminados();
+            const clave = nombre.toLowerCase().trim();
+            if (!eliminados.includes(clave)) {
+                eliminados.push(clave);
+                localStorage.setItem(ELIMINADOS_KEY, JSON.stringify(eliminados));
             }
+        }
 
-            // Sincronizar en la base de datos remota de Firebase Cloud Firestore si hay sesión activa o se fuerza
-            if (window.firebaseAPI && window.firebaseAPI.guardarSantosFirestore && (modoAdmin || forzarNube)) {
+        function desregistrarEliminado(nombre) {
+            if (!nombre) return;
+            const eliminados = obtenerEliminados();
+            const clave = nombre.toLowerCase().trim();
+            const idx = eliminados.indexOf(clave);
+            if (idx >= 0) {
+                eliminados.splice(idx, 1);
+                localStorage.setItem(ELIMINADOS_KEY, JSON.stringify(eliminados));
+            }
+        }
+
+        async function guardarSantos(lista, forzarNube = false) {
+            console.log("💾 [guardarSantos] Guardando localmente. Total:", lista.length);
+            guardarSantosLocal(lista);
+
+            // Sincronizar en la base de datos remota de Firebase Cloud Firestore si se fuerza explícitamente
+            if (window.firebaseAPI && window.firebaseAPI.guardarSantosFirestore && forzarNube) {
                 try {
-                    console.log("☁️ [guardarSantos] Invocando window.firebaseAPI.guardarSantosFirestore...");
+                    console.log("☁️ [guardarSantos] Subiendo catálogo completo a Firestore...");
                     await window.firebaseAPI.guardarSantosFirestore(lista);
                     console.log("🎉 [Firestore] Catálogo de santos subido correctamente a Firebase.");
                     return true;
@@ -632,8 +340,6 @@
                     alert("❌ Error al guardar en Firebase: " + (err.message || err));
                     throw err;
                 }
-            } else {
-                console.log("ℹ️ [guardarSantos] No se sube a Firebase porque modoAdmin=", modoAdmin, "y forzarNube=", forzarNube);
             }
             return false;
         }
@@ -735,7 +441,7 @@
 
                     // Índices de columnas
                     const idxNombre = encabezados.findIndex(h => h.includes('nombre'));
-                    const idxFechaFest = encabezados.findIndex(h => h.includes('fecha liturgica') || h.includes('festividad') || h.includes('fecha'));
+                    const idxFechaFest = encabezados.findIndex(h => h.includes('celebraci') || h.includes('fecha liturgica') || h.includes('festividad') || h.includes('fecha'));
                     const idxNac = encabezados.findIndex(h => h.includes('nacimiento'));
                     const idxMuerte = encabezados.findIndex(h => h.includes('mortalidad') || h.includes('muerte'));
                     const idxPais = encabezados.findIndex(h => h.includes('pais') || h.includes('país'));
@@ -816,14 +522,14 @@
             }
 
             const encabezados = [
-                "ID", "Fecha Liturgica / Mortalidad", "Nombre del Santo", "Fecha de Nacimiento",
+                "ID", "Fecha Celebracion", "Nombre del Santo", "Fecha de Nacimiento",
                 "Fecha de Mortalidad", "Pais de Origen", "Ciudad o Region",
                 "Realidad a la que pertenecio", "Historia y Biografia", "Detalles Curiosos o Significativos", "Hijos en la fe"
             ].join(",");
 
             const filas = santos.map((s, i) => [
                 esc(i + 1),
-                esc(s.fechaFestividad || ''),
+                esc(s.celebracion || s.fechaFestividad || ''),
                 esc(s.nombre || ''),
                 esc(s.nacimiento || '—'),
                 esc(s.muerte || '—'),
@@ -847,24 +553,57 @@
             URL.revokeObjectURL(url);
         };
 
-        // Asegurar que todos los santos de catalogoSantosAnual se incorporen al catálogo
-        const listaLocalInicial = obtenerSantos();
-        const mapaInit = new Map();
-        listaLocalInicial.forEach(s => {
-            if (s && s.nombre) mapaInit.set(s.nombre.toLowerCase().trim(), s);
-        });
-        let nuevosAgregados = 0;
-        catalogoSantosAnual.forEach(sNuevo => {
-            const clave = sNuevo.nombre.toLowerCase().trim();
-            if (!mapaInit.has(clave)) {
-                mapaInit.set(clave, sNuevo);
-                nuevosAgregados++;
+        // Asegurar que todos los santos de catalogoSantosAnual se incorporen al catálogo,
+        // respetando la lista de eliminados para no re-agregar registros que el usuario haya borrado.
+        function integrarCatalogoInicial() {
+            const listaLocalInicial = obtenerSantos();
+            const mapaInit = new Map();
+            listaLocalInicial.forEach(s => {
+                if (s && s.nombre) mapaInit.set(s.nombre.toLowerCase().trim(), s);
+            });
+            const eliminadosSet = new Set(obtenerEliminados().map(n => n.toLowerCase().trim()));
+
+            // Limpieza automática preventiva: si coexisten 'San Efrén' (sin foto) y 'San Efrén, diácono y doctor'
+            if (mapaInit.has('san efren') || mapaInit.has('san efrén')) {
+                const tieneDetallado = Array.from(mapaInit.keys()).some(k => k.includes('efren') && (k.includes('diacono') || k.includes('diácono') || k.includes('doctor')));
+                if (tieneDetallado) {
+                    const viejo = mapaInit.get('san efrén') || mapaInit.get('san efren');
+                    if (viejo && (!viejo.imagen || viejo.imagen.trim().length === 0)) {
+                        mapaInit.delete('san efrén');
+                        mapaInit.delete('san efren');
+                        registrarEliminado('San Efrén');
+                        eliminadosSet.add('san efren');
+                        eliminadosSet.add('san efrén');
+                        console.log("🧹 [Limpieza] 'San Efrén' sin foto removido automáticamente.");
+                    }
+                }
+            }
+
+            let nuevosAgregados = 0;
+            catalogoSantosAnual.forEach(sNuevo => {
+                const clave = sNuevo.nombre.toLowerCase().trim();
+                const claveSinAcento = clave.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (!mapaInit.has(clave) && !eliminadosSet.has(clave) && !eliminadosSet.has(claveSinAcento)) {
+                    mapaInit.set(clave, sNuevo);
+                    nuevosAgregados++;
+                }
+            });
+            if (nuevosAgregados > 0) {
+                console.log(`✨ Incorporando ${nuevosAgregados} nuevos santos preconfigurados.`);
+            }
+            guardarSantosLocal(Array.from(mapaInit.values()));
+        }
+
+        integrarCatalogoInicial();
+
+        // Carga asíncrona desde IndexedDB para asegurar disponibilidad de imágenes completas
+        cargarDeIndexedDB().then((santosIDB) => {
+            if (santosIDB && Array.isArray(santosIDB) && santosIDB.length > 0) {
+                santosMemoria = santosIDB;
+                integrarCatalogoInicial();
+                renderTablaRegistrados();
             }
         });
-        if (nuevosAgregados > 0) {
-            console.log(`✨ Incorporando ${nuevosAgregados} nuevos santos preconfigurados al almacenamiento local.`);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(mapaInit.values())));
-        }
 
         window.eliminarFila = function(btn) {
             const tbody = document.getElementById('tbody-hijos');
@@ -964,31 +703,63 @@
         }
         verificarAuthInicial();
 
-        window.sincronizarFechaPickerATexto = function(pickerId, textId) {
-            const picker = document.getElementById(pickerId);
-            const textInput = document.getElementById(textId);
-            if (picker && picker.value && textInput) {
-                const parts = picker.value.split('-');
-                if (parts.length === 3) {
-                    textInput.value = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                }
+        function convertirAValorFechaInput(str) {
+            if (!str) return '';
+            const s = str.trim();
+            // YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+            // DD/MM/YYYY
+            const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (m) {
+                return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
             }
-        };
+            // DD/MM (ej: festividad como 11/1 o 28/1) -> asignar al año actual para el picker
+            const mCorta = s.match(/^(\d{1,2})\/(\d{1,2})$/);
+            if (mCorta) {
+                const anioActual = new Date().getFullYear();
+                return `${anioActual}-${mCorta[2].padStart(2, '0')}-${mCorta[1].padStart(2, '0')}`;
+            }
+            // Solo año YYYY (ej. 1181 o 1226) -> 1181-01-01
+            const mAnio = s.match(/^(\d{4})$/);
+            if (mAnio) {
+                return `${mAnio[1]}-01-01`;
+            }
+            return '';
+        }
 
-        window.sincronizarTextoAPicker = function(textId, pickerId) {
-            const textInput = document.getElementById(textId);
-            const picker = document.getElementById(pickerId);
-            if (!textInput || !picker) return;
-            const match = textInput.value.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (match) {
-                const d = match[1].padStart(2, '0');
-                const m = match[2].padStart(2, '0');
-                const y = match[3];
-                picker.value = `${y}-${m}-${d}`;
-            } else {
-                picker.value = '';
+        function formatearFechaMostrar(str) {
+            if (!str) return '—';
+            const s = str.trim();
+            if (s === '—' || s === '') return '—';
+            // Si viene en formato ISO YYYY-MM-DD -> mostrar dd/mm/aaaa
+            const mIso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (mIso) {
+                return `${mIso[3]}/${mIso[2]}/${mIso[1]}`;
             }
-        };
+            return s;
+        }
+
+        function formatearCelebracionMostrar(str) {
+            if (!str) return '—';
+            const s = str.trim();
+            if (s === '—' || s === '') return '—';
+            // Formato ISO YYYY-MM-DD -> DD/MM
+            const mIso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (mIso) {
+                return `${mIso[3].padStart(2, '0')}/${mIso[2].padStart(2, '0')}`;
+            }
+            // Formato DD/MM/YYYY -> DD/MM
+            const mFull = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (mFull) {
+                return `${mFull[1].padStart(2, '0')}/${mFull[2].padStart(2, '0')}`;
+            }
+            // Formato DD/MM o D/M -> DD/MM
+            const mCorta = s.match(/^(\d{1,2})\/(\d{1,2})$/);
+            if (mCorta) {
+                return `${mCorta[1].padStart(2, '0')}/${mCorta[2].padStart(2, '0')}`;
+            }
+            return s;
+        }
 
         function extraerAnio(str) {
             if (!str) return null;
@@ -1003,14 +774,13 @@
 
         function calcularEdadSanto(nacStr, mueStr) {
             if (!nacStr || !mueStr) return null;
-            // Caso 1: Fechas exactas dd/mm/aaaa
-            const matchNac = nacStr.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            const matchMue = mueStr.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            // Caso 1: Fechas YYYY-MM-DD o DD/MM/YYYY
+            const vNac = convertirAValorFechaInput(nacStr);
+            const vMue = convertirAValorFechaInput(mueStr);
             
-            if (matchNac && matchMue) {
-                const d1 = parseInt(matchNac[1], 10), m1 = parseInt(matchNac[2], 10), y1 = parseInt(matchNac[3], 10);
-                const d2 = parseInt(matchMue[1], 10), m2 = parseInt(matchMue[2], 10), y2 = parseInt(matchMue[3], 10);
-                
+            if (vNac && vMue) {
+                const [y1, m1, d1] = vNac.split('-').map(Number);
+                const [y2, m2, d2] = vMue.split('-').map(Number);
                 let edad = y2 - y1;
                 if (m2 < m1 || (m2 === m1 && d2 < d1)) {
                     edad--;
@@ -1029,29 +799,63 @@
             return null;
         }
 
-        function aplicarMascaraFecha(input, pickerId) {
-            input.addEventListener('input', function(e) {
-                let v = this.value;
-                if (/^[a-zA-Z\s]/.test(v)) return;
-                
-                let clean = v.replace(/\D/g, '');
-                if (clean.length > 8) clean = clean.substring(0, 8);
-                
-                if (clean.length >= 5) {
-                    this.value = `${clean.substring(0,2)}/${clean.substring(2,4)}/${clean.substring(4)}`;
-                } else if (clean.length >= 3) {
-                    this.value = `${clean.substring(0,2)}/${clean.substring(2)}`;
+        // Sincronización automática: Fecha Celebración = Fecha Mortalidad (dd/mm) por defecto,
+        // a menos que el usuario modifique manualmente Fecha Celebración.
+        let celebracionModificadaManualmente = false;
+
+        const inputMuerteEl = document.getElementById('muerte');
+        const inputCelebracionEl = document.getElementById('celebracion');
+
+        function extraerDiaMesDesdeFecha(valorFecha) {
+            if (!valorFecha) return '';
+            const v = valorFecha.trim();
+            // YYYY-MM-DD
+            const mIso = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (mIso) {
+                return `${mIso[3].padStart(2, '0')}/${mIso[2].padStart(2, '0')}`;
+            }
+            // DD/MM/YYYY
+            const mFull = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (mFull) {
+                return `${mFull[1].padStart(2, '0')}/${mFull[2].padStart(2, '0')}`;
+            }
+            // DD/MM
+            const mCorta = v.match(/^(\d{1,2})\/(\d{1,2})$/);
+            if (mCorta) {
+                return `${mCorta[1].padStart(2, '0')}/${mCorta[2].padStart(2, '0')}`;
+            }
+            return '';
+        }
+
+        if (inputCelebracionEl) {
+            inputCelebracionEl.addEventListener('input', function() {
+                celebracionModificadaManualmente = true;
+                // Máscara automática para dd/mm
+                let v = this.value.replace(/\D/g, '');
+                if (v.length > 4) v = v.substring(0, 4);
+                if (v.length >= 3) {
+                    this.value = `${v.substring(0, 2)}/${v.substring(2)}`;
                 } else {
-                    this.value = clean;
+                    this.value = v;
                 }
-                sincronizarTextoAPicker(this.id, pickerId);
+            });
+            inputCelebracionEl.addEventListener('change', () => {
+                celebracionModificadaManualmente = true;
             });
         }
 
-        const inputNac = document.getElementById('nacimiento');
-        const inputMue = document.getElementById('muerte');
-        if (inputNac) aplicarMascaraFecha(inputNac, 'nacimiento-picker');
-        if (inputMue) aplicarMascaraFecha(inputMue, 'muerte-picker');
+        if (inputMuerteEl && inputCelebracionEl) {
+            inputMuerteEl.addEventListener('input', () => {
+                if (!celebracionModificadaManualmente) {
+                    inputCelebracionEl.value = extraerDiaMesDesdeFecha(inputMuerteEl.value);
+                }
+            });
+            inputMuerteEl.addEventListener('change', () => {
+                if (!celebracionModificadaManualmente) {
+                    inputCelebracionEl.value = extraerDiaMesDesdeFecha(inputMuerteEl.value);
+                }
+            });
+        }
 
         function verificarAuthInicialNS() {
             if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
@@ -1061,8 +865,22 @@
                         try {
                             const datosRemotos = await window.firebaseAPI.cargarSantosFirestore();
                             if (datosRemotos && Array.isArray(datosRemotos) && datosRemotos.length > 0) {
-                                guardarSantos(datosRemotos);
-                                console.log("☁️ [Firestore] Catálogo sincronizado desde la nube.");
+                                const eliminadosSet = new Set(obtenerEliminados().map(n => n.toLowerCase().trim()));
+                                const datosValidos = [];
+                                for (const s of datosRemotos) {
+                                    if (!s || !s.nombre) continue;
+                                    const clave = s.nombre.toLowerCase().trim();
+                                    const claveSinAcento = clave.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                                    if (eliminadosSet.has(clave) || eliminadosSet.has(claveSinAcento)) {
+                                        if (modoAdmin && window.firebaseAPI.eliminarSantoFirestore) {
+                                            window.firebaseAPI.eliminarSantoFirestore(s.nombre).catch(() => {});
+                                        }
+                                    } else {
+                                        datosValidos.push(s);
+                                    }
+                                }
+                                guardarSantosLocal(datosValidos);
+                                console.log(`☁️ [Firestore] Catálogo sincronizado desde la nube (${datosValidos.length} santos).`);
                             }
                         } catch (err) {
                             console.warn("⚠️ No se pudo descargar desde Cloud Firestore (usando copia local):", err);
@@ -1076,10 +894,30 @@
         }
         verificarAuthInicialNS();
 
+        window.actualizarBotonLimpiarBusqueda = function() {
+            const input = document.getElementById('filtro-nombre-santo');
+            const btn = document.getElementById('btn-limpiar-busqueda');
+            if (btn) {
+                btn.style.display = (input && input.value.trim().length > 0) ? 'inline-flex' : 'none';
+            }
+        };
+
+        window.limpiarBusquedaSantos = function() {
+            const input = document.getElementById('filtro-nombre-santo');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            actualizarBotonLimpiarBusqueda();
+            renderTablaRegistrados();
+        };
+
         window.renderTablaRegistrados = function() {
             const todosLosSantos = obtenerSantos();
             const tbody = document.getElementById('tbody-santos-registrados');
             if (!tbody) return;
+
+            actualizarBotonLimpiarBusqueda();
 
             const inputBusqueda = document.getElementById('filtro-nombre-santo');
             const selectFoto = document.getElementById('filtro-foto-santo');
@@ -1114,7 +952,7 @@
             }
 
             if (santosFiltrados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888; padding:18px;">No se encontraron santos con los filtros seleccionados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#888; padding:18px;">No se encontraron santos con los filtros seleccionados.</td></tr>';
                 return;
             }
 
@@ -1145,10 +983,13 @@
                 const edad = calcularEdadSanto(s.nacimiento, s.muerte);
                 const edadTag = (edad !== null) ? `<span style="font-size: 0.78rem; color: #546e7a; font-weight: 500; margin-left: 4px;">(${edad} años)</span>` : '';
 
+                const fechaCelebracion = s.celebracion || s.fechaFestividad || '';
+
                 return '<tr>' +
                     '<td class="col-nombre-santo">' + imgHtml + '<span class="nombre-santo-link" onclick="verDetalleSanto(' + idx + ')" title="Ver detalle completo">' + (s.nombre || '') + '</span>' + edadTag + '</td>' +
-                    '<td><div class="texto-recortado">' + (s.nacimiento || '—') + '</div></td>' +
-                    '<td><div class="texto-recortado">' + (s.muerte || '—') + '</div></td>' +
+                    '<td><div class="texto-recortado">' + formatearFechaMostrar(s.nacimiento) + '</div></td>' +
+                    '<td><div class="texto-recortado">' + formatearFechaMostrar(s.muerte) + '</div></td>' +
+                    '<td><div class="texto-recortado">' + formatearCelebracionMostrar(fechaCelebracion) + '</div></td>' +
                     '<td><div class="texto-recortado">' + (s.pais || '—') + '</div></td>' +
                     '<td><div class="texto-recortado">' + (s.ciudad || '—') + '</div></td>' +
                     '<td><div class="texto-recortado">' + (s.realidad || '—') + '</div></td>' +
@@ -1173,8 +1014,8 @@
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    // Comprimir imagen a maximo 400px de ancho/alto y calidad JPEG 0.75
-                    const MAX_SIZE = 400;
+                    // Optimizar imagen a máximo 280px y calidad JPEG 0.65 (pesa < 20KB y se ve nítido en avatar y modal)
+                    const MAX_SIZE = 280;
                     let width = img.width;
                     let height = img.height;
 
@@ -1191,12 +1032,12 @@
                     }
 
                     const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
+                    canvas.width = Math.round(width);
+                    canvas.height = Math.round(height);
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.65);
                     imgBase64Input.value = compressedBase64;
                     imgPreview.src = compressedBase64;
                     previewContainer.style.display = 'flex';
@@ -1243,6 +1084,47 @@
             });
         }
 
+        window.expandirFormularioSanto = function(esEdicion = false) {
+            const form = document.getElementById('form-santo');
+            const icon = document.getElementById('icon-toggle-form');
+            const badge = document.getElementById('badge-modo-form');
+            if (form) form.style.display = 'block';
+            if (icon) icon.textContent = 'expand_less';
+            if (badge) {
+                badge.style.display = 'inline-block';
+                if (esEdicion) {
+                    badge.textContent = 'Modo Edición';
+                    badge.style.background = '#fff3e0';
+                    badge.style.color = '#e65100';
+                } else {
+                    badge.textContent = 'Nuevo Registro';
+                    badge.style.background = '#e1f5fe';
+                    badge.style.color = 'var(--color-santo-azul)';
+                }
+            }
+        };
+
+        window.contraerFormularioSanto = function() {
+            const form = document.getElementById('form-santo');
+            const icon = document.getElementById('icon-toggle-form');
+            const badge = document.getElementById('badge-modo-form');
+            if (form) form.style.display = 'none';
+            if (icon) icon.textContent = 'expand_more';
+            if (badge) badge.style.display = 'none';
+        };
+
+        window.toggleFormularioSanto = function() {
+            const form = document.getElementById('form-santo');
+            if (!form) return;
+            const estaVisible = form.style.display !== 'none';
+            if (estaVisible) {
+                contraerFormularioSanto();
+            } else {
+                const editIdx = parseInt(document.getElementById('edit-index').value, 10);
+                expandirFormularioSanto(editIdx >= 0);
+            }
+        };
+
         window.editarSanto = function(index) {
             if (!modoAdmin) {
                 alert('No tienes permisos de edición activados.');
@@ -1252,18 +1134,20 @@
             const s = santos[index];
             if (!s) return;
 
+            // Abrir y desplegar formulario en modo edición
+            expandirFormularioSanto(true);
+
             document.getElementById('edit-index').value = index;
             document.getElementById('nombre').value = s.nombre || '';
-            document.getElementById('nacimiento').value = s.nacimiento || '';
-            document.getElementById('muerte').value = s.muerte || '';
+            document.getElementById('nacimiento').value = convertirAValorFechaInput(s.nacimiento || '');
+            document.getElementById('muerte').value = convertirAValorFechaInput(s.muerte || '');
+            const celebFormateada = formatearCelebracionMostrar(s.celebracion || s.fechaFestividad || '');
+            document.getElementById('celebracion').value = celebFormateada !== '—' ? celebFormateada : '';
             document.getElementById('pais').value = s.pais || '';
             document.getElementById('ciudad').value = s.ciudad || '';
             document.getElementById('realidad').value = s.realidad || '';
             document.getElementById('historia').value = s.historia || '';
             document.getElementById('detalle').value = s.detalle || '';
-
-            sincronizarTextoAPicker('nacimiento', 'nacimiento-picker');
-            sincronizarTextoAPicker('muerte', 'muerte-picker');
 
             if (s.imagen) {
                 imgBase64Input.value = s.imagen;
@@ -1288,37 +1172,56 @@
                 tbodyHijos.innerHTML = '<tr><td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
             }
 
+            celebracionModificadaManualmente = !!(s.celebracion || s.fechaFestividad);
+
             document.getElementById('btn-submit-form').textContent = 'Actualizar Santo';
             document.getElementById('btn-cancelar-edicion').style.display = 'inline-block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         window.cancelarEdicion = function() {
+            celebracionModificadaManualmente = false;
             document.getElementById('edit-index').value = '-1';
             document.getElementById('form-santo').reset();
             quitarImagen();
-            sincronizarTextoAPicker('nacimiento', 'nacimiento-picker');
-            sincronizarTextoAPicker('muerte', 'muerte-picker');
             document.getElementById('tbody-hijos').innerHTML = '<tr><td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
             document.getElementById('btn-submit-form').textContent = 'Guardar Santo';
             document.getElementById('btn-cancelar-edicion').style.display = 'none';
+            contraerFormularioSanto();
         };
 
-        window.borrarSanto = function(index) {
+        window.borrarSanto = async function(index) {
             if (!modoAdmin) {
                 alert('No tienes permisos para eliminar registros.');
                 return;
             }
             const santos = obtenerSantos();
-            const santoNombre = santos[index] ? santos[index].nombre : 'este santo';
+            const santo = santos[index];
+            if (!santo) return;
+            const santoNombre = santo.nombre || 'este santo';
             if (confirm('¿Deseas eliminar a ' + santoNombre + ' del catálogo?')) {
+                // 1. Registrar en la lista persistente de eliminados para que no se re-cree
+                registrarEliminado(santoNombre);
+
+                // 2. Eliminar de Firebase Firestore si está sincronizado
+                if (window.firebaseAPI && window.firebaseAPI.eliminarSantoFirestore) {
+                    try {
+                        await window.firebaseAPI.eliminarSantoFirestore(santoNombre);
+                    } catch (err) {
+                        console.warn("⚠️ Error al eliminar de Firestore:", err);
+                    }
+                }
+
+                // 3. Quitar del array local y guardar con el motor híbrido (sin QuotaExceededError)
                 santos.splice(index, 1);
-                guardarSantos(santos);
+                guardarSantosLocal(santos);
+
                 renderTablaRegistrados();
+                alert(`✅ Registro '${santoNombre}' eliminado correctamente.`);
             }
         };
 
-        document.getElementById('form-santo').addEventListener('submit', (e) => {
+        document.getElementById('form-santo').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!modoAdmin) {
                 alert('No tienes permisos de guardado/edición.');
@@ -1339,10 +1242,15 @@
                 return el ? el.value.trim() : '';
             };
 
+            const rawCelebracion = getVal('celebracion');
+            const fechaCelebracionFinal = formatearCelebracionMostrar(rawCelebracion);
+
             const nuevoSanto = {
                 nombre: nombre,
                 nacimiento: getVal('nacimiento'),
                 muerte: getVal('muerte'),
+                celebracion: fechaCelebracionFinal !== '—' ? fechaCelebracionFinal : '',
+                fechaFestividad: fechaCelebracionFinal !== '—' ? fechaCelebracionFinal : '',
                 pais: getVal('pais'),
                 ciudad: getVal('ciudad'),
                 realidad: getVal('realidad'),
@@ -1356,6 +1264,21 @@
             const editIdx = parseInt(document.getElementById('edit-index').value, 10);
 
             if (!isNaN(editIdx) && editIdx >= 0 && editIdx < santos.length) {
+                const santoAnterior = santos[editIdx];
+                const nombreViejo = santoAnterior ? santoAnterior.nombre : '';
+                if (nombreViejo && nombreViejo.toLowerCase().trim() !== nuevoSanto.nombre.toLowerCase().trim()) {
+                    // Si el nombre fue editado:
+                    // 1. Marcar nombre anterior como eliminado para que el catálogo anual predeterminado no lo re-cree
+                    registrarEliminado(nombreViejo);
+                    // 2. Eliminar el documento con el nombre viejo en Firestore
+                    if (window.firebaseAPI && window.firebaseAPI.eliminarSantoFirestore) {
+                        try {
+                            await window.firebaseAPI.eliminarSantoFirestore(nombreViejo);
+                        } catch (err) {
+                            console.warn("⚠️ No se pudo eliminar documento anterior de Firestore:", err);
+                        }
+                    }
+                }
                 santos[editIdx] = nuevoSanto;
             } else {
                 const idxExistente = santos.findIndex(s => s.nombre.toLowerCase() === nombre.toLowerCase());
@@ -1366,7 +1289,20 @@
                 }
             }
 
-            guardarSantos(santos);
+            // Si este nombre estaba en eliminados, lo reactivamos
+            desregistrarEliminado(nuevoSanto.nombre);
+
+            // Guardar individualmente en Firestore para persistencia inmediata
+            if (window.firebaseAPI && window.firebaseAPI.guardarUnSantoFirestore) {
+                try {
+                    await window.firebaseAPI.guardarUnSantoFirestore(nuevoSanto);
+                } catch (err) {
+                    console.warn("⚠️ No se pudo guardar individualmente en Firestore:", err);
+                }
+            }
+
+            guardarSantosLocal(santos);
+
             renderTablaRegistrados();
             alert('¡Santo guardado exitosamente!');
             cancelarEdicion();
@@ -1390,10 +1326,13 @@
                 ? `<div style="text-align:center; margin-bottom:12px;"><img src="${s.imagen}" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${s.nombre}"></div>` 
                 : '';
 
+            const fechaCeleb = s.celebracion || s.fechaFestividad || '';
+
             document.getElementById('modal-santo-cuerpo').innerHTML = `
                 ${imgModal}
-                <div><strong>Nacimiento:</strong> ${s.nacimiento || '—'}</div>
-                <div><strong>Mortalidad:</strong> ${s.muerte || '—'}</div>
+                <div><strong>Nacimiento:</strong> ${formatearFechaMostrar(s.nacimiento)}</div>
+                <div><strong>Mortalidad:</strong> ${formatearFechaMostrar(s.muerte)}</div>
+                <div><strong>Fecha Celebración:</strong> ${formatearCelebracionMostrar(fechaCeleb)}</div>
                 ${edad !== null ? `<div><strong>Edad al fallecer:</strong> ${edad} años</div>` : ''}
                 <div><strong>País:</strong> ${s.pais || '—'}</div>
                 <div><strong>Ciudad:</strong> ${s.ciudad || '—'}</div>
