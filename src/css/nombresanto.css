@@ -203,31 +203,42 @@
             background: #fff;
         }
         .tabla-santos-registrados {
-            width: 100%;
+            width: max-content;
+            min-width: 100%;
             border-collapse: collapse;
             font-size: 0.88rem;
-            min-width: 650px;
+            table-layout: fixed;
         }
         .tabla-santos-registrados td {
             border-bottom: 1px solid #eef2f5;
-            padding: 7px 12px;
+            padding: 5px 10px;
             text-align: left;
             vertical-align: middle;
             white-space: nowrap;
-        }
-        .col-nombre-santo {
-            min-width: 220px;
-            max-width: 280px;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        .col-nombre-santo {
+            white-space: normal;
+            padding: 4px 10px;
+            box-sizing: border-box;
+        }
+        .santo-item-nombre-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            width: 100%;
+            min-width: 0;
         }
         .texto-recortado {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 140px;
+            width: 100%;
+            max-width: 100%;
             display: block;
+            box-sizing: border-box;
         }
         .nombre-santo-link {
             color: #0277bd;
@@ -236,10 +247,14 @@
             text-decoration: underline;
             text-decoration-color: transparent;
             transition: text-decoration-color 0.2s;
+            line-height: 1.22;
+            white-space: normal;
+            word-break: normal;
+            overflow-wrap: break-word;
+            flex: 1;
+            min-width: 0;
         }
-        .nombre-santo-link:hover {
-            text-decoration-color: #0277bd;
-        }
+        /*.nombre-santo-link:hover {text-decoration-color: #0277bd;}*/
         /* Modal Ver Detalle */
         .modal-overlay-santo {
             display: none;
@@ -254,31 +269,458 @@
         .modal-content-santo {
             background: #fff;
             border-radius: 12px;
-            max-width: 550px;
+            max-width: 84%;
             width: 100%;
-            max-height: 85vh;
+            max-height: 77%;
             overflow-y: auto;
             padding: 24px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             position: relative;
+            left:-16px
+        }
+        .modal-santo-header {
+            position: relative;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            border-bottom: 2px solid #e1f5fe;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .modal-santo-header h2 {
+            margin: 0;
+            color: var(--color-santo-azul, #0277bd);
+            font-size: 1.35rem;
+            flex: 1;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+        .modal-santo-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            padding-top: 2px;
         }
         .modal-close-santo {
-            position: absolute;
-            top: 14px; right: 16px;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             cursor: pointer;
             color: #78909c;
             line-height: 1;
+            padding: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, transform 0.15s;
+            border: none;
+            background: transparent;
         }
-        .modal-close-santo:hover { color: #37474f; }
+        .modal-close-santo:hover {
+            color: #37474f;
+            transform: scale(1.15);
+        }
+        .btn-tts-santo {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--color-santo-azul, #0277bd);
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, color 0.2s;
+            line-height: 1;
+            position: relative;
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .btn-tts-santo:hover {
+            transform: scale(1.06);
+        }
+        .btn-modal-pencil {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--color-santo-azul, #0277bd);
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s, transform 0.15s;
+            line-height: 1;
+            position: relative;
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .btn-modal-pencil:hover {
+            background-color: #e1f5fe;
+            transform: scale(1.08);
+        }
+        .btn-modal-pencil:active {
+            transform: scale(0.95);
+        }
+        .btn-tts-santo.speaking {
+            color: #d32f2f;
+        }
+        .btn-tts-santo .material-symbols-outlined {
+            font-size: 24px;
+            position: relative;
+            z-index: 2;
+        }
+        .btn-modal-pencil .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        /* Anillo de Progreso Circular TTS (Bocina) */
+        .tts-circular-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+        }
+        .tts-circular-bg {
+            fill: none;
+            stroke: #e1f5fe;
+            stroke-width: 3.5px;
+            transition: stroke 0.2s, opacity 0.2s;
+        }
+        .btn-tts-santo:hover .tts-circular-bg {
+            stroke: #b3e5fc;
+        }
+        .tts-circular-bar {
+            fill: none;
+            stroke: #0288d1;
+            stroke-width: 3.5px;
+            stroke-linecap: round;
+            stroke-dasharray: 109.96;
+            stroke-dashoffset: 109.96;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.04s linear, stroke 0.2s;
+        }
+        .btn-tts-santo.cargando-tts .tts-circular-bg {
+            stroke: #e0f2fe;
+        }
+        .btn-tts-santo.cargando-tts .tts-circular-bar {
+            stroke: #0288d1;
+        }
+        .btn-tts-santo.cargando-tts .material-symbols-outlined {
+            animation: pulso-carga-santo 0.8s ease-in-out infinite;
+        }
+        @keyframes pulso-carga-santo {
+            0% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.12); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.85; }
+        }
+        .btn-tts-santo.speaking .tts-circular-bar {
+            stroke: #0288d1;
+            stroke-dashoffset: 0;
+        }
+        .btn-tts-santo.speaking .material-symbols-outlined {
+            animation: pulso-voz-santo 1.2s infinite;
+        }
+        @keyframes pulso-voz-santo {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+
+        /* Barra Interactiva de Progreso de Lectura TTS (Raya verde buscadora) */
+        .speech-progress-track {
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            border-radius: 3px;
+            z-index: 15;
+            transition: height 0.15s ease, bottom 0.15s ease;
+        }
+        .speech-progress-track:hover {
+            height: 8px;
+            bottom: -3px;
+        }
+        .speech-progress-bar {
+            position: relative;
+            width: 0%;
+            height: 100%;
+            background: #22c55e;
+            border-radius: 3px;
+            box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+            transition: width 0.08s linear;
+        }
+        .speech-progress-thumb {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 13px;
+            height: 13px;
+            background: #ffffff;
+            border: 2.5px solid #16a34a;
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+            transition: transform 0.15s ease;
+        }
+        .speech-progress-track:hover .speech-progress-thumb {
+            transform: translateY(-50%) scale(1.2);
+        }
         .tabla-santos-registrados th {
             background: #eef5f9;
             color: #37474f;
             font-weight: 700;
             white-space: nowrap;
+            height: 28px;
+            padding: 6px 10px;
+            position: relative;
+            user-select: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            box-sizing: border-box;
+            overflow: visible;
+        }
+        .tabla-santos-registrados th:hover {
+            background: #e1f5fe;
+            color: #0277bd;
+        }
+        .th-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .th-sort-icon {
+            display: inline-flex;
+            align-items: center;
+        }
+        .th-filter-icon {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 2px;
         }
         .tabla-santos-registrados tr:hover {
             background: #f8fafc;
+        }
+
+        /* Resizer de columnas estilo Excel */
+        .th-resizer {
+            position: absolute;
+            top: 0;
+            right: -4px;
+            width: 9px;
+            height: 100%;
+            cursor: col-resize;
+            user-select: none;
+            z-index: 25;
+            touch-action: none;
+        }
+        .th-resizer::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            bottom: 20%;
+            right: 4px;
+            width: 1.5px;
+            background-color: #b0bec5;
+            transition: background-color 0.15s, width 0.15s, top 0.15s, bottom 0.15s;
+        }
+        .th-resizer:hover::after,
+        .th-resizer.is-resizing::after {
+            background-color: #0288d1;
+            width: 3px;
+            right: 3px;
+            top: 0;
+            bottom: 0;
+        }
+        body.col-is-resizing {
+            cursor: col-resize !important;
+            user-select: none !important;
+        }
+
+        /* Menú Contextual Emergente (No Modal) */
+        .santo-context-menu {
+            position: fixed;
+            z-index: 10000;
+            background: #ffffff;
+            border: 1px solid #cfd8dc;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.08);
+            min-width: 250px;
+            max-width: 320px;
+            padding: 6px 0;
+            font-size: 0.86rem;
+            color: #263238;
+            user-select: none;
+            animation: fadeInMenuSanto 0.12s ease-out;
+        }
+        @keyframes fadeInMenuSanto {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .ctx-header {
+            padding: 8px 14px;
+            font-weight: 700;
+            color: #0277bd;
+            font-size: 0.85rem;
+            background: #f0f9ff;
+            border-bottom: 1px solid #e0f2fe;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ctx-section-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #78909c;
+            padding: 6px 14px 2px;
+            letter-spacing: 0.05em;
+        }
+        .ctx-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: background 0.12s;
+            color: #37474f;
+            font-weight: 500;
+        }
+        .ctx-item:hover {
+            background: #e1f5fe;
+            color: #0277bd;
+        }
+        .ctx-item.ctx-active {
+            background: #e0f2fe;
+            color: #0277bd;
+            font-weight: 700;
+        }
+        .ctx-item .material-symbols-outlined {
+            font-size: 18px;
+            color: #546e7a;
+            flex-shrink: 0;
+        }
+        .ctx-item:hover .material-symbols-outlined,
+        .ctx-item.ctx-active .material-symbols-outlined {
+            color: #0277bd;
+        }
+        .ctx-check-icon {
+            margin-left: auto;
+            color: #0288d1 !important;
+            font-weight: 900;
+        }
+        .ctx-divider {
+            height: 1px;
+            background: #eceff1;
+            margin: 4px 0;
+        }
+        .ctx-filter-box {
+            padding: 4px 12px 6px;
+        }
+        .ctx-filter-input-wrap {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1.5px solid #b0bec5;
+            border-radius: 6px;
+            padding: 4px 8px;
+            gap: 6px;
+            transition: border-color 0.15s;
+        }
+        .ctx-filter-input-wrap:focus-within {
+            border-color: #0288d1;
+            background: #fff;
+        }
+        .ctx-filter-input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 0.85rem;
+            width: 100%;
+            color: #263238;
+        }
+        .ctx-filter-clear {
+            background: transparent;
+            border: none;
+            color: #90a4ae;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0 2px;
+            line-height: 1;
+        }
+        .ctx-filter-clear:hover {
+            color: #d32f2f;
+        }
+        .ctx-columns-list {
+            max-height: 175px;
+            overflow-y: auto;
+            padding: 2px 8px;
+        }
+        .ctx-col-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.83rem;
+            transition: background 0.12s;
+            user-select: none;
+        }
+        .ctx-col-item:hover {
+            background: #f1f5f9;
+        }
+        .ctx-col-checkbox {
+            cursor: pointer;
+            accent-color: #0277bd;
+            width: 15px;
+            height: 15px;
+        }
+
+        /* Barra de filtros activos */
+        .chip-filtro-activo {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 1px solid #90caf9;
+            color: #0277bd;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.76rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+        .chip-filtro-activo:hover {
+            background: #e3f2fd;
+            border-color: #0288d1;
+        }
+        .chip-filtro-activo .chip-remove {
+            color: #d32f2f;
+            font-weight: 700;
+            font-size: 11px;
+        }
+        .chip-filtro-activo.chip-ocultas {
+            border-color: #b0bec5;
+            color: #455a64;
+            background: #eceff1;
         }
         .tag-hijo {
             display: inline-block;
@@ -298,30 +740,86 @@
         .btn-editar-santo-tbl {
             background: #e0f2fe;
             color: #0277bd;
-            border: none;
+            border: 1px solid #b3e5fc;
             border-radius: 6px;
-            padding: 4px 8px;
+            width: 28px;
+            height: 28px;
+            padding: 0;
             cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: background 0.15s;
+            transition: all 0.15s ease;
+            vertical-align: middle;
+            margin-right: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
         .btn-editar-santo-tbl:hover {
-            background: #b3e5fc;
+            background: #0288d1;
+            color: #ffffff;
+            border-color: #0288d1;
+            transform: scale(1.08);
+        }
+        .btn-editar-santo-tbl:active,
+        .btn-eliminar-santo-tbl:active {
+            transform: scale(0.95);
         }
         .btn-eliminar-santo-tbl {
             background: #fee2e2;
             color: #dc2626;
-            border: none;
+            border: 1px solid #fca5a5;
             border-radius: 6px;
-            padding: 4px 8px;
+            width: 28px;
+            height: 28px;
+            padding: 0;
             cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: background 0.15s;
+            transition: all 0.15s ease;
+            vertical-align: middle;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
         .btn-eliminar-santo-tbl:hover {
-            background: #fca5a5;
+            background: #dc2626;
+            color: #ffffff;
+            border-color: #dc2626;
+            transform: scale(1.08);
+        }
+        .btn-nav-arrow {
+            background: #eef5f9;
+            border: 1px solid var(--color-borde);
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-santo-azul, #0277bd);
+            padding: 0;
+            transition: background 0.15s, transform 0.15s, border-color 0.15s;
+            user-select: none;
+            line-height: 1;
+        }
+        .btn-nav-arrow:hover:not(:disabled) {
+            background: #e1f5fe;
+            border-color: var(--color-santo-azul, #0277bd);
+            transform: scale(1.08);
+        }
+        .btn-nav-arrow:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+        .btn-nav-arrow:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+        }
+        .fila-santo-seleccionada {
+            background-color: #e0f2fe !important;
+            transition: background-color 0.3s ease;
         }
         .admin-bar {
             display: flex;
@@ -404,9 +902,10 @@
             object-fit: cover;
             border: 1px solid #b0bec5;
             vertical-align: middle;
-            margin-right: 8px;
+            margin-right: 0;
             cursor: pointer;
             transition: transform 0.15s, border-color 0.15s;
+            flex-shrink: 0;
         }
         .img-avatar-tabla:hover {
             transform: scale(1.15);
@@ -414,11 +913,17 @@
         }
         .icon-avatar-sin-foto {
             vertical-align: middle;
-            margin-right: 6px;
+            margin-right: 0;
             color: #90a4ae;
-            font-size: 22px;
+            font-size: 26px;
             cursor: pointer;
             transition: transform 0.15s, color 0.15s;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
         }
         .icon-avatar-sin-foto:hover {
             color: var(--color-santo-azul);

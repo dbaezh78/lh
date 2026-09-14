@@ -146,6 +146,65 @@ window.firebaseAPI = {
             return snapshot.data().mapa || null;
         }
         return null;
+    },
+    // Métodos para sincronizar Ajustes y Preferencias (Área de Setting)
+    guardarAjustesFirestore: async (seccion, datos) => {
+        try {
+            const user = auth.currentUser;
+            const coleccion = "ajustes";
+            const payload = {
+                [seccion]: datos,
+                ultimaActualizacion: new Date().toISOString()
+            };
+            if (user) {
+                payload.email = user.email || null;
+                payload.uid = user.uid || null;
+                try {
+                    const userDocRef = doc(db, coleccion, user.uid);
+                    await setDoc(userDocRef, payload, { merge: true });
+                } catch (eUser) {
+                    console.warn("⚠️ Aviso al guardar ajustes por usuario en Firestore:", eUser);
+                }
+            }
+            // También guardar en documento global/compartido para la sección
+            const globalDocRef = doc(db, coleccion, seccion);
+            await setDoc(globalDocRef, payload, { merge: true });
+            console.log(`☁️ [Firebase] Ajustes sección '${seccion}' guardados en Firestore.`);
+            return true;
+        } catch (err) {
+            console.warn(`⚠️ Error guardando ajustes en Firestore (${seccion}):`, err);
+            return false;
+        }
+    },
+    cargarAjustesFirestore: async (seccion) => {
+        try {
+            const user = auth.currentUser;
+            const coleccion = "ajustes";
+            // Intentar primero por usuario si está autenticado
+            if (user) {
+                try {
+                    const userDocRef = doc(db, coleccion, user.uid);
+                    const userSnap = await getDoc(userDocRef);
+                    if (userSnap.exists() && userSnap.data()[seccion] !== undefined) {
+                        console.log(`☁️ [Firebase] Ajustes '${seccion}' cargados del usuario.`);
+                        return userSnap.data()[seccion];
+                    }
+                } catch (eUser) {
+                    console.warn("⚠️ Aviso al leer ajustes por usuario en Firestore:", eUser);
+                }
+            }
+            // Si no o como respaldo, leer del documento compartido de la sección
+            const globalDocRef = doc(db, coleccion, seccion);
+            const globalSnap = await getDoc(globalDocRef);
+            if (globalSnap.exists()) {
+                const data = globalSnap.data();
+                return data[seccion] !== undefined ? data[seccion] : data;
+            }
+            return null;
+        } catch (err) {
+            console.warn(`⚠️ Error cargando ajustes de Firestore (${seccion}):`, err);
+            return null;
+        }
     }
 };
 

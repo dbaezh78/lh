@@ -305,15 +305,237 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             position: relative;
         }
+        .modal-santo-header {
+            position: relative;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            border-bottom: 2px solid #e1f5fe;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .modal-santo-header h2 {
+            margin: 0;
+            color: var(--color-santo-azul, #0277bd);
+            font-size: 1.35rem;
+            flex: 1;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+        .modal-santo-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            padding-top: 2px;
+        }
         .modal-close-santo {
-            position: absolute;
-            top: 14px; right: 16px;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             cursor: pointer;
             color: #78909c;
             line-height: 1;
+            padding: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, transform 0.15s;
+            border: none;
+            background: transparent;
         }
-        .modal-close-santo:hover { color: #37474f; }
+        .modal-close-santo:hover {
+            color: #37474f;
+            transform: scale(1.15);
+        }
+        .btn-tts-santo {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--color-santo-azul, #0288d1);
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, color 0.2s;
+            line-height: 1;
+            position: relative;
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .btn-tts-santo:hover {
+            transform: scale(1.06);
+        }
+        .btn-modal-pencil {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--color-santo-azul, #0288d1);
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s, transform 0.15s;
+            line-height: 1;
+            position: relative;
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .btn-modal-pencil:hover {
+            background-color: #e1f5fe;
+            transform: scale(1.08);
+        }
+        .btn-modal-pencil:active {
+            transform: scale(0.95);
+        }
+        .btn-tts-santo.speaking {
+            color: #d32f2f;
+        }
+        .btn-tts-santo .material-symbols-outlined {
+            font-size: 24px;
+            position: relative;
+            z-index: 2;
+        }
+        .btn-modal-pencil .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        /* Anillo de Progreso Circular TTS (Bocina) */
+        .tts-circular-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+        }
+        .tts-circular-bg {
+            fill: none;
+            stroke: #e1f5fe;
+            stroke-width: 3.5px;
+            transition: stroke 0.2s, opacity 0.2s;
+        }
+        .btn-tts-santo:hover .tts-circular-bg {
+            stroke: #b3e5fc;
+        }
+        .tts-circular-bar {
+            fill: none;
+            stroke: #0288d1;
+            stroke-width: 3.5px;
+            stroke-linecap: round;
+            stroke-dasharray: 109.96;
+            stroke-dashoffset: 109.96;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.04s linear, stroke 0.2s;
+        }
+        .btn-tts-santo.cargando-tts .tts-circular-bg {
+            stroke: #e0f2fe;
+        }
+        .btn-tts-santo.cargando-tts .tts-circular-bar {
+            stroke: #0288d1;
+        }
+        .btn-tts-santo.cargando-tts .material-symbols-outlined {
+            animation: pulso-carga-santo 0.8s ease-in-out infinite;
+        }
+        @keyframes pulso-carga-santo {
+            0% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.12); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.85; }
+        }
+        .btn-tts-santo.speaking .tts-circular-bar {
+            stroke: #0288d1;
+            stroke-dashoffset: 0;
+        }
+        .btn-tts-santo.speaking .material-symbols-outlined {
+            animation: pulso-voz-santo 1.2s infinite;
+        }
+        @keyframes pulso-voz-santo {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+
+        /* Barra Interactiva de Progreso de Lectura TTS (Raya verde buscadora) */
+        .speech-progress-track {
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            border-radius: 3px;
+            z-index: 15;
+            transition: height 0.15s ease, bottom 0.15s ease;
+        }
+        .speech-progress-track:hover {
+            height: 8px;
+            bottom: -3px;
+        }
+        .speech-progress-bar {
+            position: relative;
+            width: 0%;
+            height: 100%;
+            background: #22c55e;
+            border-radius: 3px;
+            box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+            transition: width 0.08s linear;
+        }
+        .speech-progress-thumb {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 13px;
+            height: 13px;
+            background: #ffffff;
+            border: 2.5px solid #16a34a;
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+            transition: transform 0.15s ease;
+        }
+        .speech-progress-track:hover .speech-progress-thumb {
+            transform: translateY(-50%) scale(1.2);
+        }
+        .btn-nav-arrow {
+            background: #eef5f9;
+            border: 1px solid var(--color-borde);
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-santo-azul, #0277bd);
+            padding: 0;
+            transition: background 0.15s, transform 0.15s, border-color 0.15s;
+            user-select: none;
+            line-height: 1;
+        }
+        .btn-nav-arrow:hover:not(:disabled) {
+            background: #e1f5fe;
+            border-color: var(--color-santo-azul, #0277bd);
+            transform: scale(1.08);
+        }
+        .btn-nav-arrow:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+        .btn-nav-arrow:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+        }
         .btn-guardar-flotante {
             position: fixed;
             bottom: 80px;
@@ -412,7 +634,7 @@
             <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
                 <div>
                     <label for="filtro-mes" style="font-weight: 600; margin-right: 6px;">Mes:</label>
-                    <select id="filtro-mes">
+                    <select id="filtro-mes" name="filtro_mes">
                         <option value="todos">Todo el año (365 días)</option>
                         <option value="1">Enero</option>
                         <option value="2">Febrero</option>
@@ -430,12 +652,12 @@
                 </div>
                 <div>
                     <label for="filtro-santo-select" style="font-weight: 600; margin-right: 6px;">Santo:</label>
-                    <select id="filtro-santo-select" style="max-width: 250px;">
+                    <select id="filtro-santo-select" name="filtro_santo_select" style="max-width: 250px;">
                         <option value="todos">Todos los santos</option>
                     </select>
                 </div>
             </div>
-            <input type="text" id="buscador-santo" placeholder="Buscar fecha, día o santo...">
+            <input type="text" id="buscador-santo" name="buscador_santo" placeholder="Buscar fecha, día o santo...">
         </div>
 
         <div class="tabla-wrapper">
@@ -459,8 +681,37 @@
     <!-- Modal Lectura Detalle del Santo -->
     <div class="modal-overlay-santo" id="modal-detalle-santo" onclick="if(event.target===this) cerrarModalDetalleSanto()">
         <div class="modal-content-santo">
-            <span class="modal-close-santo" onclick="cerrarModalDetalleSanto()">&times;</span>
-            <h2 id="modal-santo-nombre" style="margin-top: 0; color: var(--color-santo-azul); font-size: 1.35rem; border-bottom: 2px solid #e1f5fe; padding-bottom: 8px;"></h2>
+            <div class="modal-santo-header">
+                <h2 id="modal-santo-nombre"></h2>
+                <div class="modal-santo-header-actions">
+                    <div class="modal-santo-nav" style="display: inline-flex; align-items: center; gap: 4px; margin-right: 4px;">
+                        <button type="button" id="btn-modal-prev" class="btn-nav-arrow" onclick="navegarSantoModal(-1)" title="Santo anterior">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                        </button>
+                        <span id="modal-santo-contador" style="font-size: 0.82rem; font-weight: 700; color: #546e7a; min-width: 65px; text-align: center; user-select: none;">1 de 178</span>
+                        <button type="button" id="btn-modal-next" class="btn-nav-arrow" onclick="navegarSantoModal(1)" title="Santo siguiente">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                        </button>
+                    </div>
+                    <button type="button" id="btn-leer-voz-santo" class="btn-tts-santo" onclick="toggleLeerSantoVoz()" title="Reproducir lectura">
+                        <svg class="tts-circular-ring" viewBox="0 0 42 42">
+                            <circle class="tts-circular-bg" cx="21" cy="21" r="17.5"></circle>
+                            <circle class="tts-circular-bar" id="tts-circular-bar" cx="21" cy="21" r="17.5"></circle>
+                        </svg>
+                        <span class="material-symbols-outlined" id="icono-leer-voz">play_arrow</span>
+                    </button>
+                    <button type="button" id="btn-modal-editar-santo" class="btn-tts-santo btn-modal-pencil" onclick="editarSantoDesdeModal()" title="Editar este santo en el Catálogo" aria-label="Editar">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <span class="modal-close-santo" onclick="cerrarModalDetalleSanto()" title="Cerrar">&times;</span>
+                </div>
+                <!-- Barra Interactiva de Progreso de Lectura (Raya Verde Buscadora) -->
+                <div id="santo-speech-progress-track" class="speech-progress-track" title="Haz clic o arrastra para adelantar o retroceder la lectura">
+                    <div id="santo-speech-progress-bar" class="speech-progress-bar">
+                        <div id="santo-speech-progress-thumb" class="speech-progress-thumb"></div>
+                    </div>
+                </div>
+            </div>
             <div id="modal-santo-cuerpo" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.93rem; color: #37474f;"></div>
         </div>
     </div>
@@ -470,6 +721,7 @@
     </button>
 
     <script src="../js/navigator.js" type="module"></script>
+    <script src="../js/tts-santo.js?v=1789423500" type="module"></script>
     <script type="module">
         import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 
@@ -490,16 +742,26 @@
             if (!window.indexedDB) return;
             try {
                 const db = await new Promise((resolve) => {
-                    const req = indexedDB.open('LH_Santos_DB', 1);
+                    const req = indexedDB.open('LH_Santos_DB', 2);
+                    req.onupgradeneeded = (e) => {
+                        const d = e.target.result;
+                        if (!d.objectStoreNames.contains('catalogo')) {
+                            d.createObjectStore('catalogo');
+                        }
+                    };
                     req.onsuccess = (e) => resolve(e.target.result);
                     req.onerror = () => resolve(null);
                 });
                 if (!db || !db.objectStoreNames.contains('catalogo')) return;
                 const lista = await new Promise((resolve) => {
-                    const tx = db.transaction('catalogo', 'readonly');
-                    const req = tx.objectStore('catalogo').get('santos');
-                    req.onsuccess = () => resolve(req.result || null);
-                    req.onerror = () => resolve(null);
+                    try {
+                        const tx = db.transaction('catalogo', 'readonly');
+                        const req = tx.objectStore('catalogo').get('santos');
+                        req.onsuccess = () => resolve(req.result || null);
+                        req.onerror = () => resolve(null);
+                    } catch (_) {
+                        resolve(null);
+                    }
                 });
                 if (Array.isArray(lista) && lista.length > 0) {
                     catalogoIDBCache = lista;
@@ -885,34 +1147,110 @@
             const s = santos.find(item => item.nombre.toLowerCase() === nombreSanto.toLowerCase());
             if (!s) return;
 
+            window.santoActualDetalle = s;
+            if (window.detenerLecturaSantoVoz) window.detenerLecturaSantoVoz();
+
             document.getElementById('modal-santo-nombre').textContent = s.nombre || 'Detalle del Santo';
             
-            const hijosList = (s.hijos && s.hijos.length > 0)
-                ? s.hijos.map(h => `<span class="tag-hijo">${h}</span>`).join(' ')
-                : '—';
+            const hijosValidos = (s.hijos && Array.isArray(s.hijos))
+                ? s.hijos.filter(h => h && typeof h === 'string' && h.trim().length > 0 && h.trim() !== '—')
+                : [];
 
             const imgModal = s.imagen 
                 ? `<div style="text-align:center; margin-bottom:12px;"><img src="${s.imagen}" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${s.nombre}"></div>` 
                 : '';
 
-            document.getElementById('modal-santo-cuerpo').innerHTML = `
-                ${imgModal}
-                <div><strong>Nacimiento:</strong> ${s.nacimiento || '—'}</div>
-                <div><strong>Mortalidad:</strong> ${s.muerte || '—'}</div>
-                <div><strong>País:</strong> ${s.pais || '—'}</div>
-                <div><strong>Ciudad:</strong> ${s.ciudad || '—'}</div>
-                <div><strong>Realidad:</strong> ${s.realidad || '—'}</div>
-                <div><strong>Hijos en la fe:</strong> <div style="margin-top:4px;">${hijosList}</div></div>
-                ${s.historia ? `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.historia}</p></div>` : ''}
-                ${s.detalle ? `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.detalle}</p></div>` : ''}
-            `;
+            let cuerpoHtml = imgModal;
 
+            if (s.nacimiento && s.nacimiento.trim() && s.nacimiento.trim() !== '—') {
+                cuerpoHtml += `<div><strong>Nacimiento:</strong> ${s.nacimiento.trim()}</div>`;
+            }
+            if (s.muerte && s.muerte.trim() && s.muerte.trim() !== '—') {
+                cuerpoHtml += `<div><strong>Mortalidad:</strong> ${s.muerte.trim()}</div>`;
+            }
+            const fechaCeleb = (s.celebracion || s.fechaFestividad || '').trim();
+            if (fechaCeleb && fechaCeleb !== '—') {
+                cuerpoHtml += `<div><strong>Fecha Celebración:</strong> ${fechaCeleb}</div>`;
+            }
+            if (s.pais && s.pais.trim() && s.pais.trim() !== '—') {
+                cuerpoHtml += `<div><strong>País:</strong> ${s.pais.trim()}</div>`;
+            }
+            if (s.ciudad && s.ciudad.trim() && s.ciudad.trim() !== '—') {
+                cuerpoHtml += `<div><strong>Ciudad:</strong> ${s.ciudad.trim()}</div>`;
+            }
+            if (s.realidad && s.realidad.trim() && s.realidad.trim() !== '—') {
+                cuerpoHtml += `<div><strong>Realidad:</strong> ${s.realidad.trim()}</div>`;
+            }
+            if (hijosValidos.length > 0) {
+                const hijosTags = hijosValidos.map(h => `<span class="tag-hijo">${h.trim()}</span>`).join(' ');
+                cuerpoHtml += `<div><strong>Hijos en la fe:</strong> <div style="margin-top:4px;">${hijosTags}</div></div>`;
+            }
+            if (s.historia && s.historia.trim() && s.historia.trim() !== '—') {
+                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.historia.trim()}</p></div>`;
+            }
+            if (s.detalle && s.detalle.trim() && s.detalle.trim() !== '—') {
+                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.detalle.trim()}</p></div>`;
+            }
+
+            document.getElementById('modal-santo-cuerpo').innerHTML = cuerpoHtml;
             document.getElementById('modal-detalle-santo').style.display = 'flex';
+            if (window.prepararBarraProgresoSanto) window.prepararBarraProgresoSanto(s);
+
+            window.santosCatalogoMemoria = santos;
+            window.indiceModalSantoActual = santos.findIndex(item => item.nombre.toLowerCase() === (s.nombre || '').toLowerCase());
+            actualizarModalContadorSanto();
+        };
+
+        function actualizarModalContadorSanto() {
+            const contadorEl = document.getElementById('modal-santo-contador');
+            const btnPrev = document.getElementById('btn-modal-prev');
+            const btnNext = document.getElementById('btn-modal-next');
+            const total = window.santosCatalogoMemoria ? window.santosCatalogoMemoria.length : 0;
+            const idx = window.indiceModalSantoActual !== undefined ? window.indiceModalSantoActual : 0;
+            if (contadorEl) contadorEl.textContent = `${idx + 1} de ${total}`;
+            if (btnPrev) btnPrev.disabled = (idx <= 0);
+            if (btnNext) btnNext.disabled = (idx >= total - 1);
+        }
+
+        window.navegarSantoModal = function(delta) {
+            if (!window.santosCatalogoMemoria || window.santosCatalogoMemoria.length === 0) return;
+            let nuevoIdx = (window.indiceModalSantoActual !== undefined ? window.indiceModalSantoActual : 0) + delta;
+            if (nuevoIdx >= 0 && nuevoIdx < window.santosCatalogoMemoria.length) {
+                if (window.detenerLecturaSantoVoz) window.detenerLecturaSantoVoz();
+                window.verDetallePorNombre(window.santosCatalogoMemoria[nuevoIdx].nombre);
+            }
         };
 
         window.cerrarModalDetalleSanto = function() {
             document.getElementById('modal-detalle-santo').style.display = 'none';
+            if (window.detenerLecturaSantoVoz) window.detenerLecturaSantoVoz();
         };
+
+        window.editarSantoDesdeModal = function() {
+            if (!window.santoActualDetalle || !window.santoActualDetalle.nombre) return;
+            const nombreEnc = encodeURIComponent(window.santoActualDetalle.nombre.trim());
+            window.location.href = `nombresanto.html?editar=${nombreEnc}`;
+        };
+
+        // Navegación con teclado en santo.html (Flechas Izquierda / Derecha, Escape y E para editar)
+        document.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('modal-detalle-santo');
+            const modalAbierto = modal && modal.style.display === 'flex';
+            if (modalAbierto) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    window.navegarSantoModal(-1);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    window.navegarSantoModal(1);
+                } else if (e.key === 'Escape') {
+                    window.cerrarModalDetalleSanto();
+                } else if ((e.key === 'e' || e.key === 'E') && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+                    e.preventDefault();
+                    window.editarSantoDesdeModal();
+                }
+            }
+        });
 
         window.toggleDropdownSanto = function(clave, event) {
             if (!modoAdminSanto) {

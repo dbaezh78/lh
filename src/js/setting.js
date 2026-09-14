@@ -18,6 +18,93 @@ window.cambioEnExpandir = false;
     const currentCantoId = urlParams.get('canto') || 'global';
 
     // ==========================================
+    // DEFINICIÓN DE COLUMNAS DE SANTOS (SINCRONIZACIÓN LOCAL Y FIREBASE)
+    // ==========================================
+    window.COLUMNAS_SANTOS_DEF = [
+        { key: 'nombre', label: 'Columna: Nombre' },
+        { key: 'nacimiento', label: 'Columna: Nacimiento' },
+        { key: 'muerte', label: 'Columna: Mortalidad' },
+        { key: 'celebracion', label: 'Columna: Celebración' },
+        { key: 'pais', label: 'Columna: País' },
+        { key: 'ciudad', label: 'Columna: Ciudad' },
+        { key: 'realidad', label: 'Columna: Realidad' },
+        { key: 'historia', label: 'Columna: Historial' },
+        { key: 'detalle', label: 'Columna: Detalle' },
+        { key: 'hijos', label: 'Columna: Hijos en la fe' },
+        { key: 'acciones', label: 'Columna: Acciones' }
+    ];
+
+    window.obtenerColumnasOcultasSantos = function() {
+        try {
+            const raw = localStorage.getItem('lh_santos_columnas_ocultas');
+            if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return [];
+    };
+
+    window.esColumnaSantoVisible = function(colKey) {
+        const ocultas = window.obtenerColumnasOcultasSantos();
+        return !ocultas.includes(colKey);
+    };
+
+    window.setColumnaSantoVisible = function(colKey, visible) {
+        let ocultas = window.obtenerColumnasOcultasSantos();
+        if (visible) {
+            ocultas = ocultas.filter(k => k !== colKey);
+        } else {
+            if (!ocultas.includes(colKey)) ocultas.push(colKey);
+        }
+        localStorage.setItem('lh_santos_columnas_ocultas', JSON.stringify(ocultas));
+
+        const seleccionadas = {};
+        window.COLUMNAS_SANTOS_DEF.forEach(c => {
+            seleccionadas[c.key] = !ocultas.includes(c.key);
+        });
+        localStorage.setItem('lh_santos_columnas_visibles', JSON.stringify(seleccionadas));
+
+        // Notificar evento
+        window.dispatchEvent(new CustomEvent('lh-columnas-santos-changed', {
+            detail: { ocultas, colKey, visible, seleccionadas }
+        }));
+
+        // Sincronizar automáticamente en Firebase Firestore
+        if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+            window.firebaseAPI.guardarAjustesFirestore('columnas_santos', {
+                ocultas,
+                seleccionadas,
+                actualizado: new Date().toISOString()
+            }).catch(e => console.warn("Error guardando columnas en Firebase:", e));
+        }
+    };
+
+    window.mostrarTodasColumnasSantos = function() {
+        localStorage.setItem('lh_santos_columnas_ocultas', JSON.stringify([]));
+        const seleccionadas = {};
+        window.COLUMNAS_SANTOS_DEF.forEach(c => { seleccionadas[c.key] = true; });
+        localStorage.setItem('lh_santos_columnas_visibles', JSON.stringify(seleccionadas));
+
+        window.dispatchEvent(new CustomEvent('lh-columnas-santos-changed', {
+            detail: { ocultas: [], seleccionadas }
+        }));
+
+        if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+            window.firebaseAPI.guardarAjustesFirestore('columnas_santos', {
+                ocultas: [],
+                seleccionadas,
+                actualizado: new Date().toISOString()
+            }).catch(e => console.warn("Error guardando columnas en Firebase:", e));
+        }
+
+        const modal = document.getElementById('modal-global-settings');
+        if (modal) {
+            const content = modal.querySelector('.settings-content');
+            if (content && window.generarContenidoSettings) {
+                content.innerHTML = window.generarContenidoSettings();
+            }
+        }
+    };
+
+    // ==========================================
     // MODULO: DEFINICION DE PESTAÑAS Y OPCIONES
     // ==========================================
     window.tabsConfig = [
@@ -259,7 +346,277 @@ window.cambioEnExpandir = false;
                 { label: 'Número Canto', tipo: 'color' }
             ]
         },
+
+    // ==========================================
+    // MODULO: TAB TEXTO A VOZ (TTS)
+    // ==========================================
+        {
+            id: 'tab-tts',
+            label: 'Texto a Voz',
+            icon: 'record_voice_over',
+            secciones: [
+                {
+                    id: 'global-tts-voice',
+                    label: 'Voz de Lectura',
+                    tipo: 'select',
+                    storageKey: 'pref-tts-voice',
+                    default: 'Google español (Google)',
+                    options: () => obtenerListaVocesDisponibles(),
+                    accion: (val) => {
+                        localStorage.setItem('pref-tts-voice', val);
+                    }
+                },
+                {
+                    id: 'global-tts-rate',
+                    label: 'Velocidad de Lectura',
+                    tipo: 'range',
+                    storageKey: 'pref-tts-rate',
+                    default: '1.0',
+                    min: 0.5,
+                    max: 2.0,
+                    step: 0.1,
+                    accion: (val) => {
+                        localStorage.setItem('pref-tts-rate', val);
+                    }
+                },
+                {
+                    id: 'btn-test-tts',
+                    label: 'Probar Voz y Velocidad',
+                    tipo: 'button',
+                    icon: 'volume_up',
+                    color: '#0288d1',
+                    accion: () => {
+                        window.probarTextoVozAjustes();
+                    }
+                }
+            ]
+        },
+
+        // ==========================================
+        // MODULO: TAB COLUMNAS DE SANTOS
+        // ==========================================
+        {
+            id: 'tab-columnas-santos',
+            label: 'Columnas Santos',
+            icon: 'view_column',
+            secciones: [
+                ...window.COLUMNAS_SANTOS_DEF.map(c => ({
+                    id: `col-santo-${c.key}`,
+                    label: c.label,
+                    tipo: 'switch',
+                    getValue: () => window.esColumnaSantoVisible(c.key),
+                    default: true,
+                    accion: (val) => {
+                        window.setColumnaSantoVisible(c.key, val);
+                    }
+                })),
+                {
+                    id: 'btn-mostrar-todas-cols',
+                    label: 'Mostrar Todas las Columnas',
+                    tipo: 'button',
+                    icon: 'visibility',
+                    color: '#0288d1',
+                    accion: () => {
+                        window.mostrarTodasColumnasSantos();
+                    }
+                },
+                {
+                    id: 'btn-reset-anchos-cols',
+                    label: 'Restablecer Ancho de Columnas',
+                    tipo: 'button',
+                    icon: 'settings_backup_restore',
+                    color: '#e65100',
+                    accion: async () => {
+                        try {
+                            localStorage.removeItem('lh_santos_columnas_anchos');
+                            window.dispatchEvent(new CustomEvent('lh-anchos-santos-reset'));
+                            if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+                                await window.firebaseAPI.guardarAjustesFirestore('anchos_columnas_santos', {
+                                    anchos: null,
+                                    actualizado: new Date().toISOString()
+                                });
+                            }
+                            alert("📏 Anchos de columnas restablecidos a los valores por defecto.");
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                },
+                {
+                    id: 'btn-sync-firebase-cols',
+                    label: 'Guardar Columnas en Firebase',
+                    tipo: 'button',
+                    icon: 'cloud_upload',
+                    color: '#2e7d32',
+                    accion: async () => {
+                        if (!window.firebaseAPI || !window.firebaseAPI.guardarAjustesFirestore) {
+                            alert("Firebase aún se está conectando. Espera unos segundos y reintenta.");
+                            return;
+                        }
+                        const ocultas = window.obtenerColumnasOcultasSantos();
+                        const seleccionadas = {};
+                        window.COLUMNAS_SANTOS_DEF.forEach(c => {
+                            seleccionadas[c.key] = !ocultas.includes(c.key);
+                        });
+                        const ok = await window.firebaseAPI.guardarAjustesFirestore('columnas_santos', {
+                            ocultas,
+                            seleccionadas,
+                            actualizado: new Date().toISOString()
+                        });
+                        if (ok) {
+                            alert("🎉 ¡Selección de columnas guardada correctamente en Firebase Cloud Firestore!");
+                        } else {
+                            alert("⚠️ Hubo un inconveniente al guardar en Firebase. Revisa tu conexión a internet.");
+                        }
+                    }
+                }
+            ]
+        }
     ];
+
+    // ==========================================
+    // MODULO: VOCES PARA TEXTO A VOZ (TTS)
+    // ==========================================
+    function obtenerListaVocesDisponibles() {
+        const top4 = [
+            { id: 'Microsoft Raul - Spanish (Mexico)', match: ['raul'], label: 'Microsoft Raul - Spanish (Mexico)' },
+            { id: 'Microsoft Sabina - Spanish (Mexico)', match: ['sabina'], label: 'Microsoft Sabina - Spanish (Mexico)' },
+            { id: 'Google español (Google)', realName: 'Google español', match: ['google español', 'google spanish'], label: 'Google español (Google)' },
+            { id: 'Google español de Estados Unidos (Google)', realName: 'Google español de Estados Unidos', match: ['estados unidos'], label: 'Google español de Estados Unidos (Google)' }
+        ];
+
+        const list = [];
+        const voices = (typeof window !== 'undefined' && 'speechSynthesis' in window) 
+            ? (window.speechSynthesis.getVoices() || []) 
+            : [];
+
+        // 1. Agregar de primero las cuatro voces preferidas
+        top4.forEach(top => {
+            const voiceFound = voices.find(v => {
+                const vName = (v.name || '').toLowerCase();
+                if (top.id.toLowerCase() === vName) return true;
+                if (top.realName && top.realName.toLowerCase() === vName) return true;
+                if (top.id.includes('Estados Unidos')) {
+                    return vName.includes('estados unidos') && vName.includes('google');
+                }
+                if (top.id.includes('Google español') && !top.id.includes('Estados Unidos')) {
+                    return vName.includes('google') && vName.includes('español') && !vName.includes('estados unidos');
+                }
+                if (top.match && top.match.some(m => vName.includes(m))) return true;
+                return false;
+            });
+
+            list.push({
+                val: voiceFound ? voiceFound.name : top.id,
+                text: top.label
+            });
+        });
+
+        // 2. Agregar el resto de voces disponibles en el navegador
+        if (voices.length > 0) {
+            const ordenIdiomas = ['es', 'en', 'it', 'pt', 'fr', 'la', 'de', 'ru', 'zh'];
+            const nombresIdiomas = {
+                'es': 'Español',
+                'en': 'Inglés',
+                'it': 'Italiano',
+                'pt': 'Portugués',
+                'fr': 'Francés',
+                'la': 'Latín',
+                'de': 'Alemán',
+                'ru': 'Ruso',
+                'zh': 'Chino'
+            };
+
+            const restantes = voices.filter(v => {
+                const vName = (v.name || '').toLowerCase();
+                // Excluir si ya fue incluida en las 4 principales
+                const yaEsta = list.some(item => {
+                    const itemVal = (item.val || '').toLowerCase();
+                    if (itemVal === vName) return true;
+                    if (vName.includes('raul') && itemVal.includes('raul')) return true;
+                    if (vName.includes('sabina') && itemVal.includes('sabina')) return true;
+                    if (vName.includes('google') && vName.includes('español')) return true;
+                    return false;
+                });
+                return !yaEsta;
+            });
+
+            restantes.sort((a, b) => {
+                const langA = (a.lang || '').toLowerCase().replace(/_/g, '-');
+                const langB = (b.lang || '').toLowerCase().replace(/_/g, '-');
+                const prefA = langA.split('-')[0];
+                const prefB = langB.split('-')[0];
+                const idxA = ordenIdiomas.indexOf(prefA);
+                const idxB = ordenIdiomas.indexOf(prefB);
+                const rankA = idxA === -1 ? 999 : idxA;
+                const rankB = idxB === -1 ? 999 : idxB;
+
+                if (rankA !== rankB) return rankA - rankB;
+                if (langA !== langB) return langA.localeCompare(langB);
+                return a.name.localeCompare(b.name);
+            });
+
+            restantes.forEach(v => {
+                const langCode = (v.lang || '').replace(/_/g, '-');
+                const pref = langCode.toLowerCase().split('-')[0];
+                const nombreIdioma = nombresIdiomas[pref] || langCode;
+                list.push({
+                    val: v.name,
+                    text: `${nombreIdioma} - ${v.name} (${langCode})`
+                });
+            });
+        }
+
+        return list;
+    }
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {
+            const select = document.querySelector('[data-id="global-tts-voice"] select');
+            if (select) {
+                const valActual = localStorage.getItem('pref-tts-voice') || '';
+                const opts = obtenerListaVocesDisponibles();
+                select.innerHTML = opts.map(o => `<option value="${o.val}" ${(o.val === valActual || o.text === valActual) ? 'selected' : ''}>${o.text}</option>`).join('');
+            }
+        };
+    }
+
+    window.probarTextoVozAjustes = () => {
+        if (!('speechSynthesis' in window)) {
+            alert('Tu navegador no soporta síntesis de voz.');
+            return;
+        }
+        window.speechSynthesis.cancel();
+        const texto = 'Liturgia de las Horas. Esta es una prueba de voz con la velocidad configurada.';
+        const utter = new SpeechSynthesisUtterance(texto);
+        const vozGuardada = localStorage.getItem('pref-tts-voice') || '';
+        const voices = window.speechSynthesis.getVoices() || [];
+
+        let encontrada = null;
+        if (vozGuardada) {
+            encontrada = voices.find(v => 
+                v.name === vozGuardada || 
+                v.name.toLowerCase() === vozGuardada.toLowerCase() ||
+                (vozGuardada.includes('Raul') && v.name.includes('Raul')) ||
+                (vozGuardada.includes('Sabina') && v.name.includes('Sabina')) ||
+                (vozGuardada.includes('Estados Unidos') && v.name.includes('Estados Unidos') && v.name.includes('Google')) ||
+                (vozGuardada.startsWith('Google español') && !vozGuardada.includes('Estados Unidos') && v.name.startsWith('Google español') && !v.name.includes('Estados Unidos'))
+            );
+        }
+        if (!encontrada) {
+            encontrada = voices.find(v => v.name.includes('Raul'))
+                      || voices.find(v => v.name.includes('Sabina'))
+                      || voices.find(v => v.name.startsWith('Google español'))
+                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
+        }
+
+        if (encontrada) utter.voice = encontrada;
+
+        const rateGuardado = parseFloat(localStorage.getItem('pref-tts-rate') || '1.0');
+        utter.rate = (!isNaN(rateGuardado) && rateGuardado >= 0.5 && rateGuardado <= 2.0) ? rateGuardado : 1.0;
+
+        window.speechSynthesis.speak(utter);
+    };
 
     // ==========================================
     // MODULO: MOTOR DE GENERACION DE HTML
@@ -284,8 +641,10 @@ window.cambioEnExpandir = false;
         const tabsContent = tabsConfig.map((tab) => `
             <div id="${tab.id}" class="tab-panel ${tab.id === activeTabId ? 'active' : ''}">
                 ${tab.secciones.filter(opt => !opt.hidden).map(opt => {
-                    // 1. Intentar obtener el valor del LocalStorage
-                    const valorGuardado = opt.storageKey ? localStorage.getItem(opt.storageKey) : null;
+                    // 1. Intentar obtener el valor de getValue o de LocalStorage
+                    const valorGuardado = (typeof opt.getValue === 'function')
+                                        ? opt.getValue()
+                                        : (opt.storageKey ? localStorage.getItem(typeof opt.storageKey === 'function' ? opt.storageKey() : opt.storageKey) : null);
                     
                     // 2. FILTRO DE SEGURIDAD: 
                     // Si el valor es nulo o es la palabra "undefined"/"null" por error, 
@@ -339,7 +698,8 @@ window.cambioEnExpandir = false;
         if (opt.tipo === 'switch') return `<label class="switch"><input type="checkbox" ${isChecked ? 'checked' : ''} ${onchange}><span class="slider"></span></label>`;
         
         if (opt.tipo === 'select') {
-            const optionsHTML = opt.options ? opt.options.map(o => {
+            const rawOptions = typeof opt.options === 'function' ? opt.options() : opt.options;
+            const optionsHTML = rawOptions ? rawOptions.map(o => {
                 const val = typeof o === 'object' ? o.val : o;
                 const text = typeof o === 'object' ? o.text : o;
                 return `<option value="${val}" ${valActual === val ? 'selected' : ''}>${text}</option>`;
@@ -362,9 +722,9 @@ window.cambioEnExpandir = false;
                         oninput="window.actualizarInputVinculado('${opt.id}', this.value)">
                     <input type="number" 
                         id="${opt.id}-num"
-                        min="${opt.min}" max="${opt.max}" 
+                        min="${opt.min}" max="${opt.max}" step="${opt.step || 1}"
                         value="${valActual}" 
-                        style="width: 45px; text-align: center;"
+                        style="width: 55px; text-align: center;"
                         oninput="window.actualizarSliderVinculado('${opt.id}', this.value)">
                 </div>
             `;
@@ -450,9 +810,10 @@ window.cambioEnExpandir = false;
         if (contenedor) {
             const slider = contenedor.querySelector('input[type="range"]');
             if (slider) {
-                let n = parseInt(val);
-                if (n > slider.max) n = slider.max;
-                if (n < slider.min) n = slider.min;
+                let n = parseFloat(val);
+                if (isNaN(n)) return;
+                if (n > parseFloat(slider.max)) n = parseFloat(slider.max);
+                if (n < parseFloat(slider.min)) n = parseFloat(slider.min);
                 slider.value = n;
                 window.ejecutarAccionTabs(id, n, true); // Enviamos TRUE
             }
@@ -619,6 +980,41 @@ window.cambioEnExpandir = false;
         
     };
 
+    // ==========================================
+    // SINCRONIZACIÓN INICIAL CON FIREBASE (COLUMNAS SANTOS)
+    // ==========================================
+    if (typeof window !== 'undefined') {
+        const sincronizarColumnasDesdeFirebase = async () => {
+            if (window.firebaseAPI && window.firebaseAPI.cargarAjustesFirestore) {
+                try {
+                    const datos = await window.firebaseAPI.cargarAjustesFirestore('columnas_santos');
+                    if (datos) {
+                        const ocultasRemotas = Array.isArray(datos) ? datos : (datos.ocultas || []);
+                        if (Array.isArray(ocultasRemotas)) {
+                            localStorage.setItem('lh_santos_columnas_ocultas', JSON.stringify(ocultasRemotas));
+                            window.dispatchEvent(new CustomEvent('lh-columnas-santos-changed', { detail: { ocultas: ocultasRemotas } }));
+                            console.log("☁️ [Ajustes] Columnas de santos sincronizadas desde Firebase.");
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Aviso cargando columnas de Firebase:", err);
+                }
+            }
+        };
+
+        if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
+            window.firebaseAPI.onAuthReady(sincronizarColumnasDesdeFirebase);
+        } else {
+            const checkFBC = setInterval(() => {
+                if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
+                    window.firebaseAPI.onAuthReady(sincronizarColumnasDesdeFirebase);
+                    clearInterval(checkFBC);
+                }
+            }, 600);
+        }
+    }
+
 }
+
 
 

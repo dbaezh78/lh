@@ -365,16 +365,26 @@ async function cargarImagenSantoDesdeIndexedDB(nombreSanto) {
     if (!window.indexedDB || !nombreSanto) return null;
     try {
         const db = await new Promise((resolve) => {
-            const req = indexedDB.open('LH_Santos_DB', 1);
+            const req = indexedDB.open('LH_Santos_DB', 2);
+            req.onupgradeneeded = (e) => {
+                const d = e.target.result;
+                if (!d.objectStoreNames.contains('catalogo')) {
+                    d.createObjectStore('catalogo');
+                }
+            };
             req.onsuccess = (e) => resolve(e.target.result);
             req.onerror = () => resolve(null);
         });
         if (!db || !db.objectStoreNames.contains('catalogo')) return null;
         const lista = await new Promise((resolve) => {
-            const tx = db.transaction('catalogo', 'readonly');
-            const req = tx.objectStore('catalogo').get('santos');
-            req.onsuccess = () => resolve(req.result || null);
-            req.onerror = () => resolve(null);
+            try {
+                const tx = db.transaction('catalogo', 'readonly');
+                const req = tx.objectStore('catalogo').get('santos');
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => resolve(null);
+            } catch (_) {
+                resolve(null);
+            }
         });
         if (Array.isArray(lista)) {
             const normalizar = (str) => (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();

@@ -15,9 +15,18 @@
         <div class="header-form" id="header-form-santo" onclick="toggleFormularioSanto()" title="Haz clic para expandir o contraer el formulario">
             <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
                 <div style="text-align: left;">
-                    <h1 style="display: flex; align-items: center; gap: 8px;">
+                    <h1 style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <span>Registro del Santo</span>
                         <span id="badge-modo-form" style="font-size: 0.75rem; background: #e1f5fe; color: var(--color-santo-azul); padding: 2px 8px; border-radius: 12px; font-weight: 600; display: none;">Nuevo Registro</span>
+                        <div id="nav-edicion-santo" style="display: none; align-items: center; gap: 6px; background: #fff3e0; border: 1px solid #ffe0b2; padding: 2px 8px; border-radius: 20px;" onclick="event.stopPropagation()">
+                            <button type="button" id="btn-edit-prev" class="btn-nav-arrow" onclick="navegarSantoAnterior(true)" title="Editar santo anterior">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                            </button>
+                            <span id="contador-edicion-santo" style="font-size: 0.85rem; font-weight: 700; color: #e65100; min-width: 70px; text-align: center; user-select: none;">1 de 178</span>
+                            <button type="button" id="btn-edit-next" class="btn-nav-arrow" onclick="navegarSantoSiguiente(true)" title="Editar santo siguiente">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                            </button>
+                        </div>
                     </h1>
                     <p style="margin: 4px 0 0;">Formulario de alta y edición para el catálogo de Santos</p>
                 </div>
@@ -28,49 +37,49 @@
         </div>
 
         <form id="form-santo" style="display: none;">
-            <input type="hidden" id="edit-index" value="-1">
+            <input type="hidden" id="edit-index" name="edit_index" value="-1">
             <div class="form-grid">
                 <div class="form-group form-full">
                     <label for="nombre">Nombre del Santo *</label>
-                    <input type="text" id="nombre" required placeholder="Ej. San Francisco de Asís">
+                    <input type="text" id="nombre" name="nombre" required placeholder="Ej. San Francisco de Asís">
                 </div>
                 <div class="form-fechas-fila">
                     <div class="form-group">
                         <label for="nacimiento">Fecha de Nacimiento</label>
-                        <input type="date" id="nacimiento" title="Seleccionar fecha de nacimiento">
+                        <input type="date" id="nacimiento" name="nacimiento" title="Seleccionar fecha de nacimiento">
                     </div>
                     <div class="form-group">
                         <label for="muerte">Fecha de Mortalidad</label>
-                        <input type="date" id="muerte" title="Seleccionar fecha de mortalidad">
+                        <input type="date" id="muerte" name="muerte" title="Seleccionar fecha de mortalidad">
                     </div>
                     <div class="form-group">
                         <label for="celebracion">Fecha Celebración (dd/mm)</label>
-                        <input type="text" id="celebracion" placeholder="dd/mm" maxlength="5" title="Día y mes de celebración (ej. 28/01)">
+                        <input type="text" id="celebracion" name="celebracion" placeholder="dd/mm" maxlength="5" title="Día y mes de celebración (ej. 28/01)">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="pais">País</label>
-                    <input type="text" id="pais" placeholder="Ej. Italia">
+                    <input type="text" id="pais" name="pais" placeholder="Ej. Italia">
                 </div>
                 <div class="form-group">
                     <label for="ciudad">Ciudad</label>
-                    <input type="text" id="ciudad" placeholder="Ej. Asís">
+                    <input type="text" id="ciudad" name="ciudad" placeholder="Ej. Asís">
                 </div>
                 <div class="form-group form-full">
                     <label for="realidad">Realidad</label>
-                    <input type="text" id="realidad" placeholder="Ej. Fundador de la Orden Franciscana">
+                    <input type="text" id="realidad" name="realidad" placeholder="Ej. Fundador de la Orden Franciscana">
                 </div>
                 <div class="form-group form-full">
                     <label for="historia">Historia</label>
-                    <textarea id="historia" rows="3" placeholder="Breve historia de vida..."></textarea>
+                    <textarea id="historia" name="historia" rows="3" placeholder="Breve historia de vida..."></textarea>
                 </div>
                 <div class="form-group form-full">
                     <label for="detalle">Detalle</label>
-                    <textarea id="detalle" rows="2" placeholder="Detalles particulares, atributos..."></textarea>
+                    <textarea id="detalle" name="detalle" rows="2" placeholder="Detalles particulares, atributos..."></textarea>
                 </div>
                 <div class="form-group form-full">
-                    <label for="imagen-base64">Foto / Imagen del Santo</label>
-                    <input type="hidden" id="imagen-base64">
+                    <label id="lbl-imagen-santo">Foto / Imagen del Santo</label>
+                    <input type="hidden" id="imagen-base64" name="imagen_base64">
                     <div class="imagen-paste-zone" id="paste-zone" tabindex="0">
                         <span class="material-symbols-outlined" style="font-size: 32px; color: #78909c; display: block; margin: 0 auto 4px;">photo_camera</span>
                         <span style="font-size: 0.9rem; color: #546e7a;">Haz clic aquí y <strong>presiona Ctrl+V</strong> (Pegar imagen) o arrastra un archivo de imagen</span>
@@ -96,17 +105,28 @@
                     </thead>
                     <tbody id="tbody-hijos">
                         <tr>
-                            <td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td>
+                            <td><input type="text" class="input-hijo" name="hijo_en_la_fe" placeholder="Nombre del hijo en la fe" aria-label="Nombre del hijo en la fe"></td>
                             <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="form-actions">
-                <button type="button" class="btn-cancelar" id="btn-cancelar-edicion" style="display: none;" onclick="cancelarEdicion()">Cancelar Edición</button>
-                <a href="santo.html" class="btn-cancelar">Ir al Calendario Anual</a>
-                <button type="submit" class="btn-guardar" id="btn-submit-form">Guardar Santo</button>
+            <div class="form-actions" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div id="nav-edicion-santo-bottom" style="display: none; align-items: center; gap: 6px;">
+                    <button type="button" class="btn-nav-arrow" onclick="navegarSantoAnterior(true)" title="Editar santo anterior">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                    </button>
+                    <span id="contador-edicion-santo-bottom" style="font-size: 0.85rem; font-weight: 700; color: #546e7a; min-width: 65px; text-align: center; user-select: none;">1 de 178</span>
+                    <button type="button" class="btn-nav-arrow" onclick="navegarSantoSiguiente(true)" title="Editar santo siguiente">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                    </button>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+                    <button type="button" class="btn-cancelar" id="btn-cancelar-edicion" style="display: none;" onclick="cancelarEdicion()">Cancelar Edición</button>
+                    <a href="santo.html" class="btn-cancelar">Ir al Calendario Anual</a>
+                    <button type="submit" class="btn-guardar" id="btn-submit-form">Guardar Santo</button>
+                </div>
             </div>
         </form>
 
@@ -114,7 +134,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <h3 style="margin: 0; margin-right: 6px;">Santos Registrados en el Sistema</h3>
-                    <input type="file" id="input-importar-csv" accept=".csv" style="display: none;" onchange="procesarImportacionCSV(event)">
+                    <input type="file" id="input-importar-csv" name="input_importar_csv" accept=".csv" style="display: none;" onchange="procesarImportacionCSV(event)">
                     <button type="button" class="btn-auth-action" style="background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7;" onclick="document.getElementById('input-importar-csv').click()" title="Importar archivo CSV con datos de santos">
                         📥 Importar Archivo CSV
                     </button>
@@ -139,7 +159,7 @@
             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; background: #f8fafc; border: 1px solid var(--color-borde); padding: 10px 14px; border-radius: 8px;">
                 <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 200px; position: relative;">
                     <span class="material-symbols-outlined" style="color: var(--color-santo-azul); font-size: 20px;">search</span>
-                    <input type="text" id="filtro-nombre-santo" placeholder="Buscar santo por nombre, país o realidad..." oninput="actualizarBotonLimpiarBusqueda(); renderTablaRegistrados();" style="width: 100%; padding: 6px 30px 6px 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;">
+                    <input type="text" id="filtro-nombre-santo" name="filtro_nombre_santo" placeholder="Buscar santo por nombre, país o realidad..." oninput="actualizarBotonLimpiarBusqueda(); renderTablaRegistrados();" style="width: 100%; padding: 6px 30px 6px 10px; border: 1px solid var(--color-borde); border-radius: 6px; font-size: 0.88rem; box-sizing: border-box;">
                     <button type="button" id="btn-limpiar-busqueda" onclick="limpiarBusquedaSantos()" title="Limpiar búsqueda" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #90a4ae; cursor: pointer; padding: 2px; font-size: 18px; line-height: 1; border-radius: 50%;" onmouseover="this.style.color='#d32f2f'" onmouseout="this.style.color='#90a4ae'">
                         <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
                     </button>
@@ -148,28 +168,113 @@
                     <label for="filtro-foto-santo" style="font-weight: 600; font-size: 0.88rem; color: #37474f; margin: 0; display: flex; align-items: center; gap: 4px;">
                         <span class="material-symbols-outlined" style="font-size: 18px; color: var(--color-santo-azul);">photo_camera</span> Foto:
                     </label>
-                    <select id="filtro-foto-santo" onchange="renderTablaRegistrados()" style="padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--color-santo-azul); font-size: 0.88rem; font-weight: 500; background: #fff; cursor: pointer; color: #263238;">
+                    <select id="filtro-foto-santo" name="filtro_foto_santo" onchange="renderTablaRegistrados()" style="padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--color-santo-azul); font-size: 0.88rem; font-weight: 500; background: #fff; cursor: pointer; color: #263238;">
                         <option value="todos">Todos los santos</option>
                         <option value="con_foto">📷 Con foto</option>
                         <option value="sin_foto">🚫 Sin foto</option>
                     </select>
-                    <span id="contador-santos-filtrados" style="font-size: 0.82rem; color: #546e7a; font-weight: 600; margin-left: 4px;"></span>
+                    <div class="santo-nav-toolbar" style="display: inline-flex; align-items: center; gap: 4px; margin-left: 6px;">
+                        <button type="button" id="btn-santo-prev" class="btn-nav-arrow" onclick="navegarSantoAnterior()" title="Santo anterior">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                        </button>
+                        <span id="contador-santos-filtrados" style="font-size: 0.88rem; color: #37474f; font-weight: 700; min-width: 80px; text-align: center; user-select: none;">1 de 178</span>
+                        <button type="button" id="btn-santo-next" class="btn-nav-arrow" onclick="navegarSantoSiguiente()" title="Santo siguiente">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                        </button>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Barra de Filtros / Orden Activos -->
+            <div id="barra-filtros-activos" style="display: none; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; padding: 6px 12px; background: #e0f2fe; border: 1px solid #b3e5fc; border-radius: 8px; font-size: 0.82rem; color: #0277bd;">
+                <span style="display: flex; align-items: center; gap: 4px; font-weight: 700;">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">tune</span> Filtros / Orden activo:
+                </span>
+                <div id="contenedor-chips-filtros" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;"></div>
+                <button type="button" onclick="limpiarTodosFiltrosYOrden()" style="background: #fff; border: 1px solid #0288d1; color: #0277bd; border-radius: 14px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; margin-left: auto;">
+                    Limpiar todo
+                </button>
             </div>
 
             <div class="tabla-registrados-wrapper">
                 <table class="tabla-santos-registrados">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Nacimiento</th>
-                            <th>Mortalidad</th>
-                            <th>Celebración</th>
-                            <th>País</th>
-                            <th>Ciudad</th>
-                            <th>Realidad</th>
-                            <th>Hijos en la fe</th>
-                            <th style="text-align: center; width: 130px;">Acciones</th>
+                            <th data-col="nombre" onclick="toggleOrdenarColumna('nombre')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>Nombre</span>
+                                    <span class="th-sort-icon" id="th-sort-nombre"></span>
+                                    <span class="th-filter-icon" id="th-filter-nombre"></span>
+                                </div>
+                            </th>
+                            <th data-col="nacimiento" onclick="toggleOrdenarColumna('nacimiento')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>Nacimiento</span>
+                                    <span class="th-sort-icon" id="th-sort-nacimiento"></span>
+                                    <span class="th-filter-icon" id="th-filter-nacimiento"></span>
+                                </div>
+                            </th>
+                            <th data-col="muerte" onclick="toggleOrdenarColumna('muerte')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>Mortalidad</span>
+                                    <span class="th-sort-icon" id="th-sort-muerte"></span>
+                                    <span class="th-filter-icon" id="th-filter-muerte"></span>
+                                </div>
+                            </th>
+                            <th data-col="celebracion" onclick="toggleOrdenarColumna('celebracion')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>Celebración</span>
+                                    <span class="th-sort-icon" id="th-sort-celebracion"></span>
+                                    <span class="th-filter-icon" id="th-filter-celebracion"></span>
+                                </div>
+                            </th>
+                            <th data-col="pais" onclick="toggleOrdenarColumna('pais')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>País</span>
+                                    <span class="th-sort-icon" id="th-sort-pais"></span>
+                                    <span class="th-filter-icon" id="th-filter-pais"></span>
+                                </div>
+                            </th>
+                            <th data-col="ciudad" onclick="toggleOrdenarColumna('ciudad')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>Ciudad</span>
+                                    <span class="th-sort-icon" id="th-sort-ciudad"></span>
+                                    <span class="th-filter-icon" id="th-filter-ciudad"></span>
+                                </div>
+                            </th>
+                            <th data-col="realidad" onclick="toggleOrdenarColumna('realidad')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>Realidad</span>
+                                    <span class="th-sort-icon" id="th-sort-realidad"></span>
+                                    <span class="th-filter-icon" id="th-filter-realidad"></span>
+                                </div>
+                            </th>
+                            <th data-col="historia" onclick="toggleOrdenarColumna('historia')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>Historial</span>
+                                    <span class="th-sort-icon" id="th-sort-historia"></span>
+                                    <span class="th-filter-icon" id="th-filter-historia"></span>
+                                </div>
+                            </th>
+                            <th data-col="detalle" onclick="toggleOrdenarColumna('detalle')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>Detalle</span>
+                                    <span class="th-sort-icon" id="th-sort-detalle"></span>
+                                    <span class="th-filter-icon" id="th-filter-detalle"></span>
+                                </div>
+                            </th>
+                            <th data-col="hijos" onclick="toggleOrdenarColumna('hijos')" title="Clic para ordenar, clic derecho para opciones">
+                                <div class="th-content">
+                                    <span>Hijos en la fe</span>
+                                    <span class="th-sort-icon" id="th-sort-hijos"></span>
+                                    <span class="th-filter-icon" id="th-filter-hijos"></span>
+                                </div>
+                            </th>
+                            <th data-col="acciones" style="text-align: center; width: 80px;" title="Clic derecho para opciones">
+                                <div class="th-content" style="justify-content: center;">
+                                    <span>Acciones</span>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="tbody-santos-registrados"></tbody>
@@ -181,13 +286,46 @@
     <!-- Modal Lectura Detalle del Santo -->
     <div class="modal-overlay-santo" id="modal-detalle-santo" onclick="if(event.target===this) cerrarModalDetalleSanto()">
         <div class="modal-content-santo">
-            <span class="modal-close-santo" onclick="cerrarModalDetalleSanto()">&times;</span>
-            <h2 id="modal-santo-nombre" style="margin-top: 0; color: var(--color-santo-azul); font-size: 1.35rem; border-bottom: 2px solid #e1f5fe; padding-bottom: 8px;"></h2>
+            <div class="modal-santo-header">
+                <h2 id="modal-santo-nombre"></h2>
+                <div class="modal-santo-header-actions">
+                    <div class="modal-santo-nav" style="display: inline-flex; align-items: center; gap: 4px; margin-right: 4px;">
+                        <button type="button" id="btn-modal-prev" class="btn-nav-arrow" onclick="navegarSantoAnterior()" title="Santo anterior">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                        </button>
+                        <span id="modal-santo-contador" style="font-size: 0.82rem; font-weight: 700; color: #546e7a; min-width: 65px; text-align: center; user-select: none;">1 de 178</span>
+                        <button type="button" id="btn-modal-next" class="btn-nav-arrow" onclick="navegarSantoSiguiente()" title="Santo siguiente">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                        </button>
+                    </div>
+                    <button type="button" id="btn-leer-voz-santo" class="btn-tts-santo" onclick="toggleLeerSantoVoz()" title="Reproducir lectura">
+                        <svg class="tts-circular-ring" viewBox="0 0 42 42">
+                            <circle class="tts-circular-bg" cx="21" cy="21" r="17.5"></circle>
+                            <circle class="tts-circular-bar" id="tts-circular-bar" cx="21" cy="21" r="17.5"></circle>
+                        </svg>
+                        <span class="material-symbols-outlined" id="icono-leer-voz">play_arrow</span>
+                    </button>
+                    <button type="button" id="btn-modal-editar-santo" class="btn-tts-santo btn-modal-pencil" onclick="editarSantoDesdeModal()" title="Editar este santo" aria-label="Editar">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <span class="modal-close-santo" onclick="cerrarModalDetalleSanto()" title="Cerrar">&times;</span>
+                </div>
+                <!-- Barra Interactiva de Progreso de Lectura (Raya Verde Buscadora) -->
+                <div id="santo-speech-progress-track" class="speech-progress-track" title="Haz clic o arrastra para adelantar o retroceder la lectura">
+                    <div id="santo-speech-progress-bar" class="speech-progress-bar">
+                        <div id="santo-speech-progress-thumb" class="speech-progress-thumb"></div>
+                    </div>
+                </div>
+            </div>
             <div id="modal-santo-cuerpo" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.93rem; color: #37474f;"></div>
         </div>
     </div>
 
+    <!-- Menú Contextual Emergente No Modal para la Tabla de Santos -->
+    <div id="santo-context-menu" class="santo-context-menu" style="display: none;" onclick="event.stopPropagation()"></div>
+
     <script src="../js/navigator.js" type="module"></script>
+    <script src="../js/tts-santo.js?v=1789423500" type="module"></script>
     <script type="module">
         import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 
@@ -196,6 +334,7 @@
         const ADMIN_EMAIL = 'dbaezh78@gmail.com';
         const IDB_NAME = 'LH_Santos_DB';
         const IDB_STORE = 'catalogo';
+        const IDB_VERSION = 2;
         let modoAdmin = false;
         let santosMemoria = [];
 
@@ -206,14 +345,36 @@
         function abrirIndexedDB() {
             return new Promise((resolve) => {
                 if (!window.indexedDB) return resolve(null);
-                const req = indexedDB.open(IDB_NAME, 1);
+                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
                 req.onupgradeneeded = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains(IDB_STORE)) {
                         db.createObjectStore(IDB_STORE);
                     }
                 };
-                req.onsuccess = (e) => resolve(e.target.result);
+                req.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(IDB_STORE)) {
+                        // Si la base existía previamente sin el store, forzar upgrade incrementando versión
+                        try {
+                            db.close();
+                            const nextV = (db.version || IDB_VERSION) + 1;
+                            const reqUp = indexedDB.open(IDB_NAME, nextV);
+                            reqUp.onupgradeneeded = (ev) => {
+                                const dbUp = ev.target.result;
+                                if (!dbUp.objectStoreNames.contains(IDB_STORE)) {
+                                    dbUp.createObjectStore(IDB_STORE);
+                                }
+                            };
+                            reqUp.onsuccess = (ev) => resolve(ev.target.result);
+                            reqUp.onerror = () => resolve(null);
+                            return;
+                        } catch (_) {
+                            return resolve(null);
+                        }
+                    }
+                    resolve(db);
+                };
                 req.onerror = () => resolve(null);
             });
         }
@@ -221,13 +382,17 @@
         async function guardarEnIndexedDB(lista) {
             try {
                 const db = await abrirIndexedDB();
-                if (!db) return false;
+                if (!db || !db.objectStoreNames.contains(IDB_STORE)) return false;
                 return new Promise((resolve) => {
-                    const tx = db.transaction(IDB_STORE, 'readwrite');
-                    const store = tx.objectStore(IDB_STORE);
-                    store.put(lista, 'santos');
-                    tx.oncomplete = () => resolve(true);
-                    tx.onerror = () => resolve(false);
+                    try {
+                        const tx = db.transaction(IDB_STORE, 'readwrite');
+                        const store = tx.objectStore(IDB_STORE);
+                        store.put(lista, 'santos');
+                        tx.oncomplete = () => resolve(true);
+                        tx.onerror = () => resolve(false);
+                    } catch (_) {
+                        resolve(false);
+                    }
                 });
             } catch (err) {
                 console.warn("⚠️ Error guardando en IndexedDB:", err);
@@ -238,13 +403,17 @@
         async function cargarDeIndexedDB() {
             try {
                 const db = await abrirIndexedDB();
-                if (!db) return null;
+                if (!db || !db.objectStoreNames.contains(IDB_STORE)) return null;
                 return new Promise((resolve) => {
-                    const tx = db.transaction(IDB_STORE, 'readonly');
-                    const store = tx.objectStore(IDB_STORE);
-                    const req = store.get('santos');
-                    req.onsuccess = () => resolve(req.result || null);
-                    req.onerror = () => resolve(null);
+                    try {
+                        const tx = db.transaction(IDB_STORE, 'readonly');
+                        const store = tx.objectStore(IDB_STORE);
+                        const req = store.get('santos');
+                        req.onsuccess = () => resolve(req.result || null);
+                        req.onerror = () => resolve(null);
+                    } catch (_) {
+                        resolve(null);
+                    }
                 });
             } catch (err) {
                 console.warn("⚠️ Error leyendo de IndexedDB:", err);
@@ -617,7 +786,7 @@
         document.getElementById('btn-add-hijo').addEventListener('click', () => {
             const tbody = document.getElementById('tbody-hijos');
             const tr = document.createElement('tr');
-            tr.innerHTML = '<td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td>' +
+            tr.innerHTML = '<td><input type="text" class="input-hijo" name="hijo_en_la_fe" placeholder="Nombre del hijo en la fe" aria-label="Nombre del hijo en la fe"></td>' +
                            '<td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td>';
             tbody.appendChild(tr);
             tr.querySelector('input').focus();
@@ -657,6 +826,9 @@
                     btnSubmit.style.opacity = '0.5';
                     btnSubmit.title = 'Solo el administrador puede guardar cambios';
                 }
+            }
+            if (typeof renderTablaRegistrados === 'function') {
+                renderTablaRegistrados();
             }
         }
 
@@ -885,6 +1057,38 @@
                         } catch (err) {
                             console.warn("⚠️ No se pudo descargar desde Cloud Firestore (usando copia local):", err);
                         }
+
+                        // Sincronizar también configuración de columnas desde Firebase
+                        if (window.firebaseAPI.cargarAjustesFirestore) {
+                            try {
+                                const ajustesRemotos = await window.firebaseAPI.cargarAjustesFirestore('columnas_santos');
+                                if (ajustesRemotos) {
+                                    const ocultas = Array.isArray(ajustesRemotos) ? ajustesRemotos : (ajustesRemotos.ocultas || []);
+                                    if (Array.isArray(ocultas)) {
+                                        columnasOcultas = new Set(ocultas);
+                                        window.columnasOcultas = columnasOcultas;
+                                        actualizarEstilosColumnasOcultas();
+                                        actualizarBarraFiltrosActivos();
+                                        console.log("☁️ [Firestore] Configuración de columnas sincronizada desde Firebase:", ocultas);
+                                    }
+                                }
+                            } catch (eCols) {
+                                console.warn("Aviso al sincronizar columnas desde Firebase:", eCols);
+                            }
+
+                            try {
+                                const anchosRemotos = await window.firebaseAPI.cargarAjustesFirestore('anchos_columnas_santos');
+                                if (anchosRemotos && anchosRemotos.anchos && typeof anchosRemotos.anchos === 'object') {
+                                    anchosColumnas = Object.assign({}, ANCHOS_COLUMNAS_DEFECTO, anchosRemotos.anchos);
+                                    window.anchosColumnas = anchosColumnas;
+                                    actualizarEstilosAnchosColumnas();
+                                    guardarAnchosColumnas();
+                                    console.log("☁️ [Firestore] Anchos de columnas sincronizados desde Firebase:", anchosRemotos.anchos);
+                                }
+                            } catch (eAnchos) {
+                                console.warn("Aviso al sincronizar anchos de columnas desde Firebase:", eAnchos);
+                            }
+                        }
                     }
                     renderTablaRegistrados();
                 });
@@ -912,6 +1116,865 @@
             renderTablaRegistrados();
         };
 
+        let indiceNavegacionActual = 0;
+        window.santosFiltradosActuales = [];
+
+        window.actualizarContadorNavegacion = function() {
+            const total = (window.santosFiltradosActuales && window.santosFiltradosActuales.length) ? window.santosFiltradosActuales.length : 0;
+            const actual = total > 0 ? (indiceNavegacionActual + 1) : 0;
+            const texto = `${actual} de ${total}`;
+
+            // 1. Toolbar
+            const contadorEl = document.getElementById('contador-santos-filtrados');
+            if (contadorEl) contadorEl.textContent = texto;
+            const btnPrev = document.getElementById('btn-santo-prev');
+            const btnNext = document.getElementById('btn-santo-next');
+            if (btnPrev) btnPrev.disabled = (indiceNavegacionActual <= 0 || total === 0);
+            if (btnNext) btnNext.disabled = (indiceNavegacionActual >= total - 1 || total === 0);
+
+            // 2. Formulario de edición
+            const contEditTop = document.getElementById('contador-edicion-santo');
+            if (contEditTop) contEditTop.textContent = texto;
+            const contEditBottom = document.getElementById('contador-edicion-santo-bottom');
+            if (contEditBottom) contEditBottom.textContent = texto;
+            const btnEditPrev = document.getElementById('btn-edit-prev');
+            const btnEditNext = document.getElementById('btn-edit-next');
+            if (btnEditPrev) btnEditPrev.disabled = (indiceNavegacionActual <= 0 || total === 0);
+            if (btnEditNext) btnEditNext.disabled = (indiceNavegacionActual >= total - 1 || total === 0);
+
+            // 3. Modal de detalle
+            const contModal = document.getElementById('modal-santo-contador');
+            if (contModal) contModal.textContent = texto;
+            const btnModalPrev = document.getElementById('btn-modal-prev');
+            const btnModalNext = document.getElementById('btn-modal-next');
+            if (btnModalPrev) btnModalPrev.disabled = (indiceNavegacionActual <= 0 || total === 0);
+            if (btnModalNext) btnModalNext.disabled = (indiceNavegacionActual >= total - 1 || total === 0);
+        };
+
+        window.navegarSantoAnterior = function(forzarEdicion = false) {
+            if (!window.santosFiltradosActuales || window.santosFiltradosActuales.length === 0) return;
+            if (indiceNavegacionActual > 0) {
+                indiceNavegacionActual--;
+                ejecutarNavegacionSanto(forzarEdicion);
+            }
+        };
+
+        window.navegarSantoSiguiente = function(forzarEdicion = false) {
+            if (!window.santosFiltradosActuales || window.santosFiltradosActuales.length === 0) return;
+            if (indiceNavegacionActual < window.santosFiltradosActuales.length - 1) {
+                indiceNavegacionActual++;
+                ejecutarNavegacionSanto(forzarEdicion);
+            }
+        };
+
+        function ejecutarNavegacionSanto(forzarEdicion = false) {
+            const item = window.santosFiltradosActuales[indiceNavegacionActual];
+            if (!item) return;
+
+            window.actualizarContadorNavegacion();
+
+            const modal = document.getElementById('modal-detalle-santo');
+            const modalAbierto = modal && modal.style.display === 'flex';
+            const form = document.getElementById('form-santo');
+            const editIdx = parseInt(document.getElementById('edit-index')?.value, 10);
+            const enModoEdicion = forzarEdicion || (form && form.style.display !== 'none' && editIdx >= 0);
+
+            if (modalAbierto) {
+                if (window.detenerLecturaSantoVoz) window.detenerLecturaSantoVoz();
+                window.verDetalleSanto(item.originalIdx);
+            } else if (enModoEdicion) {
+                window.editarSanto(item.originalIdx);
+            } else {
+                const fila = document.getElementById('fila-santo-' + item.originalIdx);
+                if (fila) {
+                    document.querySelectorAll('.fila-santo-seleccionada').forEach(f => f.classList.remove('fila-santo-seleccionada'));
+                    fila.classList.add('fila-santo-seleccionada');
+                    fila.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        // ========================================================
+        // GESTIÓN DE COLUMNAS, ORDEN Y FILTROS (MENÚ CONTEXTUAL)
+        // ========================================================
+        const COLUMNAS_INFO = [
+            { key: 'nombre', label: 'Nombre', sortable: true, filterable: true },
+            { key: 'nacimiento', label: 'Nacimiento', sortable: true, filterable: true },
+            { key: 'muerte', label: 'Mortalidad', sortable: true, filterable: true },
+            { key: 'celebracion', label: 'Celebración', sortable: true, filterable: true },
+            { key: 'pais', label: 'País', sortable: true, filterable: true },
+            { key: 'ciudad', label: 'Ciudad', sortable: true, filterable: true },
+            { key: 'realidad', label: 'Realidad', sortable: true, filterable: true },
+            { key: 'historia', label: 'Historial', sortable: true, filterable: true },
+            { key: 'detalle', label: 'Detalle', sortable: true, filterable: true },
+            { key: 'hijos', label: 'Hijos en la fe', sortable: true, filterable: true },
+            { key: 'acciones', label: 'Acciones', sortable: false, filterable: false }
+        ];
+        window.COLUMNAS_INFO = COLUMNAS_INFO;
+
+        let ordenColumnaActual = { col: null, dir: null };
+        try {
+            const guardadoOrden = localStorage.getItem('lh_santos_orden_columna');
+            if (guardadoOrden) ordenColumnaActual = JSON.parse(guardadoOrden);
+        } catch (e) {}
+
+        let filtrosColumnas = {};
+        try {
+            const guardadoFiltros = localStorage.getItem('lh_santos_filtros_columna');
+            if (guardadoFiltros) filtrosColumnas = JSON.parse(guardadoFiltros);
+        } catch (e) {}
+
+        let columnasOcultas = new Set();
+        try {
+            const guardadoOcultas = localStorage.getItem('lh_santos_columnas_ocultas');
+            if (guardadoOcultas) columnasOcultas = new Set(JSON.parse(guardadoOcultas));
+        } catch (e) {}
+        window.columnasOcultas = columnasOcultas;
+
+        function guardarEstadoFiltrosYOrden() {
+            try {
+                localStorage.setItem('lh_santos_orden_columna', JSON.stringify(ordenColumnaActual));
+                localStorage.setItem('lh_santos_filtros_columna', JSON.stringify(filtrosColumnas));
+            } catch (e) {}
+        }
+
+        function actualizarEstilosColumnasOcultas() {
+            let estiloEl = document.getElementById('estilo-columnas-dinamicas');
+            if (!estiloEl) {
+                estiloEl = document.createElement('style');
+                estiloEl.id = 'estilo-columnas-dinamicas';
+                document.head.appendChild(estiloEl);
+            }
+            if (columnasOcultas.size === 0) {
+                estiloEl.textContent = '';
+            } else {
+                const reglas = Array.from(columnasOcultas).map(col => `[data-col="${col}"] { display: none !important; }`).join('\n');
+                estiloEl.textContent = reglas;
+            }
+            try {
+                const ocultasArr = Array.from(columnasOcultas);
+                localStorage.setItem('lh_santos_columnas_ocultas', JSON.stringify(ocultasArr));
+                const seleccionadas = {};
+                COLUMNAS_INFO.forEach(c => {
+                    seleccionadas[c.key] = !columnasOcultas.has(c.key);
+                });
+                localStorage.setItem('lh_santos_columnas_visibles', JSON.stringify(seleccionadas));
+            } catch (e) {}
+        }
+        actualizarEstilosColumnasOcultas();
+
+        async function sincronizarColumnasAFirebase() {
+            try {
+                const ocultasArr = Array.from(columnasOcultas);
+                const seleccionadas = {};
+                COLUMNAS_INFO.forEach(c => {
+                    seleccionadas[c.key] = !columnasOcultas.has(c.key);
+                });
+                localStorage.setItem('lh_santos_columnas_ocultas', JSON.stringify(ocultasArr));
+                localStorage.setItem('lh_santos_columnas_visibles', JSON.stringify(seleccionadas));
+
+                window.dispatchEvent(new CustomEvent('lh-columnas-santos-changed', {
+                    detail: { ocultas: ocultasArr, seleccionadas }
+                }));
+
+                if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+                    await window.firebaseAPI.guardarAjustesFirestore('columnas_santos', {
+                        ocultas: ocultasArr,
+                        seleccionadas: seleccionadas,
+                        actualizado: new Date().toISOString()
+                    });
+                    console.log("☁️ [Firebase] Selección de columnas guardada en Firebase Firestore.");
+                }
+            } catch (e) {
+                console.warn("⚠️ Error guardando columnas en Firebase:", e);
+            }
+        }
+        window.sincronizarColumnasAFirebase = sincronizarColumnasAFirebase;
+
+        window.addEventListener('lh-columnas-santos-changed', function(e) {
+            try {
+                const raw = localStorage.getItem('lh_santos_columnas_ocultas');
+                if (raw) {
+                    columnasOcultas = new Set(JSON.parse(raw));
+                    window.columnasOcultas = columnasOcultas;
+                    actualizarEstilosColumnasOcultas();
+                    actualizarBarraFiltrosActivos();
+                }
+            } catch (err) {}
+        });
+
+        // ==========================================
+        // GESTIÓN DE ANCHOS DE COLUMNAS (ESTILO EXCEL)
+        // ==========================================
+        const ANCHOS_COLUMNAS_DEFECTO = {
+            nombre: 260,
+            nacimiento: 110,
+            muerte: 110,
+            celebracion: 120,
+            pais: 130,
+            ciudad: 130,
+            realidad: 140,
+            historia: 200,
+            detalle: 200,
+            hijos: 160,
+            acciones: 75
+        };
+
+        const LIMITES_ANCHOS = {
+            nombre: { min: 140, max: 800 },
+            nacimiento: { min: 75, max: 350 },
+            muerte: { min: 75, max: 350 },
+            celebracion: { min: 80, max: 350 },
+            pais: { min: 80, max: 400 },
+            ciudad: { min: 80, max: 400 },
+            realidad: { min: 80, max: 450 },
+            historia: { min: 90, max: 800 },
+            detalle: { min: 90, max: 800 },
+            hijos: { min: 80, max: 500 },
+            acciones: { min: 65, max: 150 }
+        };
+
+        let anchosColumnas = { ...ANCHOS_COLUMNAS_DEFECTO };
+        try {
+            const guardadoAnchos = localStorage.getItem('lh_santos_columnas_anchos');
+            if (guardadoAnchos) {
+                anchosColumnas = Object.assign({}, ANCHOS_COLUMNAS_DEFECTO, JSON.parse(guardadoAnchos));
+            }
+        } catch (e) {}
+        window.anchosColumnas = anchosColumnas;
+
+        function actualizarEstilosAnchosColumnas() {
+            let estiloEl = document.getElementById('estilo-anchos-columnas');
+            if (!estiloEl) {
+                estiloEl = document.createElement('style');
+                estiloEl.id = 'estilo-anchos-columnas';
+                document.head.appendChild(estiloEl);
+            }
+            const reglas = Object.entries(anchosColumnas).map(([col, ancho]) => {
+                return `.tabla-santos-registrados th[data-col="${col}"], .tabla-santos-registrados td[data-col="${col}"] { width: ${ancho}px !important; min-width: ${ancho}px !important; max-width: ${ancho}px !important; }`;
+            }).join('\n');
+            estiloEl.textContent = reglas;
+        }
+        actualizarEstilosAnchosColumnas();
+
+        function guardarAnchosColumnas() {
+            try {
+                localStorage.setItem('lh_santos_columnas_anchos', JSON.stringify(anchosColumnas));
+            } catch (e) {}
+        }
+
+        async function sincronizarAnchosAFirebase() {
+            guardarAnchosColumnas();
+            if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+                try {
+                    await window.firebaseAPI.guardarAjustesFirestore('anchos_columnas_santos', {
+                        anchos: anchosColumnas,
+                        actualizado: new Date().toISOString()
+                    });
+                    console.log("☁️ [Firebase] Anchos de columnas guardados en Firebase Firestore.");
+                } catch (e) {
+                    console.warn("Aviso guardando anchos en Firebase:", e);
+                }
+            }
+        }
+        window.sincronizarAnchosAFirebase = sincronizarAnchosAFirebase;
+
+        function autoajustarColumna(colKey) {
+            const th = document.querySelector(`.tabla-santos-registrados th[data-col="${colKey}"]`);
+            if (!th) return;
+            const thContent = th.querySelector('.th-content') || th;
+            let maxAncho = thContent.scrollWidth + 30;
+
+            const celdas = document.querySelectorAll(`.tabla-santos-registrados td[data-col="${colKey}"]`);
+            const measurer = document.createElement('span');
+            measurer.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:0.88rem;font-family:inherit;padding:0 10px;top:-9999px;left:-9999px;';
+            document.body.appendChild(measurer);
+
+            const limiteCeldas = Math.min(celdas.length, 120);
+            for (let i = 0; i < limiteCeldas; i++) {
+                const td = celdas[i];
+                if (colKey === 'nombre') {
+                    const link = td.querySelector('.nombre-santo-link');
+                    const txt = link ? link.textContent.trim() : td.textContent.trim();
+                    measurer.style.fontWeight = '700';
+                    measurer.textContent = txt;
+                    const anchoCelda = measurer.offsetWidth + 92;
+                    if (anchoCelda > maxAncho) maxAncho = anchoCelda;
+                } else if (colKey === 'hijos') {
+                    const tags = td.querySelectorAll('.tag-hijo');
+                    let wTags = 24;
+                    tags.forEach(t => { wTags += t.offsetWidth + 6; });
+                    if (wTags > maxAncho) maxAncho = wTags;
+                } else {
+                    measurer.style.fontWeight = '400';
+                    measurer.textContent = td.textContent.trim();
+                    const anchoCelda = measurer.offsetWidth + 26;
+                    if (anchoCelda > maxAncho) maxAncho = anchoCelda;
+                }
+            }
+            document.body.removeChild(measurer);
+
+            const limite = LIMITES_ANCHOS[colKey] || { min: 70, max: 650 };
+            const anchoCalculado = Math.min(Math.max(Math.ceil(maxAncho), limite.min), limite.max);
+
+            anchosColumnas[colKey] = anchoCalculado;
+            actualizarEstilosAnchosColumnas();
+            guardarAnchosColumnas();
+            sincronizarAnchosAFirebase();
+        }
+        window.autoajustarColumna = autoajustarColumna;
+
+        function restablecerAnchosColumnas() {
+            anchosColumnas = { ...ANCHOS_COLUMNAS_DEFECTO };
+            actualizarEstilosAnchosColumnas();
+            guardarAnchosColumnas();
+            sincronizarAnchosAFirebase();
+            cerrarMenuContextual();
+        }
+        window.restablecerAnchosColumnas = restablecerAnchosColumnas;
+
+        function iniciarRedimensionColumna(e, colKey, th, resizer) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            const isTouch = !!(e.touches && e.touches.length > 0);
+            const startX = isTouch ? e.touches[0].clientX : e.clientX;
+            const startWidth = anchosColumnas[colKey] || th.getBoundingClientRect().width;
+            const limite = LIMITES_ANCHOS[colKey] || { min: 70, max: 700 };
+
+            resizer.classList.add('is-resizing');
+            document.body.classList.add('col-is-resizing');
+
+            function onMove(ev) {
+                const currentX = (ev.touches && ev.touches.length > 0) ? ev.touches[0].clientX : ev.clientX;
+                const deltaX = currentX - startX;
+                let nuevoAncho = Math.round(startWidth + deltaX);
+                if (nuevoAncho < limite.min) nuevoAncho = limite.min;
+                if (nuevoAncho > limite.max) nuevoAncho = limite.max;
+
+                anchosColumnas[colKey] = nuevoAncho;
+                actualizarEstilosAnchosColumnas();
+            }
+
+            function onEnd() {
+                resizer.classList.remove('is-resizing');
+                document.body.classList.remove('col-is-resizing');
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onEnd);
+                window.removeEventListener('touchmove', onMove);
+                window.removeEventListener('touchend', onEnd);
+                window.removeEventListener('touchcancel', onEnd);
+
+                guardarAnchosColumnas();
+                sincronizarAnchosAFirebase();
+            }
+
+            if (isTouch) {
+                window.addEventListener('touchmove', onMove, { passive: false });
+                window.addEventListener('touchend', onEnd);
+                window.addEventListener('touchcancel', onEnd);
+            } else {
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onEnd);
+            }
+        }
+
+        function inicializarResizersColumnas() {
+            const thead = document.querySelector('.tabla-santos-registrados thead');
+            if (!thead) return;
+            const ths = thead.querySelectorAll('th[data-col]');
+            ths.forEach(th => {
+                const colKey = th.getAttribute('data-col');
+                if (!colKey) return;
+                let resizer = th.querySelector('.th-resizer');
+                if (!resizer) {
+                    resizer = document.createElement('div');
+                    resizer.className = 'th-resizer';
+                    resizer.title = 'Arrastra para cambiar el ancho (doble clic para autoajustar)';
+                    th.appendChild(resizer);
+
+                    resizer.addEventListener('click', (ev) => ev.stopPropagation());
+                    resizer.addEventListener('dblclick', (ev) => {
+                        ev.stopPropagation();
+                        ev.preventDefault();
+                        autoajustarColumna(colKey);
+                    });
+                    resizer.addEventListener('mousedown', (ev) => iniciarRedimensionColumna(ev, colKey, th, resizer));
+                    resizer.addEventListener('touchstart', (ev) => iniciarRedimensionColumna(ev, colKey, th, resizer), { passive: false });
+                }
+            });
+        }
+        window.inicializarResizersColumnas = inicializarResizersColumnas;
+
+        window.addEventListener('lh-anchos-santos-reset', function() {
+            anchosColumnas = { ...ANCHOS_COLUMNAS_DEFECTO };
+            actualizarEstilosAnchosColumnas();
+            guardarAnchosColumnas();
+        });
+
+        function normalizarFechaParaOrden(str) {
+            if (!str || str.trim() === '' || str.trim() === '—') return null;
+            const s = str.trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return new Date(s).getTime();
+            const mDMY = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (mDMY) return new Date(`${mDMY[3]}-${mDMY[2].padStart(2, '0')}-${mDMY[1].padStart(2, '0')}`).getTime();
+            const anio = extraerAnio(s);
+            if (anio !== null) return anio * 365.25 * 24 * 3600 * 1000;
+            return null;
+        }
+
+        function normalizarCelebracionParaOrden(str) {
+            if (!str || str.trim() === '' || str.trim() === '—') return null;
+            const s = str.trim();
+            const m = s.match(/(\d{1,2})\/(\d{1,2})/);
+            if (m) {
+                const d = parseInt(m[1], 10);
+                const mo = parseInt(m[2], 10);
+                return mo * 100 + d;
+            }
+            return null;
+        }
+
+        function compararPorColumna(sA, sB, colKey, dir) {
+            const factor = (dir === 'desc') ? -1 : 1;
+            if (colKey === 'nacimiento' || colKey === 'muerte') {
+                const valA = normalizarFechaParaOrden(sA[colKey]);
+                const valB = normalizarFechaParaOrden(sB[colKey]);
+                if (valA === null && valB === null) return 0;
+                if (valA === null) return 1;
+                if (valB === null) return -1;
+                return (valA - valB) * factor;
+            }
+            if (colKey === 'celebracion') {
+                const cA = sA.celebracion || sA.fechaFestividad || '';
+                const cB = sB.celebracion || sB.fechaFestividad || '';
+                const valA = normalizarCelebracionParaOrden(cA);
+                const valB = normalizarCelebracionParaOrden(cB);
+                if (valA === null && valB === null) return 0;
+                if (valA === null) return 1;
+                if (valB === null) return -1;
+                return (valA - valB) * factor;
+            }
+            if (colKey === 'hijos') {
+                const cantA = (sA.hijos && Array.isArray(sA.hijos)) ? sA.hijos.length : 0;
+                const cantB = (sB.hijos && Array.isArray(sB.hijos)) ? sB.hijos.length : 0;
+                return (cantA - cantB) * factor;
+            }
+            const strA = (sA[colKey] || '').toString().trim();
+            const strB = (sB[colKey] || '').toString().trim();
+            if (!strA && !strB) return 0;
+            if (!strA) return 1;
+            if (!strB) return -1;
+            return strA.localeCompare(strB, 'es', { sensitivity: 'base' }) * factor;
+        }
+
+        function cumpleFiltroColumna(s, colKey, fValLower) {
+            if (!fValLower) return true;
+            if (colKey === 'nombre') {
+                return (s.nombre || '').toLowerCase().includes(fValLower);
+            }
+            if (colKey === 'nacimiento') {
+                const raw = (s.nacimiento || '').toLowerCase();
+                const fmt = formatearFechaMostrar(s.nacimiento).toLowerCase();
+                return raw.includes(fValLower) || fmt.includes(fValLower);
+            }
+            if (colKey === 'muerte') {
+                const raw = (s.muerte || '').toLowerCase();
+                const fmt = formatearFechaMostrar(s.muerte).toLowerCase();
+                return raw.includes(fValLower) || fmt.includes(fValLower);
+            }
+            if (colKey === 'celebracion') {
+                const raw = (s.celebracion || s.fechaFestividad || '').toLowerCase();
+                const fmt = formatearCelebracionMostrar(raw).toLowerCase();
+                return raw.includes(fValLower) || fmt.includes(fValLower);
+            }
+            if (colKey === 'pais') {
+                return (s.pais || '').toLowerCase().includes(fValLower);
+            }
+            if (colKey === 'ciudad') {
+                return (s.ciudad || '').toLowerCase().includes(fValLower);
+            }
+            if (colKey === 'realidad') {
+                return (s.realidad || '').toLowerCase().includes(fValLower);
+            }
+            if (colKey === 'historia') {
+                return (s.historia || '').toLowerCase().includes(fValLower);
+            }
+            if (colKey === 'detalle') {
+                return (s.detalle || '').toLowerCase().includes(fValLower);
+            }
+            if (colKey === 'hijos') {
+                if (!s.hijos || !Array.isArray(s.hijos)) return false;
+                return s.hijos.some(h => (h || '').toLowerCase().includes(fValLower));
+            }
+            return true;
+        }
+
+        window.toggleOrdenarColumna = function(colKey) {
+            if (!colKey || colKey === 'acciones') return;
+            if (ordenColumnaActual.col === colKey) {
+                if (ordenColumnaActual.dir === 'asc') {
+                    ordenColumnaActual.dir = 'desc';
+                } else {
+                    ordenColumnaActual = { col: null, dir: null };
+                }
+            } else {
+                ordenColumnaActual = { col: colKey, dir: 'asc' };
+            }
+            guardarEstadoFiltrosYOrden();
+            renderTablaRegistrados();
+        };
+
+        window.aplicarOrdenColumna = function(colKey, dir) {
+            ordenColumnaActual = { col: colKey, dir: dir };
+            guardarEstadoFiltrosYOrden();
+            renderTablaRegistrados();
+            cerrarMenuContextual();
+        };
+
+        window.quitarOrdenColumna = function() {
+            ordenColumnaActual = { col: null, dir: null };
+            guardarEstadoFiltrosYOrden();
+            renderTablaRegistrados();
+            cerrarMenuContextual();
+        };
+
+        window.manejarInputFiltroContextual = function(colKey, valor) {
+            if (!valor || valor.trim() === '') {
+                delete filtrosColumnas[colKey];
+            } else {
+                filtrosColumnas[colKey] = valor.trim();
+            }
+            guardarEstadoFiltrosYOrden();
+            renderTablaRegistrados();
+        };
+
+        window.aplicarFiltroColumna = function(colKey, valor) {
+            if (!valor) return;
+            filtrosColumnas[colKey] = valor.trim();
+            guardarEstadoFiltrosYOrden();
+            renderTablaRegistrados();
+            cerrarMenuContextual();
+        };
+
+        window.limpiarFiltroColumna = function(colKey) {
+            delete filtrosColumnas[colKey];
+            guardarEstadoFiltrosYOrden();
+            renderTablaRegistrados();
+            cerrarMenuContextual();
+        };
+
+        window.ocultarColumna = function(colKey) {
+            if (!colKey) return;
+            columnasOcultas.add(colKey);
+            actualizarEstilosColumnasOcultas();
+            actualizarBarraFiltrosActivos();
+            cerrarMenuContextual();
+            sincronizarColumnasAFirebase();
+        };
+
+        window.toggleVisibilidadColumna = function(colKey, visible) {
+            if (visible) {
+                columnasOcultas.delete(colKey);
+            } else {
+                columnasOcultas.add(colKey);
+            }
+            actualizarEstilosColumnasOcultas();
+            actualizarBarraFiltrosActivos();
+            sincronizarColumnasAFirebase();
+        };
+
+        window.mostrarTodasColumnas = function() {
+            columnasOcultas.clear();
+            actualizarEstilosColumnasOcultas();
+            actualizarBarraFiltrosActivos();
+            cerrarMenuContextual();
+            sincronizarColumnasAFirebase();
+        };
+
+        window.limpiarTodosFiltrosYOrden = function() {
+            filtrosColumnas = {};
+            ordenColumnaActual = { col: null, dir: null };
+            guardarEstadoFiltrosYOrden();
+            renderTablaRegistrados();
+        };
+
+        window.restablecerTodoVista = function() {
+            filtrosColumnas = {};
+            ordenColumnaActual = { col: null, dir: null };
+            columnasOcultas.clear();
+            anchosColumnas = { ...ANCHOS_COLUMNAS_DEFECTO };
+            guardarEstadoFiltrosYOrden();
+            actualizarEstilosColumnasOcultas();
+            actualizarEstilosAnchosColumnas();
+            guardarAnchosColumnas();
+            renderTablaRegistrados();
+            cerrarMenuContextual();
+            sincronizarColumnasAFirebase();
+            sincronizarAnchosAFirebase();
+        };
+
+        function actualizarIndicadoresCabeceras() {
+            COLUMNAS_INFO.forEach(col => {
+                const sortEl = document.getElementById(`th-sort-${col.key}`);
+                const filterEl = document.getElementById(`th-filter-${col.key}`);
+                if (sortEl) {
+                    if (ordenColumnaActual.col === col.key) {
+                        sortEl.innerHTML = ordenColumnaActual.dir === 'asc'
+                            ? '<span class="material-symbols-outlined" style="font-size: 15px; font-weight: 900; color: #0277bd;">arrow_upward</span>'
+                            : '<span class="material-symbols-outlined" style="font-size: 15px; font-weight: 900; color: #0277bd;">arrow_downward</span>';
+                    } else {
+                        sortEl.innerHTML = '';
+                    }
+                }
+                if (filterEl) {
+                    if (filtrosColumnas[col.key]) {
+                        filterEl.innerHTML = '<span class="material-symbols-outlined" style="font-size: 14px; color: #e65100;" title="Filtro activo: ' + filtrosColumnas[col.key] + '">filter_alt</span>';
+                    } else {
+                        filterEl.innerHTML = '';
+                    }
+                }
+            });
+        }
+
+        function actualizarBarraFiltrosActivos() {
+            const barra = document.getElementById('barra-filtros-activos');
+            const contenedor = document.getElementById('contenedor-chips-filtros');
+            if (!barra || !contenedor) return;
+
+            const chips = [];
+            if (ordenColumnaActual.col) {
+                const colInfo = COLUMNAS_INFO.find(c => c.key === ordenColumnaActual.col);
+                const label = colInfo ? colInfo.label : ordenColumnaActual.col;
+                const dirLabel = ordenColumnaActual.dir === 'asc' ? '▲ Asc' : '▼ Desc';
+                chips.push(`
+                    <span class="chip-filtro-activo" onclick="quitarOrdenColumna()" title="Quitar orden">
+                        <span>Orden: <strong>${label}</strong> (${dirLabel})</span>
+                        <span class="chip-remove">✕</span>
+                    </span>
+                `);
+            }
+            for (const [colKey, fVal] of Object.entries(filtrosColumnas)) {
+                if (!fVal) continue;
+                const colInfo = COLUMNAS_INFO.find(c => c.key === colKey);
+                const label = colInfo ? colInfo.label : colKey;
+                chips.push(`
+                    <span class="chip-filtro-activo" onclick="limpiarFiltroColumna('${colKey}')" title="Quitar filtro de ${label}">
+                        <span>${label}: "<strong>${fVal}</strong>"</span>
+                        <span class="chip-remove">✕</span>
+                    </span>
+                `);
+            }
+            if (columnasOcultas.size > 0) {
+                chips.push(`
+                    <span class="chip-filtro-activo chip-ocultas" onclick="mostrarTodasColumnas()" title="Mostrar todas las columnas ocultas">
+                        <span>${columnasOcultas.size} columna(s) oculta(s)</span>
+                        <span class="chip-remove">✕</span>
+                    </span>
+                `);
+            }
+
+            if (chips.length > 0) {
+                contenedor.innerHTML = chips.join('');
+                barra.style.display = 'flex';
+            } else {
+                barra.style.display = 'none';
+            }
+        }
+
+        function renderizarContenidoMenuContextual(colKey, cellValue = '') {
+            const colInfo = COLUMNAS_INFO.find(c => c.key === colKey) || { key: colKey, label: colKey, sortable: true, filterable: true };
+            const ordenActual = ordenColumnaActual;
+            const filtroActual = filtrosColumnas[colKey] || '';
+            const esOrdenAsc = ordenActual.col === colKey && ordenActual.dir === 'asc';
+            const esOrdenDesc = ordenActual.col === colKey && ordenActual.dir === 'desc';
+
+            let html = `
+                <div class="ctx-header">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">view_column</span>
+                    <span>Columna: <strong>${colInfo.label}</strong></span>
+                </div>
+            `;
+
+            if (colInfo.sortable) {
+                const textoAsc = (colKey === 'nacimiento' || colKey === 'muerte') ? 'Menor a Mayor (antiguo a reciente)' : (colKey === 'celebracion' ? 'Por fecha en el año (01/01 → 31/12)' : 'Ascendente (A → Z)');
+                const textoDesc = (colKey === 'nacimiento' || colKey === 'muerte') ? 'Mayor a Menor (reciente a antiguo)' : (colKey === 'celebracion' ? 'Por fecha en el año (31/12 → 01/01)' : 'Descendente (Z → A)');
+                
+                html += `
+                    <div class="ctx-section-title">Organizar</div>
+                    <div class="ctx-item ${esOrdenAsc ? 'ctx-active' : ''}" onclick="aplicarOrdenColumna('${colKey}', 'asc')">
+                        <span class="material-symbols-outlined">arrow_upward</span>
+                        <span>${textoAsc}</span>
+                        ${esOrdenAsc ? '<span class="material-symbols-outlined ctx-check-icon">check</span>' : ''}
+                    </div>
+                    <div class="ctx-item ${esOrdenDesc ? 'ctx-active' : ''}" onclick="aplicarOrdenColumna('${colKey}', 'desc')">
+                        <span class="material-symbols-outlined">arrow_downward</span>
+                        <span>${textoDesc}</span>
+                        ${esOrdenDesc ? '<span class="material-symbols-outlined ctx-check-icon">check</span>' : ''}
+                    </div>
+                `;
+                if (esOrdenAsc || esOrdenDesc) {
+                    html += `
+                        <div class="ctx-item" onclick="quitarOrdenColumna()">
+                            <span class="material-symbols-outlined" style="color: #c62828;">close</span>
+                            <span style="color: #c62828;">Quitar orden</span>
+                        </div>
+                    `;
+                }
+            }
+
+            if (colInfo.filterable) {
+                html += `
+                    <div class="ctx-divider"></div>
+                    <div class="ctx-section-title">Filtrar por ${colInfo.label}</div>
+                    <div class="ctx-filter-box">
+                        <div class="ctx-filter-input-wrap">
+                            <span class="material-symbols-outlined" style="font-size: 16px; color: #78909c;">filter_alt</span>
+                            <input type="text" id="ctx-filtro-input" name="ctx_filtro_input" class="ctx-filter-input" placeholder="Filtrar por ${colInfo.label}..." value="${(filtroActual || '').replace(/"/g, '&quot;')}" oninput="manejarInputFiltroContextual('${colKey}', this.value)" onkeydown="if(event.key==='Enter') cerrarMenuContextual()">
+                            ${filtroActual ? `<button type="button" class="ctx-filter-clear" onclick="limpiarFiltroColumna('${colKey}')" title="Borrar filtro">✕</button>` : ''}
+                        </div>
+                    </div>
+                `;
+                if (cellValue && cellValue.trim() && cellValue.trim() !== '—') {
+                    const cellLimpio = cellValue.trim();
+                    const cellCorto = cellLimpio.length > 22 ? cellLimpio.substring(0, 22) + '...' : cellLimpio;
+                    html += `
+                        <div class="ctx-item" onclick="aplicarFiltroColumna('${colKey}', '${cellLimpio.replace(/'/g, "\\'")}')">
+                            <span class="material-symbols-outlined">filter_list</span>
+                            <span>Filtrar solo "<strong>${cellCorto}</strong>"</span>
+                        </div>
+                    `;
+                }
+                if (filtroActual) {
+                    html += `
+                        <div class="ctx-item" onclick="limpiarFiltroColumna('${colKey}')">
+                            <span class="material-symbols-outlined" style="color: #c62828;">filter_alt_off</span>
+                            <span style="color: #c62828;">Quitar filtro de ${colInfo.label}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            html += `
+                <div class="ctx-divider"></div>
+                <div class="ctx-section-title">Visibilidad de Columnas</div>
+                <div class="ctx-item" onclick="ocultarColumna('${colKey}')">
+                    <span class="material-symbols-outlined">visibility_off</span>
+                    <span>Ocultar columna "<strong>${colInfo.label}</strong>"</span>
+                </div>
+                <div class="ctx-columns-list">
+            `;
+
+            COLUMNAS_INFO.forEach(col => {
+                const estaOculta = columnasOcultas.has(col.key);
+                const chkId = `ctx-col-chk-${col.key}`;
+                html += `
+                    <label class="ctx-col-item">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" id="${chkId}" name="ctx_col_${col.key}" class="ctx-col-checkbox" ${!estaOculta ? 'checked' : ''} onchange="toggleVisibilidadColumna('${col.key}', this.checked)">
+                            <span>${col.label}</span>
+                        </span>
+                    </label>
+                `;
+            });
+
+            html += `
+                </div>
+                <div class="ctx-divider"></div>
+                <div class="ctx-section-title">Tamaño de Columna</div>
+                <div class="ctx-item" onclick="autoajustarColumna('${colKey}'); cerrarMenuContextual();">
+                    <span class="material-symbols-outlined">fit_screen</span>
+                    <span>Autoajustar ancho de "<strong>${colInfo.label}</strong>"</span>
+                </div>
+                <div class="ctx-item" onclick="restablecerAnchosColumnas()">
+                    <span class="material-symbols-outlined">settings_backup_restore</span>
+                    <span>Restablecer anchos por defecto</span>
+                </div>
+                <div class="ctx-divider"></div>
+                <div class="ctx-item" onclick="mostrarTodasColumnas()">
+                    <span class="material-symbols-outlined">visibility</span>
+                    <span>Mostrar todas las columnas</span>
+                </div>
+                ${(columnasOcultas.size > 0 || Object.keys(filtrosColumnas).length > 0 || ordenColumnaActual.col) ? `
+                    <div class="ctx-item" onclick="restablecerTodoVista()">
+                        <span class="material-symbols-outlined" style="color: #c62828;">restart_alt</span>
+                        <span style="color: #c62828;">Restablecer filtros y columnas</span>
+                    </div>
+                ` : ''}
+            `;
+
+            return html;
+        }
+
+        window.abrirMenuContextual = function(e) {
+            const celda = e.target.closest('th, td');
+            if (!celda) return;
+            if (['INPUT', 'BUTTON', 'SELECT'].includes(e.target.tagName)) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const colKey = celda.getAttribute('data-col') || 'nombre';
+            let cellValue = '';
+            if (celda.tagName === 'TD') {
+                const link = celda.querySelector('.nombre-santo-link');
+                if (link) {
+                    cellValue = link.textContent.trim();
+                } else {
+                    cellValue = celda.textContent.trim();
+                }
+            }
+
+            const menu = document.getElementById('santo-context-menu');
+            if (!menu) return;
+
+            menu.innerHTML = renderizarContenidoMenuContextual(colKey, cellValue);
+            menu.style.display = 'block';
+
+            // Posicionar evitando desbordar pantalla
+            const menuRect = menu.getBoundingClientRect();
+            let left = e.clientX;
+            let top = e.clientY;
+
+            if (left + menuRect.width > window.innerWidth - 12) {
+                left = Math.max(10, window.innerWidth - menuRect.width - 15);
+            }
+            if (top + menuRect.height > window.innerHeight - 12) {
+                top = Math.max(10, window.innerHeight - menuRect.height - 15);
+            }
+
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
+
+            const inputFiltro = menu.querySelector('#ctx-filtro-input');
+            if (inputFiltro) {
+                setTimeout(() => inputFiltro.focus(), 50);
+            }
+        };
+
+        window.cerrarMenuContextual = function() {
+            const menu = document.getElementById('santo-context-menu');
+            if (menu) menu.style.display = 'none';
+        };
+
+        // Cerrar menú con clic fuera o escape o scroll
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('santo-context-menu');
+            if (menu && menu.style.display !== 'none' && !menu.contains(e.target)) {
+                cerrarMenuContextual();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarMenuContextual();
+            }
+        });
+
+        window.addEventListener('scroll', function() {
+            cerrarMenuContextual();
+        }, { passive: true });
+
         window.renderTablaRegistrados = function() {
             const todosLosSantos = obtenerSantos();
             const tbody = document.getElementById('tbody-santos-registrados');
@@ -921,38 +1984,58 @@
 
             const inputBusqueda = document.getElementById('filtro-nombre-santo');
             const selectFoto = document.getElementById('filtro-foto-santo');
-            const contadorEl = document.getElementById('contador-santos-filtrados');
 
             const query = inputBusqueda ? inputBusqueda.value.toLowerCase().trim() : '';
             const filtroFoto = selectFoto ? selectFoto.value : 'todos';
 
-            // Filtrar santos
-            const santosFiltrados = todosLosSantos.map((s, originalIdx) => ({ s, originalIdx })).filter(item => {
+            // Filtrar santos (búsqueda general + foto + filtros por columna)
+            let santosFiltrados = todosLosSantos.map((s, originalIdx) => ({ s, originalIdx })).filter(item => {
                 const s = item.s;
                 // Filtro por foto
                 const tieneFoto = !!(s.imagen && s.imagen.trim().length > 0);
                 if (filtroFoto === 'con_foto' && !tieneFoto) return false;
                 if (filtroFoto === 'sin_foto' && tieneFoto) return false;
 
-                // Filtro por texto (nombre, país, realidad, ciudad)
+                // Filtro por texto general (nombre, país, realidad, ciudad, historia, detalle)
                 if (query) {
                     const matchNombre = (s.nombre || '').toLowerCase().includes(query);
                     const matchPais = (s.pais || '').toLowerCase().includes(query);
                     const matchRealidad = (s.realidad || '').toLowerCase().includes(query);
                     const matchCiudad = (s.ciudad || '').toLowerCase().includes(query);
-                    if (!matchNombre && !matchPais && !matchRealidad && !matchCiudad) {
+                    const matchHistoria = (s.historia || '').toLowerCase().includes(query);
+                    const matchDetalle = (s.detalle || '').toLowerCase().includes(query);
+                    if (!matchNombre && !matchPais && !matchRealidad && !matchCiudad && !matchHistoria && !matchDetalle) {
                         return false;
                     }
                 }
+
+                // Filtros específicos por columna
+                for (const [colKey, fVal] of Object.entries(filtrosColumnas)) {
+                    if (!fVal) continue;
+                    const fValLower = fVal.toLowerCase().trim();
+                    if (!cumpleFiltroColumna(s, colKey, fValLower)) {
+                        return false;
+                    }
+                }
+
                 return true;
             });
 
-            if (contadorEl) {
-                contadorEl.textContent = `Mostrando ${santosFiltrados.length} de ${todosLosSantos.length}`;
+            // Organizar / Ordenar según ordenColumnaActual
+            if (ordenColumnaActual.col && ordenColumnaActual.dir) {
+                santosFiltrados.sort((a, b) => compararPorColumna(a.s, b.s, ordenColumnaActual.col, ordenColumnaActual.dir));
             }
 
+            window.santosFiltradosActuales = santosFiltrados;
+            if (indiceNavegacionActual >= santosFiltrados.length) {
+                indiceNavegacionActual = Math.max(0, santosFiltrados.length - 1);
+            }
+            window.actualizarContadorNavegacion();
+
             if (santosFiltrados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#888; padding:18px;">No se encontraron santos con los filtros seleccionados.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:#888; padding:18px;">No se encontraron santos con los filtros seleccionados.</td></tr>';
+                actualizarIndicadoresCabeceras();
+                actualizarBarraFiltrosActivos();
                 return;
             }
 
@@ -967,8 +2050,7 @@
                 if (modoAdmin) {
                     accionesHtml = `
                         <div class="btn-tbl-acciones">
-                            <button type="button" class="btn-editar-santo-tbl" onclick="editarSanto(${idx})" title="Editar este santo">Editar</button>
-                            <button type="button" class="btn-eliminar-santo-tbl" onclick="borrarSanto(${idx})" title="Eliminar este santo">Eliminar</button>
+                            <button type="button" class="btn-eliminar-santo-tbl" onclick="borrarSanto(${idx})" title="Eliminar este santo" aria-label="Eliminar"><span class="material-symbols-outlined" style="font-size: 18px; line-height: 1;">delete</span></button>
                         </div>
                     `;
                 }
@@ -980,24 +2062,45 @@
                     imgHtml = `<span class="material-symbols-outlined icon-avatar-sin-foto" title="Buscar imagen de ${s.nombre} en Google" onclick="buscarOVerImagenSanto(${idx}, event)">account_circle</span>`;
                 }
 
-                const edad = calcularEdadSanto(s.nacimiento, s.muerte);
-                const edadTag = (edad !== null) ? `<span style="font-size: 0.78rem; color: #546e7a; font-weight: 500; margin-left: 4px;">(${edad} años)</span>` : '';
-
                 const fechaCelebracion = s.celebracion || s.fechaFestividad || '';
+                const btnEditarDelante = modoAdmin
+                    ? `<button type="button" class="btn-editar-santo-tbl" onclick="editarSanto(${idx})" title="Editar este santo" aria-label="Editar"><span class="material-symbols-outlined" style="font-size: 18px; line-height: 1;">edit</span></button>`
+                    : '';
 
-                return '<tr>' +
-                    '<td class="col-nombre-santo">' + imgHtml + '<span class="nombre-santo-link" onclick="verDetalleSanto(' + idx + ')" title="Ver detalle completo">' + (s.nombre || '') + '</span>' + edadTag + '</td>' +
-                    '<td><div class="texto-recortado">' + formatearFechaMostrar(s.nacimiento) + '</div></td>' +
-                    '<td><div class="texto-recortado">' + formatearFechaMostrar(s.muerte) + '</div></td>' +
-                    '<td><div class="texto-recortado">' + formatearCelebracionMostrar(fechaCelebracion) + '</div></td>' +
-                    '<td><div class="texto-recortado">' + (s.pais || '—') + '</div></td>' +
-                    '<td><div class="texto-recortado">' + (s.ciudad || '—') + '</div></td>' +
-                    '<td><div class="texto-recortado">' + (s.realidad || '—') + '</div></td>' +
-                    '<td><div class="texto-recortado">' + hijosHtml + '</div></td>' +
-                    '<td style="text-align: center;">' + accionesHtml + '</td>' +
+                return '<tr id="fila-santo-' + idx + '">' +
+                    '<td class="col-nombre-santo" data-col="nombre">' +
+                        '<div class="santo-item-nombre-wrapper">' +
+                            btnEditarDelante +
+                            imgHtml +
+                            '<span class="nombre-santo-link" onclick="verDetalleSanto(' + idx + ')" title="Ver detalle completo">' + (s.nombre || '') + '</span>' +
+                        '</div>' +
+                    '</td>' +
+                    '<td data-col="nacimiento"><div class="texto-recortado">' + formatearFechaMostrar(s.nacimiento) + '</div></td>' +
+                    '<td data-col="muerte"><div class="texto-recortado">' + formatearFechaMostrar(s.muerte) + '</div></td>' +
+                    '<td data-col="celebracion"><div class="texto-recortado">' + formatearCelebracionMostrar(fechaCelebracion) + '</div></td>' +
+                    '<td data-col="pais"><div class="texto-recortado">' + (s.pais || '—') + '</div></td>' +
+                    '<td data-col="ciudad"><div class="texto-recortado">' + (s.ciudad || '—') + '</div></td>' +
+                    '<td data-col="realidad"><div class="texto-recortado">' + (s.realidad || '—') + '</div></td>' +
+                    '<td data-col="historia"><div class="texto-recortado" title="' + (s.historia || '').replace(/"/g, '&quot;') + '">' + (s.historia || '—') + '</div></td>' +
+                    '<td data-col="detalle"><div class="texto-recortado" title="' + (s.detalle || '').replace(/"/g, '&quot;') + '">' + (s.detalle || '—') + '</div></td>' +
+                    '<td data-col="hijos"><div class="texto-recortado">' + hijosHtml + '</div></td>' +
+                    '<td data-col="acciones" style="text-align: center;">' + accionesHtml + '</td>' +
                 '</tr>';
             }).join('');
-        }
+
+            actualizarIndicadoresCabeceras();
+            actualizarBarraFiltrosActivos();
+
+            // Vincular evento de clic derecho a la tabla si aún no está vinculado
+            const tablaSantos = document.querySelector('.tabla-santos-registrados');
+            if (tablaSantos && !tablaSantos.dataset.ctxMenuInit) {
+                tablaSantos.dataset.ctxMenuInit = 'true';
+                tablaSantos.addEventListener('contextmenu', abrirMenuContextual);
+            }
+
+            // Inicializar o refrescar resizers de columnas (estilo Excel)
+            inicializarResizersColumnas();
+        };
 
         // Manejo de la Zona Pegar Imagen (Copy-Paste y Drag & Drop)
         const pasteZone = document.getElementById('paste-zone');
@@ -1127,15 +2230,29 @@
 
         window.editarSanto = function(index) {
             if (!modoAdmin) {
-                alert('No tienes permisos de edición activados.');
+                alert('No tienes permisos de edición activados. Inicia sesión como Administrador.');
                 return;
             }
             const santos = obtenerSantos();
             const s = santos[index];
             if (!s) return;
 
+            // Sincronizar índice de navegación con la lista filtrada
+            if (window.santosFiltradosActuales && window.santosFiltradosActuales.length > 0) {
+                const pos = window.santosFiltradosActuales.findIndex(item => item.originalIdx === index);
+                if (pos >= 0) indiceNavegacionActual = pos;
+            }
+
             // Abrir y desplegar formulario en modo edición
             expandirFormularioSanto(true);
+
+            // Mostrar barras de navegación en modo edición
+            const navEditTop = document.getElementById('nav-edicion-santo');
+            if (navEditTop) navEditTop.style.display = 'inline-flex';
+            const navEditBottom = document.getElementById('nav-edicion-santo-bottom');
+            if (navEditBottom) navEditBottom.style.display = 'inline-flex';
+
+            window.actualizarContadorNavegacion();
 
             document.getElementById('edit-index').value = index;
             document.getElementById('nombre').value = s.nombre || '';
@@ -1164,12 +2281,12 @@
             if (s.hijos && s.hijos.length > 0) {
                 s.hijos.forEach(h => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td><input type="text" class="input-hijo" value="${h.replace(/"/g, '&quot;')}"></td>
+                    tr.innerHTML = `<td><input type="text" class="input-hijo" name="hijo_en_la_fe" aria-label="Nombre del hijo en la fe" value="${h.replace(/"/g, '&quot;')}"></td>
                                     <td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td>`;
                     tbodyHijos.appendChild(tr);
                 });
             } else {
-                tbodyHijos.innerHTML = '<tr><td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
+                tbodyHijos.innerHTML = '<tr><td><input type="text" class="input-hijo" name="hijo_en_la_fe" placeholder="Nombre del hijo en la fe" aria-label="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
             }
 
             celebracionModificadaManualmente = !!(s.celebracion || s.fechaFestividad);
@@ -1184,10 +2301,18 @@
             document.getElementById('edit-index').value = '-1';
             document.getElementById('form-santo').reset();
             quitarImagen();
-            document.getElementById('tbody-hijos').innerHTML = '<tr><td><input type="text" class="input-hijo" placeholder="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
+            document.getElementById('tbody-hijos').innerHTML = '<tr><td><input type="text" class="input-hijo" name="hijo_en_la_fe" placeholder="Nombre del hijo en la fe" aria-label="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
             document.getElementById('btn-submit-form').textContent = 'Guardar Santo';
             document.getElementById('btn-cancelar-edicion').style.display = 'none';
+
+            // Ocultar barras de navegación de edición
+            const navEditTop = document.getElementById('nav-edicion-santo');
+            if (navEditTop) navEditTop.style.display = 'none';
+            const navEditBottom = document.getElementById('nav-edicion-santo-bottom');
+            if (navEditBottom) navEditBottom.style.display = 'none';
+
             contraerFormularioSanto();
+            window.actualizarContadorNavegacion();
         };
 
         window.borrarSanto = async function(index) {
@@ -1313,41 +2438,128 @@
             const s = santos[index];
             if (!s) return;
 
+            // Sincronizar índice de navegación con la lista filtrada
+            if (window.santosFiltradosActuales && window.santosFiltradosActuales.length > 0) {
+                const pos = window.santosFiltradosActuales.findIndex(item => item.originalIdx === index);
+                if (pos >= 0) indiceNavegacionActual = pos;
+            }
+            window.actualizarContadorNavegacion();
+
+            window.santoActualDetalle = s;
+            window.indiceSantoActualDetalle = index;
+            if (window.detenerLecturaSantoVoz) window.detenerLecturaSantoVoz();
+
             const edad = calcularEdadSanto(s.nacimiento, s.muerte);
             const edadTexto = (edad !== null) ? ` (${edad} años)` : '';
 
             document.getElementById('modal-santo-nombre').textContent = (s.nombre || 'Detalle del Santo') + edadTexto;
             
-            const hijosList = (s.hijos && s.hijos.length > 0)
-                ? s.hijos.map(h => `<span class="tag-hijo">${h}</span>`).join(' ')
-                : '—';
+            const hijosValidos = (s.hijos && Array.isArray(s.hijos))
+                ? s.hijos.filter(h => h && typeof h === 'string' && h.trim().length > 0 && h.trim() !== '—')
+                : [];
 
             const imgModal = s.imagen 
                 ? `<div style="text-align:center; margin-bottom:12px;"><img src="${s.imagen}" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${s.nombre}"></div>` 
                 : '';
 
-            const fechaCeleb = s.celebracion || s.fechaFestividad || '';
+            const fechaCeleb = (s.celebracion || s.fechaFestividad || '').trim();
+            const nacTexto = s.nacimiento ? formatearFechaMostrar(s.nacimiento) : '';
+            const mueTexto = s.muerte ? formatearFechaMostrar(s.muerte) : '';
+            const celebTexto = fechaCeleb ? formatearCelebracionMostrar(fechaCeleb) : '';
 
-            document.getElementById('modal-santo-cuerpo').innerHTML = `
-                ${imgModal}
-                <div><strong>Nacimiento:</strong> ${formatearFechaMostrar(s.nacimiento)}</div>
-                <div><strong>Mortalidad:</strong> ${formatearFechaMostrar(s.muerte)}</div>
-                <div><strong>Fecha Celebración:</strong> ${formatearCelebracionMostrar(fechaCeleb)}</div>
-                ${edad !== null ? `<div><strong>Edad al fallecer:</strong> ${edad} años</div>` : ''}
-                <div><strong>País:</strong> ${s.pais || '—'}</div>
-                <div><strong>Ciudad:</strong> ${s.ciudad || '—'}</div>
-                <div><strong>Realidad:</strong> ${s.realidad || '—'}</div>
-                <div><strong>Hijos en la fe:</strong> <div style="margin-top:4px;">${hijosList}</div></div>
-                ${s.historia ? `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.historia}</p></div>` : ''}
-                ${s.detalle ? `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.detalle}</p></div>` : ''}
-            `;
+            let cuerpoHtml = imgModal;
 
+            if (nacTexto && nacTexto !== '—') {
+                cuerpoHtml += `<div><strong>Nacimiento:</strong> ${nacTexto}</div>`;
+            }
+            if (mueTexto && mueTexto !== '—') {
+                cuerpoHtml += `<div><strong>Mortalidad:</strong> ${mueTexto}</div>`;
+            }
+            if (celebTexto && celebTexto !== '—') {
+                cuerpoHtml += `<div><strong>Fecha Celebración:</strong> ${celebTexto}</div>`;
+            }
+            if (edad !== null) {
+                cuerpoHtml += `<div><strong>Edad al fallecer:</strong> ${edad} años</div>`;
+            }
+            if (s.pais && s.pais.trim() && s.pais.trim() !== '—') {
+                cuerpoHtml += `<div><strong>País:</strong> ${s.pais.trim()}</div>`;
+            }
+            if (s.ciudad && s.ciudad.trim() && s.ciudad.trim() !== '—') {
+                cuerpoHtml += `<div><strong>Ciudad:</strong> ${s.ciudad.trim()}</div>`;
+            }
+            if (s.realidad && s.realidad.trim() && s.realidad.trim() !== '—') {
+                cuerpoHtml += `<div><strong>Realidad:</strong> ${s.realidad.trim()}</div>`;
+            }
+            if (hijosValidos.length > 0) {
+                const hijosTags = hijosValidos.map(h => `<span class="tag-hijo">${h.trim()}</span>`).join(' ');
+                cuerpoHtml += `<div><strong>Hijos en la fe:</strong> <div style="margin-top:4px;">${hijosTags}</div></div>`;
+            }
+            if (s.historia && s.historia.trim() && s.historia.trim() !== '—') {
+                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.historia.trim()}</p></div>`;
+            }
+            if (s.detalle && s.detalle.trim() && s.detalle.trim() !== '—') {
+                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.detalle.trim()}</p></div>`;
+            }
+
+            document.getElementById('modal-santo-cuerpo').innerHTML = cuerpoHtml;
             document.getElementById('modal-detalle-santo').style.display = 'flex';
+            if (window.prepararBarraProgresoSanto) window.prepararBarraProgresoSanto(s);
         };
 
         window.cerrarModalDetalleSanto = function() {
             document.getElementById('modal-detalle-santo').style.display = 'none';
+            if (window.detenerLecturaSantoVoz) window.detenerLecturaSantoVoz();
+            window.actualizarContadorNavegacion();
         };
+
+        window.editarSantoDesdeModal = function() {
+            if (!modoAdmin) {
+                alert('No tienes permisos de edición activados. Inicia sesión como Administrador.');
+                return;
+            }
+            const idx = window.indiceSantoActualDetalle;
+            if (idx === undefined || idx === null || idx < 0) return;
+
+            window.cerrarModalDetalleSanto();
+            window.editarSanto(idx);
+
+            const headerForm = document.getElementById('header-form-santo');
+            if (headerForm) {
+                headerForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+
+        // Navegación con teclado (Flechas Izquierda / Derecha, Escape y E para editar)
+        document.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('modal-detalle-santo');
+            const modalAbierto = modal && modal.style.display === 'flex';
+            const form = document.getElementById('form-santo');
+            const editIdx = parseInt(document.getElementById('edit-index')?.value, 10);
+            const enModoEdicion = form && form.style.display !== 'none' && editIdx >= 0;
+
+            if (modalAbierto) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    window.navegarSantoAnterior();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    window.navegarSantoSiguiente();
+                } else if (e.key === 'Escape') {
+                    window.cerrarModalDetalleSanto();
+                } else if ((e.key === 'e' || e.key === 'E') && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+                    e.preventDefault();
+                    window.editarSantoDesdeModal();
+                }
+            } else if (enModoEdicion && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    window.navegarSantoAnterior(true);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    window.navegarSantoSiguiente(true);
+                }
+            }
+        });
 
         window.buscarOVerImagenSanto = function(index, event) {
             if (event) event.stopPropagation();
@@ -1368,6 +2580,27 @@
         };
 
         renderTablaRegistrados();
+
+        // Si se pasa ?editar=NombrePorURL, abrirlo automáticamente en modo edición
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editarParam = urlParams.get('editar');
+            if (editarParam) {
+                const todos = obtenerSantos();
+                const idxParam = todos.findIndex(s => s.nombre && s.nombre.toLowerCase() === editarParam.toLowerCase());
+                if (idxParam >= 0) {
+                    setTimeout(() => {
+                        window.editarSanto(idxParam);
+                        const headerForm = document.getElementById('header-form-santo');
+                        if (headerForm) {
+                            headerForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 400);
+                }
+            }
+        } catch (e) {
+            console.warn("No se pudo procesar parámetro de edición:", e);
+        }
     </script>
 </body>
 </html>
