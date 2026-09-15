@@ -1,5 +1,7 @@
 import { obtenerInfoLiturgica } from '../data/calendarioLiturgico.js';
 import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+import { obtenerParidadAño, obtenerCicloDominical } from './form_etiempo.js';
+import { generarSecuenciaLiturgica } from './añoliturgico.js';
 
 const app = document.getElementById('app');
 
@@ -174,13 +176,16 @@ function cargarPortada() {
         // Buscar imagen del santo
         if (textoBotonSanto) {
             const santoEncontrado = mapaCatalogo.get(textoBotonSanto.toLowerCase().trim());
-            if (santoEncontrado && santoEncontrado.imagen && santoEncontrado.imagen.trim()) {
-                let imgPath = santoEncontrado.imagen.trim();
-                // Si la ruta en el catálogo empieza con ../img/, en la raíz (index.html) es src/img/
-                if (imgPath.startsWith('../img/')) {
-                    imgPath = 'src/' + imgPath.substring(3);
+            if (santoEncontrado) {
+                window.santoDelDiaObjeto = santoEncontrado;
+                if (santoEncontrado.imagen && santoEncontrado.imagen.trim()) {
+                    let imgPath = santoEncontrado.imagen.trim();
+                    // Si la ruta en el catálogo empieza con ../img/, en la raíz (index.html) es src/img/
+                    if (imgPath.startsWith('../img/')) {
+                        imgPath = 'src/' + imgPath.substring(3);
+                    }
+                    imagenBotonSanto = imgPath;
                 }
-                imagenBotonSanto = imgPath;
             }
         }
     } catch (e) {
@@ -209,20 +214,34 @@ function cargarPortada() {
                 ${tituloLiturgico}
             </div>
 
-            <!-- ===== BOTONES PRINCIPALES: SALMODIA DEL DÍA Y SANTO DEL DÍA ===== -->
+            <!-- ===== BOTONES PRINCIPALES: SALMODIA DEL DÍA (CON REPRODUCTOR DE EVANGELIO) Y SANTO DEL DÍA ===== -->
             <div class="btn-group" style="margin: 8px 0 4px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;">
-                <button type="button" class="btn-pill ${claseColorHoy}" id="btn-salmodia-dia">
-                    Salmodia del día
+                <div class="btn-pill btn-pill-salmodia-wrapper ${claseColorHoy}" id="btn-salmodia-dia" style="cursor: pointer;" title="Desplegar Horas Litúrgicas">
+                    <button type="button" class="btn-tts-portada btn-reproductor-evangelio" id="btn-reproductor-evangelio-dia" title="Escuchar Evangelio del día" onclick="event.preventDefault(); event.stopPropagation(); if(typeof window.toggleReproducirEvangelioPortada==='function') window.toggleReproducirEvangelioPortada();">
+                        <svg class="tts-portada-circular-ring" viewBox="0 0 32 32">
+                            <circle class="tts-portada-circular-bg" cx="16" cy="16" r="13.5"></circle>
+                            <circle class="tts-portada-circular-bar" id="evangelio-portada-circular-bar" cx="16" cy="16" r="13.5"></circle>
+                        </svg>
+                        <span class="material-symbols-outlined" id="icono-reproductor-evangelio">play_arrow</span>
+                    </button>
+                    <span class="btn-salmodia-texto">Salmodia del día</span>
                     <span class="btn-pill-icon">
                         <span class="material-symbols-outlined" id="icono-salmodia">keyboard_arrow_down</span>
                     </span>
-                </button>
+                </div>
 
                 <a href="src/html/santo.html" class="btn-pill btn-santo" id="btn-santo-dia" title="Ver calendario de Santos">
                     <span class="btn-pill-icon">
                         ${iconoBotonSantoHtml}
                     </span>
-                    <span>${textoBotonSanto}</span>
+                    <span class="btn-santo-texto">${textoBotonSanto}</span>
+                    <button type="button" class="btn-tts-portada" id="btn-tts-portada-santo" title="Escuchar lectura de ${textoBotonSanto}" onclick="event.preventDefault(); event.stopPropagation(); if(typeof window.toggleLeerSantoPortada==='function') window.toggleLeerSantoPortada();">
+                        <svg class="tts-portada-circular-ring" viewBox="0 0 32 32">
+                            <circle class="tts-portada-circular-bg" cx="16" cy="16" r="13.5"></circle>
+                            <circle class="tts-portada-circular-bar" id="tts-portada-circular-bar" cx="16" cy="16" r="13.5"></circle>
+                        </svg>
+                        <span class="material-symbols-outlined" id="icono-tts-portada">play_arrow</span>
+                    </button>
                 </a>
             </div>
 
@@ -422,6 +441,9 @@ function vincularEventos() {
 
     if (btnSalmodia && subHoras) {
         btnSalmodia.addEventListener('click', (e) => {
+            if (e.target.closest('#btn-reproductor-evangelio-dia')) {
+                return;
+            }
             e.preventDefault();
             const estaDesplegado = subHoras.classList.toggle('desplegado');
             if (iconoSalmodia) {
@@ -582,3 +604,134 @@ function vincularEventos() {
 
 // Arrancar la aplicación
 cargarPortada();
+
+// =========================================================
+// REPRODUCTOR DEL EVANGELIO DEL DÍA (PORTADA)
+// =========================================================
+let audioEvangelioGlobal = null;
+let evangelioEstaReproduciendo = false;
+
+export function pausarEvangelioPortada() {
+    if (audioEvangelioGlobal && !audioEvangelioGlobal.paused) {
+        audioEvangelioGlobal.pause();
+    }
+    evangelioEstaReproduciendo = false;
+    const btnEvangelio = document.getElementById('btn-reproductor-evangelio-dia');
+    const iconoEvangelio = document.getElementById('icono-reproductor-evangelio');
+    if (btnEvangelio) btnEvangelio.classList.remove('reproduciendo', 'speaking');
+    if (iconoEvangelio) iconoEvangelio.textContent = 'play_arrow';
+}
+window.pausarEvangelioPortada = pausarEvangelioPortada;
+
+export function resolverUrlEvangelioHoy() {
+    const hoy = new Date();
+    const y = hoy.getFullYear();
+    const m = String(hoy.getMonth() + 1).padStart(2, '0');
+    const d = String(hoy.getDate()).padStart(2, '0');
+    const fechaISO = `${y}-${m}-${d}`;
+    const esDomingo = (hoy.getDay() === 0);
+
+    let catalogo = null;
+    const guardado = localStorage.getItem(`lh-catalogo-liturgico-${y}`);
+    if (guardado) {
+        try { catalogo = JSON.parse(guardado); } catch (_) {}
+    }
+    if (!catalogo || !Array.isArray(catalogo)) {
+        catalogo = generarSecuenciaLiturgica(y);
+    }
+
+    const itemHoy = catalogo.find(item => item.fecha === fechaISO);
+    if (itemHoy) {
+        if (esDomingo) {
+            const ciclo = obtenerCicloDominical(y);
+            if (ciclo === 'A' && itemHoy.urlEvangelioCicloA) return itemHoy.urlEvangelioCicloA;
+            if (ciclo === 'B' && itemHoy.urlEvangelioCicloB) return itemHoy.urlEvangelioCicloB;
+            if (ciclo === 'C' && itemHoy.urlEvangelioCicloC) return itemHoy.urlEvangelioCicloC;
+            return itemHoy.urlEvangelioCicloA || itemHoy.urlEvangelioCicloB || itemHoy.urlEvangelioCicloC;
+        } else {
+            const esPar = (y % 2 === 0);
+            if (esPar && itemHoy.urlEvangelioPar) return itemHoy.urlEvangelioPar;
+            if (!esPar && itemHoy.urlEvangelioImpar) return itemHoy.urlEvangelioImpar;
+            return itemHoy.urlEvangelioPar || itemHoy.urlEvangelioImpar;
+        }
+    }
+
+    const nombresDias = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+    const diaUrl = nombresDias[hoy.getDay()];
+    if (esDomingo) {
+        const ciclo = obtenerCicloDominical(y).toLowerCase();
+        return `https://ev.resucito.do/to/1/domingo-${ciclo}.mp3`;
+    } else {
+        const sufijo = (y % 2 === 0) ? 'par' : 'impar';
+        return `https://ev.resucito.do/to/1/${diaUrl}-${sufijo}.mp3`;
+    }
+}
+
+export function toggleReproducirEvangelioPortada() {
+    const btnEvangelio = document.getElementById('btn-reproductor-evangelio-dia');
+    const iconoEvangelio = document.getElementById('icono-reproductor-evangelio');
+    const ringBar = document.getElementById('evangelio-portada-circular-bar');
+
+    if (!audioEvangelioGlobal) {
+        audioEvangelioGlobal = new Audio();
+
+        audioEvangelioGlobal.addEventListener('timeupdate', () => {
+            if (audioEvangelioGlobal.duration && ringBar) {
+                const progreso = audioEvangelioGlobal.currentTime / audioEvangelioGlobal.duration;
+                const offset = 84.82 * (1 - progreso);
+                ringBar.style.strokeDashoffset = offset;
+            }
+        });
+
+        audioEvangelioGlobal.addEventListener('ended', () => {
+            evangelioEstaReproduciendo = false;
+            if (btnEvangelio) btnEvangelio.classList.remove('reproduciendo', 'speaking');
+            if (iconoEvangelio) iconoEvangelio.textContent = 'play_arrow';
+            if (ringBar) ringBar.style.strokeDashoffset = '84.82';
+        });
+
+        audioEvangelioGlobal.addEventListener('error', (e) => {
+            console.error("Error al cargar audio del evangelio:", e);
+            evangelioEstaReproduciendo = false;
+            if (btnEvangelio) btnEvangelio.classList.remove('reproduciendo', 'speaking');
+            if (iconoEvangelio) iconoEvangelio.textContent = 'play_arrow';
+            alert("No se encontró el archivo de audio para el Evangelio del día de hoy.");
+        });
+    }
+
+    if (evangelioEstaReproduciendo) {
+        audioEvangelioGlobal.pause();
+        evangelioEstaReproduciendo = false;
+        if (btnEvangelio) btnEvangelio.classList.remove('reproduciendo', 'speaking');
+        if (iconoEvangelio) iconoEvangelio.textContent = 'play_arrow';
+    } else {
+        // Pausar audio del santo si estuviera activo
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            const btnSanto = document.getElementById('btn-tts-portada-santo');
+            const iconoSanto = document.getElementById('icono-tts-portada');
+            if (btnSanto) btnSanto.classList.remove('speaking', 'cargando-tts');
+            if (iconoSanto) iconoSanto.textContent = 'play_arrow';
+        }
+
+        const urlEvangelio = resolverUrlEvangelioHoy();
+        if (!urlEvangelio) {
+            alert("No hay una URL configurada para el Evangelio de hoy.");
+            return;
+        }
+
+        if (audioEvangelioGlobal.src !== urlEvangelio) {
+            audioEvangelioGlobal.src = urlEvangelio;
+        }
+
+        audioEvangelioGlobal.play().then(() => {
+            evangelioEstaReproduciendo = true;
+            if (btnEvangelio) btnEvangelio.classList.add('reproduciendo', 'speaking');
+            if (iconoEvangelio) iconoEvangelio.textContent = 'pause';
+        }).catch(err => {
+            console.error("Error reproduciendo audio del evangelio:", err);
+            alert("No se pudo iniciar la reproducción del Evangelio.");
+        });
+    }
+}
+window.toggleReproducirEvangelioPortada = toggleReproducirEvangelioPortada;

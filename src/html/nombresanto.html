@@ -325,7 +325,7 @@
     <div id="santo-context-menu" class="santo-context-menu" style="display: none;" onclick="event.stopPropagation()"></div>
 
     <script src="../js/navigator.js" type="module"></script>
-    <script src="../js/tts-santo.js?v=1789423500" type="module"></script>
+    <script src="../js/tts-santo.js?v=1789427000" type="module"></script>
     <script type="module">
         import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 
@@ -566,46 +566,75 @@
         // ==========================================
         // FUNCIONALIDAD DE IMPORTACIÓN Y EXPORTACIÓN CSV
         // ==========================================
-        function parsearLineaCSV(linea) {
-            const resultado = [];
-            let dentroComillas = false;
+        function normalizarClave(str) {
+            if (!str) return '';
+            return str
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function parsearCSVCompleto(texto) {
+            const filas = [];
+            let filaActual = [];
             let valorActual = '';
-            for (let i = 0; i < linea.length; i++) {
-                const char = linea[i];
+            let dentroComillas = false;
+
+            for (let i = 0; i < texto.length; i++) {
+                const char = texto[i];
+                const siguienteChar = texto[i + 1];
+
                 if (char === '"') {
-                    if (dentroComillas && linea[i + 1] === '"') {
+                    if (dentroComillas && siguienteChar === '"') {
                         valorActual += '"';
                         i++;
                     } else {
                         dentroComillas = !dentroComillas;
                     }
                 } else if (char === ',' && !dentroComillas) {
-                    resultado.push(valorActual.trim());
+                    filaActual.push(valorActual.trim());
                     valorActual = '';
+                } else if ((char === '\r' || char === '\n') && !dentroComillas) {
+                    if (char === '\r' && siguienteChar === '\n') {
+                        i++;
+                    }
+                    filaActual.push(valorActual.trim());
+                    valorActual = '';
+                    if (filaActual.some(col => col.length > 0)) {
+                        filas.push(filaActual);
+                    }
+                    filaActual = [];
                 } else {
                     valorActual += char;
                 }
             }
-            resultado.push(valorActual.trim());
-            return resultado;
+
+            if (valorActual.length > 0 || filaActual.length > 0) {
+                filaActual.push(valorActual.trim());
+                if (filaActual.some(col => col.length > 0)) {
+                    filas.push(filaActual);
+                }
+            }
+
+            return filas;
         }
 
         window.procesarImportacionCSV = function(event) {
             const archivo = event.target.files && event.target.files[0];
             if (!archivo) return;
 
-            const lector = new FileReader();
-            lector.onload = async function(e) {
+            async function ejecutarProcesamiento(texto) {
                 try {
-                    const texto = e.target.result;
-                    const lineas = texto.split(/\r?\n/).filter(l => l.trim().length > 0);
-                    if (lineas.length <= 1) {
+                    const filas = parsearCSVCompleto(texto);
+                    if (filas.length <= 1) {
                         alert("⚠️ El archivo CSV parece estar vacío o no tiene registros válidos.");
                         return;
                     }
 
-                    // Identificar encabezados
-                    const encabezados = parsearLineaCSV(lineas[0]).map(h => h.toLowerCase().trim());
+                    // Identificar encabezados en la primera fila
+                    const encabezados = filas[0].map(h => h.toLowerCase().trim());
                     console.log("📑 [CSV Encabezados detectados]:", encabezados);
 
                     // Índices de columnas
@@ -627,23 +656,30 @@
 
                     const listaActual = obtenerSantos();
                     const mapa = new Map();
-                    listaActual.forEach(s => {
-                        if (s && s.nombre) mapa.set(s.nombre.toLowerCase().trim(), s);
+                    listaActual.forEach((s, idx) => {
+                        if (s && s.nombre) {
+                            mapa.set(normalizarClave(s.nombre), { santo: s, index: idx });
+                        }
                     });
 
-                    let importados = 0;
-                    for (let i = 1; i < lineas.length; i++) {
-                        const col = parsearLineaCSV(lineas[i]);
+                    let actualizados = 0;
+                    let agregados = 0;
+
+                    for (let i = 1; i < filas.length; i++) {
+                        const col = filas[i];
                         const nombre = col[idxNombre] ? col[idxNombre].trim() : '';
                         if (!nombre) continue;
 
-                        const clave = nombre.toLowerCase().trim();
+                        const clave = normalizarClave(nombre);
                         const hijosStr = (idxHijos >= 0 && col[idxHijos] && col[idxHijos] !== '—') ? col[idxHijos] : '';
                         const hijosArr = hijosStr ? hijosStr.split(',').map(h => h.trim()).filter(h => h.length > 0) : [];
 
+                        const fechaVal = (idxFechaFest >= 0 && col[idxFechaFest]) ? col[idxFechaFest].trim() : '';
+
                         const santoObj = {
                             nombre: nombre,
-                            fechaFestividad: (idxFechaFest >= 0 && col[idxFechaFest]) ? col[idxFechaFest] : '',
+                            celebracion: fechaVal,
+                            fechaFestividad: fechaVal,
                             nacimiento: (idxNac >= 0 && col[idxNac] && col[idxNac] !== '—') ? col[idxNac] : '',
                             muerte: (idxMuerte >= 0 && col[idxMuerte] && col[idxMuerte] !== '—') ? col[idxMuerte] : '',
                             pais: (idxPais >= 0 && col[idxPais] && col[idxPais] !== '—') ? col[idxPais] : '',
@@ -655,23 +691,45 @@
                         };
 
                         if (mapa.has(clave)) {
-                            const prev = mapa.get(clave);
-                            mapa.set(clave, { ...santoObj, imagen: prev.imagen || '' });
+                            const entry = mapa.get(clave);
+                            // Actualizar santo existente manteniendo su imagen y posición
+                            entry.santo = { ...entry.santo, ...santoObj, imagen: entry.santo.imagen || '' };
+                            mapa.set(clave, entry);
+                            actualizados++;
                         } else {
                             santoObj.imagen = '';
-                            mapa.set(clave, santoObj);
+                            mapa.set(clave, { santo: santoObj, index: mapa.size });
+                            agregados++;
                         }
-                        importados++;
                     }
 
-                    const listaNueva = Array.from(mapa.values());
+                    // Reconstruir lista ordenada preservando orden
+                    const listaNueva = Array.from(mapa.values())
+                        .sort((a, b) => a.index - b.index)
+                        .map(item => item.santo);
+
                     await guardarSantos(listaNueva);
                     renderTablaRegistrados();
-                    event.target.value = ''; // Limpiar input file
-                    alert(`✅ ¡Importación completada! Se procesaron ${importados} registros del archivo CSV.`);
+                    event.target.value = '';
+                    alert(`✅ ¡Importación completada con éxito!\n\n• Santos actualizados: ${actualizados}\n• Santos nuevos agregados: ${agregados}\n• Total santos en catálogo: ${listaNueva.length}`);
                 } catch (err) {
                     console.error("Error al procesar archivo CSV:", err);
                     alert("❌ Ocurrió un error al leer el archivo CSV: " + (err.message || err));
+                }
+            }
+
+            const lector = new FileReader();
+            lector.onload = function(e) {
+                const texto = e.target.result;
+                // Si contiene caracteres de sustitución causados por codificación ANSI/Windows-1252
+                if (texto.includes('\uFFFD')) {
+                    const lectorWin = new FileReader();
+                    lectorWin.onload = function(eWin) {
+                        ejecutarProcesamiento(eWin.target.result);
+                    };
+                    lectorWin.readAsText(archivo, 'windows-1252');
+                } else {
+                    ejecutarProcesamiento(texto);
                 }
             };
             lector.readAsText(archivo, 'UTF-8');
@@ -2462,10 +2520,27 @@
                 ? `<div style="text-align:center; margin-bottom:12px;"><img src="${s.imagen}" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${s.nombre}"></div>` 
                 : '';
 
-            const fechaCeleb = (s.celebracion || s.fechaFestividad || '').trim();
+            const ocultas = (window.columnasOcultas instanceof Set) 
+                ? window.columnasOcultas 
+                : new Set(JSON.parse(localStorage.getItem('lh_santos_columnas_ocultas') || '[]'));
+
+            const fechaCeleb = (s.celebracion !== undefined && s.celebracion !== null && s.celebracion.trim() !== '')
+                ? s.celebracion.trim()
+                : (s.celebracion === undefined ? (s.fechaFestividad || '').trim() : '');
+
             const nacTexto = s.nacimiento ? formatearFechaMostrar(s.nacimiento) : '';
             const mueTexto = s.muerte ? formatearFechaMostrar(s.muerte) : '';
             const celebTexto = fechaCeleb ? formatearCelebracionMostrar(fechaCeleb) : '';
+
+            // Si la celebración cae en el mismo día y mes que la mortalidad, no duplicar el campo de fecha
+            let esMismaFecha = false;
+            if (mueTexto && celebTexto && mueTexto !== '—' && celebTexto !== '—') {
+                const mMue = mueTexto.match(/^(\d{1,2})\/(\d{1,2})/);
+                const mCel = celebTexto.match(/^(\d{1,2})\/(\d{1,2})/);
+                if (mMue && mCel && parseInt(mMue[1], 10) === parseInt(mCel[1], 10) && parseInt(mMue[2], 10) === parseInt(mCel[2], 10)) {
+                    esMismaFecha = true;
+                }
+            }
 
             let cuerpoHtml = imgModal;
 
@@ -2475,11 +2550,8 @@
             if (mueTexto && mueTexto !== '—') {
                 cuerpoHtml += `<div><strong>Mortalidad:</strong> ${mueTexto}</div>`;
             }
-            if (celebTexto && celebTexto !== '—') {
+            if (celebTexto && celebTexto !== '—' && !esMismaFecha) {
                 cuerpoHtml += `<div><strong>Fecha Celebración:</strong> ${celebTexto}</div>`;
-            }
-            if (edad !== null) {
-                cuerpoHtml += `<div><strong>Edad al fallecer:</strong> ${edad} años</div>`;
             }
             if (s.pais && s.pais.trim() && s.pais.trim() !== '—') {
                 cuerpoHtml += `<div><strong>País:</strong> ${s.pais.trim()}</div>`;
@@ -2495,10 +2567,10 @@
                 cuerpoHtml += `<div><strong>Hijos en la fe:</strong> <div style="margin-top:4px;">${hijosTags}</div></div>`;
             }
             if (s.historia && s.historia.trim() && s.historia.trim() !== '—') {
-                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.historia.trim()}</p></div>`;
+                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4; text-align: justify;">${s.historia.trim()}</p></div>`;
             }
             if (s.detalle && s.detalle.trim() && s.detalle.trim() !== '—') {
-                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.detalle.trim()}</p></div>`;
+                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4; text-align: justify;">${s.detalle.trim()}</p></div>`;
             }
 
             document.getElementById('modal-santo-cuerpo').innerHTML = cuerpoHtml;

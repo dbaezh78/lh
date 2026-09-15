@@ -159,9 +159,167 @@
     color: #0277bd !important;
     border: 1.5px solid #0288d1;
     box-shadow: 0 4px 14px rgba(2, 119, 189, 0.25);
-    padding: 10px 22px 10px 10px;
-    gap: 12px;
+    padding: 6px 8px 6px 8px;
+    gap: 10px;
     justify-content: flex-start;
+    align-items: center;
+}
+
+.btn-pill.btn-santo .btn-santo-texto {
+    font-weight: 700;
+    color: #0277bd;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    font-size: 0.95rem;
+}
+
+/* Reproductor circular en portada */
+.btn-tts-portada {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #0288d1;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, color 0.2s ease, background-color 0.2s ease;
+    line-height: 1;
+    position: relative;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    margin-left: auto;
+    z-index: 2;
+}
+
+.btn-tts-portada:hover {
+    background-color: #e1f5fe;
+    transform: scale(1.1);
+}
+
+.btn-tts-portada:active {
+    transform: scale(0.94);
+}
+
+.btn-tts-portada .material-symbols-outlined {
+    font-size: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-tts-portada.speaking {
+    color: #d32f2f;
+}
+
+.btn-tts-portada.speaking .material-symbols-outlined {
+    animation: pulso-voz-santo 1.2s infinite;
+}
+
+.btn-tts-portada.cargando-tts .material-symbols-outlined {
+    animation: pulso-carga-santo 0.8s ease-in-out infinite;
+}
+
+/* Anillo circular de carga para portada */
+.tts-portada-circular-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.tts-portada-circular-bg {
+    fill: none;
+    stroke: #e1f5fe;
+    stroke-width: 2.8px;
+    transition: stroke 0.2s, opacity 0.2s;
+}
+
+.btn-tts-portada:hover .tts-portada-circular-bg {
+    stroke: #b3e5fc;
+}
+
+.tts-portada-circular-bar {
+    fill: none;
+    stroke: #0288d1;
+    stroke-width: 2.8px;
+    stroke-linecap: round;
+    stroke-dasharray: 84.82;
+    stroke-dashoffset: 84.82;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 0.04s linear, stroke 0.2s;
+}
+
+.btn-tts-portada.cargando-tts .tts-portada-circular-bar {
+    stroke: #0288d1;
+}
+
+.btn-tts-portada.speaking .tts-portada-circular-bar {
+    stroke: #0288d1;
+    stroke-dashoffset: 0;
+}
+
+@keyframes pulso-carga-santo {
+    0% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.14); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.85; }
+}
+
+@keyframes pulso-voz-santo {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+    100% { transform: scale(1); }
+}
+
+/* Reproductor del Evangelio a la izquierda de Salmodia del Día */
+.btn-reproductor-evangelio {
+    margin-left: 0;
+    margin-right: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+}
+
+.btn-reproductor-evangelio:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+}
+
+.btn-reproductor-evangelio .tts-portada-circular-bg {
+    stroke: rgba(255, 255, 255, 0.3);
+}
+
+.btn-reproductor-evangelio .tts-portada-circular-bar {
+    stroke: #ffffff;
+}
+
+.btn-reproductor-evangelio.speaking,
+.btn-reproductor-evangelio.reproduciendo {
+    color: #ffffff;
+    background: rgba(211, 47, 47, 0.85);
+    border-color: #ff5252;
+}
+
+.btn-pill-salmodia-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px 6px 8px !important;
+}
+
+.btn-salmodia-texto {
+    flex: 1;
+    text-align: center;
+    padding: 0 10px;
+    user-select: none;
 }
 
 .btn-pill.btn-santo .btn-pill-icon {

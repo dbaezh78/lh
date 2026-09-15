@@ -1,0 +1,339 @@
+:root {
+    --color-fondo: #f8f6f0;
+    --color-card: #ffffff;
+    --color-borde: #ded8cb;
+    --color-texto: #2b2b2b;
+    --color-primario: #8B0000;
+    --color-morado: #7B2FBE;
+    --color-verde: #2E7D32;
+    --color-azul: #0288D1;
+    --color-hover: #f3efe6;
+    --color-sombra: rgba(0, 0, 0, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+}
+
+.contenedor-etiempo {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--color-card);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 20px var(--color-sombra);
+    border: 1px solid var(--color-borde);
+}
+
+.header-etiempo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    border-bottom: 2px solid var(--color-primario);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+.header-etiempo .titulo-box h1 {
+    margin: 0;
+    color: var(--color-primario);
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.header-etiempo .titulo-box p {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.header-acciones {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-accion {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+    background: #fff;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-accion:hover {
+    background: var(--color-hover);
+    border-color: #bbb;
+}
+
+.btn-accion.btn-primary {
+    background: var(--color-primario);
+    color: #fff;
+    border-color: var(--color-primario);
+}
+
+.btn-accion.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.panel-config-año {
+    background: #faf8f4;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.selector-grupo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.selector-grupo label {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+}
+
+.selector-grupo select,
+.selector-grupo input[type="number"] {
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+    background: #fff;
+    font-weight: bold;
+    color: var(--color-primario);
+}
+
+.badges-año-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.badge-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #e8ecf2;
+    color: #1e3a5f;
+    border: 1px solid #cdd7e4;
+}
+
+.badge-info.badge-par {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #c8e6c9;
+}
+
+.badge-info.badge-impar {
+    background: #fff3e0;
+    color: #e65100;
+    border-color: #ffe0b2;
+}
+
+.badge-info.badge-ciclo {
+    background: #f3e5f5;
+    color: #6a1b9a;
+    border-color: #e1bee7;
+}
+
+/* Grid formulario para agregar o editar cambio */
+.seccion-form {
+    background: #ffffff;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+}
+
+.seccion-form h2 {
+    margin: 0 0 14px;
+    font-size: 1.15rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    align-items: flex-end;
+}
+
+.form-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-campo label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-campo input,
+.form-campo select {
+    padding: 9px 12px;
+    border: 1px solid var(--color-borde);
+    border-radius: 7px;
+    font-size: 0.95rem;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.2s;
+}
+
+.form-campo input:focus,
+.form-campo select:focus {
+    border-color: var(--color-primario);
+}
+
+.tabla-responsive {
+    overflow-x: auto;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    background: #fff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+th, td {
+    padding: 11px 13px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+th {
+    background-color: #f7f4ed;
+    color: #444;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background-color: var(--color-hover);
+}
+
+.tag-tiempo {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.tag-adviento  { background-color: var(--color-morado); }
+.tag-navidad   { background-color: var(--color-primario); }
+.tag-ordinario { background-color: var(--color-verde); }
+.tag-cuaresma  { background-color: #581845; }
+.tag-pascua    { background-color: var(--color-azul); }
+
+.badge-fecha {
+    font-family: monospace;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #111;
+}
+
+.input-fecha-tabla {
+    padding: 4px 8px;
+    border: 1px solid var(--color-borde);
+    border-radius: 5px;
+    font-size: 0.88rem;
+    font-family: inherit;
+}
+
+.btn-mini-accion {
+    padding: 4px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--color-borde);
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-right: 4px;
+}
+
+.btn-mini-accion:hover {
+    background: #eef2f7;
+}
+
+.btn-mini-accion.btn-danger {
+    color: #c62828;
+}
+
+.btn-mini-accion.btn-danger:hover {
+    background: #ffebee;
+}
+
+.banner-notificacion {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+.banner-exito {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.banner-info {
+    background: #e1f5fe;
+    color: #0277bd;
+    border: 1px solid #b3e5fc;
+}
+
+@media (max-width: 768px) {
+    .header-etiempo {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .panel-config-año {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

@@ -366,6 +366,54 @@
         .btn-modal-pencil:active {
             transform: scale(0.95);
         }
+        /* Botón de reproducción de voz directamente en la fila de la tabla */
+        .btn-tts-tabla {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--color-santo-azul, #0277bd);
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+            line-height: 1;
+            position: relative;
+            width: 26px;
+            height: 26px;
+            min-width: 26px;
+            margin-left: 4px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            vertical-align: middle;
+        }
+        .btn-tts-tabla:hover {
+            background-color: #e1f5fe;
+            color: #01579b;
+            transform: scale(1.18);
+        }
+        .btn-tts-tabla:active {
+            transform: scale(0.92);
+        }
+        .btn-tts-tabla .material-symbols-outlined {
+            font-size: 18px;
+            line-height: 1;
+        }
+        .btn-tts-tabla.speaking {
+            color: #d32f2f;
+            background-color: #ffebee;
+        }
+        .btn-tts-tabla.speaking .material-symbols-outlined {
+            animation: pulso-voz-santo 1.2s infinite;
+        }
+        .btn-tts-tabla.cargando-tts {
+            color: #0288d1;
+            background-color: #e0f2fe;
+        }
+        .btn-tts-tabla.cargando-tts .material-symbols-outlined {
+            animation: pulso-carga-santo 0.8s ease-in-out infinite;
+        }
         .btn-tts-santo.speaking {
             color: #d32f2f;
         }

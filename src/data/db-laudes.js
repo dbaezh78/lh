@@ -2351,6 +2351,7 @@ export const dbLaudes = [
     {id: "tos22LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos22LAdo_cE_A, tos22LAdo_cE_B, tos22LAdo_cE_C),...s2TO2,}},
     {id: "tos26LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos26LAdo_cE_A, tos26LAdo_cE_B, tos26LAdo_cE_C),...s2TO2,}},
     {id: "tos30LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos30LAdo_cE_A, tos30LAdo_cE_B, tos30LAdo_cE_C),...s2TO2,}},
+    {id: "tos34LAdo", ...s2TO1,cEvan_Conclusion: {cEvangelicoAnt:   window.antifonaDomingo(tos34LAdo_cE_A, tos34LAdo_cE_B, tos34LAdo_cE_C),...s2TO2,}},
 // ********* tos2LAdo: Tiempo Ordinario, Semana 2 Laudes DOMINGO *********
 // ********* TOS3LAdo: Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 Laudes DOMINGO *********
 /*  TIEMPO ORDINARIO | DOMINGO DE LA SEMANA II, VI, X, XIV, XVIII, XXII, XXVI, XXX De la Feria. Salterio II    */
@@ -2399,6 +2400,7 @@ export const dbLaudes = [
     {id: "tos22lalu", ...s2TOln1,},
     {id: "tos26lalu", ...s2TOln1,},
     {id: "tos30lalu", ...s2TOln1,},
+    {id: "tos34lalu", ...s2TOln1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES LUNES *********
     {id: "tos3lalu",  ...s3TOln1,},
@@ -2449,6 +2451,7 @@ export const dbLaudes = [
     {id: "tos22lama", ...s2TOmt1,},
     {id: "tos26lama", ...s2TOmt1,},
     {id: "tos30lama", ...s2TOmt1,},
+    {id: "tos34lama", ...s2TOmt1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES MARTES *********
     {id: "tos3lama",  ...s3TOmt1,},
@@ -2491,7 +2494,7 @@ export const dbLaudes = [
     {id: "tos33lami", ...s1TOml1,},
     // ********* tos2LAdo: Tiempo Ordinario, Semana 1,5,9,13,21,25,29,33 Laudes MIERCOLES *********
     
-    // Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30 LAUDES MIERCOLES *********
+    // Tiempo Ordinario, Semana 2,6,10,14,18,22,26,30,34 LAUDES MIERCOLES *********
     {id: "tos2lami",  ...s2TOml1,},
     {id: "tos6lami",  ...s2TOml1,},
     {id: "tos10lami", ...s2TOml1,},
@@ -2500,6 +2503,7 @@ export const dbLaudes = [
     {id: "tos22lami", ...s2TOml1,},
     {id: "tos26lami", ...s2TOml1,},
     {id: "tos30lami", ...s2TOml1,},
+    {id: "tos34lami", ...s2TOml1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES MIERCOLES *********
     {id: "tos3lami",  ...s3TOml1,},
@@ -2550,6 +2554,7 @@ export const dbLaudes = [
     {id: "tos22laju", ...s2TOjs1,},
     {id: "tos26laju", ...s2TOjs1,},
     {id: "tos30laju", ...s2TOjs1,},
+    {id: "tos34laju", ...s2TOjs1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES JUEVES *********
     {id: "tos3laju",  ...s3TOjs1,},
@@ -2600,6 +2605,7 @@ export const dbLaudes = [
     {id: "tos22lavi", ...s2TOvs1,},
     {id: "tos26lavi", ...s2TOvs1,},
     {id: "tos30lavi", ...s2TOvs1,},
+    {id: "tos34lavi", ...s2TOvs1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES VIERNES *********
     {id: "tos3lavi",  ...s3TOvs1,},
@@ -2650,6 +2656,7 @@ export const dbLaudes = [
     {id: "tos22lasa", ...s2TOsb1,},
     {id: "tos26lasa", ...s2TOsb1,},
     {id: "tos30lasa", ...s2TOsb1,},
+    {id: "tos34lasa", ...s2TOsb1,},
 
     // Tiempo Ordinario, Semana 3,7,11,15,19,23,27,31 LAUDES SABADO *********
     {id: "tos3lasa",  ...s3TOsb1,},

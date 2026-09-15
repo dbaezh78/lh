@@ -1,116 +1,300 @@
 :root {
     --color-fondo: #fcfbf7;
     --color-card: #ffffff;
-    --color-borde: #e0dcd3;
+    --color-borde: #ded8cb;
     --color-texto: #2c2c2c;
-    --color-primario: #bc0009;
+    --color-primario: #8B0000;
+    --color-morado: #7B2FBE;
+    --color-verde: #2E7D32;
+    --color-cuaresma: #4A0080;
+    --color-pascua: #0288D1;
     --color-hover: #f5f2eb;
 }
 
 body {
     margin: 0;
-    padding: 20px;
+    padding: 20px 15px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--color-fondo);
     color: var(--color-texto);
 }
 
 .contenedor-año {
-    max-width: 1000px;
+    max-width: 1250px;
     margin: 0 auto;
     background: var(--color-card);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
     border: 1px solid var(--color-borde);
 }
 
 .header-año {
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
     border-bottom: 2px solid var(--color-primario);
-    padding-bottom: 12px;
+    padding-bottom: 14px;
     margin-bottom: 20px;
 }
 
-.header-año h1 {
+.header-año .titulo-box h1 {
     margin: 0;
     color: var(--color-primario);
     font-size: 1.8rem;
 }
 
-.header-año p {
+.header-año .titulo-box p {
     margin: 6px 0 0;
     color: #666;
     font-weight: 500;
 }
 
-.filtros-tabla {
-    margin-bottom: 15px;
+.header-controles {
     display: flex;
-    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
 }
 
-.filtros-tabla input {
-    width: 100%;
-    max-width: 320px;
-    padding: 10px 14px;
-    border: 1px solid var(--color-borde);
+.btn-nav-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
     border-radius: 8px;
-    font-size: 0.95rem;
-    outline: none;
+    border: 1px solid var(--color-borde);
+    background: #fff;
+    color: #333;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.filtros-tabla input:focus {
+.btn-nav-header:hover {
+    background: var(--color-hover);
+    border-color: #aaa;
+}
+
+.btn-nav-header.btn-primario {
+    background: var(--color-primario);
+    color: #fff;
     border-color: var(--color-primario);
 }
 
+.btn-nav-header.btn-primario:hover {
+    opacity: 0.9;
+}
+
+/* Barra de Filtros y Configuración */
+.barra-filtros {
+    margin-bottom: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.grupo-filtro-izq {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.select-filtro {
+    padding: 8px 12px;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    font-size: 0.92rem;
+    background: #fff;
+    outline: none;
+    font-weight: 600;
+}
+
+.input-buscador {
+    width: 280px;
+    padding: 8px 14px;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    font-size: 0.92rem;
+    outline: none;
+}
+
+.input-buscador:focus {
+    border-color: var(--color-primario);
+}
+
+.badge-info-año {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #eef2f7;
+    color: #1e3a5f;
+    border: 1px solid #cdd7e4;
+}
+
+.badge-info-año.badge-par {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #c8e6c9;
+}
+
+.badge-info-año.badge-impar {
+    background: #fff3e0;
+    color: #e65100;
+    border-color: #ffe0b2;
+}
+
+/* Tabla del Año Litúrgico */
 .tabla-responsive {
     overflow-x: auto;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    min-width: 950px;
 }
 
 th, td {
-    padding: 12px 14px;
+    padding: 10px 12px;
     text-align: left;
     border-bottom: 1px solid var(--color-borde);
 }
 
 th {
     background-color: #faf8f3;
-    font-weight: 600;
+    font-weight: 700;
     color: #444;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 tr:hover {
     background-color: var(--color-hover);
 }
 
-.badge-id {
+/* Tags de Tiempo Litúrgico */
+.tag-tiempo {
     display: inline-block;
-    padding: 4px 8px;
-    background: #eef2f7;
-    color: #1e4273;
+    padding: 3px 8px;
     border-radius: 6px;
-    font-family: monospace;
-    font-weight: bold;
-}
-
-.btn-ir {
-    padding: 6px 12px;
-    background: var(--color-primario);
+    font-size: 0.78rem;
+    font-weight: 700;
     color: white;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: opacity 0.2s;
+    white-space: nowrap;
 }
 
-.btn-ir:hover {
-    opacity: 0.85;
+.tag-adviento  { background-color: var(--color-morado); }
+.tag-navidad   { background-color: var(--color-primario); }
+.tag-ordinario { background-color: var(--color-verde); }
+.tag-cuaresma  { background-color: var(--color-cuaresma); }
+.tag-pascua    { background-color: var(--color-pascua); }
+
+.badge-semana {
+    font-weight: 700;
+    color: #444;
+}
+
+.badge-dia {
+    font-weight: 600;
+}
+
+.badge-dia.dia-domingo {
+    color: #b71c1c;
+    font-weight: 700;
+}
+
+.input-fecha-consecutiva {
+    padding: 4px 6px;
+    border: 1px solid var(--color-borde);
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    width: 125px;
+}
+
+.badge-ciclo-tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #e8eaf6;
+    color: #283593;
+}
+
+.badge-paridad-tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #f1f8e9;
+    color: #33691e;
+}
+
+.input-url-evangelio {
+    width: 100%;
+    min-width: 160px;
+    max-width: 220px;
+    padding: 4px 8px;
+    border: 1px solid var(--color-borde);
+    border-radius: 5px;
+    font-size: 0.8rem;
+    box-sizing: border-box;
+}
+
+.btn-play-fila {
+    background: #0288d1;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, background-color 0.2s ease;
+}
+
+.btn-play-fila:hover {
+    background-color: #0277bd;
+    transform: scale(1.1);
+}
+
+.btn-play-fila.reproduciendo {
+    background-color: #d32f2f;
+}
+
+.btn-ir-laudes {
+    padding: 4px 8px;
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.btn-ir-laudes:hover {
+    background: #e0e0e0;
 }

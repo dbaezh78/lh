@@ -106,6 +106,7 @@ function iniciarHeartbeat() {
 // CONTROL DE PROGRESO CIRCULAR DE LA BOCINA (TTS)
 // ==========================================
 const CIRCUNFERENCIA_CIRCULO = 109.96; // 2 * Math.PI * 17.5 (r=17.5 en viewBox="0 0 42 42")
+const CIRCUNFERENCIA_PORTADA = 84.82;  // 2 * Math.PI * 13.5 (r=13.5 en viewBox="0 0 32 32")
 let ttsCargaTimer = null;
 let ttsCargaActiva = false;
 let ttsAudioIniciado = false;
@@ -132,11 +133,17 @@ export function asegurarAnilloCircularTTS() {
 }
 
 export function fijarProgresoCircular(porcentaje) {
-    const bar = asegurarAnilloCircularTTS();
-    if (!bar) return;
     const clamped = Math.min(100, Math.max(0, porcentaje));
-    const offset = CIRCUNFERENCIA_CIRCULO - (CIRCUNFERENCIA_CIRCULO * (clamped / 100));
-    bar.style.strokeDashoffset = offset.toFixed(2);
+    const bar = asegurarAnilloCircularTTS();
+    if (bar) {
+        const offset = CIRCUNFERENCIA_CIRCULO - (CIRCUNFERENCIA_CIRCULO * (clamped / 100));
+        bar.style.strokeDashoffset = offset.toFixed(2);
+    }
+    const barPortada = document.getElementById('tts-portada-circular-bar');
+    if (barPortada) {
+        const offsetP = CIRCUNFERENCIA_PORTADA - (CIRCUNFERENCIA_PORTADA * (clamped / 100));
+        barPortada.style.strokeDashoffset = offsetP.toFixed(2);
+    }
 }
 
 export function resetearAnimacionCargaCircular() {
@@ -150,6 +157,11 @@ export function resetearAnimacionCargaCircular() {
     if (btn) {
         btn.classList.remove('cargando-tts');
         btn.classList.remove('speaking');
+    }
+    const btnPortada = document.getElementById('btn-tts-portada-santo');
+    if (btnPortada) {
+        btnPortada.classList.remove('cargando-tts');
+        btnPortada.classList.remove('speaking');
     }
     fijarProgresoCircular(0);
 }
@@ -167,6 +179,13 @@ export function completarAnimacionCargaCircular() {
             btn.classList.add('speaking');
         }
     }
+    const btnPortada = document.getElementById('btn-tts-portada-santo');
+    if (btnPortada) {
+        btnPortada.classList.remove('cargando-tts');
+        if (currentSpeechState.isSpeaking) {
+            btnPortada.classList.add('speaking');
+        }
+    }
     fijarProgresoCircular(100);
 }
 
@@ -176,6 +195,11 @@ export function iniciarAnimacionCargaCircular(onTreintaPorCiento, onCompletado) 
     if (btn) {
         btn.classList.add('cargando-tts');
         btn.classList.remove('speaking');
+    }
+    const btnPortada = document.getElementById('btn-tts-portada-santo');
+    if (btnPortada) {
+        btnPortada.classList.add('cargando-tts');
+        btnPortada.classList.remove('speaking');
     }
     fijarProgresoCircular(0);
     ttsCargaActiva = true;
@@ -237,6 +261,10 @@ export function detenerLecturaSantoVoz() {
     currentSpeechState.currentChunkIndex = 0;
     const bar = document.getElementById('santo-speech-progress-bar');
     if (bar) bar.style.width = '0%';
+    if (typeof window !== 'undefined') {
+        window.santoFilaHablandoIdx = null;
+        window.reproduciendoSantoPortada = false;
+    }
     actualizarEstadoIconoVoz(false);
 }
 
@@ -298,6 +326,71 @@ export function toggleLeerSantoVoz() {
     }
 
     // Si no está hablando, reproducir desde la posición actual
+    reproducirVoz();
+}
+
+/**
+ * Inicia, pausa o reanuda la lectura en voz alta directamente desde el botón de la fila de la tabla
+ */
+export function toggleLeerSantoVozFila(idx, santo) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+        alert('Tu navegador no soporta la función de lectura por voz (SpeechSynthesis).');
+        return;
+    }
+
+    if (!santo) return;
+
+    // Si ya se está reproduciendo este mismo santo
+    if (window.santoFilaHablandoIdx === idx) {
+        if (currentSpeechState.isSpeaking || ttsCargaActiva) {
+            pausarLecturaSantoVoz();
+            return;
+        } else if (currentSpeechState.currentCharIndex > 0) {
+            reproducirVoz();
+            return;
+        }
+    }
+
+    // Santo diferente o no había ninguno activo
+    detenerLecturaSantoVoz();
+    window.santoFilaHablandoIdx = idx;
+    prepararBarraProgresoSanto(santo);
+    reproducirVoz();
+}
+
+/**
+ * Inicia, pausa o reanuda la lectura en voz alta del santo del día directamente desde el botón de la portada
+ */
+export function toggleLeerSantoPortada(santoParam) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+        alert('Tu navegador no soporta la función de lectura por voz (SpeechSynthesis).');
+        return;
+    }
+
+    const s = santoParam || window.santoDelDiaObjeto || window.santoActualDetalle;
+    if (!s) {
+        alert('No hay información disponible para leer.');
+        return;
+    }
+
+    // Si ya se está reproduciendo el santo de portada
+    if (window.reproduciendoSantoPortada) {
+        if (currentSpeechState.isSpeaking || ttsCargaActiva) {
+            pausarLecturaSantoVoz();
+            return;
+        } else if (currentSpeechState.currentCharIndex > 0) {
+            reproducirVoz();
+            return;
+        }
+    }
+
+    // Detener cualquier otra lectura e iniciar la del santo de portada
+    if (typeof window !== 'undefined' && typeof window.pausarEvangelioPortada === 'function') {
+        window.pausarEvangelioPortada();
+    }
+    detenerLecturaSantoVoz();
+    window.reproduciendoSantoPortada = true;
+    prepararBarraProgresoSanto(s);
     reproducirVoz();
 }
 
@@ -478,7 +571,10 @@ function finalizarLecturaCompleta() {
     currentSpeechState.currentCharIndex = 0;
     currentSpeechState.currentChunkIndex = 0;
     currentSpeechState.utterance = null;
-    if (typeof window !== 'undefined') window.currentTTSUtterance = null;
+    if (typeof window !== 'undefined') {
+        window.currentTTSUtterance = null;
+        window.reproduciendoSantoPortada = false;
+    }
     resetearAnimacionCargaCircular();
     const bar = document.getElementById('santo-speech-progress-bar');
     if (bar) bar.style.width = '100%';
@@ -637,36 +733,230 @@ export function construirTextoCompletoSanto() {
     return frases.join(' ').replace(/\s+/g, ' ').trim();
 }
 
+// ==========================================
+// CONVERSIÓN DE NÚMEROS Y FECHAS A ESPAÑOL HABLADO
+// ==========================================
+const UNIDADES_ESP = ['', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+const DECENAS_10_ESP = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
+const DECENAS_ESP = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+const CENTENAS_ESP = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+
+const MESES_ESP = [
+    '', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+];
+
+export function numeroMenor100ATexto(n) {
+    if (n <= 0) return '';
+    if (n < 10) return ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'][n];
+    if (n >= 10 && n < 20) return DECENAS_10_ESP[n - 10];
+    if (n === 20) return 'veinte';
+    if (n > 20 && n < 30) {
+        const veinti = ['', 'veintiuno', 'veintidós', 'veintitrés', 'veinticuatro', 'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve'];
+        return veinti[n - 20];
+    }
+    const d = Math.floor(n / 10);
+    const u = n % 10;
+    if (u === 0) return DECENAS_ESP[d];
+    return `${DECENAS_ESP[d]} y ${['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'][u]}`;
+}
+
+export function numeroATextoEspanol(num) {
+    const n = parseInt(num, 10);
+    if (isNaN(n)) return String(num);
+    if (n === 0) return 'cero';
+    if (n === 100) return 'cien';
+    if (n < 100) return numeroMenor100ATexto(n);
+
+    if (n < 1000) {
+        const c = Math.floor(n / 100);
+        const resto = n % 100;
+        if (resto === 0) {
+            return c === 1 ? 'cien' : CENTENAS_ESP[c];
+        }
+        return `${CENTENAS_ESP[c]} ${numeroMenor100ATexto(resto)}`.trim();
+    }
+
+    if (n < 1000000) {
+        const miles = Math.floor(n / 1000);
+        const resto = n % 1000;
+        let parteMiles = '';
+        if (miles === 1) {
+            parteMiles = 'mil';
+        } else {
+            parteMiles = `${numeroATextoEspanol(miles)} mil`;
+        }
+        if (resto === 0) return parteMiles;
+        if (resto === 100) return `${parteMiles} cien`;
+        if (resto < 100) return `${parteMiles} ${numeroMenor100ATexto(resto)}`;
+        const c = Math.floor(resto / 100);
+        const restoC = resto % 100;
+        if (restoC === 0) return `${parteMiles} ${CENTENAS_ESP[c]}`;
+        return `${parteMiles} ${CENTENAS_ESP[c]} ${numeroMenor100ATexto(restoC)}`;
+    }
+
+    return String(n);
+}
+
+export function formatearFechaParaLocucion(fechaStr, esCelebracion = false) {
+    if (!fechaStr) return '';
+    const str = fechaStr.trim();
+    if (str === '—' || str === '-' || str === '') return '';
+
+    // Caso siglo romano: ej "Siglo III", "Siglo IV", "Siglo XIII"
+    const mSiglo = str.match(/siglo\s+([ivxlcdm]+)/i);
+    if (mSiglo) {
+        const romanos = {
+            'i': 'primero', 'ii': 'segundo', 'iii': 'tercero', 'iv': 'cuarto',
+            'v': 'quinto', 'vi': 'sexto', 'vii': 'séptimo', 'viii': 'octavo',
+            'ix': 'noveno', 'x': 'décimo', 'xi': 'once', 'xii': 'doce',
+            'xiii': 'trece', 'xiv': 'catorce', 'xv': 'quince', 'xvi': 'dieciséis',
+            'xvii': 'diecisiete', 'xviii': 'dieciocho', 'xix': 'diecinueve', 'xx': 'veinte'
+        };
+        const rom = mSiglo[1].toLowerCase();
+        const textoRom = romanos[rom] || mSiglo[1];
+        return `siglo ${textoRom}`;
+    }
+
+    // Caso fecha completa ISO: YYYY-MM-DD
+    const mIso = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (mIso) {
+        const dia = parseInt(mIso[3], 10);
+        const mes = parseInt(mIso[2], 10);
+        const anio = parseInt(mIso[1], 10);
+        const mesTexto = MESES_ESP[mes] || '';
+        const anioTexto = numeroATextoEspanol(anio);
+        if (esCelebracion) {
+            return `${dia} de ${mesTexto}`;
+        }
+        return `${dia} de ${mesTexto} de ${anioTexto}`;
+    }
+
+    // Caso fecha completa DD/MM/YYYY o D/M/YYYY
+    const mFull = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{1,4})$/);
+    if (mFull) {
+        const dia = parseInt(mFull[1], 10);
+        const mes = parseInt(mFull[2], 10);
+        const anio = parseInt(mFull[3], 10);
+        const mesTexto = MESES_ESP[mes] || '';
+        const anioTexto = numeroATextoEspanol(anio);
+        if (esCelebracion) {
+            return `${dia} de ${mesTexto}`;
+        }
+        return `${dia} de ${mesTexto} de ${anioTexto}`;
+    }
+
+    // Caso día y mes: DD/MM o D/M
+    const mDiaMes = str.match(/^(\d{1,2})\/(\d{1,2})$/);
+    if (mDiaMes) {
+        const dia = parseInt(mDiaMes[1], 10);
+        const mes = parseInt(mDiaMes[2], 10);
+        const mesTexto = MESES_ESP[mes] || '';
+        return `${dia} de ${mesTexto}`;
+    }
+
+    // Caso solo año de 3 o 4 dígitos (ej: "1500", "1474", "1225", "316")
+    const mSoloAnio = str.match(/^(\d{3,4})$/);
+    if (mSoloAnio) {
+        const anio = parseInt(mSoloAnio[1], 10);
+        return `año ${numeroATextoEspanol(anio)}`;
+    }
+
+    // Caso con prefijo ej: "hacia 1225", "c. 1500"
+    const mConAnio = str.match(/(hacia|c\.|alrededor\s+de)?\s*(\d{3,4})/i);
+    if (mConAnio) {
+        const pref = mConAnio[1] ? mConAnio[1] + ' ' : '';
+        const anio = parseInt(mConAnio[2], 10);
+        return `${pref}año ${numeroATextoEspanol(anio)}`.trim();
+    }
+
+    return str;
+}
+
+export function expandirAniosEnTexto(texto) {
+    if (!texto) return '';
+    return texto.replace(/\b(1[0-9]{3}|20[0-9]{2})\b/g, (match) => {
+        return numeroATextoEspanol(parseInt(match, 10));
+    });
+}
+
+export function normalizarDiaMes(str) {
+    if (!str) return '';
+    const s = str.trim();
+    const mFull = s.match(/^(\d{1,2})\/(\d{1,2})/);
+    if (mFull) {
+        return `${parseInt(mFull[1], 10)}/${parseInt(mFull[2], 10)}`;
+    }
+    const mIso = s.match(/^\d{4}-(\d{1,2})-(\d{1,2})/);
+    if (mIso) {
+        return `${parseInt(mIso[3], 10)}/${parseInt(mIso[2], 10)}`;
+    }
+    return '';
+}
+
+export function obtenerColumnasOcultasActuales() {
+    if (typeof window !== 'undefined') {
+        if (window.columnasOcultas && window.columnasOcultas instanceof Set) {
+            return window.columnasOcultas;
+        }
+        if (typeof window.obtenerColumnasOcultasSantos === 'function') {
+            try {
+                return new Set(window.obtenerColumnasOcultasSantos());
+            } catch (_) {}
+        }
+        try {
+            const raw = localStorage.getItem('lh_santos_columnas_ocultas');
+            if (raw) return new Set(JSON.parse(raw));
+        } catch (_) {}
+    }
+    return new Set();
+}
+
 /**
  * Extrae y formatea de manera limpia las frases a leer desde el contenido del modal.
- * No incluye campos sin información, '—' ni campos opcionales vacíos.
+ * No incluye campos sin información, '—', campos suprimidos/ocultos ni fechas duplicadas.
  */
 export function construirFrasesLecturaSanto() {
     const s = window.santoActualDetalle;
     const frases = [];
 
     if (s && s.nombre) {
-        let nombreTexto = s.nombre.trim();
-        if (typeof window.calcularEdadSanto === 'function' && s.nacimiento && s.muerte) {
-            const edad = window.calcularEdadSanto(s.nacimiento, s.muerte);
-            if (edad !== null) nombreTexto += `, ${edad} años`;
-        }
-        frases.push(nombreTexto.endsWith('.') ? nombreTexto : nombreTexto + '.');
+        let nombre = s.nombre.trim();
+        frases.push(nombre.endsWith('.') ? nombre : nombre + '.');
 
-        const nacTexto = (typeof window.formatearFechaMostrar === 'function' && s.nacimiento) ? window.formatearFechaMostrar(s.nacimiento) : (s.nacimiento || '').trim();
-        if (nacTexto && nacTexto !== '—') {
-            frases.push(`Nacimiento: ${nacTexto}.`);
-        }
-
-        const mueTexto = (typeof window.formatearFechaMostrar === 'function' && s.muerte) ? window.formatearFechaMostrar(s.muerte) : (s.muerte || '').trim();
-        if (mueTexto && mueTexto !== '—') {
-            frases.push(`Mortalidad: ${mueTexto}.`);
+        // Nacimiento: lee como año en palabras (ej. "año mil quinientos") o fecha completa sin barras
+        if (s.nacimiento && s.nacimiento.trim() && s.nacimiento.trim() !== '—') {
+            const nacHabla = formatearFechaParaLocucion(s.nacimiento);
+            if (nacHabla) {
+                frases.push(`Nacimiento: ${nacHabla}.`);
+            }
         }
 
-        const celeb = (s.celebracion || s.fechaFestividad || '').trim();
-        const celebTexto = (typeof window.formatearCelebracionMostrar === 'function' && celeb) ? window.formatearCelebracionMostrar(celeb) : celeb;
-        if (celebTexto && celebTexto !== '—') {
-            frases.push(`Fecha de celebración: ${celebTexto}.`);
+        // Mortalidad: lee como año en palabras (ej. "30 de mayo de mil quinientos cuarenta y ocho")
+        let diaMesMuerte = '';
+        if (s.muerte && s.muerte.trim() && s.muerte.trim() !== '—') {
+            diaMesMuerte = normalizarDiaMes(s.muerte);
+            const mueHabla = formatearFechaParaLocucion(s.muerte);
+            if (mueHabla) {
+                frases.push(`Mortalidad: ${mueHabla}.`);
+            }
+        }
+
+        // Celebración:
+        // Solo si no fue suprimida en edición (s.celebracion !== ''),
+        // y NO coincide con el día y mes de mortalidad (para no duplicar fechas idénticas)
+        const celebRaw = (s.celebracion !== undefined && s.celebracion !== null && s.celebracion.trim() !== '')
+            ? s.celebracion.trim()
+            : (s.celebracion === undefined ? (s.fechaFestividad || '').trim() : '');
+
+        if (celebRaw && celebRaw !== '—') {
+            const diaMesCeleb = normalizarDiaMes(celebRaw);
+            if (!diaMesMuerte || diaMesCeleb !== diaMesMuerte) {
+                const celebHabla = formatearFechaParaLocucion(celebRaw, true);
+                if (celebHabla) {
+                    frases.push(`Fecha de celebración: ${celebHabla}.`);
+                }
+            }
         }
 
         if (s.pais && s.pais.trim() && s.pais.trim() !== '—') {
@@ -685,10 +975,12 @@ export function construirFrasesLecturaSanto() {
             }
         }
         if (s.historia && s.historia.trim() && s.historia.trim() !== '—') {
-            frases.push(`Historia: ${s.historia.trim()}`);
+            const histExpandida = expandirAniosEnTexto(s.historia.trim());
+            frases.push(`Historia: ${histExpandida}`);
         }
         if (s.detalle && s.detalle.trim() && s.detalle.trim() !== '—') {
-            frases.push(`Detalle: ${s.detalle.trim()}`);
+            const detExpandido = expandirAniosEnTexto(s.detalle.trim());
+            frases.push(`Detalle: ${detExpandido}`);
         }
 
         return frases;
@@ -716,10 +1008,18 @@ export function construirFrasesLecturaSanto() {
                 const valor = matchEtiqueta[2].trim();
                 if (!valor || valor === '—' || valor === '-' || /^[—\-\s]+$/.test(valor)) return;
 
-                const limpia = `${label}: ${valor}`.replace(/\s+/g, ' ');
+                let valorFormateado = valor;
+                if (/nacimiento|mortalidad|fecha/i.test(label)) {
+                    const esCeleb = /celebraci/i.test(label);
+                    valorFormateado = formatearFechaParaLocucion(valor, esCeleb) || valor;
+                } else {
+                    valorFormateado = expandirAniosEnTexto(valor);
+                }
+
+                const limpia = `${label}: ${valorFormateado}`.replace(/\s+/g, ' ');
                 frases.push(limpia.endsWith('.') ? limpia : limpia + '.');
             } else {
-                const limpia = rawText.replace(/\s+/g, ' ');
+                const limpia = expandirAniosEnTexto(rawText).replace(/\s+/g, ' ');
                 if (limpia && !limpia.includes('—')) {
                     frases.push(limpia.endsWith('.') ? limpia : limpia + '.');
                 }
@@ -736,27 +1036,74 @@ export function construirFrasesLecturaSanto() {
 export function actualizarEstadoIconoVoz(hablando) {
     const btn = document.getElementById('btn-leer-voz-santo');
     const icono = document.getElementById('icono-leer-voz');
-    if (!btn || !icono) return;
-
-    if (hablando) {
-        btn.classList.add('speaking');
-        btn.title = 'Pausar lectura';
-        icono.textContent = 'pause';
-    } else {
-        btn.classList.remove('speaking');
-        if (currentSpeechState.currentCharIndex > 0 && currentSpeechState.fullText && currentSpeechState.currentCharIndex < currentSpeechState.fullText.length) {
-            btn.title = 'Continuar lectura';
-            icono.textContent = 'play_arrow';
+    if (btn && icono) {
+        if (hablando) {
+            btn.classList.add('speaking');
+            btn.title = 'Pausar lectura';
+            icono.textContent = 'pause';
         } else {
-            btn.title = 'Reproducir lectura';
-            icono.textContent = 'play_arrow';
+            btn.classList.remove('speaking');
+            if (currentSpeechState.currentCharIndex > 0 && currentSpeechState.fullText && currentSpeechState.currentCharIndex < currentSpeechState.fullText.length) {
+                btn.title = 'Continuar lectura';
+                icono.textContent = 'play_arrow';
+            } else {
+                btn.title = 'Reproducir lectura';
+                icono.textContent = 'play_arrow';
+            }
         }
+    }
+
+    // Actualizar botón de la portada del index si existe
+    const btnPortada = document.getElementById('btn-tts-portada-santo');
+    const iconoPortada = document.getElementById('icono-tts-portada');
+    if (btnPortada && iconoPortada) {
+        if (hablando && window.reproduciendoSantoPortada) {
+            btnPortada.classList.add('speaking');
+            btnPortada.classList.remove('cargando-tts');
+            btnPortada.title = 'Pausar lectura';
+            iconoPortada.textContent = 'pause';
+        } else {
+            btnPortada.classList.remove('speaking');
+            btnPortada.classList.remove('cargando-tts');
+            if (window.reproduciendoSantoPortada && currentSpeechState.currentCharIndex > 0) {
+                btnPortada.title = 'Continuar lectura';
+            } else {
+                btnPortada.title = 'Escuchar lectura del santo';
+            }
+            iconoPortada.textContent = 'play_arrow';
+        }
+    }
+
+    // Actualizar botones de las filas de la tabla (si existieran)
+    if (typeof document !== 'undefined') {
+        const filaBtns = document.querySelectorAll('.btn-tts-tabla');
+        filaBtns.forEach(b => {
+            const bIdx = parseInt(b.dataset.santoIdx, 10);
+            const iconoFila = b.querySelector('.material-symbols-outlined');
+            if (hablando && window.santoFilaHablandoIdx === bIdx) {
+                b.classList.add('speaking');
+                b.classList.remove('cargando-tts');
+                b.title = 'Pausar lectura';
+                if (iconoFila) iconoFila.textContent = 'pause';
+            } else {
+                b.classList.remove('speaking');
+                b.classList.remove('cargando-tts');
+                if (window.santoFilaHablandoIdx === bIdx && currentSpeechState.currentCharIndex > 0) {
+                    b.title = 'Continuar lectura';
+                } else {
+                    b.title = 'Reproducir lectura del santo';
+                }
+                if (iconoFila) iconoFila.textContent = 'play_arrow';
+            }
+        });
     }
 }
 
 // Asignación en el objeto window para compatibilidad directa con onclick en HTML
 if (typeof window !== 'undefined') {
     window.toggleLeerSantoVoz = toggleLeerSantoVoz;
+    window.toggleLeerSantoVozFila = toggleLeerSantoVozFila;
+    window.toggleLeerSantoPortada = toggleLeerSantoPortada;
     window.pausarLecturaSantoVoz = pausarLecturaSantoVoz;
     window.detenerLecturaSantoVoz = detenerLecturaSantoVoz;
     window.prepararBarraProgresoSanto = prepararBarraProgresoSanto;
@@ -767,4 +1114,5 @@ if (typeof window !== 'undefined') {
     window.iniciarAnimacionCargaCircular = iniciarAnimacionCargaCircular;
     window.completarAnimacionCargaCircular = completarAnimacionCargaCircular;
     window.resetearAnimacionCargaCircular = resetearAnimacionCargaCircular;
+    window.formatearFechaParaLocucion = formatearFechaParaLocucion;
 }

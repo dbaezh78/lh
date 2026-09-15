@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario del cambio litúrgico - Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="../css/form_etiempo.css">
+</head>
+<body>
+
+    <div class="contenedor-etiempo">
+        <header class="header-etiempo">
+            <div class="titulo-box">
+                <h1>Formulario del cambio litúrgico</h1>
+                <p>Configuración y control de tiempos litúrgicos por año (Cuaresma, Adviento, Navidad, Pascua y Ordinario)</p>
+            </div>
+            <div class="header-acciones">
+                <a href="añoliturgico.html" class="btn-accion">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    Ver Año Litúrgico
+                </a>
+                <a href="../../index.html" class="btn-accion">
+                    <span class="material-symbols-outlined">home</span>
+                    Inicio
+                </a>
+            </div>
+        </header>
+
+        <div id="banner-notificacion" class="banner-notificacion"></div>
+
+        <!-- Panel de Configuración del Año -->
+        <div class="panel-config-año">
+            <div class="selector-grupo">
+                <label for="select-año">Seleccionar Año Litúrgico:</label>
+                <select id="select-año">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026 (Actual)</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                    <option value="2031">2031</option>
+                    <option value="2032">2032</option>
+                    <option value="2033">2033</option>
+                    <option value="2034">2034</option>
+                    <option value="2035">2035</option>
+                </select>
+            </div>
+
+            <div class="badges-año-info">
+                <span class="badge-info badge-par" id="badge-paridad">Año Par</span>
+                <span class="badge-info badge-ciclo" id="badge-ciclo">Ciclo Dominical A</span>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-accion btn-primary" id="btn-guardar-hitos">
+                    <span class="material-symbols-outlined">save</span>
+                    Guardar Cambios
+                </button>
+                <button type="button" class="btn-accion" id="btn-restablecer-hitos" title="Restablecer valores originales">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Formulario para Agregar Nuevo Cambio / Hito -->
+        <div class="seccion-form">
+            <h2>
+                <span class="material-symbols-outlined" style="color: var(--color-primario);">add_circle</span>
+                Agregar cambio o hito litúrgico
+            </h2>
+            <form id="form-agregar-cambio" class="form-grid">
+                <div class="form-campo">
+                    <label for="nuevo-tiempo">Tiempo Litúrgico:</label>
+                    <select id="nuevo-tiempo" required>
+                        <option value="Adviento">Adviento</option>
+                        <option value="Navidad">Navidad</option>
+                        <option value="Ordinario">Tiempo Ordinario</option>
+                        <option value="Cuaresma">Cuaresma</option>
+                        <option value="Pascua">Pascua</option>
+                    </select>
+                </div>
+
+                <div class="form-campo">
+                    <label for="nuevo-nombre">Nombre de la Celebración o Cambio:</label>
+                    <input type="text" id="nuevo-nombre" placeholder="Ej. Miércoles de Ceniza" required>
+                </div>
+
+                <div class="form-campo">
+                    <label for="nueva-fecha">Fecha (Año-Mes-Día):</label>
+                    <input type="date" id="nueva-fecha" required>
+                </div>
+
+                <div class="form-campo">
+                    <label for="nueva-desc">Descripción / Observación:</label>
+                    <input type="text" id="nueva-desc" placeholder="Opcional">
+                </div>
+
+                <div class="form-campo" style="justify-content: flex-end;">
+                    <button type="submit" class="btn-accion btn-primary" style="height: 40px; justify-content: center;">
+                        <span class="material-symbols-outlined">add</span>
+                        Agregar a la Tabla
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de Hitos y Tiempos Litúrgicos -->
+        <div class="tabla-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tiempo</th>
+                        <th>Hito / Celebración Litúrgica</th>
+                        <th>Fecha</th>
+                        <th>Día</th>
+                        <th>Descripción / Regla</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-tabla-hitos">
+                    <!-- Filas generadas dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="../js/form_etiempo.js" type="module"></script>
+    <script src="../js/navigator.js"></script>
+</body>
+</html>

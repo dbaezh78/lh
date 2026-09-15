@@ -721,7 +721,7 @@
     </button>
 
     <script src="../js/navigator.js" type="module"></script>
-    <script src="../js/tts-santo.js?v=1789423500" type="module"></script>
+    <script src="../js/tts-santo.js?v=1789427000" type="module"></script>
     <script type="module">
         import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 
@@ -1160,6 +1160,25 @@
                 ? `<div style="text-align:center; margin-bottom:12px;"><img src="${s.imagen}" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${s.nombre}"></div>` 
                 : '';
 
+            let ocultas = new Set();
+            try {
+                const rawOcultas = localStorage.getItem('lh_santos_columnas_ocultas');
+                if (rawOcultas) ocultas = new Set(JSON.parse(rawOcultas));
+            } catch (_) {}
+
+            const fechaCeleb = (s.celebracion !== undefined && s.celebracion !== null && s.celebracion.trim() !== '')
+                ? s.celebracion.trim()
+                : (s.celebracion === undefined ? (s.fechaFestividad || '').trim() : '');
+
+            let esMismaFecha = false;
+            if (s.muerte && fechaCeleb && s.muerte.trim() !== '—' && fechaCeleb !== '—') {
+                const mMue = s.muerte.trim().match(/^(\d{1,2})\/(\d{1,2})/);
+                const mCel = fechaCeleb.match(/^(\d{1,2})\/(\d{1,2})/);
+                if (mMue && mCel && parseInt(mMue[1], 10) === parseInt(mCel[1], 10) && parseInt(mMue[2], 10) === parseInt(mCel[2], 10)) {
+                    esMismaFecha = true;
+                }
+            }
+
             let cuerpoHtml = imgModal;
 
             if (s.nacimiento && s.nacimiento.trim() && s.nacimiento.trim() !== '—') {
@@ -1168,8 +1187,7 @@
             if (s.muerte && s.muerte.trim() && s.muerte.trim() !== '—') {
                 cuerpoHtml += `<div><strong>Mortalidad:</strong> ${s.muerte.trim()}</div>`;
             }
-            const fechaCeleb = (s.celebracion || s.fechaFestividad || '').trim();
-            if (fechaCeleb && fechaCeleb !== '—') {
+            if (fechaCeleb && fechaCeleb !== '—' && !esMismaFecha) {
                 cuerpoHtml += `<div><strong>Fecha Celebración:</strong> ${fechaCeleb}</div>`;
             }
             if (s.pais && s.pais.trim() && s.pais.trim() !== '—') {
@@ -1186,10 +1204,10 @@
                 cuerpoHtml += `<div><strong>Hijos en la fe:</strong> <div style="margin-top:4px;">${hijosTags}</div></div>`;
             }
             if (s.historia && s.historia.trim() && s.historia.trim() !== '—') {
-                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.historia.trim()}</p></div>`;
+                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.4; text-align: justify;">${s.historia.trim()}</p></div>`;
             }
             if (s.detalle && s.detalle.trim() && s.detalle.trim() !== '—') {
-                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4;">${s.detalle.trim()}</p></div>`;
+                cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4; text-align: justify;">${s.detalle.trim()}</p></div>`;
             }
 
             document.getElementById('modal-santo-cuerpo').innerHTML = cuerpoHtml;

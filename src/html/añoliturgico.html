@@ -5,30 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Año Litúrgico - Liturgia de las Horas</title>
     <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../css/añoliturgico.css">
 </head>
 <body>
 
     <div class="contenedor-año">
         <header class="header-año">
-            <h1>Calendario Litúrgico</h1>
-            <p id="año-actual">Año Litúrgico 2026</p>
+            <div class="titulo-box">
+                <h1>Calendario del Año Litúrgico</h1>
+                <p id="subtitulo-año">Año Litúrgico 2026</p>
+            </div>
+            <div class="header-controles">
+                <a href="form_etiempo.html" class="btn-nav-header btn-primario" title="Ir al Formulario del cambio litúrgico">
+                    <span class="material-symbols-outlined">edit_calendar</span>
+                    Formulario del cambio litúrgico
+                </a>
+                <a href="../../index.html" class="btn-nav-header">
+                    <span class="material-symbols-outlined">home</span>
+                    Inicio
+                </a>
+            </div>
         </header>
 
-        <div class="filtros-tabla">
-            <input type="text" id="buscador" placeholder="Buscar fecha, tiempo o semana...">
+        <!-- Barra de Filtros, Selector de Año y Paridad/Ciclo -->
+        <div class="barra-filtros">
+            <div class="grupo-filtro-izq">
+                <label for="select-año-liturgico" style="font-weight: 600;">Año:</label>
+                <select id="select-año-liturgico" class="select-filtro">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                </select>
+
+                <select id="filtro-tiempo" class="select-filtro">
+                    <option value="">Todos los Tiempos</option>
+                    <option value="Adviento">Adviento</option>
+                    <option value="Navidad">Navidad</option>
+                    <option value="Ordinario">Tiempo Ordinario</option>
+                    <option value="Cuaresma">Cuaresma</option>
+                    <option value="Pascua">Pascua</option>
+                </select>
+
+                <span class="badge-info-año badge-par" id="badge-año-paridad">Año Par</span>
+                <span class="badge-info-año" id="badge-año-ciclo" style="background: #f3e5f5; color: #6a1b9a;">Ciclo Dominical A</span>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="buscador" class="input-buscador" placeholder="Buscar día, celebración, fecha...">
+                <button type="button" class="btn-nav-header" id="btn-guardar-año" title="Guardar cambios de URLs y fechas">
+                    <span class="material-symbols-outlined">save</span>
+                    Guardar
+                </button>
+            </div>
         </div>
 
+        <!-- Tabla Litúrgica Completa -->
         <div class="tabla-responsive">
             <table id="tabla-liturgica">
                 <thead>
                     <tr>
-                        <th>Fecha</th>
                         <th>Tiempo</th>
                         <th>Semana</th>
                         <th>Día</th>
-                        <th>ID Litúrgico</th>
-                        <th>Acción</th>
+                        <th>Fecha</th>
+                        <th>Celebración / Nombre</th>
+                        <th>Ciclo / Paridad</th>
+                        <th>Evangelio (Audio URL)</th>
+                        <th>Oír</th>
+                        <th>Laudes</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpo-tabla">
@@ -37,6 +86,9 @@
             </table>
         </div>
     </div>
+
+    <!-- Elemento de audio global para reproducción en la tabla -->
+    <audio id="audio-tabla" preload="none"></audio>
 
     <script src="../js/añoliturgico.js" type="module"></script>
     <script src="../js/navigator.js"></script>
