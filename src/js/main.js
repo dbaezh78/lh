@@ -631,25 +631,39 @@ export function resolverUrlEvangelioHoy() {
     const fechaISO = `${y}-${m}-${d}`;
     const esDomingo = (hoy.getDay() === 0);
 
-    let catalogo = null;
-    const guardado = localStorage.getItem(`lh-catalogo-liturgico-${y}`);
-    if (guardado) {
-        try { catalogo = JSON.parse(guardado); } catch (_) {}
-    }
-    if (!catalogo || !Array.isArray(catalogo)) {
-        catalogo = generarSecuenciaLiturgica(y);
+    let itemHoy = null;
+    const añosAProbar = [y, y + 1, y - 1];
+    for (const anio of añosAProbar) {
+        let catalogo = null;
+        if (typeof localStorage !== 'undefined') {
+            const guardado = localStorage.getItem(`lh-catalogo-liturgico-${anio}`);
+            if (guardado) {
+                try { catalogo = JSON.parse(guardado); } catch (_) {}
+            }
+        }
+        if (!catalogo || !Array.isArray(catalogo)) {
+            try { catalogo = generarSecuenciaLiturgica(anio); } catch (_) {}
+        }
+        if (catalogo && Array.isArray(catalogo)) {
+            const encontrado = catalogo.find(item => item.fecha === fechaISO);
+            if (encontrado) {
+                itemHoy = encontrado;
+                break;
+            }
+        }
     }
 
-    const itemHoy = catalogo.find(item => item.fecha === fechaISO);
     if (itemHoy) {
+        if (itemHoy.urlEvangelio) return itemHoy.urlEvangelio;
         if (esDomingo) {
-            const ciclo = obtenerCicloDominical(y);
+            const ciclo = obtenerCicloDominical(hoy);
             if (ciclo === 'A' && itemHoy.urlEvangelioCicloA) return itemHoy.urlEvangelioCicloA;
             if (ciclo === 'B' && itemHoy.urlEvangelioCicloB) return itemHoy.urlEvangelioCicloB;
             if (ciclo === 'C' && itemHoy.urlEvangelioCicloC) return itemHoy.urlEvangelioCicloC;
             return itemHoy.urlEvangelioCicloA || itemHoy.urlEvangelioCicloB || itemHoy.urlEvangelioCicloC;
         } else {
-            const esPar = (y % 2 === 0);
+            const paridad = obtenerParidadAño(hoy);
+            const esPar = (paridad === 'Par');
             if (esPar && itemHoy.urlEvangelioPar) return itemHoy.urlEvangelioPar;
             if (!esPar && itemHoy.urlEvangelioImpar) return itemHoy.urlEvangelioImpar;
             return itemHoy.urlEvangelioPar || itemHoy.urlEvangelioImpar;
@@ -659,11 +673,10 @@ export function resolverUrlEvangelioHoy() {
     const nombresDias = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
     const diaUrl = nombresDias[hoy.getDay()];
     if (esDomingo) {
-        const ciclo = obtenerCicloDominical(y).toLowerCase();
+        const ciclo = obtenerCicloDominical(hoy).toLowerCase();
         return `https://ev.resucito.do/to/1/domingo-${ciclo}.mp3`;
     } else {
-        const sufijo = (y % 2 === 0) ? 'par' : 'impar';
-        return `https://ev.resucito.do/to/1/${diaUrl}-${sufijo}.mp3`;
+        return `https://ev.resucito.do/to/1/${diaUrl}.mp3`;
     }
 }
 
@@ -734,4 +747,10 @@ export function toggleReproducirEvangelioPortada() {
         });
     }
 }
-window.toggleReproducirEvangelioPortada = toggleReproducirEvangelioPortada;
+window.toggleReproducirEvangelioPortada = toggleReproducirEvangelioPortada;
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('lh-calendario-config-changed', () => {
+        cargarPortada();
+    });
+}

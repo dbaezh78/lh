@@ -924,6 +924,18 @@ export function construirFrasesLecturaSanto() {
         let nombre = s.nombre.trim();
         frases.push(nombre.endsWith('.') ? nombre : nombre + '.');
 
+        // Celebración (Primero tras el nombre)
+        const celebRaw = (s.celebracion !== undefined && s.celebracion !== null && s.celebracion.trim() !== '')
+            ? s.celebracion.trim()
+            : (s.celebracion === undefined ? (s.fechaFestividad || '').trim() : '');
+
+        if (celebRaw && celebRaw !== '—') {
+            const celebHabla = formatearFechaParaLocucion(celebRaw, true);
+            if (celebHabla) {
+                frases.push(`Fecha de celebración: ${celebHabla}.`);
+            }
+        }
+
         // Nacimiento: lee como año en palabras (ej. "año mil quinientos") o fecha completa sin barras
         if (s.nacimiento && s.nacimiento.trim() && s.nacimiento.trim() !== '—') {
             const nacHabla = formatearFechaParaLocucion(s.nacimiento);
@@ -933,29 +945,10 @@ export function construirFrasesLecturaSanto() {
         }
 
         // Mortalidad: lee como año en palabras (ej. "30 de mayo de mil quinientos cuarenta y ocho")
-        let diaMesMuerte = '';
         if (s.muerte && s.muerte.trim() && s.muerte.trim() !== '—') {
-            diaMesMuerte = normalizarDiaMes(s.muerte);
             const mueHabla = formatearFechaParaLocucion(s.muerte);
             if (mueHabla) {
                 frases.push(`Mortalidad: ${mueHabla}.`);
-            }
-        }
-
-        // Celebración:
-        // Solo si no fue suprimida en edición (s.celebracion !== ''),
-        // y NO coincide con el día y mes de mortalidad (para no duplicar fechas idénticas)
-        const celebRaw = (s.celebracion !== undefined && s.celebracion !== null && s.celebracion.trim() !== '')
-            ? s.celebracion.trim()
-            : (s.celebracion === undefined ? (s.fechaFestividad || '').trim() : '');
-
-        if (celebRaw && celebRaw !== '—') {
-            const diaMesCeleb = normalizarDiaMes(celebRaw);
-            if (!diaMesMuerte || diaMesCeleb !== diaMesMuerte) {
-                const celebHabla = formatearFechaParaLocucion(celebRaw, true);
-                if (celebHabla) {
-                    frases.push(`Fecha de celebración: ${celebHabla}.`);
-                }
             }
         }
 

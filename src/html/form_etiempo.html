@@ -17,6 +17,10 @@
                 <p>Configuración y control de tiempos litúrgicos por año (Cuaresma, Adviento, Navidad, Pascua y Ordinario)</p>
             </div>
             <div class="header-acciones">
+                <a href="datos.html" class="btn-accion" title="Gestionar Años y Datos">
+                    <span class="material-symbols-outlined">dataset</span>
+                    Datos
+                </a>
                 <a href="añoliturgico.html" class="btn-accion">
                     <span class="material-symbols-outlined">calendar_month</span>
                     Ver Año Litúrgico
@@ -99,10 +103,14 @@
                     <input type="text" id="nueva-desc" placeholder="Opcional">
                 </div>
 
-                <div class="form-campo" style="justify-content: flex-end;">
-                    <button type="submit" class="btn-accion btn-primary" style="height: 40px; justify-content: center;">
-                        <span class="material-symbols-outlined">add</span>
-                        Agregar a la Tabla
+                <div class="form-campo" style="justify-content: flex-end; gap: 8px;">
+                    <button type="button" id="btn-cancelar-edicion-cambio" class="btn-accion" style="display: none; height: 40px; justify-content: center; background: #e2e8f0; color: #475569;">
+                        <span class="material-symbols-outlined">close</span>
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btn-submit-cambio" class="btn-accion btn-primary" style="height: 40px; justify-content: center;">
+                        <span class="material-symbols-outlined" id="icono-submit-cambio">add</span>
+                        <span id="texto-submit-cambio">Agregar a la Tabla</span>
                     </button>
                 </div>
             </form>
@@ -128,6 +136,7 @@
         </div>
     </div>
 
+    <script src="../js/accesscontrol.js" type="module"></script>
     <script src="../js/form_etiempo.js" type="module"></script>
     <script src="../js/navigator.js"></script>
 </body>

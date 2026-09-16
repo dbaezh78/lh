@@ -14,6 +14,7 @@
     const v = window.APP_VERSION || Date.now();
     const scriptsToLoad = [
         { src: `/src/js/firebase-config.js?v=${v}`, type: 'module' },
+        { src: `/src/js/accesscontrol.js?v=${v}`, type: 'module' },
         { src: `/src/js/setting.js?v=${v}`, type: 'text/javascript' }
     ];
 
@@ -29,15 +30,262 @@
     // 3. Crear el HTML de la navegación 
     // Añadimos 'style="visibility: hidden"' para evitar el parpadeo sin estilos
 // 3. Crear el HTML de la navegación 
+    window.APP_VERSION = '1.0.01';
+    const appVersion = window.APP_VERSION;
+
+    // Función universal para mostrar ventana modal de archivos actualizándose
+    window.ejecutarActualizacionConListaArchivos = async function(tipo = 'actualizar') {
+        // Quitar modal previo si existiese
+        const prevModal = document.getElementById('lh-updating-modal');
+        if (prevModal) prevModal.remove();
+
+        let titulo = 'Actualizando Liturgia de las Horas';
+        let sub = `Sincronizando archivos y recursos a la versión v${appVersion}...`;
+        if (tipo === 'cache') {
+            titulo = 'Limpiando Caché del Sistema';
+            sub = 'Purgando archivos temporales y renovando cachés sin cerrar sesión...';
+        } else if (tipo === 'cache_total') {
+            titulo = 'Limpieza Total de Caché';
+            sub = 'Renovando almacenamiento de caché completo (sesión protegida)...';
+        }
+
+        const modalHtml = `
+            <div id="lh-updating-modal" style="
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                background: rgba(10, 14, 23, 0.88); backdrop-filter: blur(10px);
+                display: flex; justify-content: center; align-items: center;
+                z-index: 9999999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                animation: fadeInModal 0.25s ease forwards;
+            ">
+                <div style="
+                    background: #1e2430; border: 1px solid rgba(255, 255, 255, 0.15);
+                    border-radius: 18px; width: 92%; max-width: 460px; padding: 24px;
+                    box-shadow: 0 16px 40px rgba(0,0,0,0.6); color: #f8fafc;
+                ">
+                    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+                        <div style="
+                            width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 230, 118, 0.12);
+                            border: 1px solid rgba(0, 230, 118, 0.35); display: flex; align-items: center;
+                            justify-content: center; color: #00e676; flex-shrink: 0;
+                        ">
+                            <span class="material-symbols-outlined" style="font-size: 28px; animation: spinUpdateIcon 1.8s linear infinite;">sync</span>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff;">${titulo}</h3>
+                            <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: #94a3b8;">${sub}</p>
+                        </div>
+                    </div>
+
+                    <!-- Barra de progreso -->
+                    <div style="background: rgba(255,255,255,0.08); border-radius: 8px; height: 7px; overflow: hidden; margin-bottom: 16px;">
+                        <div id="lh-update-progress-bar" style="
+                            background: linear-gradient(90deg, #00e676, #00b0ff);
+                            height: 100%; width: 5%; transition: width 0.2s ease;
+                        "></div>
+                    </div>
+
+                    <!-- Lista de Archivos -->
+                    <div style="font-size: 0.78rem; font-weight: 600; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Archivos en actualización:
+                    </div>
+                    <div id="lh-update-file-list" style="
+                        background: #141821; border: 1px solid rgba(255,255,255,0.07);
+                        border-radius: 10px; max-height: 165px; overflow-y: auto; padding: 8px 12px;
+                        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                        font-size: 0.8rem; line-height: 1.6; color: #cbd5e1;
+                    ">
+                    </div>
+                    
+                    <div id="lh-update-status-msg" style="margin-top: 14px; text-align: center; font-size: 0.82rem; color: #38bdf8; font-weight: 500;">
+                        Preparando componentes...
+                    </div>
+                </div>
+            </div>
+            <style>
+                @keyframes fadeInModal { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+                @keyframes spinUpdateIcon { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            </style>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        const listEl = document.getElementById('lh-update-file-list');
+        const barEl = document.getElementById('lh-update-progress-bar');
+        const statusEl = document.getElementById('lh-update-status-msg');
+
+        // Lista de archivos del sistema
+        const archivos = [
+            'src/html/index.html',
+            'src/html/aCtrl.html',
+            'src/html/ver.html',
+            'src/html/system.html',
+            'src/html/form_etiempo.html',
+            'src/html/añoliturgico.html',
+            'src/html/nombresanto.html',
+            'src/js/navigator.js',
+            'src/js/aCtrl-ui.js',
+            'src/js/accesscontrol.js',
+            'src/js/firebase-config.js',
+            'src/js/setting.js',
+            'src/js/form_etiempo.js',
+            'src/js/añoliturgico.js',
+            'src/js/ver.js',
+            'src/js/system.js',
+            'src/css/navigator.css',
+            'src/css/aCtrl.css',
+            'src/css/ver.css',
+            'src/css/system.css',
+            'src/css/setting.css',
+            'src/css/buttons.css',
+            'src/img/icono.png',
+            'src/img/liturgia_reloj.jpg'
+        ];
+
+        // 1. Limpieza de Caché respetando SIEMPRE la sesión de Firebase
+        if ('caches' in window) {
+            try {
+                const cacheNames = await caches.keys();
+                for (const cName of cacheNames) {
+                    await caches.delete(cName);
+                }
+            } catch (err) {
+                console.warn("Aviso al limpiar CacheStorage:", err);
+            }
+        }
+
+        if (tipo === 'cache_total') {
+            try {
+                // Conservar credenciales de sesión en localStorage
+                const backupAuth = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && (k.startsWith('firebase:authUser') || k.startsWith('firebase:token') || k === 'pending_login')) {
+                        backupAuth[k] = localStorage.getItem(k);
+                    }
+                }
+                // Limpiar claves temporales de la app sin borrar auth
+                Object.keys(localStorage).forEach(k => {
+                    if (!k.startsWith('firebase:authUser') && !k.startsWith('firebase:token')) {
+                        localStorage.removeItem(k);
+                    }
+                });
+                // Restaurar por seguridad
+                Object.entries(backupAuth).forEach(([k, v]) => {
+                    localStorage.setItem(k, v);
+                });
+            } catch (err) {
+                console.warn("Aviso en limpieza selectiva de localStorage:", err);
+            }
+        }
+
+        // 2. Simular/Ejecutar actualización visual de cada archivo
+        const delay = (ms) => new Promise(res => setTimeout(res, ms));
+        const total = archivos.length;
+
+        for (let i = 0; i < total; i++) {
+            const file = archivos[i];
+            const p = Math.round(((i + 1) / total) * 100);
+            
+            if (barEl) barEl.style.width = `${p}%`;
+            if (statusEl) statusEl.textContent = `Actualizando (${i + 1}/${total}): ${file}`;
+            
+            if (listEl) {
+                const item = document.createElement('div');
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
+                item.innerHTML = `<span>✓ ${file}</span><span style="color: #00e676; font-size: 0.72rem;">ACTUALIZADO</span>`;
+                listEl.appendChild(item);
+                listEl.scrollTop = listEl.scrollHeight;
+            }
+
+            // Opcional: prefetch con timestamp
+            try {
+                fetch(`/${file}?_v=${Date.now()}`, { cache: 'reload' }).catch(() => {});
+            } catch (e) {}
+
+            await delay(45);
+        }
+
+        if (statusEl) statusEl.textContent = '¡Completado! Reiniciando aplicación...';
+        try {
+            localStorage.setItem('lh_last_updated_version', appVersion);
+            localStorage.setItem('lh_app_up_to_date', 'true');
+        } catch (e) {}
+        await delay(500);
+
+        // Recargar con bypass de caché
+        window.location.reload();
+    };
+
+    // 3. Crear el HTML de la navegación y el Popup de Cuenta Google
     const navHTML = `
         <div id="nav-wrapper">
             <div id="nav-toggle" onclick="toggleNavbar()">
                 <span class="material-symbols-outlined" id="toggle-icon">keyboard_arrow_down</span>
             </div>
 
+            <!-- Card Popup de Cuenta (Estilo Google Account) -->
+            <div id="account-popup-card" class="account-popup-card hidden">
+                <div class="account-popup-header">
+                    <span class="account-user-email" id="account-popup-email">usuario@gmail.com</span>
+                    <button class="account-popup-close-btn" id="account-popup-close" title="Cerrar">&times;</button>
+                </div>
+
+                <div class="account-popup-profile">
+                    <div class="account-avatar-wrapper">
+                        <img id="account-popup-img" src="/src/img/icono.png" alt="Perfil" class="account-avatar-img">
+                        <div class="account-camera-badge" title="Foto de perfil">
+                            <span class="material-symbols-outlined">photo_camera</span>
+                        </div>
+                    </div>
+                    <h3 class="account-greeting" id="account-popup-greeting">¡Hola, Usuario!</h3>
+                    <button class="account-manage-btn" id="account-popup-manage">
+                        Administrar tu Cuenta de <span style="font-weight: 700;">Liturgia</span>
+                    </button>
+                </div>
+
+                <div class="account-popup-actions-wrapper">
+                    <div class="account-toggle-row" id="account-popup-toggle-header">
+                        <span id="account-toggle-text">Ocultar</span>
+                        <span class="material-symbols-outlined" id="account-toggle-icon">expand_less</span>
+                    </div>
+
+                    <div class="account-actions-list" id="account-actions-list">
+                        <button class="account-action-item" id="account-action-ajustes">
+                            <span class="material-symbols-outlined">settings</span>
+                            <span>Ajustes</span>
+                        </button>
+
+                        <button class="account-action-item" id="account-action-perfil">
+                            <span class="material-symbols-outlined">badge</span>
+                            <span>Perfil Cuenta</span>
+                        </button>
+
+                        <button class="account-action-item has-update-ready" id="account-action-actualizar">
+                            <div class="account-update-halo-ring" id="account-action-actualizar-icon"></div>
+                            <span id="account-action-actualizar-text" style="color: #00e676; font-weight: bold;">Actualizar App</span>
+                            <span class="account-update-badge-pill" id="account-action-actualizar-pill">v${appVersion}</span>
+                        </button>
+                    </div>
+
+                    <div class="account-actions-logout">
+                        <button class="account-action-item" id="account-action-logout">
+                            <span class="material-symbols-outlined">logout</span>
+                            <span>Salir de la cuenta</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="account-popup-footer">
+                    <a href="#" id="account-footer-privacy" class="account-footer-link">Política de Privacidad</a>
+                    <span class="account-footer-dot">•</span>
+                    <a href="#" id="account-info-app-link" class="account-footer-link">Info de la App</a>
+                </div>
+            </div>
+
             <div class="nav-bottom-bar" id="main-navbar">
                 <div class="nav-version-display ver">
-                    v${window.APP_VERSION || '1.0.0'}
+                    v${appVersion}
                 </div>
 
                 <a href="/" class="nav-item">
@@ -91,9 +339,13 @@
                     <span class="material-symbols-outlined">menu_book</span>
                     <span>Liturgia</span>
                     <div class="nav-submenu" id="nav-submenu-resucito">
-                        <a href="/src/html/añoliturgico.html"><span class="material-symbols-outlined">calendar_month</span>Año Litúrgico</a>
-                        <a href="/src/html/santo.html"><span class="material-symbols-outlined">calendar_today</span>Santo</a>
-                        <a href="/src/html/nombresanto.html"><span class="material-symbols-outlined">person_add</span>Nombre Santo</a>
+                        <a href="/src/html/form_etiempo.html"><span class="material-symbols-outlined">edit_calendar</span> Cambio litúrgico</a>
+                        <a href="/src/html/añoliturgico.html"><span class="material-symbols-outlined">calendar_month</span> Año Liturgico</a>
+                        <a href="/src/html/datos.html"><span class="material-symbols-outlined">dataset</span> Datos y Años</a>
+                        <a href="/src/html/santo.html"><span class="material-symbols-outlined">calendar_today</span> Santo</a>
+                        <a href="/src/html/nombresanto.html"><span class="material-symbols-outlined">person_add</span> Nombre Santo</a>
+                        <a href="/src/html/ver.html"><span class="material-symbols-outlined">history_edu</span> Historial de Cambios</a>
+                        <a href="/src/html/system.html"><span class="material-symbols-outlined">folder_special</span> Archivos del Sistema</a>
                     </div>
                 </button>
 
@@ -106,17 +358,52 @@
                     <span class="material-symbols-outlined" id="nav-auth-icon">account_circle</span>
                     <span id="nav-auth-text">Entrar</span>
                 </button>
-
-                <button class="nav-item" id="nav-logout" style="display: none;" title="Cerrar sesión">
-                    <span class="material-symbols-outlined" style="color: #d01212;">logout</span>
-                    <span>Salir</span>
-                </button>
             </div>
         </div>
     `;
 
+    // Modal Info de la App
+    const infoModalHTML = `
+        <div id="app-info-modal" style="display: none;">
+            <div class="settings-modal-content" style="max-width: 480px; width: 92%; padding: 20px; border-radius: 20px; background: #242526; color: #e4e6eb; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
+                <div class="settings-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px; background: transparent;">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1.15rem; color: #fff;">
+                        <span class="material-symbols-outlined" style="color: var(--SangreDeCristo, #d01212);">info</span> Info de la App
+                    </h3>
+                    <button class="modal-close-btn" id="close-app-info-modal" style="background: transparent; border: none; font-size: 1.4rem; cursor: pointer; color: #b0b3b8;">&times;</button>
+                </div>
+                <div class="settings-body" style="padding: 4px; color: #e4e6eb;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <img src="/src/img/icono.png" alt="Liturgia" style="width: 68px; height: 68px; border-radius: 16px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                        <h2 style="margin: 4px 0 2px 0; font-size: 1.35rem; color: #fff;">Liturgia de las Horas</h2>
+                        <span style="background: var(--SangreDeCristo, #d01212); color: #fff; padding: 3px 12px; border-radius: 12px; font-size: 0.78rem; font-weight: 600; display: inline-block; margin-top: 4px;">Versión v${appVersion}</span>
+                    </div>
 
-    document.body.insertAdjacentHTML('beforeend', navHTML);
+                    <h4 style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 12px; font-size: 0.95rem; color: #fff;">Historial y Detalles</h4>
+                    <div style="margin-bottom: 16px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <strong style="color: #00e676; font-size: 0.95rem;">v${appVersion} (Versión Actual)</strong>
+                            <small style="color: #9aa0a6; font-size: 0.75rem;">2026</small>
+                        </div>
+                        <ul style="margin: 0; padding-left: 18px; font-size: 0.83rem; color: #b0b3b8; line-height: 1.5;">
+                            <li>Panel de cuenta emergente estilo Google Account con control de sesión.</li>
+                            <li>Barra de navegación interactiva con accesos rápidos y submenús.</li>
+                            <li>Control de acceso, gestión de usuarios (aCtrl) y configuración avanzada.</li>
+                        </ul>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 14px;">
+                        <a href="/src/html/ver.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #38bdf8; text-decoration: none; font-size: 0.85rem; font-weight: 600;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">history_edu</span>
+                            Ver todos los cambios en ver.html
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', navHTML + infoModalHTML);
 
     // Hacer visible la barra una vez inyectada
     requestAnimationFrame(() => {
@@ -131,6 +418,10 @@
         if (btn && menu) {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                // Cerrar tarjeta de cuenta al abrir submenú
+                const card = document.getElementById('account-popup-card');
+                if (card) card.classList.add('hidden');
+
                 document.querySelectorAll('.nav-submenu').forEach(m => {
                     if (m !== menu) m.classList.remove('active');
                 });
@@ -143,8 +434,174 @@
     setupSubmenu('btn-nav-neocate', 'nav-submenu-neocate');
     setupSubmenu('btn-nav-resucito', 'nav-submenu-resucito');
 
-    document.addEventListener('click', () => {
+    // --- LÓGICA DEL POP-UP DE CUENTA GOOGLE ---
+    const accountCard = document.getElementById('account-popup-card');
+    const closeAccountBtn = document.getElementById('account-popup-close');
+    const toggleHeader = document.getElementById('account-popup-toggle-header');
+    const actionsList = document.getElementById('account-actions-list');
+    const toggleText = document.getElementById('account-toggle-text');
+    const toggleIcon = document.getElementById('account-toggle-icon');
+
+    if (closeAccountBtn && accountCard) {
+        closeAccountBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            accountCard.classList.add('hidden');
+        });
+    }
+
+    if (toggleHeader && actionsList && toggleText && toggleIcon) {
+        toggleHeader.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isCollapsed = actionsList.classList.contains('collapsed');
+            if (isCollapsed) {
+                actionsList.classList.remove('collapsed');
+                toggleText.innerText = 'Ocultar';
+                toggleIcon.innerText = 'expand_less';
+            } else {
+                actionsList.classList.add('collapsed');
+                toggleText.innerText = 'Mostrar';
+                toggleIcon.innerText = 'expand_more';
+            }
+        });
+    }
+
+    const manageBtn = document.getElementById('account-popup-manage');
+    const perfilBtn = document.getElementById('account-action-perfil');
+    const ajustesBtn = document.getElementById('account-action-ajustes');
+    const actualizarBtn = document.getElementById('account-action-actualizar');
+    const logoutBtn = document.getElementById('account-action-logout');
+    const infoAppLink = document.getElementById('account-info-app-link');
+    const privacyLink = document.getElementById('account-footer-privacy');
+    const appInfoModal = document.getElementById('app-info-modal');
+    const closeAppInfoModal = document.getElementById('close-app-info-modal');
+
+    const goToPerfil = (e) => {
+        e.stopPropagation();
+        if (accountCard) accountCard.classList.add('hidden');
+        window.location.href = '/src/html/aCtrl.html';
+    };
+
+    if (manageBtn) manageBtn.addEventListener('click', goToPerfil);
+    if (perfilBtn) perfilBtn.addEventListener('click', goToPerfil);
+
+    if (ajustesBtn) {
+        ajustesBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (accountCard) accountCard.classList.add('hidden');
+            abrirModalConfiguracion();
+        });
+    }
+
+    // Función para verificar y actualizar el estado visual del botón en el popup de cuenta
+    function actualizarVisualBotonActualizarApp() {
+        const btnAct = document.getElementById('account-action-actualizar');
+        const textAct = document.getElementById('account-action-actualizar-text');
+        const iconAct = document.getElementById('account-action-actualizar-icon');
+        const pillAct = document.getElementById('account-action-actualizar-pill');
+        if (!btnAct) return;
+
+        const lastUpdated = localStorage.getItem('lh_last_updated_version');
+        const isUpToDate = (lastUpdated === appVersion);
+
+        if (isUpToDate) {
+            btnAct.classList.remove('has-update-ready');
+            btnAct.classList.add('is-updated');
+            if (textAct) textAct.innerText = 'Refrescar App';
+            if (pillAct) {
+                pillAct.innerText = `v${appVersion}`;
+                pillAct.style.background = 'rgba(0, 230, 118, 0.15)';
+                pillAct.style.color = '#00e676';
+                pillAct.style.border = '1px solid rgba(0, 230, 118, 0.4)';
+            }
+            if (iconAct) {
+                iconAct.className = 'material-symbols-outlined';
+                iconAct.style.cssText = 'font-size: 20px; color: #00e676; margin-right: 4px;';
+                iconAct.innerText = 'refresh';
+            }
+        } else {
+            btnAct.classList.add('has-update-ready');
+            btnAct.classList.remove('is-updated');
+            if (textAct) textAct.innerText = 'Actualizar App';
+            if (pillAct) {
+                pillAct.innerText = `v${appVersion}`;
+                pillAct.style.background = '#ffd700';
+                pillAct.style.color = '#121212';
+                pillAct.style.border = 'none';
+            }
+        }
+    }
+
+    // Inicializar visualización del botón
+    actualizarVisualBotonActualizarApp();
+
+    if (actualizarBtn) {
+        actualizarBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (accountCard) accountCard.classList.add('hidden');
+            const lastUpdated = localStorage.getItem('lh_last_updated_version');
+            const isUpToDate = (lastUpdated === appVersion);
+            const msg = isUpToDate
+                ? `🔄 ¿Desea refrescar y sincronizar los archivos de la aplicación (v${appVersion})?`
+                : `🔄 ¿Desea actualizar y sincronizar la aplicación a la última versión (v${appVersion})?`;
+
+            if (confirm(msg)) {
+                await window.ejecutarActualizacionConListaArchivos('actualizar');
+            }
+        });
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (accountCard) accountCard.classList.add('hidden');
+            if (confirm("👤 ¿Desea cerrar sesión de su cuenta?")) {
+                if (window.firebaseAPI?.logout) await window.firebaseAPI.logout();
+                else location.reload();
+            }
+        });
+    }
+
+    if (infoAppLink && appInfoModal) {
+        infoAppLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (accountCard) accountCard.classList.add('hidden');
+            appInfoModal.style.display = 'flex';
+        });
+    }
+
+    if (privacyLink) {
+        privacyLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            alert("🔒 Política de Privacidad:\nEsta aplicación respeta y protege la privacidad de sus datos y de los miembros.");
+        });
+    }
+
+    if (closeAppInfoModal && appInfoModal) {
+        closeAppInfoModal.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            appInfoModal.style.display = 'none';
+        });
+    }
+
+    if (appInfoModal) {
+        appInfoModal.addEventListener('click', (e) => {
+            if (e.target === appInfoModal) {
+                appInfoModal.style.display = 'none';
+            }
+        });
+    }
+
+    // Cierre al hacer clic fuera
+    document.addEventListener('click', (e) => {
         document.querySelectorAll('.nav-submenu').forEach(m => m.classList.remove('active'));
+        if (accountCard && !accountCard.contains(e.target) && !e.target.closest('#nav-google-auth')) {
+            accountCard.classList.add('hidden');
+        }
     });
 
     // --- LÓGICA DE AUTENTICACIÓN ---
@@ -152,32 +609,141 @@
         const icon = document.getElementById('nav-auth-icon');
         const text = document.getElementById('nav-auth-text');
         const btnAuth = document.getElementById('nav-google-auth');
-        const btnLogout = document.getElementById('nav-logout');
+        const card = document.getElementById('account-popup-card');
+        const emailEl = document.getElementById('account-popup-email');
+        const greetingEl = document.getElementById('account-popup-greeting');
+        const imgEl = document.getElementById('account-popup-img');
 
-        if (!btnAuth || !icon || !text || !btnLogout) return;
+        if (!btnAuth || !icon || !text) return;
 
         if (user) {
+            if (emailEl) emailEl.innerText = user.email || 'usuario@gmail.com';
+            if (greetingEl) greetingEl.innerText = `¡Hola, ${user.displayName || 'Usuario'}!`;
+            if (imgEl && user.photoURL) imgEl.src = user.photoURL;
+
             icon.innerHTML = user.photoURL 
                 ? `<img src="${user.photoURL}" class="dbperfil">`
                 : `<span class="material-symbols-outlined">person</span>`;
-            text.innerText = "Perfil";
-            btnAuth.onclick = () => window.location.href = '/perfil.html';
-            btnLogout.style.display = "flex";
-            
-            btnLogout.onclick = async () => {
-            if (confirm("👤 Desea cerrar sesión?")) { //lo agregué aqui
+            text.innerText = "Cuenta";
 
-                if (window.firebaseAPI?.logout) await window.firebaseAPI.logout();
-                else location.reload();
-                } //agregué esta llave
+            btnAuth.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                document.querySelectorAll('.nav-submenu').forEach(m => m.classList.remove('active'));
+                if (card) card.classList.toggle('hidden');
             };
         } else {
-            icon.innerHTML = "account_circle";
+            icon.innerHTML = `<span class="material-symbols-outlined">account_circle</span>`;
             text.innerText = "Entrar";
+            if (card) card.classList.add('hidden');
             btnAuth.onclick = () => window.firebaseAPI?.login?.();
-            btnLogout.style.display = "none";
+        }
+
+        verificarPermisosNavegacion();
+    };
+
+    // --- CONTROL DE ACCESO Y GUARDIÁN DE PÁGINAS ---
+    const verificarPermisosNavegacion = () => {
+        if (typeof window.hasPermission !== 'function') return;
+
+        // 1. Filtrar enlaces del submenú Liturgia
+        const enlacesLiturgia = document.querySelectorAll('#nav-submenu-resucito a');
+        enlacesLiturgia.forEach(a => {
+            const href = a.getAttribute('href') || '';
+            let perm = null;
+            if (href.includes('form_etiempo.html')) perm = 'page_cambio_liturgico';
+            else if (href.includes('añoliturgico.html') || href.includes('a%c3%b1oliturgico.html')) perm = 'page_ano_liturgico';
+            else if (href.includes('datos.html')) perm = 'page_datos_anios';
+            else if (href.includes('santo.html')) perm = 'page_santos_iglesia';
+            else if (href.includes('nombresanto.html')) perm = 'page_registro_santo';
+            else if (href.includes('ver.html')) perm = 'page_ver';
+            else if (href.includes('system.html')) perm = 'page_system';
+
+            if (perm) {
+                const tienePermiso = window.hasPermission(perm);
+                a.style.display = tienePermiso ? 'flex' : 'none';
+            }
+        });
+
+        // 2. Guardián de la página actual
+        verificarAccesoPaginaActual();
+    };
+
+    const verificarAccesoPaginaActual = () => {
+        if (typeof window.hasPermission !== 'function') return;
+
+        const path = window.location.pathname.toLowerCase();
+        const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
+        const email = currentUser?.email || "";
+        if (email.toLowerCase() === "dbaezh78@gmail.com") {
+            const overlay = document.getElementById("lh-access-denied-overlay");
+            if (overlay) overlay.remove();
+            return;
+        }
+
+        let requiredPerm = null;
+        let pageTitle = "";
+
+        if (path.includes("form_etiempo.html")) {
+            requiredPerm = "page_cambio_liturgico";
+            pageTitle = "Cambio Litúrgico";
+        } else if (path.includes("añoliturgico.html") || path.includes("a%c3%b1oliturgico.html")) {
+            requiredPerm = "page_ano_liturgico";
+            pageTitle = "Año Litúrgico";
+        } else if (path.includes("datos.html")) {
+            requiredPerm = "page_datos_anios";
+            pageTitle = "Datos y Años";
+        } else if (path.includes("santo.html")) {
+            requiredPerm = "page_santos_iglesia";
+            pageTitle = "Santos de la Iglesia Católica";
+        } else if (path.includes("nombresanto.html")) {
+            requiredPerm = "page_registro_santo";
+            pageTitle = "Registro del Santo";
+        }
+
+        if (requiredPerm) {
+            const tieneAcceso = window.hasPermission(requiredPerm);
+            const overlay = document.getElementById("lh-access-denied-overlay");
+
+            if (!tieneAcceso) {
+                if (!overlay) {
+                    const el = document.createElement("div");
+                    el.id = "lh-access-denied-overlay";
+                    el.style.cssText = `
+                        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                        background: #18191a; color: #e4e6eb; z-index: 99999;
+                        display: flex; flex-direction: column; align-items: center; justify-content: center;
+                        text-align: center; padding: 20px; box-sizing: border-box; font-family: sans-serif;
+                    `;
+                    el.innerHTML = `
+                        <div style="max-width: 480px; background: #242526; padding: 32px 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 12px 32px rgba(0,0,0,0.6);">
+                            <span class="material-symbols-outlined" style="font-size: 4rem; color: #d01212; margin-bottom: 12px;">lock</span>
+                            <h2 style="margin: 0 0 8px 0; font-size: 1.4rem; color: #fff;">Acceso Restringido</h2>
+                            <p style="color: #b0b3b8; font-size: 0.95rem; margin-bottom: 16px;">
+                                No dispones de los permisos necesarios para visualizar la sección <b>${pageTitle}</b>.
+                            </p>
+                            <p style="color: #888; font-size: 0.82rem; margin-bottom: 24px;">
+                                Si crees que esto es un error, solicita los permisos correspondientes al Administrador del sistema.
+                            </p>
+                            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                                <a href="/" style="background: #d01212; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 600;">Ir al Inicio</a>
+                                <a href="/src/html/aCtrl.html" style="background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 12px; font-size: 0.9rem;">Ver Mi Cuenta</a>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(el);
+                }
+            } else if (overlay) {
+                overlay.remove();
+            }
         }
     };
+
+    window.verificarPermisosNavegacion = verificarPermisosNavegacion;
+    window.verificarAccesoPaginaActual = verificarAccesoPaginaActual;
+
+    window.addEventListener('lh-access-control-updated', verificarPermisosNavegacion);
+    setTimeout(verificarPermisosNavegacion, 1200);
 
     if (window.firebaseAPI?.onAuthReady) {
         window.firebaseAPI.onAuthReady(updateAuthUI);
@@ -350,8 +916,11 @@ function cerrarModalConfiguracion() {
 function toggleNavbar() {
     const wrapper = document.getElementById('nav-wrapper');
     const icon = document.getElementById('toggle-icon');
+    const card = document.getElementById('account-popup-card');
     if (!wrapper || !icon) return;
     
+    if (card) card.classList.add('hidden');
+
     // Ocultamos el wrapper completo
     wrapper.classList.toggle('hidden');
     

@@ -59,19 +59,55 @@ export function parsearFechaISO(str) {
 }
 
 /**
- * Determina si un año es Par o Impar
+ * Verifica si el switch de Adviento(Par/Impar) está activo en configuraciones
  */
-export function obtenerParidadAño(year) {
-    return (year % 2 === 0) ? 'Par' : 'Impar';
+export function esAdvientoParImparActivo() {
+    if (typeof localStorage === 'undefined') return true;
+    const val = localStorage.getItem('pref-adviento-par-impar');
+    return val === null ? true : (val === 'true' || val === true);
 }
 
 /**
- * Determina el ciclo dominical (A, B, C)
+ * Determina si un año o fecha es Par o Impar tomando en cuenta la regla de Adviento
+ */
+export function obtenerParidadAño(yearOrDate) {
+    if (yearOrDate instanceof Date || (typeof yearOrDate === 'string' && yearOrDate.includes('-'))) {
+        const d = (yearOrDate instanceof Date) ? yearOrDate : parsearFechaISO(yearOrDate);
+        const y = d.getFullYear();
+        if (!esAdvientoParImparActivo()) {
+            return (y % 2 === 0) ? 'Par' : 'Impar';
+        }
+        const advientoDate = parsearFechaISO(calcularInicioAdviento(y));
+        if (d >= advientoDate) {
+            const añoLiturgico = y + 1;
+            return (añoLiturgico % 2 === 0) ? 'Par' : 'Impar';
+        }
+        return (y % 2 === 0) ? 'Par' : 'Impar';
+    }
+    const y = parseInt(yearOrDate, 10);
+    return (y % 2 === 0) ? 'Par' : 'Impar';
+}
+
+/**
+ * Determina el ciclo dominical (A, B, C) tomando en cuenta la regla de Adviento
  * 2026: Ciclo A, 2027: Ciclo B, 2028: Ciclo C
  */
-export function obtenerCicloDominical(year) {
+export function obtenerCicloDominical(yearOrDate) {
+    let y = 2026;
+    if (yearOrDate instanceof Date || (typeof yearOrDate === 'string' && yearOrDate.includes('-'))) {
+        const d = (yearOrDate instanceof Date) ? yearOrDate : parsearFechaISO(yearOrDate);
+        y = d.getFullYear();
+        if (esAdvientoParImparActivo()) {
+            const advientoDate = parsearFechaISO(calcularInicioAdviento(y));
+            if (d >= advientoDate) {
+                y = y + 1;
+            }
+        }
+    } else {
+        y = parseInt(yearOrDate, 10);
+    }
     const ciclos = ['A', 'B', 'C'];
-    const indice = (((year - 2026) % 3) + 3) % 3;
+    const indice = (((y - 2026) % 3) + 3) % 3;
     return ciclos[indice];
 }
 
@@ -81,7 +117,7 @@ export function obtenerCicloDominical(year) {
 export function generarHitosLiturgicos(year) {
     const y = parseInt(year, 10);
     const claveStorage = `lh-hitos-liturgicos-${y}`;
-    const guardado = localStorage.getItem(claveStorage);
+    const guardado = (typeof localStorage !== 'undefined') ? localStorage.getItem(claveStorage) : null;
     if (guardado) {
         try {
             return JSON.parse(guardado);
@@ -114,9 +150,12 @@ export function generarHitosLiturgicos(year) {
         ceniza = TABLA_CENIZA_BASE[y].ceniza;
         pascua = TABLA_CENIZA_BASE[y].pascua;
     } else {
-        // Fallback aproximado
-        ceniza = `${y}-02-25`;
-        pascua = `${y}-04-12`;
+        // Cálculo eclesiástico exacto (Computus Meeus/Jones) para cualquier año
+        const calc = (typeof window !== 'undefined' && typeof window.calcularPascuaGregoriana === 'function')
+            ? window.calcularPascuaGregoriana(y)
+            : calcularPascuaGregorianaAlgoritmo(y);
+        ceniza = calc.ceniza;
+        pascua = calc.pascua;
     }
 
     // 5. Cuaresma: Semana Santa y Triduo
@@ -147,11 +186,20 @@ export function generarHitosLiturgicos(year) {
     ordinarioIIDate.setDate(ordinarioIIDate.getDate() + 1);
     const ordinarioII = formatearFechaISO(ordinarioIIDate);
 
-    // 8. Cristo Rey (Domingo antes de Adviento de este año)
+    // 8. Cristo Rey (Domingo antes de Adviento de este año) - Semana 34 obligatoria
     const advientoDate = parsearFechaISO(advientoEsteAño);
     const cristoReyDate = new Date(advientoDate);
     cristoReyDate.setDate(cristoReyDate.getDate() - 7);
     const cristoRey = formatearFechaISO(cristoReyDate);
+
+    // Cálculo exacto de la semana en que reanuda el Tiempo Ordinario para culminar en la Semana 34
+    const diffSemanas = Math.round((cristoReyDate - pentecostesDate) / (7 * 86400000));
+    const semReanudacion = 34 - diffSemanas;
+
+    // 9. La Santísima Trinidad (Domingo siguiente a Pentecostés)
+    const trinidadDate = new Date(pentecostesDate);
+    trinidadDate.setDate(trinidadDate.getDate() + 7);
+    const trinidad = formatearFechaISO(trinidadDate);
 
     return [
         {
@@ -237,18 +285,26 @@ export function generarHitosLiturgicos(year) {
         {
             id: "ordinario-2",
             tiempo: "Ordinario",
-            nombre: "Reanudación del Tiempo Ordinario (II)",
+            nombre: `Reanudación del Tiempo Ordinario (Semana ${semReanudacion})`,
             fecha: ordinarioII,
             fijo: false,
-            descripcion: "Lunes posterior a Pentecostés"
+            descripcion: `Lunes posterior a Pentecostés (Continúa en Semana ${semReanudacion} para culminar en Semana 34)`
+        },
+        {
+            id: "trinidad",
+            tiempo: "Ordinario",
+            nombre: "La Santísima Trinidad",
+            fecha: trinidad,
+            fijo: false,
+            descripcion: `Domingo siguiente a Pentecostés (${semReanudacion + 1}º Domingo del Tiempo Ordinario)`
         },
         {
             id: "cristo-rey",
             tiempo: "Ordinario",
-            nombre: "Jesucristo, Rey del Universo",
+            nombre: "Jesucristo, Rey del Universo (Semana 34)",
             fecha: cristoRey,
             fijo: false,
-            descripcion: "Último domingo del Tiempo Ordinario (Semana 34)"
+            descripcion: "Último domingo del Tiempo Ordinario antes de Adviento (Semana 34 obligatoria)"
         },
         {
             id: "adviento",
@@ -285,8 +341,35 @@ export function guardarHitosLiturgicos(year, hitos) {
     localStorage.setItem(`lh-hitos-liturgicos-${y}`, JSON.stringify(hitos));
 }
 
+export function calcularPascuaGregorianaAlgoritmo(year) {
+    const y = parseInt(year, 10);
+    const a = y % 19;
+    const b = Math.floor(y / 100);
+    const c = y % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const mes = Math.floor((h + l - 7 * m + 114) / 31);
+    const dia = ((h + l - 7 * m + 114) % 31) + 1;
+    const pDate = new Date(y, mes - 1, dia);
+    const cDate = new Date(pDate);
+    cDate.setDate(cDate.getDate() - 46);
+    const mStr = String(pDate.getMonth() + 1).padStart(2, '0');
+    const dStr = String(pDate.getDate()).padStart(2, '0');
+    const cmStr = String(cDate.getMonth() + 1).padStart(2, '0');
+    const cdStr = String(cDate.getDate()).padStart(2, '0');
+    return { ceniza: `${y}-${cmStr}-${cdStr}`, pascua: `${y}-${mStr}-${dStr}` };
+}
+
 // Inicialización de la interfaz en form_etiempo.html
-document.addEventListener('DOMContentLoaded', () => {
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
     const selectAño = document.getElementById('select-año');
     const badgeParidad = document.getElementById('badge-paridad');
     const badgeCiclo = document.getElementById('badge-ciclo');
@@ -298,8 +381,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!selectAño || !cuerpoTabla) return;
 
+    // Poblar select-año dinámicamente según catálogo de datos.html
+    const aniosDisponibles = (typeof window !== 'undefined' && typeof window.obtenerCatalogoAños === 'function')
+        ? window.obtenerCatalogoAños()
+        : [2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035];
+
+    const añoGuardado = localStorage.getItem('pref-año-etiempo');
+    const valorInicial = añoGuardado && aniosDisponibles.includes(parseInt(añoGuardado, 10))
+        ? parseInt(añoGuardado, 10)
+        : (aniosDisponibles.includes(2026) ? 2026 : aniosDisponibles[0]);
+
+    selectAño.innerHTML = aniosDisponibles.map(y => `
+        <option value="${y}" ${y === valorInicial ? 'selected' : ''}>${y}${y === 2026 ? ' (Actual)' : ''}</option>
+    `).join('');
+
     let añoActual = parseInt(selectAño.value, 10) || new Date().getFullYear();
     let hitosActuales = [];
+    let indiceHitoEnEdicion = -1;
+
+    function resetearFormularioEdicion() {
+        indiceHitoEnEdicion = -1;
+        if (formAgregar) formAgregar.reset();
+        const btnSubmit = document.getElementById('btn-submit-cambio');
+        const btnCancelar = document.getElementById('btn-cancelar-edicion-cambio');
+        const iconoSubmit = document.getElementById('icono-submit-cambio');
+        const textoSubmit = document.getElementById('texto-submit-cambio');
+
+        if (btnCancelar) btnCancelar.style.display = 'none';
+        if (btnSubmit) {
+            btnSubmit.style.background = '';
+            if (iconoSubmit) iconoSubmit.textContent = 'add';
+            if (textoSubmit) textoSubmit.textContent = 'Agregar a la Tabla';
+        }
+    }
+
+    const btnCancelarEdicion = document.getElementById('btn-cancelar-edicion-cambio');
+    if (btnCancelarEdicion) {
+        btnCancelarEdicion.addEventListener('click', resetearFormularioEdicion);
+    }
 
     function mostrarMensaje(texto, tipo = 'exito') {
         if (!bannerNotificacion) return;
@@ -328,24 +447,47 @@ document.addEventListener('DOMContentLoaded', () => {
         cuerpoTabla.innerHTML = '';
         actualizarBadges();
 
+        const puedeCambiarFecha = (typeof window.hasPermission !== 'function') || window.hasPermission('cambio_liturgico_cambiar_fecha');
+        const puedeBorrar = (typeof window.hasPermission !== 'function') || window.hasPermission('cambio_liturgico_borrar');
+        const puedeEditar = (typeof window.hasPermission !== 'function') || window.hasPermission('cambio_liturgico_editar');
+
+        actualizarEstadoPermisosGlobales();
+
         hitosActuales.forEach((hito, index) => {
             const tr = document.createElement('tr');
             const fechaObj = parsearFechaISO(hito.fecha);
             const diaSemanaNombre = DIAS_SEMANA[fechaObj.getDay()] || '';
             const tagClass = `tag-${hito.tiempo.toLowerCase()}`;
 
+            const inputFechaHtml = puedeCambiarFecha 
+                ? `<input type="date" class="input-fecha-tabla" value="${hito.fecha}" data-index="${index}">`
+                : `<input type="date" class="input-fecha-tabla" value="${hito.fecha}" disabled style="opacity: 0.5; cursor: not-allowed;" title="Sin permiso para cambiar fecha">`;
+
+            const btnEditarHtml = `
+                <button type="button" class="btn-mini-accion" data-editar="${index}" 
+                        ${puedeEditar ? '' : 'disabled'} 
+                        style="background:${puedeEditar ? '#e0f2fe' : '#f1f5f9'}; color:${puedeEditar ? '#0288d1' : '#94a3b8'}; border:1px solid ${puedeEditar ? '#b3e5fc' : '#cbd5e1'}; margin-right:4px; opacity:${puedeEditar ? '1' : '0.45'}; cursor:${puedeEditar ? 'pointer' : 'not-allowed'};" 
+                        title="${puedeEditar ? 'Editar este cambio' : 'Sin permiso para editar'}">
+                    <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">edit</span>
+                </button>`;
+
+            const btnBorrarHtml = `
+                <button type="button" class="btn-mini-accion btn-danger" data-borrar="${index}" 
+                        ${puedeBorrar ? '' : 'disabled'} 
+                        style="opacity:${puedeBorrar ? '1' : '0.45'}; cursor:${puedeBorrar ? 'pointer' : 'not-allowed'}; background:${puedeBorrar ? '' : '#e2e8f0'}; color:${puedeBorrar ? '' : '#94a3b8'}; border:${puedeBorrar ? '' : '1px solid #cbd5e1'};" 
+                        title="${puedeBorrar ? 'Eliminar este cambio' : 'Sin permiso para eliminar'}">
+                    <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">delete</span>
+                </button>`;
+
             tr.innerHTML = `
                 <td><span class="tag-tiempo ${tagClass}">${hito.tiempo}</span></td>
-                <td><strong>${hito.nombre}</strong></td>
-                <td>
-                    <input type="date" class="input-fecha-tabla" value="${hito.fecha}" data-index="${index}">
-                </td>
+                <td><strong class="col-nombre-hito">${hito.nombre}</strong></td>
+                <td>${inputFechaHtml}</td>
                 <td><span class="badge-fecha">${diaSemanaNombre}</span></td>
                 <td><small style="color: #666;">${hito.descripcion || '-'}</small></td>
                 <td>
-                    <button type="button" class="btn-mini-accion btn-danger" data-borrar="${index}" title="Eliminar este cambio">
-                        <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">delete</span>
-                    </button>
+                    ${btnEditarHtml}
+                    ${btnBorrarHtml}
                 </td>
             `;
             cuerpoTabla.appendChild(tr);
@@ -359,6 +501,45 @@ document.addEventListener('DOMContentLoaded', () => {
                     hitosActuales[idx].fecha = e.target.value;
                     renderTabla();
                 }
+            });
+        });
+
+        // Eventos para editar hito
+        cuerpoTabla.querySelectorAll('button[data-editar]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.editar, 10);
+                const item = hitosActuales[idx];
+                if (!item) return;
+
+                indiceHitoEnEdicion = idx;
+                
+                const selectTiempo = document.getElementById('nuevo-tiempo');
+                const inputNombre = document.getElementById('nuevo-nombre');
+                const inputFecha = document.getElementById('nueva-fecha');
+                const inputDesc = document.getElementById('nueva-desc');
+                const btnSubmit = document.getElementById('btn-submit-cambio');
+                const btnCancelar = document.getElementById('btn-cancelar-edicion-cambio');
+                const iconoSubmit = document.getElementById('icono-submit-cambio');
+                const textoSubmit = document.getElementById('texto-submit-cambio');
+
+                if (selectTiempo) selectTiempo.value = item.tiempo;
+                if (inputNombre) inputNombre.value = item.nombre || '';
+                if (inputFecha) inputFecha.value = item.fecha || '';
+                if (inputDesc) inputDesc.value = item.descripcion || '';
+
+                if (btnCancelar) btnCancelar.style.display = 'inline-flex';
+                if (btnSubmit) {
+                    btnSubmit.style.background = '#0288d1';
+                    if (iconoSubmit) iconoSubmit.textContent = 'check';
+                    if (textoSubmit) textoSubmit.textContent = 'Guardar Edición';
+                }
+
+                // Desplazar la vista suavemente al formulario
+                const seccionForm = document.querySelector('.seccion-form');
+                if (seccionForm) {
+                    seccionForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                if (inputNombre) inputNombre.focus();
             });
         });
 
@@ -387,6 +568,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnGuardar) {
         btnGuardar.addEventListener('click', () => {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('cambio_liturgico_guardar')) {
+                alert("No tienes permiso para guardar cambios litúrgicos.");
+                return;
+            }
             guardarHitosLiturgicos(añoActual, hitosActuales);
             mostrarMensaje(`Los cambios litúrgicos para el año ${añoActual} se han guardado con éxito.`, 'exito');
         });
@@ -394,6 +579,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnRestablecer) {
         btnRestablecer.addEventListener('click', () => {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('cambio_liturgico_restablecer')) {
+                alert("No tienes permiso para restablecer valores originales.");
+                return;
+            }
             if (confirm(`¿Restablecer los cambios litúrgicos del año ${añoActual} a los valores predeterminados?`)) {
                 localStorage.removeItem(`lh-hitos-liturgicos-${añoActual}`);
                 hitosActuales = generarHitosLiturgicos(añoActual);
@@ -406,6 +595,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formAgregar) {
         formAgregar.addEventListener('submit', (e) => {
             e.preventDefault();
+            const esEdicion = (indiceHitoEnEdicion >= 0 && hitosActuales[indiceHitoEnEdicion]);
+            const permisoRequerido = esEdicion ? 'cambio_liturgico_editar' : 'cambio_liturgico_agregar_tabla';
+
+            if (typeof window.hasPermission === 'function' && !window.hasPermission(permisoRequerido)) {
+                alert(`No tienes permiso para ${esEdicion ? 'editar este cambio' : 'agregar cambios a la tabla'}.`);
+                return;
+            }
+
             const nuevoTiempo = document.getElementById('nuevo-tiempo').value;
             const nuevoNombre = document.getElementById('nuevo-nombre').value.trim();
             const nuevaFecha = document.getElementById('nueva-fecha').value;
@@ -416,24 +613,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            hitosActuales.push({
-                id: `custom-${Date.now()}`,
-                tiempo: nuevoTiempo,
-                nombre: nuevoNombre,
-                fecha: nuevaFecha,
-                fijo: false,
-                descripcion: nuevaDesc || 'Cambio manual'
-            });
+            if (esEdicion) {
+                hitosActuales[indiceHitoEnEdicion].tiempo = nuevoTiempo;
+                hitosActuales[indiceHitoEnEdicion].nombre = nuevoNombre;
+                hitosActuales[indiceHitoEnEdicion].fecha = nuevaFecha;
+                hitosActuales[indiceHitoEnEdicion].descripcion = nuevaDesc || '';
+                mostrarMensaje(`Se actualizó "${nuevoNombre}" correctamente.`, 'exito');
+            } else {
+                hitosActuales.push({
+                    id: `custom-${Date.now()}`,
+                    tiempo: nuevoTiempo,
+                    nombre: nuevoNombre,
+                    fecha: nuevaFecha,
+                    fijo: false,
+                    descripcion: nuevaDesc || 'Cambio manual'
+                });
+                mostrarMensaje(`Se agregó "${nuevoNombre}" correctamente.`);
+            }
 
             // Ordenar por fecha cronológica
             hitosActuales.sort((a, b) => a.fecha.localeCompare(b.fecha));
 
+            resetearFormularioEdicion();
             renderTabla();
-            formAgregar.reset();
-            mostrarMensaje(`Se agregó "${nuevoNombre}" correctamente.`);
         });
+    }
+
+    function actualizarEstadoPermisosGlobales() {
+        const puedeGuardar = (typeof window.hasPermission !== 'function') || window.hasPermission('cambio_liturgico_guardar');
+        const puedeRestablecer = (typeof window.hasPermission !== 'function') || window.hasPermission('cambio_liturgico_restablecer');
+        const puedeAgregar = (typeof window.hasPermission !== 'function') || window.hasPermission('cambio_liturgico_agregar_tabla');
+
+        if (btnGuardar) {
+            btnGuardar.disabled = !puedeGuardar;
+            btnGuardar.style.opacity = puedeGuardar ? '1' : '0.45';
+            btnGuardar.style.cursor = puedeGuardar ? 'pointer' : 'not-allowed';
+            btnGuardar.title = puedeGuardar ? 'Guardar cambios' : 'Sin permiso para guardar cambios litúrgicos';
+        }
+
+        if (btnRestablecer) {
+            btnRestablecer.disabled = !puedeRestablecer;
+            btnRestablecer.style.opacity = puedeRestablecer ? '1' : '0.45';
+            btnRestablecer.style.cursor = puedeRestablecer ? 'pointer' : 'not-allowed';
+            btnRestablecer.title = puedeRestablecer ? 'Restablecer valores' : 'Sin permiso para restablecer valores originales';
+        }
+
+        if (formAgregar) {
+            const btnSubmit = formAgregar.querySelector('button[type="submit"]');
+            const inputs = formAgregar.querySelectorAll('input, select');
+            if (btnSubmit) {
+                btnSubmit.disabled = !puedeAgregar;
+                btnSubmit.style.opacity = puedeAgregar ? '1' : '0.45';
+                btnSubmit.style.cursor = puedeAgregar ? 'pointer' : 'not-allowed';
+                btnSubmit.title = puedeAgregar ? 'Agregar cambio' : 'Sin permiso para agregar a la tabla';
+            }
+            inputs.forEach(inp => {
+                inp.disabled = !puedeAgregar;
+                inp.style.opacity = puedeAgregar ? '1' : '0.55';
+                inp.style.cursor = puedeAgregar ? '' : 'not-allowed';
+            });
+        }
     }
 
     // Carga inicial
     cargarAño(añoActual);
+
+    // Actualización reactiva ante cambios de permisos de AccessControl o Firebase Auth
+    window.addEventListener('lh-access-control-updated', () => {
+        renderTabla();
+    });
+    if (window.onAuthReady) {
+        window.onAuthReady(() => {
+            renderTabla();
+        });
+    }
 });
+}
+

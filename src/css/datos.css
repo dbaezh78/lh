@@ -1,0 +1,539 @@
+:root {
+    --color-fondo: #f8f6f0;
+    --color-card: #ffffff;
+    --color-borde: #ded8cb;
+    --color-texto: #2b2b2b;
+    --color-primario: #8B0000;
+    --color-verde: #2E7D32;
+    --color-azul: #0288D1;
+    --color-morado: #7B2FBE;
+    --color-naranja: #e65100;
+    --color-hover: #f3efe6;
+    --color-sombra: rgba(0, 0, 0, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px 15px 80px 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+}
+
+.contenedor-datos {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--color-card);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 20px var(--color-sombra);
+    border: 1px solid var(--color-borde);
+}
+
+/* Header */
+.header-datos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    border-bottom: 2px solid var(--color-primario);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+.header-datos .titulo-box h1 {
+    margin: 0;
+    color: var(--color-primario);
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.header-datos .titulo-box p {
+    margin: 4px 0 0 0;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.header-controles {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-nav-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background-color: #ffffff;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    color: var(--color-texto);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-nav-header:hover {
+    background-color: var(--color-hover);
+    border-color: #bbb;
+}
+
+.btn-nav-header.btn-primario {
+    background-color: var(--color-primario);
+    color: #ffffff;
+    border-color: var(--color-primario);
+}
+
+.btn-nav-header.btn-primario:hover {
+    background-color: #6d0000;
+}
+
+/* Selector de Categoría */
+.panel-categoria {
+    background: #f1f3f5;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.categoria-label-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.categoria-label-box label {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #1e293b;
+}
+
+.select-categoria {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    font-size: 1rem;
+    font-weight: 600;
+    background: #ffffff;
+    cursor: pointer;
+    outline: none;
+    min-width: 240px;
+}
+
+.select-categoria:focus {
+    border-color: var(--color-primario);
+}
+
+/* Card de Registro de Año */
+.card-gestion-año {
+    background: #ffffff;
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.card-gestion-año h2 {
+    margin: 0 0 16px 0;
+    font-size: 1.25rem;
+    color: var(--color-primario);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.grid-formulario-año {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+.col-entrada {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.campo-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-grupo label {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: #475569;
+}
+
+.input-año, .select-año-sugerido {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.input-año:focus, .select-año-sugerido:focus {
+    border-color: var(--color-primario);
+}
+
+/* Tarjeta de Diagnóstico en tiempo real */
+.tarjeta-diagnostico {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.diagnostico-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+    font-weight: 700;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+.badge-bisiesto {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-bisiesto.es-bisiesto {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+.badge-bisiesto.no-bisiesto {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.detalles-diagnostico {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    font-size: 0.88rem;
+}
+
+.detalle-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.detalle-item span.lbl {
+    color: #64748b;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.detalle-item span.val {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* Botones de acción */
+.fila-botones-accion {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.btn-accion-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-accion-form:active {
+    transform: scale(0.98);
+}
+
+.btn-accion-form.primario {
+    background-color: var(--color-primario);
+    color: #ffffff;
+}
+
+.btn-accion-form.primario:hover {
+    background-color: #6d0000;
+}
+
+.btn-accion-form.secundario {
+    background-color: var(--color-azul);
+    color: #ffffff;
+}
+
+.btn-accion-form.secundario:hover {
+    background-color: #0277bd;
+}
+
+.btn-accion-form.outline {
+    background-color: transparent;
+    border: 1.5px solid #cbd5e1;
+    color: #334155;
+}
+
+.btn-accion-form.outline:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+/* Barra de Estadísticas */
+.barra-stats-años {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.stat-card {
+    background: #ffffff;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stat-card .material-symbols-outlined {
+    font-size: 28px;
+    color: var(--color-primario);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-num {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+.stat-lbl {
+    font-size: 0.78rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Tabla de Años Registrados */
+.tabla-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.tabla-años {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    text-align: left;
+}
+
+.tabla-años th {
+    background: #f1f3f5;
+    color: #334155;
+    font-weight: 700;
+    padding: 12px 14px;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.tabla-años td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.tabla-años tr:hover td {
+    background-color: #f8fafc;
+}
+
+.tabla-años tr.fila-actual td {
+    background-color: #fffbeb;
+}
+
+.tag-año {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.badge-tag {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.badge-tag.par { background: #e0f2fe; color: #0369a1; }
+.badge-tag.impar { background: #fef3c7; color: #b45309; }
+.badge-tag.ciclo-a { background: #fee2e2; color: #b91c1c; }
+.badge-tag.ciclo-b { background: #dcfce7; color: #15803d; }
+.badge-tag.ciclo-c { background: #ede9fe; color: #6d28d9; }
+
+.acciones-celda {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.btn-tabla {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--color-borde);
+    background: #ffffff;
+    color: #334155;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.btn-tabla:hover {
+    background: var(--color-hover);
+    border-color: #94a3b8;
+}
+
+.btn-tabla.eliminar:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+
+/* Mensaje Toast */
+.toast-msg {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.toast-msg.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Modo Oscuro */
+body.dark-theme {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-theme .contenedor-datos {
+    background-color: #1e1e1e;
+    border-color: #333333;
+}
+
+body.dark-theme .header-datos .titulo-box h1 {
+    color: #ef5350;
+}
+
+body.dark-theme .panel-categoria,
+body.dark-theme .tarjeta-diagnostico {
+    background-color: #262626;
+    border-color: #3a3a3a;
+}
+
+body.dark-theme .card-gestion-año,
+body.dark-theme .stat-card,
+body.dark-theme .tabla-wrapper {
+    background-color: #1e1e1e;
+    border-color: #333333;
+}
+
+body.dark-theme .select-categoria,
+body.dark-theme .input-año,
+body.dark-theme .select-año-sugerido,
+body.dark-theme .btn-nav-header,
+body.dark-theme .btn-tabla {
+    background-color: #2a2a2a;
+    border-color: #444444;
+    color: #ffffff;
+}
+
+body.dark-theme .tabla-años th {
+    background-color: #262626;
+    color: #cbd5e1;
+    border-bottom-color: #383838;
+}
+
+body.dark-theme .tabla-años td {
+    border-bottom-color: #2c2c2c;
+}
+
+body.dark-theme .tabla-años tr:hover td {
+    background-color: #252525;
+}
+
+body.dark-theme .tag-año,
+body.dark-theme .stat-num {
+    color: #ffffff;
+}

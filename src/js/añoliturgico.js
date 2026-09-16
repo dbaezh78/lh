@@ -19,16 +19,25 @@ const DIAS_SEMANA_NOMBRES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves
 /**
  * Genera la secuencia completa de días del año litúrgico
  */
-export function generarSecuenciaLiturgica(añoBase) {
-    const y = parseInt(añoBase, 10);
-    const hitos = generarHitosLiturgicos(y);
-    const hitosMap = {};
-    hitos.forEach(h => { hitosMap[h.id] = h.fecha; });
+export function generarSecuenciaLiturgica(añoLiturgico) {
+    const y = parseInt(añoLiturgico, 10);
+    const añoPrevio = y - 1;
+
+    // Hitos del año previo (para Adviento y Navidad que abren el ciclo)
+    const hitosPrev = generarHitosLiturgicos(añoPrevio);
+    const hitosPrevMap = {};
+    hitosPrev.forEach(h => { hitosPrevMap[h.id] = h.fecha; });
+
+    // Hitos de este año litúrgico (para Epifanía, Bautismo, Ceniza, Pascua, Pentecostés, Cristo Rey)
+    const hitosEste = generarHitosLiturgicos(y);
+    const hitosEsteMap = {};
+    hitosEste.forEach(h => { hitosEsteMap[h.id] = h.fecha; });
 
     // Hitos clave
-    const fechaInicioAdviento = parsearFechaISO(hitosMap['adviento'] || calcularInicioAdviento(y));
-    const fechaCeniza = parsearFechaISO(hitosMap['ceniza'] || (TABLA_CENIZA_BASE[y + 1] ? TABLA_CENIZA_BASE[y + 1].ceniza : `${y + 1}-02-18`));
-    const fechaPascua = parsearFechaISO(hitosMap['pascua'] || (TABLA_CENIZA_BASE[y + 1] ? TABLA_CENIZA_BASE[y + 1].pascua : `${y + 1}-04-05`));
+    const fechaInicioAdviento = parsearFechaISO(hitosPrevMap['adviento'] || calcularInicioAdviento(añoPrevio));
+    const fechaCeniza = parsearFechaISO(hitosEsteMap['ceniza'] || (TABLA_CENIZA_BASE[y] ? TABLA_CENIZA_BASE[y].ceniza : `${y}-02-18`));
+    const fechaPascua = parsearFechaISO(hitosEsteMap['pascua'] || (TABLA_CENIZA_BASE[y] ? TABLA_CENIZA_BASE[y].pascua : `${y}-04-05`));
+    const fechaAdvientoSiguiente = parsearFechaISO(hitosEsteMap['adviento'] || calcularInicioAdviento(y));
 
     const dias = [];
     let fechaActual = new Date(fechaInicioAdviento);
@@ -68,8 +77,8 @@ export function generarSecuenciaLiturgica(añoBase) {
     // ==========================================
     // 2. TIEMPO DE NAVIDAD (25 Dic a Bautismo del Señor)
     // ==========================================
-    // Posicionar exactamente en 25 de Diciembre
-    fechaActual = new Date(y, 11, 25);
+    // Posicionar exactamente en 25 de Diciembre del año previo
+    fechaActual = new Date(añoPrevio, 11, 25);
 
     // Días de la Octava de Navidad (25 al 31 de Dic)
     const nombresNavidadOctava = {
@@ -97,12 +106,11 @@ export function generarSecuenciaLiturgica(añoBase) {
     }
 
     // 1 de Enero (Santa María Madre de Dios) a Epifanía y Bautismo
-    // fechaActual ahora está en 1 de Enero del año siguiente (y + 1)
-    const añoSiguiente = y + 1;
-    const epifaniaDate = new Date(añoSiguiente, 0, 6);
+    // fechaActual ahora está en 1 de Enero del año litúrgico actual (y)
+    const epifaniaDate = new Date(y, 0, 6);
     const diaEpif = epifaniaDate.getDay();
     const deltaBautismo = diaEpif === 0 ? 7 : (7 - diaEpif);
-    const bautismoDate = new Date(añoSiguiente, 0, 6 + deltaBautismo);
+    const bautismoDate = new Date(y, 0, 6 + deltaBautismo);
 
     while (fechaActual <= bautismoDate) {
         const diaNum = fechaActual.getDate();
@@ -266,7 +274,7 @@ export function generarSecuenciaLiturgica(añoBase) {
             let celebracion = '';
             if (d === 0) {
                 if (sem === 2) celebracion = "II Domingo de Pascua o de la Divina Misericordia";
-                else if (sem === 7) celebracion = "Domingo de Pentecostés";
+                else if (sem === 7) celebracion = "VII Domingo de Pascua (o La Ascensión del Señor)";
                 else celebracion = `${sem}º Domingo de Pascua`;
             }
             dias.push(crearItemDia({
@@ -282,21 +290,50 @@ export function generarSecuenciaLiturgica(añoBase) {
 
     // ==========================================
     // 6. TIEMPO ORDINARIO (II Parte)
-    // Reanudación tras Pentecostés hasta Cristo Rey (Semana 34)
+    // Reanudación en Pentecostés hasta Cristo Rey (Semana 34 obligatoria)
     // ==========================================
-    const fechaAdvientoSiguiente = parsearFechaISO(hitosMap['adviento'] || calcularInicioAdviento(añoSiguiente));
+    const fechaCristoRey = new Date(fechaAdvientoSiguiente);
+    fechaCristoRey.setDate(fechaCristoRey.getDate() - 7);
+
+    // Calcular exactamente la semana en que reanuda el Tiempo Ordinario
+    // La semana inicia en domingo: Domingo de Pentecostés marca la semana de reanudación
+    const fechaPentecostes = new Date(fechaActual); // Domingo de Pentecostés
+    const diffSemanas = Math.round((fechaCristoRey - fechaPentecostes) / (7 * 86400000));
+    semOrdinario = 34 - diffSemanas;
+
+    // Día 50: Domingo de Pentecostés (Cierre de Pascua e inicio de la semana de reanudación)
+    dias.push(crearItemDia({
+        tiempo: 'Pascua',
+        semana: `S${semOrdinario}`,
+        dia: 'Domingo',
+        fecha: formatearFechaISO(fechaActual),
+        celebracion: 'Domingo de Pentecostés'
+    }));
+    fechaActual.setDate(fechaActual.getDate() + 1);
+
+    let primerDomingoTrinidad = true;
+
     while (fechaActual < fechaAdvientoSiguiente) {
         const diaSemana = DIAS_SEMANA_NOMBRES[fechaActual.getDay()];
-        if (fechaActual.getDay() === 0) semOrdinario++;
+        
+        // Cada semana litúrgica inicia en domingo: incrementamos la semana al llegar al domingo
+        if (fechaActual.getDay() === 0) {
+            semOrdinario++;
+        }
 
         let celebracion = '';
-        // Si es el último domingo antes de Adviento: Jesucristo, Rey del Universo
         const unSemanaMas = new Date(fechaActual);
         unSemanaMas.setDate(unSemanaMas.getDate() + 7);
-        if (diaSemana === 'Domingo' && unSemanaMas >= fechaAdvientoSiguiente) {
-            celebracion = "Jesucristo, Rey del Universo (Semana 34)";
-        } else if (diaSemana === 'Domingo') {
-            celebracion = `${semOrdinario}º Domingo del Tiempo Ordinario`;
+
+        if (diaSemana === 'Domingo') {
+            if (primerDomingoTrinidad) {
+                celebracion = `${semOrdinario}º Domingo del Tiempo Ordinario - La Santísima Trinidad`;
+                primerDomingoTrinidad = false;
+            } else if (unSemanaMas >= fechaAdvientoSiguiente) {
+                celebracion = "Jesucristo, Rey del Universo (Semana 34)";
+            } else {
+                celebracion = `${semOrdinario}º Domingo del Tiempo Ordinario`;
+            }
         }
 
         dias.push(crearItemDia({
@@ -320,8 +357,8 @@ function crearItemDia(datos) {
     const fechaObj = parsearFechaISO(datos.fecha);
     const año = fechaObj.getFullYear();
     const esDomingo = (datos.dia.toLowerCase() === 'domingo');
-    const paridad = obtenerParidadAño(año);
-    const ciclo = obtenerCicloDominical(año);
+    const paridad = obtenerParidadAño(fechaObj);
+    const ciclo = obtenerCicloDominical(fechaObj);
 
     // Generar prefijo de ID litúrgico consistente
     const tiempoCode = datos.tiempo.substring(0, 2).toLowerCase();
@@ -347,8 +384,8 @@ function crearItemDia(datos) {
             urlEvangelioCicloB = `https://ev.resucito.do/to/${semNum}/domingo-b.mp3`;
             urlEvangelioCicloC = `https://ev.resucito.do/to/${semNum}/domingo-c.mp3`;
         } else {
-            urlEvangelioPar = `https://ev.resucito.do/to/${semNum}/${diaUrl}-par.mp3`;
-            urlEvangelioImpar = `https://ev.resucito.do/to/${semNum}/${diaUrl}-impar.mp3`;
+            urlEvangelioPar = `https://ev.resucito.do/to/${semNum}/${diaUrl}.mp3`;
+            urlEvangelioImpar = `https://ev.resucito.do/to/${semNum}/${diaUrl}.mp3`;
         }
     } else if (datos.tiempo === 'Adviento') {
         if (esDomingo) {
@@ -356,8 +393,8 @@ function crearItemDia(datos) {
             urlEvangelioCicloB = `https://ev.resucito.do/adviento/${semNum}/domingo-b.mp3`;
             urlEvangelioCicloC = `https://ev.resucito.do/adviento/${semNum}/domingo-c.mp3`;
         } else {
-            urlEvangelioPar = `https://ev.resucito.do/adviento/${semNum}/${diaUrl}-par.mp3`;
-            urlEvangelioImpar = `https://ev.resucito.do/adviento/${semNum}/${diaUrl}-impar.mp3`;
+            urlEvangelioPar = `https://ev.resucito.do/adviento/${semNum}/${diaUrl}.mp3`;
+            urlEvangelioImpar = `https://ev.resucito.do/adviento/${semNum}/${diaUrl}.mp3`;
         }
     } else if (datos.tiempo === 'Cuaresma') {
         if (esDomingo) {
@@ -365,8 +402,8 @@ function crearItemDia(datos) {
             urlEvangelioCicloB = `https://ev.resucito.do/cuaresma/${semNum}/domingo-b.mp3`;
             urlEvangelioCicloC = `https://ev.resucito.do/cuaresma/${semNum}/domingo-c.mp3`;
         } else {
-            urlEvangelioPar = `https://ev.resucito.do/cuaresma/${semNum}/${diaUrl}-par.mp3`;
-            urlEvangelioImpar = `https://ev.resucito.do/cuaresma/${semNum}/${diaUrl}-impar.mp3`;
+            urlEvangelioPar = `https://ev.resucito.do/cuaresma/${semNum}/${diaUrl}.mp3`;
+            urlEvangelioImpar = `https://ev.resucito.do/cuaresma/${semNum}/${diaUrl}.mp3`;
         }
     } else if (datos.tiempo === 'Pascua') {
         if (esDomingo) {
@@ -374,8 +411,8 @@ function crearItemDia(datos) {
             urlEvangelioCicloB = `https://ev.resucito.do/pascua/${semNum}/domingo-b.mp3`;
             urlEvangelioCicloC = `https://ev.resucito.do/pascua/${semNum}/domingo-c.mp3`;
         } else {
-            urlEvangelioPar = `https://ev.resucito.do/pascua/${semNum}/${diaUrl}-par.mp3`;
-            urlEvangelioImpar = `https://ev.resucito.do/pascua/${semNum}/${diaUrl}-impar.mp3`;
+            urlEvangelioPar = `https://ev.resucito.do/pascua/${semNum}/${diaUrl}.mp3`;
+            urlEvangelioImpar = `https://ev.resucito.do/pascua/${semNum}/${diaUrl}.mp3`;
         }
     } else if (datos.tiempo === 'Navidad') {
         urlEvangelioPar = `https://ev.resucito.do/tn/${diaUrl}.mp3`;
@@ -384,6 +421,10 @@ function crearItemDia(datos) {
         urlEvangelioCicloB = `https://ev.resucito.do/tn/domingo-b.mp3`;
         urlEvangelioCicloC = `https://ev.resucito.do/tn/domingo-c.mp3`;
     }
+
+    const defaultUrl = esDomingo ? 
+        (ciclo === 'A' ? urlEvangelioCicloA : (ciclo === 'B' ? urlEvangelioCicloB : urlEvangelioCicloC)) : 
+        (paridad === 'Par' ? urlEvangelioPar : urlEvangelioImpar);
 
     return {
         tiempo: datos.tiempo,
@@ -396,17 +437,19 @@ function crearItemDia(datos) {
         año: año,
         paridad: paridad,
         ciclo: ciclo,
-        urlEvangelioPar: urlEvangelioPar,
-        urlEvangelioImpar: urlEvangelioImpar,
-        urlEvangelioCicloA: urlEvangelioCicloA,
-        urlEvangelioCicloB: urlEvangelioCicloB,
-        urlEvangelioCicloC: urlEvangelioCicloC
+        urlEvangelio: datos.urlEvangelio || defaultUrl,
+        urlEvangelioPar: datos.urlEvangelioPar || urlEvangelioPar,
+        urlEvangelioImpar: datos.urlEvangelioImpar || urlEvangelioImpar,
+        urlEvangelioCicloA: datos.urlEvangelioCicloA || urlEvangelioCicloA,
+        urlEvangelioCicloB: datos.urlEvangelioCicloB || urlEvangelioCicloB,
+        urlEvangelioCicloC: datos.urlEvangelioCicloC || urlEvangelioCicloC
     };
 }
 
 // ==========================================
 // RENDERIZADO Y CONTROL EN añoliturgico.html
 // ==========================================
+if (typeof document !== 'undefined') {
 document.addEventListener('DOMContentLoaded', () => {
     const cuerpoTabla = document.getElementById('cuerpo-tabla');
     const buscador = document.getElementById('buscador');
@@ -419,6 +462,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioGlobal = document.getElementById('audio-tabla');
 
     if (!cuerpoTabla || !selectAño) return;
+
+    // Poblar dinámicamente el selector con el catálogo de años de datos.html
+    function poblarSelectorAños() {
+        const catalogo = (typeof window.obtenerCatalogoAños === 'function') 
+            ? window.obtenerCatalogoAños()
+            : (() => {
+                try {
+                    const guardado = localStorage.getItem('lh_catalogo_anios');
+                    return guardado ? JSON.parse(guardado) : [2024, 2025, 2026, 2027, 2028, 2029, 2030];
+                } catch(e) {
+                    return [2024, 2025, 2026, 2027, 2028, 2029, 2030];
+                }
+            })();
+
+        const valorActual = parseInt(selectAño.value, 10) || 2026;
+        selectAño.innerHTML = '';
+        catalogo.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = `${y}${y === 2026 ? ' (Actual)' : ''}`;
+            if (y === valorActual) opt.selected = true;
+            selectAño.appendChild(opt);
+        });
+
+        if (!catalogo.includes(valorActual) && catalogo.length > 0) {
+            selectAño.value = catalogo[0];
+        }
+    }
+
+    poblarSelectorAños();
 
     let añoSeleccionado = parseInt(selectAño.value, 10) || 2026;
     let catalogoDias = [];
@@ -433,6 +506,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (guardado) {
             try {
                 catalogoDias = JSON.parse(guardado);
+                // Si el catálogo guardado contiene el error previo (Pentecostés con S7 o ausencia de S8),
+                // o desfase de fechas, regeneramos y preservamos las URLs personalizadas del usuario
+                const tieneS8 = catalogoDias.some(d => d.semana === 'S8');
+                const pentecostes = catalogoDias.find(d => d.celebracion && d.celebracion.includes('Pentecost'));
+                if (!tieneS8 || (pentecostes && pentecostes.semana === 'S7')) {
+                    const nuevoCatalogo = generarSecuenciaLiturgica(y);
+                    catalogoDias.forEach(oldItem => {
+                        if (oldItem.urlEvangelio || oldItem.urlEvangelioPar || oldItem.urlEvangelioImpar) {
+                            const matching = nuevoCatalogo.find(n => n.fecha === oldItem.fecha || (n.semana === oldItem.semana && n.dia === oldItem.dia));
+                            if (matching) {
+                                if (oldItem.urlEvangelio) matching.urlEvangelio = oldItem.urlEvangelio;
+                                if (oldItem.urlEvangelioPar) matching.urlEvangelioPar = oldItem.urlEvangelioPar;
+                                if (oldItem.urlEvangelioImpar) matching.urlEvangelioImpar = oldItem.urlEvangelioImpar;
+                            }
+                        }
+                    });
+                    catalogoDias = nuevoCatalogo;
+                    localStorage.setItem(`lh-catalogo-liturgico-${y}`, JSON.stringify(catalogoDias));
+                }
             } catch (e) {
                 catalogoDias = generarSecuenciaLiturgica(y);
             }
@@ -482,6 +574,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const termino = (buscador ? buscador.value : '').toLowerCase().trim();
         const tiempoFiltro = filtroTiempo ? filtroTiempo.value : '';
 
+        const thColUrl = document.getElementById('th-col-url');
+        const puedeEditarUrl = (typeof window.hasPermission === 'function') && window.hasPermission('ano_liturgico_editar_url');
+        const puedeCambiarFecha = (typeof window.hasPermission === 'function') && window.hasPermission('ano_liturgico_cambiar_fecha');
+        const puedeGuardar = (typeof window.hasPermission === 'function') && window.hasPermission('ano_liturgico_guardar');
+
+        if (thColUrl) {
+            thColUrl.style.display = puedeEditarUrl ? '' : 'none';
+        }
+
+        if (btnGuardar) {
+            btnGuardar.style.display = puedeGuardar ? '' : 'none';
+        }
+
         catalogoDias.forEach((item, index) => {
             const matchTiempo = !tiempoFiltro || item.tiempo === tiempoFiltro;
             const matchTermino = !termino ||
@@ -502,27 +607,31 @@ document.addEventListener('DOMContentLoaded', () => {
             let audioUrlActiva = '';
 
             if (esDomingo) {
-                const cicloActivo = obtenerCicloDominical(item.año || añoSeleccionado);
+                const cicloActivo = obtenerCicloDominical(item.fecha || item.año || añoSeleccionado);
                 badgeTipoHtml = `<span class="badge-ciclo-tag">Ciclo ${cicloActivo} (A/B/C)</span>`;
-                audioUrlActiva = (cicloActivo === 'A') ? item.urlEvangelioCicloA : ((cicloActivo === 'B') ? item.urlEvangelioCicloB : item.urlEvangelioCicloC);
+                audioUrlActiva = item.urlEvangelio || ((cicloActivo === 'A') ? item.urlEvangelioCicloA : ((cicloActivo === 'B') ? item.urlEvangelioCicloB : item.urlEvangelioCicloC));
             } else {
-                const paridadActiva = (item.año % 2 === 0) ? 'Par' : 'Impar';
+                const paridadActiva = obtenerParidadAño(item.fecha || item.año || añoSeleccionado);
                 badgeTipoHtml = `<span class="badge-paridad-tag">Año ${paridadActiva}</span>`;
-                audioUrlActiva = (paridadActiva === 'Par') ? item.urlEvangelioPar : item.urlEvangelioImpar;
+                audioUrlActiva = item.urlEvangelio || ((paridadActiva === 'Par') ? item.urlEvangelioPar : item.urlEvangelioImpar);
             }
+
+            const tdFechaHtml = puedeCambiarFecha
+                ? `<td><input type="date" class="input-fecha-consecutiva" value="${item.fecha}" data-index="${index}" title="Cambiar fecha (actualiza consecutivamente las siguientes)"></td>`
+                : `<td><span style="font-size: 0.88rem; font-weight: 500;">${item.fecha}</span></td>`;
+
+            const tdUrlHtml = puedeEditarUrl
+                ? `<td><input type="text" class="input-url-evangelio" value="${audioUrlActiva || ''}" data-url-index="${index}" placeholder="https://ev.resucito.do/..."></td>`
+                : `<td style="display: none;"></td>`;
 
             tr.innerHTML = `
                 <td><span class="tag-tiempo ${tagTiempoClass}">${item.tiempo}</span></td>
                 <td><span class="badge-semana">${item.semana}</span></td>
                 <td><span class="badge-dia ${esDomingo ? 'dia-domingo' : ''}">${item.dia}</span></td>
-                <td>
-                    <input type="date" class="input-fecha-consecutiva" value="${item.fecha}" data-index="${index}" title="Cambiar fecha (actualiza consecutivamente las siguientes)">
-                </td>
+                ${tdFechaHtml}
                 <td><strong>${item.celebracion || '-'}</strong></td>
                 <td>${badgeTipoHtml}</td>
-                <td>
-                    <input type="text" class="input-url-evangelio" value="${audioUrlActiva || ''}" data-url-index="${index}" placeholder="https://ev.resucito.do/...">
-                </td>
+                ${tdUrlHtml}
                 <td>
                     <button type="button" class="btn-play-fila" data-audio="${audioUrlActiva || ''}" title="Escuchar Evangelio">
                         <span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span>
@@ -536,36 +645,57 @@ document.addEventListener('DOMContentLoaded', () => {
             cuerpoTabla.appendChild(tr);
         });
 
-        // Conectar inputs de fecha consecutiva
+        // Conectar inputs de fecha consecutiva con auto-guardado
         cuerpoTabla.querySelectorAll('.input-fecha-consecutiva').forEach(input => {
             input.addEventListener('change', (e) => {
+                if (typeof window.hasPermission === 'function' && !window.hasPermission('ano_liturgico_cambiar_fecha')) {
+                    alert('No tienes permiso para cambiar fechas en el Año Litúrgico.');
+                    renderTabla();
+                    return;
+                }
                 const idx = parseInt(e.target.dataset.index, 10);
                 const nuevaFecha = e.target.value;
                 if (nuevaFecha) {
                     recalcularFechasConsecutivas(idx, nuevaFecha);
+                    localStorage.setItem(`lh-catalogo-liturgico-${añoSeleccionado}`, JSON.stringify(catalogoDias));
                 }
             });
         });
 
-        // Conectar inputs de URL personalizada
+        // Conectar inputs de URL personalizada con auto-guardado inmediato y actualización de play button
         cuerpoTabla.querySelectorAll('.input-url-evangelio').forEach(input => {
-            input.addEventListener('change', (e) => {
+            const actualizarUrl = (e) => {
+                if (typeof window.hasPermission === 'function' && !window.hasPermission('ano_liturgico_editar_url')) {
+                    alert('No tienes permiso para editar URLs en el Año Litúrgico.');
+                    renderTabla();
+                    return;
+                }
                 const idx = parseInt(e.target.dataset.urlIndex, 10);
                 const val = e.target.value.trim();
                 const item = catalogoDias[idx];
                 if (item) {
+                    item.urlEvangelio = val;
                     if (item.esDomingo) {
-                        const c = obtenerCicloDominical(item.año || añoSeleccionado);
+                        const c = obtenerCicloDominical(item.fecha || item.año || añoSeleccionado);
                         if (c === 'A') item.urlEvangelioCicloA = val;
                         else if (c === 'B') item.urlEvangelioCicloB = val;
                         else item.urlEvangelioCicloC = val;
                     } else {
-                        const p = (item.año % 2 === 0) ? 'Par' : 'Impar';
-                        if (p === 'Par') item.urlEvangelioPar = val;
-                        else item.urlEvangelioImpar = val;
+                        item.urlEvangelioPar = val;
+                        item.urlEvangelioImpar = val;
                     }
+
+                    const tr = e.target.closest('tr');
+                    if (tr) {
+                        const btnPlay = tr.querySelector('.btn-play-fila');
+                        if (btnPlay) btnPlay.dataset.audio = val;
+                    }
+
+                    localStorage.setItem(`lh-catalogo-liturgico-${añoSeleccionado}`, JSON.stringify(catalogoDias));
                 }
-            });
+            };
+            input.addEventListener('change', actualizarUrl);
+            input.addEventListener('blur', actualizarUrl);
         });
 
         // Conectar botones de reproducción
@@ -626,12 +756,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnGuardar) {
+        if (typeof window.hasPermission === 'function' && !window.hasPermission('ano_liturgico_guardar')) {
+            btnGuardar.disabled = true;
+            btnGuardar.style.opacity = '0.5';
+            btnGuardar.title = 'Sin permiso para guardar el Año Litúrgico';
+        }
         btnGuardar.addEventListener('click', () => {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('ano_liturgico_guardar')) {
+                alert('No tienes permiso para guardar cambios en el Año Litúrgico.');
+                return;
+            }
             localStorage.setItem(`lh-catalogo-liturgico-${añoSeleccionado}`, JSON.stringify(catalogoDias));
             alert(`Año Litúrgico ${añoSeleccionado} guardado exitosamente.`);
         });
     }
 
+    window.addEventListener('lh-access-control-updated', () => renderTabla());
+    if (window.firebaseAPI?.onAuthReady) {
+        window.firebaseAPI.onAuthReady(() => renderTabla());
+    }
+
     // Carga inicial
     cargarDatosAño(añoSeleccionado);
 });
+}
+

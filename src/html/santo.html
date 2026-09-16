@@ -615,7 +615,7 @@
                     <button type="button" class="btn-auth-action" id="btn-auth-login" onclick="iniciarSesionAdmin()" style="display: none;">Iniciar Sesión</button>
                     <button type="button" class="btn-auth-action" id="btn-auth-logout" onclick="cerrarSesionAdmin()" style="display: none;">Salir</button>
                 </div>
-                <button type="button" class="btn-accion-santo" onclick="subirAsignacionesAFirebaseDirecto()" title="Subir catálogo y asignaciones a Firebase Cloud Firestore" style="background: #0288d1; color: white;">
+                <button type="button" class="btn-accion-santo" id="btn-subir-firebase-santo" onclick="subirAsignacionesAFirebaseDirecto()" title="Subir catálogo y asignaciones a Firebase Cloud Firestore" style="background: #0288d1; color: white;">
                     <span class="material-symbols-outlined" style="font-size: 18px;">cloud_upload</span>
                     Subir a Firebase
                 </button>
@@ -720,6 +720,7 @@
         <span class="material-symbols-outlined">save</span> Guardar Asignaciones
     </button>
 
+    <script src="../js/accesscontrol.js" type="module"></script>
     <script src="../js/navigator.js" type="module"></script>
     <script src="../js/tts-santo.js?v=1789427000" type="module"></script>
     <script type="module">
@@ -929,7 +930,11 @@
             const btnLogin = document.getElementById('btn-auth-login');
             const btnLogout = document.getElementById('btn-auth-logout');
             const btnCrear = document.getElementById('btn-ir-nombresanto');
+            const btnSubir = document.getElementById('btn-subir-firebase-santo');
             const btnGuardar = document.getElementById('btn-guardar-asignaciones');
+
+            const puedeSubir = (typeof window.hasPermission !== 'function') || window.hasPermission('santos_subir_firebase');
+            const puedeCrearEditar = (typeof window.hasPermission !== 'function') || window.hasPermission('santos_crear_editar');
 
             if (user && user.email) {
                 const esAdmin = user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
@@ -940,8 +945,6 @@
                 }
                 if (btnLogin) btnLogin.style.display = 'none';
                 if (btnLogout) btnLogout.style.display = 'inline-block';
-                if (btnCrear) btnCrear.style.display = esAdmin ? 'inline-flex' : 'none';
-                if (btnGuardar) btnGuardar.style.display = esAdmin ? 'flex' : 'none';
             } else {
                 modoAdminSanto = false;
                 if (label) {
@@ -950,8 +953,39 @@
                 }
                 if (btnLogin) btnLogin.style.display = 'inline-block';
                 if (btnLogout) btnLogout.style.display = 'none';
-                if (btnCrear) btnCrear.style.display = 'none';
-                if (btnGuardar) btnGuardar.style.display = 'none';
+            }
+
+            // Botón Crear / Editar Santo
+            if (btnCrear) {
+                const activoCrear = modoAdminSanto && puedeCrearEditar;
+                btnCrear.style.display = 'inline-flex';
+                btnCrear.style.opacity = activoCrear ? '1' : '0.45';
+                btnCrear.style.cursor = activoCrear ? 'pointer' : 'not-allowed';
+                btnCrear.style.pointerEvents = activoCrear ? '' : 'none';
+                btnCrear.title = activoCrear ? 'Crear o editar santos' : 'Sin permiso para crear o editar santos';
+            }
+
+            // Botón Subir a Firebase
+            if (btnSubir) {
+                btnSubir.style.display = 'inline-flex';
+                btnSubir.disabled = !puedeSubir;
+                btnSubir.style.opacity = puedeSubir ? '1' : '0.45';
+                btnSubir.style.cursor = puedeSubir ? 'pointer' : 'not-allowed';
+                btnSubir.title = puedeSubir ? 'Subir catálogo y asignaciones a Firebase' : 'Sin permiso para subir a Firebase';
+            }
+
+            // Botón flotante Guardar Asignaciones
+            if (btnGuardar) {
+                btnGuardar.style.display = 'flex';
+                btnGuardar.disabled = !modoAdminSanto;
+                btnGuardar.style.opacity = modoAdminSanto ? '1' : '0.45';
+                btnGuardar.style.cursor = modoAdminSanto ? 'pointer' : 'not-allowed';
+                btnGuardar.title = modoAdminSanto ? 'Guardar cambios del calendario' : 'Solo administrador puede guardar asignaciones';
+            }
+
+            const modalPencil = document.getElementById('btn-modal-editar-santo');
+            if (modalPencil) {
+                modalPencil.style.display = (modoAdminSanto && puedeCrearEditar) ? 'inline-flex' : 'none';
             }
         }
 
@@ -975,6 +1009,10 @@
         };
 
         window.subirAsignacionesAFirebaseDirecto = async function() {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('santos_subir_firebase')) {
+                alert("No tienes permiso para subir datos a Firebase.");
+                return;
+            }
             if (!window.firebaseAPI || !window.firebaseAPI.guardarAsignacionesFirestore) {
                 alert("⚠️ Firebase no se ha cargado totalmente. Espera un momento y reintenta.");
                 return;
@@ -1094,7 +1132,9 @@
                 const muerte = santoObj ? (santoObj.muerte || '-') : '-';
 
                 let celdaSantoHtml = '';
-                if (modoAdminSanto) {
+                const puedeSelectSanto = (typeof window.hasPermission !== 'function') || window.hasPermission('santos_nombre_select');
+
+                if (modoAdminSanto && puedeSelectSanto) {
                     const textoMostrado = santoAsignadoNombre || '-- Sin santo asignado --';
                     const estiloColor = santoAsignadoNombre ? 'color:#0277bd; font-weight:600;' : 'color:#78909c; font-style:italic;';
                     
@@ -1181,14 +1221,17 @@
 
             let cuerpoHtml = imgModal;
 
+            // 1. Fecha Celebración primero
+            if (fechaCeleb && fechaCeleb !== '—') {
+                cuerpoHtml += `<div><strong>Fecha Celebración:</strong> ${fechaCeleb}</div>`;
+            }
+            // 2. Nacimiento
             if (s.nacimiento && s.nacimiento.trim() && s.nacimiento.trim() !== '—') {
                 cuerpoHtml += `<div><strong>Nacimiento:</strong> ${s.nacimiento.trim()}</div>`;
             }
+            // 3. Mortalidad
             if (s.muerte && s.muerte.trim() && s.muerte.trim() !== '—') {
                 cuerpoHtml += `<div><strong>Mortalidad:</strong> ${s.muerte.trim()}</div>`;
-            }
-            if (fechaCeleb && fechaCeleb !== '—' && !esMismaFecha) {
-                cuerpoHtml += `<div><strong>Fecha Celebración:</strong> ${fechaCeleb}</div>`;
             }
             if (s.pais && s.pais.trim() && s.pais.trim() !== '—') {
                 cuerpoHtml += `<div><strong>País:</strong> ${s.pais.trim()}</div>`;
@@ -1245,6 +1288,10 @@
         };
 
         window.editarSantoDesdeModal = function() {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('santos_crear_editar')) {
+                alert('No tienes permiso para editar o crear santos.');
+                return;
+            }
             if (!window.santoActualDetalle || !window.santoActualDetalle.nombre) return;
             const nombreEnc = encodeURIComponent(window.santoActualDetalle.nombre.trim());
             window.location.href = `nombresanto.html?editar=${nombreEnc}`;
@@ -1436,6 +1483,25 @@
 
         actualizarSelectorFiltroSantos();
         renderTabla();
+
+        window.addEventListener('lh-user-changed', () => {
+            if (window.currentUser) {
+                actualizarEstadoAdmin(window.currentUser);
+            }
+            renderTabla();
+        });
+
+        window.addEventListener('lh-access-control-updated', () => {
+            actualizarEstadoAdmin(window.currentUser || null);
+            renderTabla();
+        });
+
+        if (window.onAuthReady) {
+            window.onAuthReady((user) => {
+                actualizarEstadoAdmin(user);
+                renderTabla();
+            });
+        }
     </script>
 </body>
 </html>

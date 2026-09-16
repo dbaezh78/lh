@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Actualizaciones — Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/ver.css">
+</head>
+<body>
+
+    <div class="contenedor-ver">
+        <!-- Encabezado Principal -->
+        <header class="header-ver">
+            <div class="titulo-box">
+                <h1>
+                    <span class="material-symbols-outlined" style="font-size: 2.2rem; color: var(--accent-color);">history_edu</span>
+                    Historial de Actualizaciones
+                </h1>
+                <p>Registro de cambios, novedades litúrgicas y versiones sincronizadas en la nube</p>
+            </div>
+            <div class="header-controles">
+                <a href="aCtrl.html" class="btn-nav-ver" title="Ir a Control de Acceso y Actualización">
+                    <span class="material-symbols-outlined">update</span>
+                    Actualización
+                </a>
+                <a href="../../index.html" class="btn-nav-ver" title="Volver al Inicio">
+                    <span class="material-symbols-outlined">home</span>
+                    Inicio
+                </a>
+            </div>
+        </header>
+
+        <!-- Formulario para Registrar / Editar Actualizaciones (Solo con permiso ver_editar o Admin) -->
+        <section class="card-formulario-actualizacion" id="seccion-form-actualizacion">
+            <div class="form-header">
+                <h2 id="titulo-form-actualizacion">
+                    <span class="material-symbols-outlined" id="icono-form-actualizacion">add_circle</span>
+                    <span id="texto-form-actualizacion">Registrar Nueva Actualización</span>
+                </h2>
+                <button type="button" id="btn-cancelar-edicion" class="btn-cancelar-edicion" style="display: none;">
+                    <span class="material-symbols-outlined">cancel</span>
+                    Cancelar Edición
+                </button>
+            </div>
+
+            <form id="form-actualizacion">
+                <input type="hidden" id="input-actualizacion-id">
+
+                <div class="grid-form-actualizacion">
+                    <div class="campo-grupo">
+                        <label for="input-version">
+                            <span class="material-symbols-outlined">numbers</span>
+                            Versión:
+                        </label>
+                        <input type="text" id="input-version" class="input-form" placeholder="ej: 1.0.01" required>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="input-fecha">
+                            <span class="material-symbols-outlined">calendar_today</span>
+                            Fecha:
+                        </label>
+                        <input type="date" id="input-fecha" class="input-form" required>
+                    </div>
+                </div>
+
+                <div class="campo-grupo" style="margin-top: 14px;">
+                    <label for="textarea-detalles">
+                        <span class="material-symbols-outlined">description</span>
+                        Detalles de Actualización:
+                    </label>
+                    <textarea id="textarea-detalles" class="textarea-form" rows="4" placeholder="Describe los cambios, novedades, correcciones o mejoras litúrgicas realizadas..." required></textarea>
+                </div>
+
+                <div class="fila-botones-form">
+                    <button type="submit" id="btn-submit-actualizacion" class="btn-submit-form">
+                        <span class="material-symbols-outlined" id="icono-btn-submit">cloud_upload</span>
+                        <span id="texto-btn-submit">Guardar en Firebase</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Lista de Actualizaciones / Registro de Versiones -->
+        <section class="seccion-lista-actualizaciones">
+            <div class="lista-cabecera">
+                <h2>
+                    <span class="material-symbols-outlined">view_timeline</span>
+                    Versiones Registradas
+                </h2>
+                <div class="lista-badge-count" id="count-actualizaciones">Cargando...</div>
+            </div>
+
+            <div id="contenedor-actualizaciones-lista" class="timeline-actualizaciones">
+                <!-- Se inyecta dinámicamente -->
+                <div class="estado-cargando">
+                    <span class="material-symbols-outlined spin-icon">sync</span>
+                    <p>Sincronizando actualizaciones desde Firebase...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/firebase-config.js" type="module"></script>
+    <script src="../js/accesscontrol.js" type="module"></script>
+    <script src="../js/ver.js" type="module"></script>
+    <script src="../js/navigator.js" type="module"></script>
+</body>
+</html>

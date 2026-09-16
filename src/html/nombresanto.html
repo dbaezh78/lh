@@ -135,13 +135,13 @@
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <h3 style="margin: 0; margin-right: 6px;">Santos Registrados en el Sistema</h3>
                     <input type="file" id="input-importar-csv" name="input_importar_csv" accept=".csv" style="display: none;" onchange="procesarImportacionCSV(event)">
-                    <button type="button" class="btn-auth-action" style="background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7;" onclick="document.getElementById('input-importar-csv').click()" title="Importar archivo CSV con datos de santos">
+                    <button type="button" id="btn-importar-csv" class="btn-auth-action" style="background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7;" onclick="document.getElementById('input-importar-csv').click()" title="Importar archivo CSV con datos de santos">
                         📥 Importar Archivo CSV
                     </button>
-                    <button type="button" class="btn-auth-action" onclick="descargarCSVActual()" title="Descargar catálogo completo en formato CSV para Excel">
+                    <button type="button" id="btn-exportar-csv" class="btn-auth-action" onclick="descargarCSVActual()" title="Descargar catálogo completo en formato CSV para Excel">
                         📊 Exportar / Descargar CSV
                     </button>
-                    <button type="button" class="btn-auth-action" onclick="subirCatalogoAFirebaseDirecto()" title="Subir catálogo completo a la base de datos de Firebase">
+                    <button type="button" id="btn-sincronizar-firebase" class="btn-auth-action" onclick="subirCatalogoAFirebaseDirecto()" title="Subir catálogo completo a la base de datos de Firebase">
                         ☁️ Sincronizar / Subir a Firebase
                     </button>
                 </div>
@@ -324,6 +324,7 @@
     <!-- Menú Contextual Emergente No Modal para la Tabla de Santos -->
     <div id="santo-context-menu" class="santo-context-menu" style="display: none;" onclick="event.stopPropagation()"></div>
 
+    <script src="../js/accesscontrol.js" type="module"></script>
     <script src="../js/navigator.js" type="module"></script>
     <script src="../js/tts-santo.js?v=1789427000" type="module"></script>
     <script type="module">
@@ -514,6 +515,10 @@
         }
 
         window.subirCatalogoAFirebaseDirecto = async function() {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_sincronizar_firebase')) {
+                alert("No tienes permiso para sincronizar o subir datos a Firebase.");
+                return;
+            }
             console.log("🔘 [subirCatalogoAFirebaseDirecto] Botón presionado.");
             if (!window.firebaseAPI || !window.firebaseAPI.guardarSantosFirestore) {
                 console.warn("⚠️ window.firebaseAPI o guardarSantosFirestore no disponible aún:", window.firebaseAPI);
@@ -622,6 +627,11 @@
         }
 
         window.procesarImportacionCSV = function(event) {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_importar_csv')) {
+                alert("No tienes permiso para importar archivos CSV.");
+                event.target.value = '';
+                return;
+            }
             const archivo = event.target.files && event.target.files[0];
             if (!archivo) return;
 
@@ -736,6 +746,10 @@
         };
 
         window.descargarCSVActual = function() {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_exportar_csv')) {
+                alert("No tienes permiso para exportar archivos CSV.");
+                return;
+            }
             const santos = obtenerSantos();
             if (!santos || santos.length === 0) {
                 alert("⚠️ No hay santos registrados para exportar.");
@@ -856,6 +870,16 @@
             const btnLogout = document.getElementById('btn-auth-logout-ns');
             const formSanto = document.getElementById('form-santo');
             const btnSubmit = document.getElementById('btn-submit-form');
+            const btnImportarCsv = document.getElementById('btn-importar-csv');
+            const btnExportarCsv = document.getElementById('btn-exportar-csv');
+            const btnSincronizarFb = document.getElementById('btn-sincronizar-firebase');
+            const btnAddHijo = document.getElementById('btn-add-hijo');
+
+            const puedeGuardar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_guardar');
+            const puedeImportar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_importar_csv');
+            const puedeExportar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_exportar_csv');
+            const puedeSincronizar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_sincronizar_firebase');
+            const puedeAddHijo = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_agregar_nombre');
 
             if (user && user.email) {
                 const esAdmin = user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
@@ -867,9 +891,9 @@
                 if (btnLogin) btnLogin.style.display = 'none';
                 if (btnLogout) btnLogout.style.display = 'inline-block';
                 if (btnSubmit) {
-                    btnSubmit.disabled = !esAdmin;
-                    btnSubmit.style.opacity = esAdmin ? '1' : '0.5';
-                    btnSubmit.title = esAdmin ? '' : 'Solo el administrador puede guardar cambios';
+                    btnSubmit.disabled = !(esAdmin && puedeGuardar);
+                    btnSubmit.style.opacity = (esAdmin && puedeGuardar) ? '1' : '0.5';
+                    btnSubmit.title = (esAdmin && puedeGuardar) ? '' : 'Sin permisos para guardar cambios';
                 }
             } else {
                 modoAdmin = false;
@@ -885,6 +909,43 @@
                     btnSubmit.title = 'Solo el administrador puede guardar cambios';
                 }
             }
+
+            if (btnImportarCsv) {
+                btnImportarCsv.disabled = !puedeImportar;
+                btnImportarCsv.style.opacity = puedeImportar ? '1' : '0.45';
+                btnImportarCsv.style.cursor = puedeImportar ? 'pointer' : 'not-allowed';
+                btnImportarCsv.title = puedeImportar ? 'Importar archivo CSV con datos de santos' : 'Sin permiso para importar CSV';
+            }
+            if (btnExportarCsv) {
+                btnExportarCsv.disabled = !puedeExportar;
+                btnExportarCsv.style.opacity = puedeExportar ? '1' : '0.45';
+                btnExportarCsv.style.cursor = puedeExportar ? 'pointer' : 'not-allowed';
+                btnExportarCsv.title = puedeExportar ? 'Descargar catálogo completo en formato CSV para Excel' : 'Sin permiso para exportar CSV';
+            }
+            if (btnSincronizarFb) {
+                btnSincronizarFb.disabled = !puedeSincronizar;
+                btnSincronizarFb.style.opacity = puedeSincronizar ? '1' : '0.45';
+                btnSincronizarFb.style.cursor = puedeSincronizar ? 'pointer' : 'not-allowed';
+                btnSincronizarFb.title = puedeSincronizar ? 'Subir catálogo completo a la base de datos de Firebase' : 'Sin permiso para sincronizar o subir a Firebase';
+            }
+            if (btnAddHijo) {
+                btnAddHijo.disabled = !puedeAddHijo;
+                btnAddHijo.style.opacity = puedeAddHijo ? '1' : '0.45';
+                btnAddHijo.style.cursor = puedeAddHijo ? 'pointer' : 'not-allowed';
+                btnAddHijo.title = puedeAddHijo ? 'Agregar nombre' : 'Sin permiso para agregar nombre';
+            }
+
+            const modalPencil = document.getElementById('btn-modal-editar-santo');
+            const puedeEditar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_editar');
+            if (modalPencil) {
+                const activoPencil = modoAdmin && puedeEditar;
+                modalPencil.style.display = 'inline-flex';
+                modalPencil.disabled = !activoPencil;
+                modalPencil.style.opacity = activoPencil ? '1' : '0.45';
+                modalPencil.style.cursor = activoPencil ? 'pointer' : 'not-allowed';
+                modalPencil.title = activoPencil ? 'Editar este santo' : 'Sin permiso para editar';
+            }
+
             if (typeof renderTablaRegistrados === 'function') {
                 renderTablaRegistrados();
             }
@@ -1270,10 +1331,15 @@
         ];
         window.COLUMNAS_INFO = COLUMNAS_INFO;
 
-        let ordenColumnaActual = { col: null, dir: null };
+        let ordenColumnaActual = { col: 'celebracion', dir: 'asc' };
         try {
             const guardadoOrden = localStorage.getItem('lh_santos_orden_columna');
-            if (guardadoOrden) ordenColumnaActual = JSON.parse(guardadoOrden);
+            if (guardadoOrden) {
+                const parsedOrden = JSON.parse(guardadoOrden);
+                if (parsedOrden && parsedOrden.col) {
+                    ordenColumnaActual = parsedOrden;
+                }
+            }
         } catch (e) {}
 
         let filtrosColumnas = {};
@@ -1670,6 +1736,10 @@
 
         window.toggleOrdenarColumna = function(colKey) {
             if (!colKey || colKey === 'acciones') return;
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_ordenar')) {
+                alert("No tienes permiso para ordenar columnas.");
+                return;
+            }
             if (ordenColumnaActual.col === colKey) {
                 if (ordenColumnaActual.dir === 'asc') {
                     ordenColumnaActual.dir = 'desc';
@@ -1684,6 +1754,10 @@
         };
 
         window.aplicarOrdenColumna = function(colKey, dir) {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_ordenar')) {
+                alert("No tienes permiso para ordenar columnas.");
+                return;
+            }
             ordenColumnaActual = { col: colKey, dir: dir };
             guardarEstadoFiltrosYOrden();
             renderTablaRegistrados();
@@ -1691,6 +1765,10 @@
         };
 
         window.quitarOrdenColumna = function() {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_ordenar')) {
+                alert("No tienes permiso para ordenar columnas.");
+                return;
+            }
             ordenColumnaActual = { col: null, dir: null };
             guardarEstadoFiltrosYOrden();
             renderTablaRegistrados();
@@ -1724,6 +1802,10 @@
 
         window.ocultarColumna = function(colKey) {
             if (!colKey) return;
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_columnas_visibilidad')) {
+                alert("No tienes permiso para mostrar u ocultar columnas.");
+                return;
+            }
             columnasOcultas.add(colKey);
             actualizarEstilosColumnasOcultas();
             actualizarBarraFiltrosActivos();
@@ -1732,6 +1814,10 @@
         };
 
         window.toggleVisibilidadColumna = function(colKey, visible) {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_columnas_visibilidad')) {
+                alert("No tienes permiso para mostrar u ocultar columnas.");
+                return;
+            }
             if (visible) {
                 columnasOcultas.delete(colKey);
             } else {
@@ -1743,6 +1829,10 @@
         };
 
         window.mostrarTodasColumnas = function() {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_columnas_visibilidad')) {
+                alert("No tienes permiso para mostrar u ocultar columnas.");
+                return;
+            }
             columnasOcultas.clear();
             actualizarEstilosColumnasOcultas();
             actualizarBarraFiltrosActivos();
@@ -1847,6 +1937,9 @@
             const esOrdenAsc = ordenActual.col === colKey && ordenActual.dir === 'asc';
             const esOrdenDesc = ordenActual.col === colKey && ordenActual.dir === 'desc';
 
+            const puedeOrdenar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_ordenar');
+            const puedeVisibilidad = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_columnas_visibilidad');
+
             let html = `
                 <div class="ctx-header">
                     <span class="material-symbols-outlined" style="font-size: 18px;">view_column</span>
@@ -1859,19 +1952,25 @@
                 const textoDesc = (colKey === 'nacimiento' || colKey === 'muerte') ? 'Mayor a Menor (reciente a antiguo)' : (colKey === 'celebracion' ? 'Por fecha en el año (31/12 → 01/01)' : 'Descendente (Z → A)');
                 
                 html += `
-                    <div class="ctx-section-title">Organizar</div>
-                    <div class="ctx-item ${esOrdenAsc ? 'ctx-active' : ''}" onclick="aplicarOrdenColumna('${colKey}', 'asc')">
+                    <div class="ctx-section-title" style="${puedeOrdenar ? '' : 'opacity: 0.5;'}">Organizar ${puedeOrdenar ? '' : '(Sin permiso)'}</div>
+                    <div class="ctx-item ${esOrdenAsc ? 'ctx-active' : ''}" 
+                         style="${puedeOrdenar ? '' : 'opacity: 0.45; cursor: not-allowed; pointer-events: none;'}" 
+                         onclick="${puedeOrdenar ? `aplicarOrdenColumna('${colKey}', 'asc')` : ''}" 
+                         title="${puedeOrdenar ? '' : 'Sin permiso para ordenar columnas'}">
                         <span class="material-symbols-outlined">arrow_upward</span>
                         <span>${textoAsc}</span>
                         ${esOrdenAsc ? '<span class="material-symbols-outlined ctx-check-icon">check</span>' : ''}
                     </div>
-                    <div class="ctx-item ${esOrdenDesc ? 'ctx-active' : ''}" onclick="aplicarOrdenColumna('${colKey}', 'desc')">
+                    <div class="ctx-item ${esOrdenDesc ? 'ctx-active' : ''}" 
+                         style="${puedeOrdenar ? '' : 'opacity: 0.45; cursor: not-allowed; pointer-events: none;'}" 
+                         onclick="${puedeOrdenar ? `aplicarOrdenColumna('${colKey}', 'desc')` : ''}" 
+                         title="${puedeOrdenar ? '' : 'Sin permiso para ordenar columnas'}">
                         <span class="material-symbols-outlined">arrow_downward</span>
                         <span>${textoDesc}</span>
                         ${esOrdenDesc ? '<span class="material-symbols-outlined ctx-check-icon">check</span>' : ''}
                     </div>
                 `;
-                if (esOrdenAsc || esOrdenDesc) {
+                if ((esOrdenAsc || esOrdenDesc) && puedeOrdenar) {
                     html += `
                         <div class="ctx-item" onclick="quitarOrdenColumna()">
                             <span class="material-symbols-outlined" style="color: #c62828;">close</span>
@@ -1915,21 +2014,24 @@
 
             html += `
                 <div class="ctx-divider"></div>
-                <div class="ctx-section-title">Visibilidad de Columnas</div>
-                <div class="ctx-item" onclick="ocultarColumna('${colKey}')">
+                <div class="ctx-section-title" style="${puedeVisibilidad ? '' : 'opacity: 0.5;'}">Visibilidad de Columnas ${puedeVisibilidad ? '' : '(Sin permiso)'}</div>
+                <div class="ctx-item" 
+                     style="${puedeVisibilidad ? '' : 'opacity: 0.45; cursor: not-allowed; pointer-events: none;'}" 
+                     onclick="${puedeVisibilidad ? `ocultarColumna('${colKey}')` : ''}" 
+                     title="${puedeVisibilidad ? '' : 'Sin permiso para mostrar u ocultar columnas'}">
                     <span class="material-symbols-outlined">visibility_off</span>
                     <span>Ocultar columna "<strong>${colInfo.label}</strong>"</span>
                 </div>
-                <div class="ctx-columns-list">
+                <div class="ctx-columns-list" style="${puedeVisibilidad ? '' : 'opacity: 0.5; pointer-events: none;'}">
             `;
 
             COLUMNAS_INFO.forEach(col => {
                 const estaOculta = columnasOcultas.has(col.key);
                 const chkId = `ctx-col-chk-${col.key}`;
                 html += `
-                    <label class="ctx-col-item">
+                    <label class="ctx-col-item" style="${puedeVisibilidad ? '' : 'cursor: not-allowed;'}">
                         <span style="display: flex; align-items: center; gap: 6px;">
-                            <input type="checkbox" id="${chkId}" name="ctx_col_${col.key}" class="ctx-col-checkbox" ${!estaOculta ? 'checked' : ''} onchange="toggleVisibilidadColumna('${col.key}', this.checked)">
+                            <input type="checkbox" id="${chkId}" name="ctx_col_${col.key}" class="ctx-col-checkbox" ${!estaOculta ? 'checked' : ''} ${puedeVisibilidad ? '' : 'disabled'} onchange="toggleVisibilidadColumna('${col.key}', this.checked)">
                             <span>${col.label}</span>
                         </span>
                     </label>
@@ -1949,7 +2051,10 @@
                     <span>Restablecer anchos por defecto</span>
                 </div>
                 <div class="ctx-divider"></div>
-                <div class="ctx-item" onclick="mostrarTodasColumnas()">
+                <div class="ctx-item" 
+                     style="${puedeVisibilidad ? '' : 'opacity: 0.45; cursor: not-allowed; pointer-events: none;'}" 
+                     onclick="${puedeVisibilidad ? 'mostrarTodasColumnas()' : ''}" 
+                     title="${puedeVisibilidad ? '' : 'Sin permiso para mostrar u ocultar columnas'}">
                     <span class="material-symbols-outlined">visibility</span>
                     <span>Mostrar todas las columnas</span>
                 </div>
@@ -2097,6 +2202,9 @@
                 return;
             }
 
+            const puedeEditar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_editar');
+            const puedeEliminar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_eliminar');
+
             tbody.innerHTML = santosFiltrados.map(item => {
                 const s = item.s;
                 const idx = item.originalIdx;
@@ -2105,12 +2213,14 @@
                     : '<span style="color:#9e9e9e;">—</span>';
 
                 let accionesHtml = '<span style="color:#b0bec5; font-size:0.8rem;">Solo lectura</span>';
-                if (modoAdmin) {
+                if (modoAdmin && puedeEliminar) {
                     accionesHtml = `
                         <div class="btn-tbl-acciones">
                             <button type="button" class="btn-eliminar-santo-tbl" onclick="borrarSanto(${idx})" title="Eliminar este santo" aria-label="Eliminar"><span class="material-symbols-outlined" style="font-size: 18px; line-height: 1;">delete</span></button>
                         </div>
                     `;
+                } else if (modoAdmin) {
+                    accionesHtml = '<span style="color:#b0bec5; font-size:0.8rem;">Sin permiso eliminar</span>';
                 }
 
                 let imgHtml = '';
@@ -2121,7 +2231,7 @@
                 }
 
                 const fechaCelebracion = s.celebracion || s.fechaFestividad || '';
-                const btnEditarDelante = modoAdmin
+                const btnEditarDelante = (modoAdmin && puedeEditar)
                     ? `<button type="button" class="btn-editar-santo-tbl" onclick="editarSanto(${idx})" title="Editar este santo" aria-label="Editar"><span class="material-symbols-outlined" style="font-size: 18px; line-height: 1;">edit</span></button>`
                     : '';
 
@@ -2282,11 +2392,19 @@
                 contraerFormularioSanto();
             } else {
                 const editIdx = parseInt(document.getElementById('edit-index').value, 10);
+                if (editIdx < 0 && typeof window.hasPermission === 'function' && !window.hasPermission('registro_agregar_nuevo')) {
+                    alert('No tienes permiso para agregar nuevos santos.');
+                    return;
+                }
                 expandirFormularioSanto(editIdx >= 0);
             }
         };
 
         window.editarSanto = function(index) {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_editar')) {
+                alert('No tienes permiso para editar registros de santos.');
+                return;
+            }
             if (!modoAdmin) {
                 alert('No tienes permisos de edición activados. Inicia sesión como Administrador.');
                 return;
@@ -2374,6 +2492,10 @@
         };
 
         window.borrarSanto = async function(index) {
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_eliminar')) {
+                alert('No tienes permiso para eliminar registros de santos.');
+                return;
+            }
             if (!modoAdmin) {
                 alert('No tienes permisos para eliminar registros.');
                 return;
@@ -2406,6 +2528,10 @@
 
         document.getElementById('form-santo').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (typeof window.hasPermission === 'function' && !window.hasPermission('registro_guardar')) {
+                alert('No tienes permiso para guardar santos.');
+                return;
+            }
             if (!modoAdmin) {
                 alert('No tienes permisos de guardado/edición.');
                 return;
@@ -2507,10 +2633,7 @@
             window.indiceSantoActualDetalle = index;
             if (window.detenerLecturaSantoVoz) window.detenerLecturaSantoVoz();
 
-            const edad = calcularEdadSanto(s.nacimiento, s.muerte);
-            const edadTexto = (edad !== null) ? ` (${edad} años)` : '';
-
-            document.getElementById('modal-santo-nombre').textContent = (s.nombre || 'Detalle del Santo') + edadTexto;
+            document.getElementById('modal-santo-nombre').textContent = s.nombre || 'Detalle del Santo';
             
             const hijosValidos = (s.hijos && Array.isArray(s.hijos))
                 ? s.hijos.filter(h => h && typeof h === 'string' && h.trim().length > 0 && h.trim() !== '—')
@@ -2544,14 +2667,17 @@
 
             let cuerpoHtml = imgModal;
 
+            // 1. Fecha Celebración primero
+            if (celebTexto && celebTexto !== '—') {
+                cuerpoHtml += `<div><strong>Fecha Celebración:</strong> ${celebTexto}</div>`;
+            }
+            // 2. Nacimiento
             if (nacTexto && nacTexto !== '—') {
                 cuerpoHtml += `<div><strong>Nacimiento:</strong> ${nacTexto}</div>`;
             }
+            // 3. Mortalidad
             if (mueTexto && mueTexto !== '—') {
                 cuerpoHtml += `<div><strong>Mortalidad:</strong> ${mueTexto}</div>`;
-            }
-            if (celebTexto && celebTexto !== '—' && !esMismaFecha) {
-                cuerpoHtml += `<div><strong>Fecha Celebración:</strong> ${celebTexto}</div>`;
             }
             if (s.pais && s.pais.trim() && s.pais.trim() !== '—') {
                 cuerpoHtml += `<div><strong>País:</strong> ${s.pais.trim()}</div>`;
@@ -2652,6 +2778,24 @@
         };
 
         renderTablaRegistrados();
+
+        window.addEventListener('lh-user-changed', () => {
+            if (window.currentUser) {
+                actualizarEstadoAdmin(window.currentUser);
+            } else {
+                actualizarEstadoAdmin(null);
+            }
+        });
+
+        window.addEventListener('lh-access-control-updated', () => {
+            actualizarEstadoAdmin(window.currentUser || null);
+        });
+
+        if (window.onAuthReady) {
+            window.onAuthReady((user) => {
+                actualizarEstadoAdmin(user);
+            });
+        }
 
         // Si se pasa ?editar=NombrePorURL, abrirlo automáticamente en modo edición
         try {

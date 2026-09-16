@@ -1,0 +1,870 @@
+[
+  {
+    "nombre": "aCtrl.css",
+    "ruta": "src/css/aCtrl.css",
+    "size": 10875,
+    "fecha": "2026-09-16 21:13:56",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "añoliturgico.css",
+    "ruta": "src/css/añoliturgico.css",
+    "size": 5870,
+    "fecha": "2026-09-15 18:16:17",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "buttons.css",
+    "ruta": "src/css/buttons.css",
+    "size": 15771,
+    "fecha": "2026-09-16 12:29:04",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "completas.css",
+    "ruta": "src/css/completas.css",
+    "size": 125,
+    "fecha": "2026-09-11 18:22:30",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "datos.css",
+    "ruta": "src/css/datos.css",
+    "size": 10519,
+    "fecha": "2026-09-16 14:49:06",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "form_etiempo.css",
+    "ruta": "src/css/form_etiempo.css",
+    "size": 6439,
+    "fecha": "2026-09-15 18:14:40",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "gral.css",
+    "ruta": "src/css/gral.css",
+    "size": 3650,
+    "fecha": "2026-06-23 11:38:04",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "main.css",
+    "ruta": "src/css/main.css",
+    "size": 13044,
+    "fecha": "2026-09-11 21:00:35",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "navigator.css",
+    "ruta": "src/css/navigator.css",
+    "size": 16352,
+    "fecha": "2026-09-16 21:42:08",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "nombresanto.css",
+    "ruta": "src/css/nombresanto.css",
+    "size": 30916,
+    "fecha": "2026-09-15 14:07:53",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "nona.css",
+    "ruta": "src/css/nona.css",
+    "size": 120,
+    "fecha": "2026-09-11 18:22:22",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "setting.css",
+    "ruta": "src/css/setting.css",
+    "size": 17656,
+    "fecha": "2026-09-16 16:16:32",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "sexta.css",
+    "ruta": "src/css/sexta.css",
+    "size": 122,
+    "fecha": "2026-09-11 18:22:17",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "tercia.css",
+    "ruta": "src/css/tercia.css",
+    "size": 124,
+    "fecha": "2026-09-11 18:22:12",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "ver.css",
+    "ruta": "src/css/ver.css",
+    "size": 8187,
+    "fecha": "2026-09-16 21:16:22",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "visperas.css",
+    "ruta": "src/css/visperas.css",
+    "size": 124,
+    "fecha": "2026-09-11 18:22:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "antifonas.js",
+    "ruta": "src/data/antifonas.js",
+    "size": 13523,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "calendario2026.js",
+    "ruta": "src/data/calendario2026.js",
+    "size": 14411,
+    "fecha": "2026-09-11 17:56:00",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "calendarioLiturgico.js",
+    "ruta": "src/data/calendarioLiturgico.js",
+    "size": 145445,
+    "fecha": "2026-09-11 18:21:03",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "cantEvangelica.js",
+    "ruta": "src/data/cantEvangelica.js",
+    "size": 33656,
+    "fecha": "2026-09-11 17:59:01",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "catalogoSantosAnual.js",
+    "ruta": "src/data/catalogoSantosAnual.js",
+    "size": 103057,
+    "fecha": "2026-09-14 11:09:16",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "fijas.js",
+    "ruta": "src/data/core/fijas.js",
+    "size": 4429,
+    "fecha": "2026-09-11 16:50:09",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "db-laudes -mal.js",
+    "ruta": "src/data/db-laudes -mal.js",
+    "size": 26337,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "db-laudes copy 2.js",
+    "ruta": "src/data/db-laudes copy 2.js",
+    "size": 26337,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "db-laudes copy 3.js",
+    "ruta": "src/data/db-laudes copy 3.js",
+    "size": 28381,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "db-laudes copy 4.js",
+    "ruta": "src/data/db-laudes copy 4.js",
+    "size": 29363,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "db-laudes copy 5.js",
+    "ruta": "src/data/db-laudes copy 5.js",
+    "size": 29261,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "db-laudes copy.js",
+    "ruta": "src/data/db-laudes copy.js",
+    "size": 28381,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "db-laudes.js",
+    "ruta": "src/data/db-laudes.js",
+    "size": 134763,
+    "fecha": "2026-09-15 14:03:05",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "db-Oficio.js",
+    "ruta": "src/data/db-Oficio.js",
+    "size": 12019,
+    "fecha": "2026-04-13 10:58:41",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "himnos.js",
+    "ruta": "src/data/himnos.js",
+    "size": 28137,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "lecturabreve.js",
+    "ruta": "src/data/lecturabreve.js",
+    "size": 18111,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "lecturas.js",
+    "ruta": "src/data/lecturas.js",
+    "size": 5886,
+    "fecha": "2026-04-13 10:58:41",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "oracion.js",
+    "ruta": "src/data/oracion.js",
+    "size": 11090,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "preces.js",
+    "ruta": "src/data/preces.js",
+    "size": 25316,
+    "fecha": "2026-09-11 17:45:25",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "salmos.js",
+    "ruta": "src/data/salmos.js",
+    "size": 84461,
+    "fecha": "2026-06-25 11:17:53",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "Fave-ScriptBoldPro.ttf",
+    "ruta": "src/font/Fave-ScriptBoldPro.ttf",
+    "size": 180800,
+    "fecha": "2025-05-22 13:35:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "Fave-ScriptBoldPro.woff",
+    "ruta": "src/font/Fave-ScriptBoldPro.woff",
+    "size": 93980,
+    "fecha": "2025-05-22 13:35:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "Fave-ScriptBoldPro.woff2",
+    "ruta": "src/font/Fave-ScriptBoldPro.woff2",
+    "size": 68400,
+    "fecha": "2025-05-22 13:35:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "font.woff2",
+    "ruta": "src/font/font.woff2",
+    "size": 3520792,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "FRABK.TTF",
+    "ruta": "src/font/FRABK.TTF",
+    "size": 152700,
+    "fecha": "2024-08-05 17:26:37",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "FRABKIT.TTF",
+    "ruta": "src/font/FRABKIT.TTF",
+    "size": 169620,
+    "fecha": "2024-08-05 17:26:37",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "FranklinGothicMedium.ttf",
+    "ruta": "src/font/FranklinGothicMedium.ttf",
+    "size": 133632,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "LibreFranklin-Bold.ttf",
+    "ruta": "src/font/LibreFranklin-Bold.ttf",
+    "size": 108560,
+    "fecha": "2025-05-22 13:35:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "material-symbols.woff2",
+    "ruta": "src/font/material-symbols.woff2",
+    "size": 314924,
+    "fecha": "2026-03-09 15:54:08",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "Neocat-Regular_3.0.ttf",
+    "ruta": "src/font/Neocat-Regular_3.0.ttf",
+    "size": 77292,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "aCtrl.html",
+    "ruta": "src/html/aCtrl.html",
+    "size": 15296,
+    "fecha": "2026-09-16 21:43:03",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "añoliturgico.html",
+    "ruta": "src/html/añoliturgico.html",
+    "size": 4581,
+    "fecha": "2026-09-16 20:21:38",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "completas.html",
+    "ruta": "src/html/completas.html",
+    "size": 1083,
+    "fecha": "2026-09-11 18:22:57",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "datos.html",
+    "ruta": "src/html/datos.html",
+    "size": 10368,
+    "fecha": "2026-09-16 18:29:59",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "form_etiempo.html",
+    "ruta": "src/html/form_etiempo.html",
+    "size": 6661,
+    "fecha": "2026-09-16 21:11:56",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "laudes.html",
+    "ruta": "src/html/laudes.html",
+    "size": 1495,
+    "fecha": "2026-09-11 17:28:20",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "nombresanto.html",
+    "ruta": "src/html/nombresanto.html",
+    "size": 151233,
+    "fecha": "2026-09-16 21:02:58",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "nona.html",
+    "ruta": "src/html/nona.html",
+    "size": 1117,
+    "fecha": "2026-09-11 18:22:47",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "oficio.html",
+    "ruta": "src/html/oficio.html",
+    "size": 1458,
+    "fecha": "2026-04-13 10:58:41",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "santo.html",
+    "ruta": "src/html/santo.html",
+    "size": 67220,
+    "fecha": "2026-09-16 20:36:29",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "sexta.html",
+    "ruta": "src/html/sexta.html",
+    "size": 1122,
+    "fecha": "2026-09-11 18:22:42",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "tercia.html",
+    "ruta": "src/html/tercia.html",
+    "size": 1127,
+    "fecha": "2026-09-11 18:22:37",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "ver.html",
+    "ruta": "src/html/ver.html",
+    "size": 5390,
+    "fecha": "2026-09-16 21:16:09",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "visperas.html",
+    "ruta": "src/html/visperas.html",
+    "size": 1328,
+    "fecha": "2026-09-11 18:22:51",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "96fc69c34770a02ef6f6010fe1af98ed.jpg",
+    "ruta": "src/img/96fc69c34770a02ef6f6010fe1af98ed.jpg",
+    "size": 106419,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "amad.png",
+    "ruta": "src/img/amad.png",
+    "size": 1678652,
+    "fecha": "2025-03-10 18:14:48",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "BackGround.jpg",
+    "ruta": "src/img/BackGround.jpg",
+    "size": 264765,
+    "fecha": "2025-03-10 14:56:20",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "carmen_hernandez.jpg",
+    "ruta": "src/img/carmen_hernandez.jpg",
+    "size": 285270,
+    "fecha": "2026-03-09 14:13:26",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "cristo.jpg",
+    "ruta": "src/img/cristo.jpg",
+    "size": 163737,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "cristo.png",
+    "ruta": "src/img/cristo.png",
+    "size": 389344,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "cristo2.jpg",
+    "ruta": "src/img/cristo2.jpg",
+    "size": 108143,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "cristo3.png",
+    "ruta": "src/img/cristo3.png",
+    "size": 429257,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "Cristo_1.jpg",
+    "ruta": "src/img/Cristo_1.jpg",
+    "size": 36333,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "Cristo_1.png",
+    "ruta": "src/img/Cristo_1.png",
+    "size": 83186,
+    "fecha": "2026-03-31 20:05:51",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "cristo_b.png",
+    "ruta": "src/img/cristo_b.png",
+    "size": 391019,
+    "fecha": "2026-03-20 16:54:45",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "golden_ring.jpg",
+    "ruta": "src/img/golden_ring.jpg",
+    "size": 279666,
+    "fecha": "2026-09-07 10:47:53",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "ico-laudes.ico",
+    "ruta": "src/img/ico-laudes.ico",
+    "size": 206910,
+    "fecha": "2025-02-17 10:45:45",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "ico.ico",
+    "ruta": "src/img/ico.ico",
+    "size": 206910,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-128.png",
+    "ruta": "src/img/icono-128.png",
+    "size": 32747,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-16.png",
+    "ruta": "src/img/icono-16.png",
+    "size": 818,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-180.png",
+    "ruta": "src/img/icono-180.png",
+    "size": 62429,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-192.png",
+    "ruta": "src/img/icono-192.png",
+    "size": 70578,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-256.png",
+    "ruta": "src/img/icono-256.png",
+    "size": 123424,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-32.png",
+    "ruta": "src/img/icono-32.png",
+    "size": 2623,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-48.png",
+    "ruta": "src/img/icono-48.png",
+    "size": 5396,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-512-.png",
+    "ruta": "src/img/icono-512-.png",
+    "size": 1444766,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-512-ORIGEN.png",
+    "ruta": "src/img/icono-512-ORIGEN.png",
+    "size": 1246560,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-512.png",
+    "ruta": "src/img/icono-512.png",
+    "size": 476681,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono-64.png",
+    "ruta": "src/img/icono-64.png",
+    "size": 9013,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "icono.png",
+    "ruta": "src/img/icono.png",
+    "size": 1444766,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "kiko_arguello.jpg",
+    "ruta": "src/img/kiko_arguello.jpg",
+    "size": 81509,
+    "fecha": "2026-03-09 14:13:41",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "lh.jpg",
+    "ruta": "src/img/lh.jpg",
+    "size": 31807,
+    "fecha": "2025-02-17 10:45:45",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "liturgia_reloj.jpg",
+    "ruta": "src/img/liturgia_reloj.jpg",
+    "size": 248320,
+    "fecha": "2026-09-16 21:10:48",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "logo_cantos.png",
+    "ruta": "src/img/logo_cantos.png",
+    "size": 78791,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "maria_ascension.jpg",
+    "ruta": "src/img/maria_ascension.jpg",
+    "size": 11439,
+    "fecha": "2026-03-09 14:13:07",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "mariopezzi.jpg",
+    "ruta": "src/img/mariopezzi.jpg",
+    "size": 10122,
+    "fecha": "2026-03-09 14:12:50",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "Untitled.png",
+    "ruta": "src/img/Untitled.png",
+    "size": 69455,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "vengopronto.jpg",
+    "ruta": "src/img/vengopronto.jpg",
+    "size": 311868,
+    "fecha": "2025-03-10 17:05:54",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "xCristo_1.png",
+    "ruta": "src/img/xCristo_1.png",
+    "size": 60692,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "yoteamo1.png",
+    "ruta": "src/img/yoteamo1.png",
+    "size": 261678,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "yoteamo2.png",
+    "ruta": "src/img/yoteamo2.png",
+    "size": 55747,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "yoteamo3.png",
+    "ruta": "src/img/yoteamo3.png",
+    "size": 269248,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "yoteamo4.png",
+    "ruta": "src/img/yoteamo4.png",
+    "size": 268861,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "yoteamo5.png",
+    "ruta": "src/img/yoteamo5.png",
+    "size": 44713,
+    "fecha": "2026-02-10 15:20:49",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "accesscontrol.js",
+    "ruta": "src/js/accesscontrol.js",
+    "size": 32408,
+    "fecha": "2026-09-16 21:41:53",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "aCtrl-ui.js",
+    "ruta": "src/js/aCtrl-ui.js",
+    "size": 25655,
+    "fecha": "2026-09-16 21:14:03",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "añoliturgico.js",
+    "ruta": "src/js/añoliturgico.js",
+    "size": 33697,
+    "fecha": "2026-09-16 21:05:52",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "completas.js",
+    "ruta": "src/js/completas.js",
+    "size": 746,
+    "fecha": "2026-09-11 18:23:24",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "datos.js",
+    "ruta": "src/js/datos.js",
+    "size": 25117,
+    "fecha": "2026-09-16 20:36:00",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "firebase-config.js",
+    "ruta": "src/js/firebase-config.js",
+    "size": 12077,
+    "fecha": "2026-09-16 21:15:20",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "form_etiempo.js",
+    "ruta": "src/js/form_etiempo.js",
+    "size": 29411,
+    "fecha": "2026-09-16 21:12:28",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "laudes copy 2.js",
+    "ruta": "src/js/laudes copy 2.js",
+    "size": 6444,
+    "fecha": "2026-04-09 17:26:48",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "laudes copy 3.js",
+    "ruta": "src/js/laudes copy 3.js",
+    "size": 9290,
+    "fecha": "2026-04-09 17:49:48",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "laudes copy 4.js",
+    "ruta": "src/js/laudes copy 4.js",
+    "size": 9338,
+    "fecha": "2026-04-09 18:07:01",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "laudes copy 5.js",
+    "ruta": "src/js/laudes copy 5.js",
+    "size": 12073,
+    "fecha": "2026-06-23 14:51:10",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "laudes copy.js",
+    "ruta": "src/js/laudes copy.js",
+    "size": 5972,
+    "fecha": "2026-04-09 17:17:22",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "laudes.js",
+    "ruta": "src/js/laudes.js",
+    "size": 12111,
+    "fecha": "2026-09-11 17:56:50",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "main.js",
+    "ruta": "src/js/main.js",
+    "size": 38130,
+    "fecha": "2026-09-16 11:57:45",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "navigator.js",
+    "ruta": "src/js/navigator.js",
+    "size": 43728,
+    "fecha": "2026-09-16 21:43:20",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "nona.js",
+    "ruta": "src/js/nona.js",
+    "size": 785,
+    "fecha": "2026-09-11 18:23:13",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "oficio.js",
+    "ruta": "src/js/oficio.js",
+    "size": 13061,
+    "fecha": "2026-04-13 10:58:41",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "setting.js",
+    "ruta": "src/js/setting.js",
+    "size": 79859,
+    "fecha": "2026-09-16 20:00:56",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "sexta.js",
+    "ruta": "src/js/sexta.js",
+    "size": 787,
+    "fecha": "2026-09-11 18:23:08",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "tercia.js",
+    "ruta": "src/js/tercia.js",
+    "size": 789,
+    "fecha": "2026-09-11 18:23:01",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "tts-santo.js",
+    "ruta": "src/js/tts-santo.js",
+    "size": 42112,
+    "fecha": "2026-09-16 17:45:40",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "ver.js",
+    "ruta": "src/js/ver.js",
+    "size": 13889,
+    "fecha": "2026-09-16 21:16:34",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "visperas.js",
+    "ruta": "src/js/visperas.js",
+    "size": 812,
+    "fecha": "2026-09-11 18:23:17",
+    "version": "1.0.01"
+  },
+  {
+    "nombre": "Tiempos.xlsx",
+    "ruta": "src/Tiempos.xlsx",
+    "size": 9586,
+    "fecha": "2026-06-25 11:17:53",
+    "version": "1.0.01"
+  }
+]

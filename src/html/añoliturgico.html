@@ -17,6 +17,10 @@
                 <p id="subtitulo-año">Año Litúrgico 2026</p>
             </div>
             <div class="header-controles">
+                <a href="datos.html" class="btn-nav-header" title="Gestionar Años y Datos">
+                    <span class="material-symbols-outlined">dataset</span>
+                    Datos
+                </a>
                 <a href="form_etiempo.html" class="btn-nav-header btn-primario" title="Ir al Formulario del cambio litúrgico">
                     <span class="material-symbols-outlined">edit_calendar</span>
                     Formulario del cambio litúrgico
@@ -75,7 +79,7 @@
                         <th>Fecha</th>
                         <th>Celebración / Nombre</th>
                         <th>Ciclo / Paridad</th>
-                        <th>Evangelio (Audio URL)</th>
+                        <th id="th-col-url">Evangelio (Audio URL)</th>
                         <th>Oír</th>
                         <th>Laudes</th>
                     </tr>
@@ -90,6 +94,7 @@
     <!-- Elemento de audio global para reproducción en la tabla -->
     <audio id="audio-tabla" preload="none"></audio>
 
+    <script src="../js/accesscontrol.js" type="module"></script>
     <script src="../js/añoliturgico.js" type="module"></script>
     <script src="../js/navigator.js"></script>
 </body>

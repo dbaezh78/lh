@@ -48,12 +48,16 @@ export const ADMIN_EMAIL = "dbaezh78@gmail.com";
 window.firebaseAPI = {
     app,
     auth,
+    db,
     adminEmail: ADMIN_EMAIL,
     login: () => signInWithPopup(auth, provider),
     logout: () => signOut(auth),
     onAuthReady: (callback) => onAuthStateChanged(auth, (user) => {
         const isAdmin = user && user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
         localStorage.setItem('lh_auth_is_admin', isAdmin ? 'true' : 'false');
+        if (user && window.accessControlAPI?.registerUser) {
+            window.accessControlAPI.registerUser(user);
+        }
         if (callback) callback(user, isAdmin);
     }),
     getCurrentUser: () => auth.currentUser,
@@ -204,6 +208,62 @@ window.firebaseAPI = {
         } catch (err) {
             console.warn(`⚠️ Error cargando ajustes de Firestore (${seccion}):`, err);
             return null;
+        }
+    },
+    // Métodos para historial de versiones y cambios (ver.html)
+    guardarActualizacionFirestore: async (registro) => {
+        try {
+            if (!registro || !registro.version) throw new Error("Versión requerida.");
+            const docId = registro.id || `v_${registro.version.replace(/[^a-zA-Z0-9_-]/g, "_")}_${Date.now()}`;
+            const docRef = doc(db, "actualizaciones", docId);
+            const payload = {
+                id: docId,
+                version: registro.version.trim(),
+                fecha: registro.fecha || new Date().toISOString().split("T")[0],
+                detalles: registro.detalles || "",
+                ultimaModificacion: new Date().toISOString()
+            };
+            const user = auth.currentUser;
+            if (user) {
+                payload.autor = user.email || user.displayName || "Usuario";
+            }
+            await setDoc(docRef, payload, { merge: true });
+            console.log(`☁️ [Firebase] Actualización '${docId}' guardada en Firestore.`);
+            return { success: true, id: docId };
+        } catch (err) {
+            console.error("❌ [Firebase] Error al guardar actualización:", err);
+            throw err;
+        }
+    },
+    cargarActualizacionesFirestore: async () => {
+        try {
+            const querySnapshot = await getDocs(collection(db, "actualizaciones"));
+            const lista = [];
+            querySnapshot.forEach((d) => {
+                lista.push({ id: d.id, ...d.data() });
+            });
+            // Ordenar por fecha o última modificación descendente
+            lista.sort((a, b) => {
+                const fa = a.fecha || a.ultimaModificacion || "";
+                const fb = b.fecha || b.ultimaModificacion || "";
+                return fb.localeCompare(fa);
+            });
+            return lista;
+        } catch (err) {
+            console.warn("⚠️ Error cargando actualizaciones de Firestore:", err);
+            return [];
+        }
+    },
+    eliminarActualizacionFirestore: async (docId) => {
+        try {
+            if (!docId) return false;
+            const docRef = doc(db, "actualizaciones", docId);
+            await deleteDoc(docRef);
+            console.log(`🗑️ [Firebase] Actualización '${docId}' eliminada.`);
+            return true;
+        } catch (err) {
+            console.error("❌ [Firebase] Error al eliminar actualización:", err);
+            throw err;
         }
     }
 };

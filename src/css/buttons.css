@@ -173,12 +173,12 @@
     font-size: 0.95rem;
 }
 
-/* Reproductor circular en portada */
+/* Reproductor circular en portada (Santo) */
 .btn-tts-portada {
-    background: transparent;
-    border: none;
+    background: var(--player-santo-bg, transparent);
+    border: 1.5px solid var(--player-santo-border, transparent);
     cursor: pointer;
-    color: #0288d1;
+    color: var(--player-santo-icon, #0288d1);
     padding: 0;
     border-radius: 50%;
     display: inline-flex;
@@ -197,7 +197,7 @@
 }
 
 .btn-tts-portada:hover {
-    background-color: #e1f5fe;
+    background-color: var(--player-santo-hover-bg, #e1f5fe);
     transform: scale(1.1);
 }
 
@@ -212,7 +212,9 @@
 }
 
 .btn-tts-portada.speaking {
-    color: #d32f2f;
+    color: var(--player-santo-play-icon, #d32f2f);
+    background-color: var(--player-santo-play-bg, transparent);
+    border-color: var(--player-santo-play-border, transparent);
 }
 
 .btn-tts-portada.speaking .material-symbols-outlined {
@@ -236,18 +238,18 @@
 
 .tts-portada-circular-bg {
     fill: none;
-    stroke: #e1f5fe;
+    stroke: var(--player-santo-ring-bg, #e1f5fe);
     stroke-width: 2.8px;
     transition: stroke 0.2s, opacity 0.2s;
 }
 
 .btn-tts-portada:hover .tts-portada-circular-bg {
-    stroke: #b3e5fc;
+    stroke: var(--player-santo-ring-bg-hover, #b3e5fc);
 }
 
 .tts-portada-circular-bar {
     fill: none;
-    stroke: #0288d1;
+    stroke: var(--player-santo-ring-bar, #0288d1);
     stroke-width: 2.8px;
     stroke-linecap: round;
     stroke-dasharray: 84.82;
@@ -258,11 +260,11 @@
 }
 
 .btn-tts-portada.cargando-tts .tts-portada-circular-bar {
-    stroke: #0288d1;
+    stroke: var(--player-santo-ring-bar, #0288d1);
 }
 
 .btn-tts-portada.speaking .tts-portada-circular-bar {
-    stroke: #0288d1;
+    stroke: var(--player-santo-play-ring-bar, var(--player-santo-ring-bar, #0288d1));
     stroke-dashoffset: 0;
 }
 
@@ -282,30 +284,35 @@
 .btn-reproductor-evangelio {
     margin-left: 0;
     margin-right: 6px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    background: var(--player-ev-bg, rgba(255, 255, 255, 0.2));
+    color: var(--player-ev-icon, #ffffff);
+    border: 1.5px solid var(--player-ev-border, rgba(255, 255, 255, 0.6));
     flex-shrink: 0;
 }
 
 .btn-reproductor-evangelio:hover {
-    background-color: rgba(255, 255, 255, 0.35);
-    color: #ffffff;
+    background-color: var(--player-ev-hover-bg, rgba(255, 255, 255, 0.35));
+    color: var(--player-ev-icon, #ffffff);
 }
 
 .btn-reproductor-evangelio .tts-portada-circular-bg {
-    stroke: rgba(255, 255, 255, 0.3);
+    stroke: var(--player-ev-ring-bg, rgba(255, 255, 255, 0.3));
 }
 
 .btn-reproductor-evangelio .tts-portada-circular-bar {
-    stroke: #ffffff;
+    stroke: var(--player-ev-ring-bar, #ffffff);
 }
 
 .btn-reproductor-evangelio.speaking,
 .btn-reproductor-evangelio.reproduciendo {
-    color: #ffffff;
-    background: rgba(211, 47, 47, 0.85);
-    border-color: #ff5252;
+    color: var(--player-ev-play-icon, #ffffff) !important;
+    background: var(--player-ev-play-bg, rgb(47 92 211 / 85%)) !important;
+    border-color: var(--player-ev-play-border, #5298ff) !important;
+}
+
+.btn-reproductor-evangelio.speaking .tts-portada-circular-bar,
+.btn-reproductor-evangelio.reproduciendo .tts-portada-circular-bar {
+    stroke: var(--player-ev-play-ring-bar, var(--player-ev-ring-bar, #ffffff)) !important;
 }
 
 .btn-pill-salmodia-wrapper {

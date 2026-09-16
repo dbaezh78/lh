@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archivos del Sistema — Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/system.css">
+</head>
+<body>
+
+    <div class="contenedor-system">
+        <!-- Cabecera -->
+        <header class="header-system">
+            <div class="titulo-box">
+                <h1>
+                    <span class="material-symbols-outlined" style="font-size: 2.2rem; color: #00c853;">folder_special</span>
+                    Archivos del Sistema
+                </h1>
+                <p>Monitoreo en tiempo real, verificación de integridad y estado de sincronización de archivos</p>
+            </div>
+            <div class="header-controles">
+                <button id="btn-comprobar-archivos" class="btn-nav-system btn-primario" title="Comprobar estado de todos los archivos">
+                    <span class="material-symbols-outlined">sync</span>
+                    Comprobar Archivos
+                </button>
+                <a href="aCtrl.html" class="btn-nav-system" title="Ir a Actualización y Control de Acceso">
+                    <span class="material-symbols-outlined">update</span>
+                    Actualización
+                </a>
+                <a href="../../index.html" class="btn-nav-system" title="Volver al Inicio">
+                    <span class="material-symbols-outlined">home</span>
+                    Inicio
+                </a>
+            </div>
+        </header>
+
+        <!-- Tarjetas de Resumen -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: rgba(0, 200, 83, 0.12); color: #00c853;">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Total Archivos</span>
+                    <strong class="stat-value" id="stat-total">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: rgba(46, 125, 50, 0.12); color: #2e7d32;">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">En el Sistema</span>
+                    <strong class="stat-value" id="stat-ok" style="color: #00c853;">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: rgba(229, 57, 53, 0.12); color: #e53935;">
+                    <span class="material-symbols-outlined">cancel</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">No Encontrados</span>
+                    <strong class="stat-value" id="stat-faltantes" style="color: #e53935;">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: rgba(2, 136, 209, 0.12); color: #0288d1;">
+                    <span class="material-symbols-outlined">verified</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Versión Actual</span>
+                    <strong class="stat-value" id="stat-version">v1.0.01</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de Búsqueda y Filtros -->
+        <div class="toolbar-filtros">
+            <div class="search-box">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="input-buscar-archivo" placeholder="Buscar archivo por nombre o ruta...">
+            </div>
+
+            <div class="filtro-tipo-box">
+                <select id="select-filtro-tipo" class="select-filtro">
+                    <option value="todos">Todos los tipos</option>
+                    <option value="html">HTML (.html)</option>
+                    <option value="js">JavaScript (.js)</option>
+                    <option value="css">Estilos (.css)</option>
+                    <option value="img">Imágenes (.png, .jpg, .ico)</option>
+                    <option value="font">Fuentes (.woff2, .ttf)</option>
+                </select>
+
+                <select id="select-filtro-estado" class="select-filtro">
+                    <option value="todos">Todos los estados</option>
+                    <option value="actualizado">Actualizados (Círculo Verde)</option>
+                    <option value="error">No en Sistema (Círculo Rojo)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabla de Archivos del Sistema -->
+        <div class="tabla-contenedor-card">
+            <table class="tabla-archivos-sistema" id="tabla-archivos">
+                <thead>
+                    <tr>
+                        <th style="width: 50px; text-align: center;">Estado</th>
+                        <th>Nombre</th>
+                        <th>Ruta</th>
+                        <th style="width: 95px; text-align: center;">Versión</th>
+                        <th style="width: 140px;">Fecha</th>
+                        <th style="width: 130px; text-align: center;">¿Actualizado?</th>
+                        <th style="width: 80px; text-align: center;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-archivos-sistema">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <span class="material-symbols-outlined spin-icon" style="font-size: 32px; color: #00c853;">sync</span>
+                            <p style="margin: 8px 0 0 0;">Cargando inventario de archivos del sistema...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/firebase-config.js" type="module"></script>
+    <script src="../js/accesscontrol.js" type="module"></script>
+    <script src="../js/system.js" type="module"></script>
+    <script src="../js/navigator.js" type="module"></script>
+</body>
+</html>
