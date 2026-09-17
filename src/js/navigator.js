@@ -63,7 +63,7 @@
                     box-shadow: 0 16px 40px rgba(0,0,0,0.6); color: #f8fafc;
                 ">
                     <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
-                        <div style="
+                        <div id="lh-update-icon-wrapper" style="
                             width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 230, 118, 0.12);
                             border: 1px solid rgba(0, 230, 118, 0.35); display: flex; align-items: center;
                             justify-content: center; color: #00e676; flex-shrink: 0;
@@ -72,7 +72,7 @@
                         </div>
                         <div>
                             <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff;">${titulo}</h3>
-                            <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: #94a3b8;">${sub}</p>
+                            <p id="lh-update-subtitle" style="margin: 3px 0 0 0; font-size: 0.82rem; color: #94a3b8;">${sub}</p>
                         </div>
                     </div>
 
@@ -85,12 +85,12 @@
                     </div>
 
                     <!-- Lista de Archivos -->
-                    <div style="font-size: 0.78rem; font-weight: 600; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <div id="lh-update-list-label" style="font-size: 0.78rem; font-weight: 600; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
                         Archivos en actualización:
                     </div>
                     <div id="lh-update-file-list" style="
                         background: #141821; border: 1px solid rgba(255,255,255,0.07);
-                        border-radius: 10px; max-height: 165px; overflow-y: auto; padding: 8px 12px;
+                        border-radius: 10px; max-height: 175px; overflow-y: auto; padding: 8px 12px;
                         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
                         font-size: 0.8rem; line-height: 1.6; color: #cbd5e1;
                     ">
@@ -99,11 +99,32 @@
                     <div id="lh-update-status-msg" style="margin-top: 14px; text-align: center; font-size: 0.82rem; color: #38bdf8; font-weight: 500;">
                         Preparando componentes...
                     </div>
+
+                    <!-- Botón OK al finalizar la actualización -->
+                    <div id="lh-update-actions" style="margin-top: 16px; display: none; justify-content: center; align-items: center;">
+                        <button id="btn-lh-update-ok" style="
+                            background: #00e676; color: #0a1118; border: none;
+                            border-radius: 10px; padding: 10px 38px; font-size: 0.95rem;
+                            font-weight: 800; cursor: pointer; display: inline-flex;
+                            align-items: center; justify-content: center; gap: 8px;
+                            box-shadow: 0 4px 16px rgba(0, 230, 118, 0.45);
+                            transition: all 0.2s ease; letter-spacing: 0.5px;
+                        ">
+                            <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 700;">check</span>
+                            OK
+                        </button>
+                    </div>
                 </div>
             </div>
             <style>
                 @keyframes fadeInModal { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
                 @keyframes spinUpdateIcon { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                #lh-update-file-list::-webkit-scrollbar { width: 6px; }
+                #lh-update-file-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+                #lh-update-file-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+                #lh-update-file-list::-webkit-scrollbar-thumb:hover { background: #00e676; }
+                #btn-lh-update-ok:hover { background: #00c853; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 230, 118, 0.6); }
+                #btn-lh-update-ok:active { transform: translateY(0); }
             </style>
         `;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
@@ -112,32 +133,35 @@
         const barEl = document.getElementById('lh-update-progress-bar');
         const statusEl = document.getElementById('lh-update-status-msg');
 
-        // Lista de archivos del sistema
-        const archivos = [
-            'src/html/index.html',
-            'src/html/aCtrl.html',
-            'src/html/ver.html',
-            'src/html/system.html',
-            'src/html/form_etiempo.html',
-            'src/html/añoliturgico.html',
-            'src/html/nombresanto.html',
+        // Lista de módulos del sistema con los nombres exactos requeridos
+        const modulos = [
+            { nombre: 'Inicio', icono: 'home', files: ['index.html', 'src/css/main.css', 'src/js/main.js'] },
+            { nombre: 'Control de Acceso', icono: 'admin_panel_settings', files: ['src/html/aCtrl.html', 'src/css/aCtrl.css', 'src/js/aCtrl-ui.js', 'src/js/accesscontrol.js'] },
+            { nombre: 'Año Liturgico', icono: 'calendar_month', files: ['src/html/añoliturgico.html', 'src/css/añoliturgico.css', 'src/js/añoliturgico.js'] },
+            { nombre: 'Archivos de Sistema', icono: 'folder_special', files: ['src/html/system.html', 'src/css/system.css', 'src/js/system.js'] },
+            { nombre: 'Completas', icono: 'bedtime', files: ['src/html/completas.html', 'src/css/completas.css', 'src/js/completas.js'] },
+            { nombre: 'Base de datos', icono: 'dataset', files: ['src/html/datos.html', 'src/css/datos.css', 'src/js/datos.js'] },
+            { nombre: 'Cambios Litúrgicos', icono: 'edit_calendar', files: ['src/html/form_etiempo.html', 'src/css/form_etiempo.css', 'src/js/form_etiempo.js'] },
+            { nombre: 'Laudes', icono: 'wb_twilight', files: ['src/html/laudes.html', 'src/css/laudes.css', 'src/js/laudes.js'] },
+            { nombre: 'Nombre de los Santos', icono: 'person_add', files: ['src/html/nombresanto.html', 'src/css/nombresanto.css', 'src/js/nombresanto.js'] },
+            { nombre: 'Nona', icono: 'schedule', files: ['src/html/nona.html', 'src/css/nona.css', 'src/js/nona.js'] },
+            { nombre: 'Oficio de Lectura', icono: 'menu_book', files: ['src/html/oficio.html', 'src/css/oficio.css', 'src/js/oficio.js'] },
+            { nombre: 'Santos de la Iglesia', icono: 'groups', files: ['src/html/santo.html', 'src/css/santo.css', 'src/js/santo.js'] },
+            { nombre: 'Sexta', icono: 'wb_sunny', files: ['src/html/sexta.html', 'src/css/sexta.css', 'src/js/sexta.js'] },
+            { nombre: 'Tercia', icono: 'alarm', files: ['src/html/tercia.html', 'src/css/tercia.css', 'src/js/tercia.js'] },
+            { nombre: 'Versión de la aplicación', icono: 'history_edu', files: ['src/html/ver.html', 'src/css/ver.css', 'src/js/ver.js'] },
+            { nombre: 'Visperas', icono: 'nights_stay', files: ['src/html/visperas.html', 'src/css/visperas.css', 'src/js/visperas.js'] }
+        ];
+
+        // Archivos base del sistema a refrescar en segundo plano
+        const coreFiles = [
             'src/js/navigator.js',
-            'src/js/aCtrl-ui.js',
-            'src/js/accesscontrol.js',
+            'src/css/navigator.css',
+            'src/css/buttons.css',
             'src/js/firebase-config.js',
             'src/js/setting.js',
-            'src/js/form_etiempo.js',
-            'src/js/añoliturgico.js',
-            'src/js/ver.js',
-            'src/js/system.js',
-            'src/css/navigator.css',
-            'src/css/aCtrl.css',
-            'src/css/ver.css',
-            'src/css/system.css',
             'src/css/setting.css',
-            'src/css/buttons.css',
-            'src/img/icono.png',
-            'src/img/liturgia_reloj.jpg'
+            'src/data/system_files.json'
         ];
 
         // 1. Limpieza de Caché respetando SIEMPRE la sesión de Firebase
@@ -177,44 +201,95 @@
             }
         }
 
-        // 2. Simular/Ejecutar actualización visual de cada archivo
+        // 2. Ejecutar actualización de cada módulo
         const delay = (ms) => new Promise(res => setTimeout(res, ms));
-        const total = archivos.length;
+        const total = modulos.length;
+
+        // Prefetch background de archivos base
+        coreFiles.forEach(cf => {
+            try { fetch(`/${cf}?_v=${Date.now()}`, { cache: 'reload' }).catch(() => {}); } catch(e) {}
+        });
 
         for (let i = 0; i < total; i++) {
-            const file = archivos[i];
+            const mod = modulos[i];
             const p = Math.round(((i + 1) / total) * 100);
             
             if (barEl) barEl.style.width = `${p}%`;
-            if (statusEl) statusEl.textContent = `Actualizando (${i + 1}/${total}): ${file}`;
+            if (statusEl) statusEl.textContent = `Actualizando (${i + 1}/${total}): ${mod.nombre}`;
             
             if (listEl) {
                 const item = document.createElement('div');
                 item.style.display = 'flex';
                 item.style.justifyContent = 'space-between';
                 item.style.alignItems = 'center';
-                item.innerHTML = `<span>✓ ${file}</span><span style="color: #00e676; font-size: 0.72rem;">ACTUALIZADO</span>`;
+                item.style.padding = '4px 0';
+                item.innerHTML = `
+                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span style="color: #00e676; font-weight: bold;">✓</span>
+                        <span class="material-symbols-outlined" style="font-size: 16px; color: #94a3b8;">${mod.icono}</span>
+                        <span style="color: #f1f5f9; font-weight: 600;">${mod.nombre}</span>
+                    </span>
+                    <span style="color: #00e676; font-size: 0.72rem; font-weight: 700;">ACTUALIZADO</span>
+                `;
                 listEl.appendChild(item);
                 listEl.scrollTop = listEl.scrollHeight;
             }
 
-            // Opcional: prefetch con timestamp
-            try {
-                fetch(`/${file}?_v=${Date.now()}`, { cache: 'reload' }).catch(() => {});
-            } catch (e) {}
+            // Prefetch de los archivos del módulo
+            if (Array.isArray(mod.files)) {
+                mod.files.forEach(file => {
+                    try { fetch(`/${file}?_v=${Date.now()}`, { cache: 'reload' }).catch(() => {}); } catch (e) {}
+                });
+            }
 
-            await delay(45);
+            await delay(55);
         }
 
-        if (statusEl) statusEl.textContent = '¡Completado! Reiniciando aplicación...';
+        if (barEl) {
+            barEl.style.width = '100%';
+            barEl.style.background = '#00e676';
+        }
+
+        const iconContainer = document.getElementById('lh-update-icon-wrapper');
+        if (iconContainer) {
+            iconContainer.innerHTML = '<span class="material-symbols-outlined" style="font-size: 28px; color: #00e676;">check_circle</span>';
+        }
+
+        const subEl = document.getElementById('lh-update-subtitle');
+        if (subEl) {
+            subEl.textContent = 'Todos los archivos han sido sincronizados con éxito.';
+        }
+
+        const labelEl = document.getElementById('lh-update-list-label');
+        if (labelEl) {
+            labelEl.textContent = `Archivos actualizados (${total}):`;
+        }
+
+        if (statusEl) {
+            statusEl.innerHTML = '<span style="color: #00e676; font-weight: 600;">✓ ¡Actualización completada! Puedes revisar los archivos actualizados arriba.</span>';
+        }
+
         try {
             localStorage.setItem('lh_last_updated_version', appVersion);
             localStorage.setItem('lh_app_up_to_date', 'true');
         } catch (e) {}
-        await delay(500);
 
-        // Recargar con bypass de caché
-        window.location.reload();
+        // Mostrar botón OK para que el usuario revise los archivos y confirme el reinicio
+        const actionsEl = document.getElementById('lh-update-actions');
+        if (actionsEl) {
+            actionsEl.style.display = 'flex';
+            const btnOk = document.getElementById('btn-lh-update-ok');
+            if (btnOk) {
+                btnOk.focus();
+                btnOk.onclick = () => {
+                    btnOk.disabled = true;
+                    btnOk.innerHTML = '<span class="material-symbols-outlined spin-icon" style="font-size: 18px;">sync</span> Reiniciando...';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 300);
+                };
+            }
+        }
     };
 
     // 3. Crear el HTML de la navegación y el Popup de Cuenta Google

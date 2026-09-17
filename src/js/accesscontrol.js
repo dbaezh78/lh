@@ -12,6 +12,7 @@ export const PERMISSIONS = {
 
   // PÁGINAS DEL SISTEMA (VER)
   PAGE_INICIO: "page_inicio",
+  INICIO_VER_PERMISOS_AUTORIZADOS: "actrl_permisos_ver_autorizados",
 
   // 1. CAMBIO LITÚRGICO (form_etiempo.html)
   PAGE_CAMBIO_LITURGICO: "page_cambio_liturgico",
@@ -59,10 +60,44 @@ export const PERMISSIONS = {
 
   // 6. CONTROL DE ACCESO (aCtrl.html)
   PAGE_ACTRL: "page_actrl",
-  ACTRL_MIEMBROS: "actrl_miembros",
-  ACTRL_GRUPOS: "actrl_grupos",
-  ACTRL_PERMISOS: "actrl_permisos",
-  ACTRL_INSPECTOR: "actrl_inspector",
+  // Cuenta
+  ACTRL_CUENTA_LOGIN: "actrl_cuenta_login",
+  ACTRL_CUENTA_LOGOUT: "actrl_cuenta_logout",
+  ACTRL_CUENTA_GUARDAR_AJUSTES: "actrl_cuenta_guardar_ajustes",
+  // Acceso - Miembros
+  ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE: "actrl_miembros_autorizo_mostrar_nombre",
+  ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO: "actrl_miembros_autorizo_mostrar_correo",
+  ACTRL_MIEMBROS_BUSCADOR: "actrl_miembros_buscador",
+  ACTRL_MIEMBROS_VER_TODO: "actrl_miembros_ver_todo",
+  ACTRL_MIEMBROS_VER_CORREO: "actrl_miembros_ver_correo",
+  ACTRL_MIEMBROS_VER_BOTONES: "actrl_miembros_ver_botones",
+  ACTRL_MIEMBROS_VER_GRUPO: "actrl_miembros_ver_grupo",
+  ACTRL_MIEMBROS_VER_GRUPO_ACTUAL: "actrl_miembros_ver_grupo_actual",
+  ACTRL_MIEMBROS_BANEAR: "actrl_miembros_banear",
+  ACTRL_MIEMBROS_ELIMINAR_REGISTRO: "actrl_miembros_eliminar_registro",
+  ACTRL_MIEMBROS_CAMBIAR_GRUPO: "actrl_miembros_cambiar_grupo",
+  // Acceso - Grupos
+  ACTRL_GRUPOS_VER_GRUPO: "actrl_grupos_ver_grupo",
+  ACTRL_GRUPOS_VER_MIEMBROS: "actrl_grupos_ver_miembros",
+  ACTRL_GRUPOS_CREAR: "actrl_grupos_crear",
+  ACTRL_GRUPOS_EDITAR: "actrl_grupos_editar",
+  ACTRL_GRUPOS_ELIMINAR: "actrl_grupos_eliminar",
+  // Acceso - Miembros Internos
+  ACTRL_MIEMBROS_INTERNOS_VER: "actrl_miembros_internos_ver",
+  ACTRL_MIEMBROS_INTERNOS_AGREGAR: "actrl_miembros_internos_agregar",
+  ACTRL_PERMISOS_VER: "actrl_permisos_ver",
+  ACTRL_PERMISOS_MARCAR: "actrl_permisos_marcar",
+  ACTRL_PERMISOS_VER_AUTORIZADOS: "actrl_permisos_ver_autorizados",
+  ACTRL_INSPECTOR_VER: "actrl_inspector_ver",
+  ACTRL_INSPECTOR_ESCRIBIR: "actrl_inspector_escribir",
+  ACTRL_INSPECTOR_VERIFICAR: "actrl_inspector_verificar",
+  // Actualización
+  ACTRL_ACTUALIZACION_REFRESCAR: "actrl_actualizacion_refrescar",
+  ACTRL_ACTUALIZACION_LIMPIAR_CACHE: "actrl_actualizacion_limpiar_cache",
+  ACTRL_ACTUALIZACION_LIMPIAR_CACHE_TOTAL: "actrl_actualizacion_limpiar_cache_total",
+  ACTRL_ACTUALIZACION_VER_HISTORIAL: "actrl_actualizacion_ver_historial",
+  ACTRL_ACTUALIZACION_ARCHIVOS_SISTEMA: "actrl_actualizacion_archivos_sistema",
+  ACTRL_ACTUALIZACION_REGISTRO_IPS: "actrl_actualizacion_registro_ips",
 
   // 7. AJUSTES DEL SISTEMA
   VIEW_SETTINGS_GENERAL: "view_settings_general",
@@ -86,7 +121,17 @@ export const PERMISSIONS = {
 
   // 11. ARCHIVOS DEL SISTEMA (system.html)
   PAGE_SYSTEM: "page_system",
-  SYSTEM_GESTIONAR: "system_gestionar"
+  SYSTEM_GESTIONAR: "system_gestionar",
+
+  // 12. DIRECCIÓN IP PUBLICAS (ipaddr.html)
+  IPADDR_VER_USUARIO: "ipaddr_ver_usuario",
+  IPADDR_VER_IP: "ipaddr_ver_ip",
+  IPADDR_ULTIMO_ACCESO: "ipaddr_ultimo_acceso",
+  IPADDR_ESTADO: "ipaddr_estado",
+  IPADDR_MOTIVO: "ipaddr_motivo",
+  IPADDR_BANEAR: "ipaddr_banear",
+  IPADDR_EDITAR: "ipaddr_editar",
+  IPADDR_ELIMINAR: "ipaddr_eliminar"
 };
 
 // Árbol jerárquico anidado para la interfaz visual
@@ -179,13 +224,88 @@ export const PERMISSION_TREE = [
   // 6. Control de Acceso
   {
     key: "group_actrl",
-    label: "Página: Control de Acceso (aCtrl)",
+    label: "Página: Control de Acceso",
     children: [
       { key: "page_actrl", label: "Ver página" },
-      { key: "actrl_miembros", label: "Gestión de Miembros" },
-      { key: "actrl_grupos", label: "Crear y Gestionar Grupos" },
-      { key: "actrl_permisos", label: "Asignación de Permisos" },
-      { key: "actrl_inspector", label: "Inspector de Permisos" }
+      {
+        key: "group_actrl_cuenta",
+        label: "Cuenta",
+        children: [
+          { key: "actrl_cuenta_login", label: "Iniciar Sesión con Google" },
+          { key: "actrl_cuenta_logout", label: "Cerrar Sesión" },
+          { key: "actrl_cuenta_guardar_ajustes", label: "Guardar Ajustes en Firebase" }
+        ]
+      },
+      {
+        key: "group_actrl_acceso",
+        label: "Acceso",
+        children: [
+          {
+            key: "group_actrl_miembros",
+            label: "Miembros",
+            children: [
+              { key: "actrl_miembros_buscador", label: "ver Buscador" },
+              { key: "actrl_miembros_ver_todo", label: "Ver todo" },
+              { key: "actrl_miembros_ver_correo", label: "ver correo" },
+              { key: "actrl_miembros_ver_botones", label: "ver botones" },
+              { key: "actrl_miembros_ver_grupo", label: "ver grupo" },
+              { key: "actrl_miembros_ver_grupo_actual", label: "ver Grupo actual" },
+              { key: "actrl_miembros_banear", label: "Banear" },
+              { key: "actrl_miembros_eliminar_registro", label: "Eliminar Registro" },
+              { key: "actrl_miembros_cambiar_grupo", label: "cambiar grupo" }
+            ]
+          },
+          {
+            key: "group_actrl_grupos",
+            label: "Grupos",
+            children: [
+              { key: "actrl_grupos_ver_grupo", label: "ver grupo" },
+              { key: "actrl_grupos_ver_miembros", label: "ver Miembros" },
+              { key: "actrl_grupos_crear", label: "Crear Grupo" },
+              { key: "actrl_grupos_editar", label: "Editar" },
+              { key: "actrl_grupos_eliminar", label: "Eliminar" }
+            ]
+          },
+          {
+            key: "group_actrl_miembros_internos",
+            label: "Miembros Internos",
+            children: [
+              { key: "actrl_miembros_internos_ver", label: "ver" },
+              { key: "actrl_miembros_internos_agregar", label: "Agregar Hermano" }
+            ]
+          },
+          {
+            key: "group_actrl_permisos",
+            label: "Permisos",
+            children: [
+              { key: "actrl_permisos_ver", label: "ver" },
+              { key: "actrl_permisos_marcar", label: "marcar" },
+              { key: "actrl_permisos_ver_autorizados", label: "Ver permisos autorizados" }
+            ]
+          },
+          {
+            key: "group_actrl_inspector",
+            label: "Inspector",
+            children: [
+              { key: "actrl_inspector_ver", label: "ver" },
+              { key: "actrl_inspector_escribir", label: "escribir" },
+              { key: "actrl_inspector_verificar", label: "Verificar" }
+            ]
+          }
+        ]
+      },
+      {
+        key: "group_actrl_actualizacion",
+        label: "Actualización",
+        children: [
+          { key: "actrl_actualizacion_refrescar", label: "Refrescar" },
+          { key: "actrl_actualizacion_limpiar_cache", label: "Limpiar Caché" },
+          { key: "actrl_actualizacion_limpiar_cache_total", label: "Limpiar Caché Total" },
+          { key: "actrl_actualizacion_ver_historial", label: "Ver Historial de cambios" },
+          { key: "actrl_actualizacion_archivos_sistema", label: "Archivos de Sistema" },
+          { key: "actrl_actualizacion_registro_ips", label: "Registro de Direcciones IP" }
+        ]
+      }
     ]
   },
 
@@ -237,6 +357,22 @@ export const PERMISSION_TREE = [
       { key: "page_system", label: "Ver página" },
       { key: "system_gestionar", label: "Gestionar y Refrescar Archivos" }
     ]
+  },
+
+  // 10. Dirección IP Públicas (ipaddr.html)
+  {
+    key: "group_ipaddr",
+    label: "Página: Dirección IP Publicas",
+    children: [
+      { key: "ipaddr_ver_usuario", label: "ver usuario" },
+      { key: "ipaddr_ver_ip", label: "ver dirección IP" },
+      { key: "ipaddr_ultimo_acceso", label: "ultimo acceso" },
+      { key: "ipaddr_estado", label: "estado" },
+      { key: "ipaddr_motivo", label: "Motivo / Observaciones" },
+      { key: "ipaddr_banear", label: "banear" },
+      { key: "ipaddr_editar", label: "editar" },
+      { key: "ipaddr_eliminar", label: "eliminar" }
+    ]
   }
 ];
 
@@ -259,7 +395,10 @@ export const accessControlState = {
   registeredUsers: new Set(),
   registeredUserNames: {},
   registeredUserPhotos: {},
-  bannedUsers: new Set()
+  bannedUsers: new Set(),
+  bannedIps: new Set(),
+  suspiciousIps: new Set(),
+  ipRecords: {}
 };
 
 const STORAGE_KEY = "lh_access_control";
@@ -299,6 +438,15 @@ export function initAccessControl() {
       if (Array.isArray(parsed.bannedUsers)) {
         accessControlState.bannedUsers = new Set(parsed.bannedUsers);
       }
+      if (Array.isArray(parsed.bannedIps)) {
+        accessControlState.bannedIps = new Set(parsed.bannedIps);
+      }
+      if (Array.isArray(parsed.suspiciousIps)) {
+        accessControlState.suspiciousIps = new Set(parsed.suspiciousIps);
+      }
+      if (parsed.ipRecords && typeof parsed.ipRecords === "object") {
+        accessControlState.ipRecords = { ...parsed.ipRecords };
+      }
       
       asegurarGruposBase();
       return;
@@ -312,14 +460,15 @@ export function initAccessControl() {
 
 function crearGruposPorDefecto() {
   // 1. Administradores (Acceso Total)
-  createGroup("administradores", "Administradores del Sistema", [PERMISSIONS.ALL], "Grupo con control total del sistema");
+  createGroup("administradores", "Administradores del Sistema", [PERMISSIONS.ALL, ...Object.values(PERMISSIONS)], "Grupo con control total del sistema");
   
   // 2. Hermanos (grupo por defecto al autenticarse)
   // Incluye permisos de lectura y uso interactivo de todas las páginas y herramientas
-  const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && !p.startsWith("actrl_"));
-  createGroup("hermanos", "Grupo General de Hermanos", permisosHermano, "Hermanos registrados y autenticados");
+  const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && !p.startsWith("actrl_") && !p.startsWith("ipaddr_"));
+  permisosHermano.push(PERMISSIONS.ACTRL_CUENTA_LOGOUT);
+  createGroup("hermanos", "Hermano", permisosHermano, "Hermanos registrados y autenticados");
 
-  // 3. Invitados (sin inicio de sesión: solo lectura básica)
+  // 3. Invitados (sin inicio de sesión: solo lectura básica + botón de login)
   createGroup("invitados", "Usuarios Invitados", [
     PERMISSIONS.PAGE_CAMBIO_LITURGICO,
     PERMISSIONS.PAGE_ANO_LITURGICO,
@@ -331,22 +480,32 @@ function crearGruposPorDefecto() {
     PERMISSIONS.VIEW_SETTINGS_GENERAL,
     PERMISSIONS.VIEW_SETTINGS_THEME,
     PERMISSIONS.VIEW_SETTINGS_TTS,
-    PERMISSIONS.VIEW_SETTINGS_CALENDARIO
+    PERMISSIONS.VIEW_SETTINGS_CALENDARIO,
+    PERMISSIONS.ACTRL_CUENTA_LOGIN
   ], "Usuarios visitantes sin inicio de sesión");
 
   // Asignar al admin principal por defecto
   setUserPrimaryGroup(ADMIN_EMAIL, "administradores");
-  accessControlState.registeredUserNames[ADMIN_EMAIL] = "Carlos David Báez";
+  accessControlState.registeredUserNames[ADMIN_EMAIL] = "Carlos David Báez (Administrador General)";
   saveAccessControl();
 }
 
 function asegurarGruposBase() {
   if (!accessControlState.groups["administradores"]) {
-    createGroup("administradores", "Administradores del Sistema", [PERMISSIONS.ALL], "Grupo con control total del sistema");
+    createGroup("administradores", "Administradores del Sistema", [PERMISSIONS.ALL, ...Object.values(PERMISSIONS)], "Grupo con control total del sistema");
+  } else {
+    // Garantizar y restablecer siempre Acceso Total (*) y todos los permisos para el grupo Administradores
+    accessControlState.groups["administradores"].permissions.add(PERMISSIONS.ALL);
+    Object.values(PERMISSIONS).forEach(p => accessControlState.groups["administradores"].permissions.add(p));
   }
   if (!accessControlState.groups["hermanos"]) {
-    const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && !p.startsWith("actrl_"));
-    createGroup("hermanos", "Grupo General de Hermanos", permisosHermano, "Hermanos registrados y autenticados");
+    const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && !p.startsWith("actrl_") && !p.startsWith("ipaddr_"));
+    permisosHermano.push(PERMISSIONS.ACTRL_CUENTA_LOGOUT);
+    createGroup("hermanos", "Hermano", permisosHermano, "Hermanos registrados y autenticados");
+  } else {
+    // Actualizar nombre a Hermano si estaba guardado como Grupo General de Hermanos
+    accessControlState.groups["hermanos"].name = "Hermano";
+    accessControlState.groups["hermanos"].permissions.delete("inicio_ver_permisos_autorizados");
   }
   if (!accessControlState.groups["invitados"]) {
     createGroup("invitados", "Usuarios Invitados", [
@@ -354,14 +513,18 @@ function asegurarGruposBase() {
       PERMISSIONS.PAGE_ANO_LITURGICO,
       PERMISSIONS.PAGE_DATOS_ANIOS,
       PERMISSIONS.PAGE_SANTOS_IGLESIA,
-      PERMISSIONS.PAGE_REGISTRO_SANTO
+      PERMISSIONS.PAGE_REGISTRO_SANTO,
+      PERMISSIONS.ACTRL_CUENTA_LOGIN
     ], "Usuarios visitantes sin inicio de sesión");
   }
   
-  // Asegurar siempre a dbaezh78@gmail.com como administrador
+  // Asegurar siempre a dbaezh78@gmail.com como Administrador General
+  accessControlState.registeredUserNames[ADMIN_EMAIL] = "Carlos David Báez (Administrador General)";
   if (!accessControlState.groups["administradores"].userIds.has(ADMIN_EMAIL)) {
     setUserPrimaryGroup(ADMIN_EMAIL, "administradores");
   }
+
+  saveAccessControl();
 }
 
 /**
@@ -394,9 +557,34 @@ export function createGroup(groupId, name, permissions = [], description = "") {
 }
 
 /**
- * Elimina un grupo
+ * Edita un grupo existente (nombre visible y descripción)
  */
-export function deleteGroup(groupId) {
+export async function updateGroup(groupId, newName, newDescription = "") {
+  const gid = (groupId || "").toLowerCase().trim();
+  if (!gid || !accessControlState.groups[gid]) {
+    alert("El grupo especificado no existe.");
+    return false;
+  }
+
+  const trimmedName = (newName || "").trim();
+  if (!trimmedName) {
+    alert("El nombre del grupo no puede estar vacío.");
+    return false;
+  }
+
+  accessControlState.groups[gid].name = trimmedName;
+  accessControlState.groups[gid].description = (newDescription || "").trim();
+
+  saveAccessControl();
+  await saveGroupConfigToCloud();
+  window.dispatchEvent(new CustomEvent('lh-access-control-updated'));
+  return true;
+}
+
+/**
+ * Elimina un grupo y purga su existencia tanto local como en Firestore
+ */
+export async function deleteGroup(groupId) {
   const gid = (groupId || "").toLowerCase().trim();
   if (gid === "administradores" || gid === "hermanos" || gid === "invitados") {
     alert("No se pueden eliminar los grupos base del sistema.");
@@ -404,6 +592,7 @@ export function deleteGroup(groupId) {
   }
 
   if (accessControlState.groups[gid]) {
+    // Reasignar miembros al grupo general de Hermanos
     accessControlState.groups[gid].userIds.forEach(uid => {
       setUserPrimaryGroup(uid, "hermanos");
     });
@@ -415,15 +604,37 @@ export function deleteGroup(groupId) {
     });
 
     saveAccessControl();
-    saveGroupConfigToCloud();
+
+    // Eliminar campo específico en Firestore de manera atómica
+    if (window.firebaseAPI && window.firebaseAPI.db) {
+      try {
+        const { doc, updateDoc, deleteField } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+        const docRef = doc(window.firebaseAPI.db, "access_control", "groups_config");
+        await updateDoc(docRef, {
+          [`groups.${gid}`]: deleteField(),
+          updatedAt: new Date().toISOString()
+        });
+        console.log(`🗑️ [Firebase] Grupo '${gid}' eliminado de Firestore.`);
+      } catch (err) {
+        console.warn("⚠️ Aviso al eliminar campo con updateDoc:", err);
+      }
+    }
+
+    await saveGroupConfigToCloud();
+    window.dispatchEvent(new CustomEvent('lh-access-control-updated'));
     return true;
   }
   return false;
 }
 
 /**
- * Asigna de forma EXCLUSIVA a un usuario su grupo primario
+ * Valida que una cadena sea un correo válido en formato cuenta@dominio.extension
  */
+export function isValidEmail(email) {
+  if (!email || typeof email !== "string") return false;
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim());
+}
+
 /**
  * Asigna de forma EXCLUSIVA a un usuario su grupo primario
  */
@@ -431,6 +642,13 @@ export function setUserPrimaryGroup(userEmail, groupId, skipCloud = false) {
   if (!userEmail || !groupId) return;
   const uid = userEmail.toLowerCase().trim();
   const gid = groupId.toLowerCase().trim();
+
+  // Validación estricta: cuenta@dominio.extension
+  if (!isValidEmail(uid)) {
+    console.warn(`[AccessControl] Correo inválido rechazado: "${uid}"`);
+    alert(`El correo "${uid}" no es válido. Debe tener el formato: cuenta@dominio.com (cuenta, arroba, dominio y extensión).`);
+    return;
+  }
 
   if (uid === ADMIN_EMAIL && gid !== "administradores") {
     alert("El administrador principal siempre debe pertenecer a Administradores.");
@@ -536,6 +754,83 @@ export async function deleteUserRegistration(userEmail) {
 }
 
 /**
+ * Verifica si una dirección IP está baneada
+ */
+export function isIpBanned(ip) {
+  if (!ip) return false;
+  return accessControlState.bannedIps ? accessControlState.bannedIps.has(ip) : false;
+}
+
+/**
+ * Verifica si una dirección IP está marcada como sospechosa
+ */
+export function isIpSuspicious(ip) {
+  if (!ip) return false;
+  return accessControlState.suspiciousIps ? accessControlState.suspiciousIps.has(ip) : false;
+}
+
+/**
+ * Banea una dirección IP en memoria y en Firestore
+ */
+export async function banIp(ip, reason = "") {
+  if (!ip) return;
+  if (!accessControlState.bannedIps) accessControlState.bannedIps = new Set();
+  accessControlState.bannedIps.add(ip);
+  if (!accessControlState.ipRecords) accessControlState.ipRecords = {};
+  if (!accessControlState.ipRecords[ip]) {
+    accessControlState.ipRecords[ip] = { ip, email: "desconocido", status: "Baneada", reason, updatedAt: new Date().toISOString() };
+  } else {
+    accessControlState.ipRecords[ip].status = "Baneada";
+    accessControlState.ipRecords[ip].reason = reason || accessControlState.ipRecords[ip].reason || "Baneo administrativo";
+    accessControlState.ipRecords[ip].updatedAt = new Date().toISOString();
+  }
+  saveAccessControl();
+
+  if (window.firebaseAPI && window.firebaseAPI.db) {
+    try {
+      const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+      const cleanIp = ip.replace(/[^a-zA-Z0-9_-]/g, "_");
+      await setDoc(doc(window.firebaseAPI.db, "user_ips", cleanIp), {
+        ip,
+        status: "Baneada",
+        banned: true,
+        reason,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch (e) {
+      console.warn("⚠️ Error guardando baneo de IP en Firestore:", e);
+    }
+  }
+}
+
+/**
+ * Desbanea una dirección IP
+ */
+export async function unbanIp(ip) {
+  if (!ip) return;
+  if (accessControlState.bannedIps) accessControlState.bannedIps.delete(ip);
+  if (accessControlState.ipRecords && accessControlState.ipRecords[ip]) {
+    accessControlState.ipRecords[ip].status = "Normal";
+    accessControlState.ipRecords[ip].updatedAt = new Date().toISOString();
+  }
+  saveAccessControl();
+
+  if (window.firebaseAPI && window.firebaseAPI.db) {
+    try {
+      const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+      const cleanIp = ip.replace(/[^a-zA-Z0-9_-]/g, "_");
+      await setDoc(doc(window.firebaseAPI.db, "user_ips", cleanIp), {
+        status: "Normal",
+        banned: false,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch (e) {
+      console.warn("⚠️ Error desbaneando IP en Firestore:", e);
+    }
+  }
+}
+
+/**
  * Registra o actualiza a un usuario que inicia sesión
  */
 export async function registerUser(user) {
@@ -609,11 +904,6 @@ export function getUserEffectivePermissions(userIdOrEmail) {
     return effective;
   }
 
-  if (uid === ADMIN_EMAIL) {
-    effective.add(PERMISSIONS.ALL);
-    return effective;
-  }
-
   const visitedGroups = new Set();
 
   function collect(gid) {
@@ -625,13 +915,151 @@ export function getUserEffectivePermissions(userIdOrEmail) {
     g.subgroupIds.forEach(sub => collect(sub));
   }
 
+  let inAnyGroup = false;
   Object.keys(accessControlState.groups).forEach(gid => {
-    if (accessControlState.groups[gid].userIds.has(uid)) {
+    if (accessControlState.groups[gid]?.userIds?.has(uid)) {
+      inAnyGroup = true;
       collect(gid);
     }
   });
 
+  if (accessControlState.userDirectGroups && accessControlState.userDirectGroups[uid]) {
+    accessControlState.userDirectGroups[uid].forEach(gid => {
+      inAnyGroup = true;
+      collect(gid);
+    });
+  }
+
+  // Si el usuario está autenticado pero aún no tiene grupo asignado explícitamente, hereda 'hermanos' por defecto
+  if (!inAnyGroup && uid && uid !== ADMIN_EMAIL.toLowerCase() && accessControlState.groups["hermanos"]) {
+    collect("hermanos");
+  }
+
+  // Permisos directos individuales asignados al usuario (ej: Autorizo mostrar mi correo)
+  if (accessControlState.userDirectPermissions && accessControlState.userDirectPermissions[uid]) {
+    accessControlState.userDirectPermissions[uid].forEach(p => effective.add(p));
+  }
+
+  // El administrador principal siempre tiene garantizado Acceso Total
+  if (uid === ADMIN_EMAIL) {
+    effective.add(PERMISSIONS.ALL);
+  }
+
   return effective;
+}
+
+/**
+ * Establece o revoca la autorización de un usuario para mostrar su correo a los demás hermanos
+ */
+export function setUserEmailConsent(userEmail, authorized) {
+  const uid = (userEmail || "").toLowerCase().trim();
+  if (!uid || !isValidEmail(uid)) return;
+  if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+  if (!accessControlState.userDirectPermissions[uid]) {
+    accessControlState.userDirectPermissions[uid] = new Set();
+  }
+  if (authorized) {
+    accessControlState.userDirectPermissions[uid].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+  } else {
+    accessControlState.userDirectPermissions[uid].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+  }
+  saveAccessControl();
+
+  const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
+  const currentEmail = (currentUser?.email || localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
+  const cachedIsAdmin = localStorage.getItem('lh_auth_is_admin') === 'true';
+  const isAdmin = (currentEmail === ADMIN_EMAIL.toLowerCase()) || (!currentEmail && cachedIsAdmin);
+
+  // Solo el administrador actualiza la configuración global de grupos en la nube
+  if (isAdmin) {
+    saveGroupConfigToCloud();
+  }
+
+  // Sincronizar en el documento individual del usuario en Firestore (registered_users)
+  if (window.firebaseAPI && window.firebaseAPI.db) {
+    import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js").then(({ doc, setDoc }) => {
+      const cleanDocId = uid.replace(/[^a-zA-Z0-9_-]/g, "_");
+      setDoc(doc(window.firebaseAPI.db, "registered_users", cleanDocId), {
+        email: uid,
+        autorizoMostrarCorreo: !!authorized,
+        updatedAt: new Date().toISOString()
+      }, { merge: true }).catch(err => {
+        console.warn("⚠️ Error guardando consentimiento de correo en Firestore:", err);
+      });
+    }).catch(err => console.warn(err));
+  }
+
+  window.dispatchEvent(new CustomEvent('lh-access-control-updated'));
+}
+
+/**
+ * Establece o revoca la autorización de un usuario para mostrar su nombre a los demás hermanos
+ */
+export function setUserNameConsent(userEmail, authorized) {
+  const uid = (userEmail || "").toLowerCase().trim();
+  if (!uid || !isValidEmail(uid)) return;
+  if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+  if (!accessControlState.userDirectPermissions[uid]) {
+    accessControlState.userDirectPermissions[uid] = new Set();
+  }
+  if (authorized) {
+    accessControlState.userDirectPermissions[uid].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+  } else {
+    accessControlState.userDirectPermissions[uid].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+  }
+  saveAccessControl();
+
+  const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
+  const currentEmail = (currentUser?.email || localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
+  const cachedIsAdmin = localStorage.getItem('lh_auth_is_admin') === 'true';
+  const isAdmin = (currentEmail === ADMIN_EMAIL.toLowerCase()) || (!currentEmail && cachedIsAdmin);
+
+  // Solo el administrador actualiza la configuración global de grupos en la nube
+  if (isAdmin) {
+    saveGroupConfigToCloud();
+  }
+
+  // Sincronizar en el documento individual del usuario en Firestore (registered_users)
+  if (window.firebaseAPI && window.firebaseAPI.db) {
+    import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js").then(({ doc, setDoc }) => {
+      const cleanDocId = uid.replace(/[^a-zA-Z0-9_-]/g, "_");
+      setDoc(doc(window.firebaseAPI.db, "registered_users", cleanDocId), {
+        email: uid,
+        autorizoMostrarNombre: !!authorized,
+        updatedAt: new Date().toISOString()
+      }, { merge: true }).catch(err => {
+        console.warn("⚠️ Error guardando consentimiento de nombre en Firestore:", err);
+      });
+    }).catch(err => console.warn(err));
+  }
+
+  window.dispatchEvent(new CustomEvent('lh-access-control-updated'));
+}
+
+/**
+ * Consulta si un usuario ha autorizado que su nombre sea visible para otros hermanos.
+ * Es un consentimiento estrictamente individual y personal del usuario.
+ */
+export function isUserNameAuthorized(userEmail) {
+  const uid = (userEmail || "").toLowerCase().trim();
+  if (!uid) return false;
+  if (uid === ADMIN_EMAIL.toLowerCase()) return true;
+
+  // Consentimiento directo individual asignado al usuario
+  return !!(accessControlState.userDirectPermissions?.[uid]?.has(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE));
+}
+
+/**
+ * Consulta si un usuario ha autorizado que su correo sea visible para otros hermanos.
+ * Es un consentimiento estrictamente individual y personal del usuario.
+ */
+export function isUserEmailAuthorized(userEmail) {
+  const uid = (userEmail || "").toLowerCase().trim();
+  if (!uid) return false;
+  if (uid === ADMIN_EMAIL.toLowerCase()) return true;
+
+  // Consentimiento directo individual asignado al usuario
+  return !!(accessControlState.userDirectPermissions?.[uid]?.has(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO));
 }
 
 export function hasPermission(permissionKey, userEmail) {
@@ -654,7 +1082,10 @@ export function saveAccessControl() {
     registeredUsers: Array.from(accessControlState.registeredUsers),
     registeredUserNames: accessControlState.registeredUserNames,
     registeredUserPhotos: accessControlState.registeredUserPhotos,
-    bannedUsers: Array.from(accessControlState.bannedUsers)
+    bannedUsers: Array.from(accessControlState.bannedUsers),
+    bannedIps: Array.from(accessControlState.bannedIps || []),
+    suspiciousIps: Array.from(accessControlState.suspiciousIps || []),
+    ipRecords: accessControlState.ipRecords || {}
   };
 
   Object.keys(accessControlState.groups).forEach(gid => {
@@ -669,6 +1100,10 @@ export function saveAccessControl() {
     };
   });
 
+  Object.keys(accessControlState.userDirectPermissions || {}).forEach(uid => {
+    serializable.userDirectPermissions[uid] = Array.from(accessControlState.userDirectPermissions[uid] || []);
+  });
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));
 }
 
@@ -677,7 +1112,21 @@ export function saveAccessControl() {
  */
 export async function saveGroupConfigToCloud() {
   if (!window.firebaseAPI?.db) return;
+  const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
+  const currentEmail = (currentUser?.email || localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
+  const cachedIsAdmin = localStorage.getItem('lh_auth_is_admin') === 'true';
+  const isAdmin = (currentEmail === ADMIN_EMAIL.toLowerCase()) || (!currentEmail && cachedIsAdmin);
+  const canMarcar = (typeof hasPermission === 'function') && hasPermission(PERMISSIONS.ACTRL_PERMISOS_MARCAR, currentEmail);
+  if (!isAdmin && !canMarcar) {
+    // Solo el Administrador General o un usuario con permiso de marcar pueden modificar /access_control/groups_config
+    return;
+  }
   try {
+    // Protección garantizada: Administradores siempre conserva Acceso Total
+    if (accessControlState.groups["administradores"]) {
+      accessControlState.groups["administradores"].permissions.add(PERMISSIONS.ALL);
+      Object.values(PERMISSIONS).forEach(p => accessControlState.groups["administradores"].permissions.add(p));
+    }
     const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
     const serializableGroups = {};
     Object.keys(accessControlState.groups).forEach(gid => {
@@ -691,11 +1140,18 @@ export async function saveGroupConfigToCloud() {
       };
     });
 
+    const serializableUserDirectPerms = {};
+    Object.keys(accessControlState.userDirectPermissions || {}).forEach(uid => {
+      serializableUserDirectPerms[uid] = Array.from(accessControlState.userDirectPermissions[uid] || []);
+    });
+
+    // Guardar reemplazando el mapa completo para purgar grupos eliminados
     await setDoc(doc(window.firebaseAPI.db, "access_control", "groups_config"), {
       groups: serializableGroups,
+      userDirectPermissions: serializableUserDirectPerms,
       updatedAt: new Date().toISOString()
-    }, { merge: true });
-    console.log("☁️ [Firebase] Configuración de grupos guardada en Firestore.");
+    });
+    console.log("☁️ [Firebase] Configuración de grupos guardada en Firestore (sincronización limpia).");
   } catch (err) {
     console.warn("⚠️ Error guardando grupos en Firestore:", err);
   }
@@ -719,6 +1175,24 @@ export async function syncRegisteredUsersFromFirebase() {
         if (d.group) setUserPrimaryGroup(em, d.group, true);
         if (d.banned) accessControlState.bannedUsers.add(em);
         else accessControlState.bannedUsers.delete(em);
+        if (d.autorizoMostrarCorreo !== undefined) {
+          if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+          if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+          if (d.autorizoMostrarCorreo) {
+            accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+          } else {
+            accessControlState.userDirectPermissions[em].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+          }
+        }
+        if (d.autorizoMostrarNombre !== undefined) {
+          if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+          if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+          if (d.autorizoMostrarNombre) {
+            accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+          } else {
+            accessControlState.userDirectPermissions[em].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+          }
+        }
       }
     });
     saveAccessControl();
@@ -765,9 +1239,29 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
                 accessControlState.groups[gid].name = remote.name || accessControlState.groups[gid].name;
                 accessControlState.groups[gid].description = remote.description || accessControlState.groups[gid].description;
                 accessControlState.groups[gid].permissions = new Set(remote.permissions || []);
+                accessControlState.groups[gid].permissions.delete("inicio_ver_permisos_autorizados");
                 accessControlState.groups[gid].subgroupIds = new Set(remote.subgroupIds || []);
               }
             });
+
+            // Si un grupo no-base fue eliminado de Firestore, purgarlo de la memoria local
+            Object.keys(accessControlState.groups).forEach(localGid => {
+              if (localGid !== "administradores" && localGid !== "hermanos" && localGid !== "invitados" && !data.groups[localGid]) {
+                delete accessControlState.groups[localGid];
+              }
+            });
+
+            if (accessControlState.groups["administradores"]) {
+              accessControlState.groups["administradores"].permissions.add(PERMISSIONS.ALL);
+            }
+
+            if (data.userDirectPermissions) {
+              if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+              Object.keys(data.userDirectPermissions).forEach(uid => {
+                accessControlState.userDirectPermissions[uid] = new Set(data.userDirectPermissions[uid] || []);
+              });
+            }
+
             saveAccessControl();
             window.dispatchEvent(new CustomEvent('lh-access-control-updated'));
           }
@@ -807,6 +1301,24 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
               }
               if (d.banned) accessControlState.bannedUsers.add(em);
               else accessControlState.bannedUsers.delete(em);
+              if (d.autorizoMostrarCorreo !== undefined) {
+                if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+                if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+                if (d.autorizoMostrarCorreo) {
+                  accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+                } else {
+                  accessControlState.userDirectPermissions[em].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+                }
+              }
+              if (d.autorizoMostrarNombre !== undefined) {
+                if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+                if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+                if (d.autorizoMostrarNombre) {
+                  accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+                } else {
+                  accessControlState.userDirectPermissions[em].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+                }
+              }
             }
           });
           saveAccessControl();
@@ -834,6 +1346,24 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
               }
               if (d.banned) accessControlState.bannedUsers.add(em);
               else accessControlState.bannedUsers.delete(em);
+              if (d.autorizoMostrarCorreo !== undefined) {
+                if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+                if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+                if (d.autorizoMostrarCorreo) {
+                  accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+                } else {
+                  accessControlState.userDirectPermissions[em].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+                }
+              }
+              if (d.autorizoMostrarNombre !== undefined) {
+                if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+                if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+                if (d.autorizoMostrarNombre) {
+                  accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+                } else {
+                  accessControlState.userDirectPermissions[em].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+                }
+              }
               saveAccessControl();
               window.dispatchEvent(new CustomEvent('lh-access-control-updated'));
             }
@@ -864,16 +1394,30 @@ if (window.firebaseAPI?.onAuthReady) {
 window.hasPermission = hasPermission;
 window.canAccessPage = canAccessPage;
 window.getUserEffectivePermissions = getUserEffectivePermissions;
+window.isUserNameAuthorized = isUserNameAuthorized;
+window.setUserNameConsent = setUserNameConsent;
+window.isUserEmailAuthorized = isUserEmailAuthorized;
+window.setUserEmailConsent = setUserEmailConsent;
 
 window.accessControlAPI = {
   initAccessControl,
   createGroup,
+  updateGroup,
   deleteGroup,
   setUserPrimaryGroup,
+  isValidEmail,
+  setUserNameConsent,
+  isUserNameAuthorized,
+  setUserEmailConsent,
+  isUserEmailAuthorized,
   banUser,
   unbanUser,
   deleteUserRegistration,
   registerUser,
+  banIp,
+  unbanIp,
+  isIpBanned,
+  isIpSuspicious,
   hasPermission,
   canAccessPage,
   getUserEffectivePermissions,

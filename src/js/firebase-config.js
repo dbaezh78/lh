@@ -55,6 +55,11 @@ window.firebaseAPI = {
     onAuthReady: (callback) => onAuthStateChanged(auth, (user) => {
         const isAdmin = user && user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
         localStorage.setItem('lh_auth_is_admin', isAdmin ? 'true' : 'false');
+        if (user && user.email) {
+            localStorage.setItem('lh_auth_email', user.email.toLowerCase().trim());
+        } else if (!user) {
+            localStorage.removeItem('lh_auth_email');
+        }
         if (user && window.accessControlAPI?.registerUser) {
             window.accessControlAPI.registerUser(user);
         }
@@ -148,6 +153,34 @@ window.firebaseAPI = {
         const snapshot = await getDoc(docRef);
         if (snapshot.exists()) {
             return snapshot.data().mapa || null;
+        }
+        return null;
+    },
+    // Métodos para el orden personalizado de Archivos del Sistema
+    guardarOrdenArchivosSistema: async (ordenIds) => {
+        const user = auth.currentUser;
+        if (!user || (user.email && user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase())) {
+            throw new Error("No tienes permisos de administrador para guardar el orden de los archivos.");
+        }
+        const docRef = doc(db, "catalogo", "orden_archivos_sistema");
+        await setDoc(docRef, {
+            orden: ordenIds,
+            modificadoPor: user.email,
+            ultimaActualizacion: new Date().toISOString()
+        }, { merge: true });
+        console.log("☁️ [Firebase] Orden de archivos del sistema guardado con éxito.");
+        return true;
+    },
+    cargarOrdenArchivosSistema: async () => {
+        try {
+            const docRef = doc(db, "catalogo", "orden_archivos_sistema");
+            const snapshot = await getDoc(docRef);
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                return data.orden || null;
+            }
+        } catch (e) {
+            console.warn("⚠️ Error al leer orden_archivos_sistema de Firestore:", e);
         }
         return null;
     },

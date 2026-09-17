@@ -225,8 +225,10 @@ body {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 14px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   box-shadow: var(--card-shadow);
+  -webkit-overflow-scrolling: touch;
 }
 
 .tabla-archivos-sistema {
@@ -234,6 +236,7 @@ body {
   border-collapse: collapse;
   text-align: left;
   font-size: 0.88rem;
+  min-width: 820px;
 }
 
 .tabla-archivos-sistema th {
@@ -245,6 +248,13 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 1px solid var(--panel-border);
+  white-space: nowrap;
+}
+
+.tabla-archivos-sistema th.th-actualizado {
+  min-width: 135px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 body.dark-theme .tabla-archivos-sistema th {
@@ -256,6 +266,7 @@ body.dark-theme .tabla-archivos-sistema th {
   border-bottom: 1px solid var(--panel-border);
   color: var(--text-color);
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 .tabla-archivos-sistema tr:hover td {
@@ -264,6 +275,93 @@ body.dark-theme .tabla-archivos-sistema th {
 
 body.dark-theme .tabla-archivos-sistema tr:hover td {
   background: rgba(255, 255, 255, 0.02);
+}
+
+/* Celda de Nombre del Módulo */
+.modulo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 700;
+  transition: color 0.15s ease;
+}
+
+.modulo-link:hover .modulo-titulo {
+  color: var(--accent-color);
+}
+
+.modulo-icono {
+  font-size: 20px;
+  color: #00c853;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+body.dark-theme .modulo-icono {
+  color: #00e676;
+}
+
+.modulo-titulo {
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+/* Complementos CSS y JS */
+.complementos-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.chip-complemento {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: help;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.chip-complemento .material-symbols-outlined {
+  font-size: 15px;
+}
+
+.chip-complemento.borde-verde {
+  border: 1.5px solid #00c853;
+  color: #00c853;
+  background: rgba(0, 200, 83, 0.08);
+}
+
+body.dark-theme .chip-complemento.borde-verde {
+  border-color: #00e676;
+  color: #00e676;
+  background: rgba(0, 230, 118, 0.12);
+}
+
+.chip-complemento.borde-rojo {
+  border: 1.5px solid #e53935;
+  color: #e53935;
+  background: rgba(229, 57, 53, 0.08);
+}
+
+body.dark-theme .chip-complemento.borde-rojo {
+  border-color: #ff5252;
+  color: #ff5252;
+  background: rgba(255, 82, 82, 0.12);
+}
+
+.chip-complemento:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Círculos Rellenos de Estado */
@@ -279,6 +377,11 @@ body.dark-theme .tabla-archivos-sistema tr:hover td {
 .circulo-estado.verde {
   background-color: #00c853;
   box-shadow: 0 0 8px rgba(0, 200, 83, 0.6);
+}
+
+.circulo-estado.amarillo {
+  background-color: #ffb300;
+  box-shadow: 0 0 8px rgba(255, 179, 0, 0.65);
 }
 
 .circulo-estado.rojo {
@@ -306,10 +409,24 @@ body.dark-theme .badge-estado-texto.si {
   color: #00e676;
 }
 
+.badge-estado-texto.parcial {
+  background: rgba(255, 179, 0, 0.12);
+  color: #d97706;
+  border: 1px solid rgba(255, 179, 0, 0.35);
+}
+
+body.dark-theme .badge-estado-texto.parcial {
+  color: #ffca28;
+}
+
 .badge-estado-texto.no {
   background: rgba(229, 57, 53, 0.12);
   color: #e53935;
   border: 1px solid rgba(229, 57, 53, 0.3);
+}
+
+body.dark-theme .badge-estado-texto.no {
+  color: #ff5252;
 }
 
 .badge-version-item {
@@ -356,4 +473,316 @@ body.dark-theme .badge-estado-texto.si {
 @keyframes spinLoading {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Controles de Administrador y Reordenamiento
+   ========================================================================== */
+
+.btn-nav-system.btn-guardar-orden {
+  background: #00c853;
+  color: #fff;
+  border-color: #00c853;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(0, 200, 83, 0.3);
+}
+
+.btn-nav-system.btn-guardar-orden:hover {
+  background: #00b248;
+  box-shadow: 0 4px 14px rgba(0, 200, 83, 0.45);
+}
+
+.btn-nav-system.btn-guardar-orden.pendiente-cambios {
+  animation: pulseGuardar 1.8s infinite;
+}
+
+@keyframes pulseGuardar {
+  0% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 200, 83, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
+}
+
+.btn-nav-system.btn-admin-tool {
+  background: rgba(0, 200, 83, 0.08);
+  border-color: rgba(0, 200, 83, 0.35);
+  color: var(--text-color);
+}
+
+.btn-nav-system.btn-admin-tool:hover {
+  border-color: #00c853;
+  color: #00c853;
+}
+
+/* Banner Informativo de Administrador */
+.admin-banner-orden {
+  background: rgba(0, 200, 83, 0.08);
+  border: 1px solid rgba(0, 200, 83, 0.28);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  color: var(--text-color);
+}
+
+.admin-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.icon-admin {
+  color: #00c853;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.status-orden-cambios {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 179, 0, 0.15);
+  border: 1px solid rgba(255, 179, 0, 0.4);
+  color: #d97706;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+body.dark-theme .status-orden-cambios {
+  color: #fbbf24;
+}
+
+.dot-cambios {
+  width: 8px;
+  height: 8px;
+  background-color: #ffb300;
+  border-radius: 50%;
+  animation: blinkDot 1s infinite alternate;
+}
+
+@keyframes blinkDot {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+/* Columna y Agarrador de Reordenamiento */
+.th-orden {
+  width: 46px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.td-orden {
+  width: 46px;
+  text-align: center;
+  padding: 8px 4px !important;
+}
+
+.drag-handle-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: grab;
+  user-select: none;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.drag-handle-box:hover {
+  background: rgba(0, 200, 83, 0.12);
+  color: #00c853;
+}
+
+.drag-handle-box:active {
+  cursor: grabbing;
+}
+
+.drag-icon {
+  font-size: 18px;
+}
+
+.orden-numero {
+  font-size: 0.76rem;
+  font-weight: 800;
+  min-width: 14px;
+}
+
+/* Estados de Arrastre de Filas */
+tr.fila-draggable {
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+tr.fila-dragging {
+  opacity: 0.35;
+  background: rgba(0, 200, 83, 0.1) !important;
+  outline: 2px dashed #00c853;
+}
+
+tr.fila-drag-over-top {
+  border-top: 3px solid #00c853 !important;
+}
+
+tr.fila-drag-over-bottom {
+  border-bottom: 3px solid #00c853 !important;
+}
+
+/* Acciones en la fila */
+.acciones-fila-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.btn-mover-fila {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.btn-mover-fila:hover:not(:disabled) {
+  border-color: #00c853;
+  color: #00c853;
+  background: rgba(0, 200, 83, 0.08);
+}
+
+.btn-mover-fila:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* Modal de Compartir Orden */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 14, 23, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 16px;
+  animation: fadeInModal 0.2s ease forwards;
+}
+
+.modal-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  color: var(--text-color);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.btn-cerrar-modal {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.btn-cerrar-modal:hover {
+  color: #e53935;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.textarea-codigo {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0d131f;
+  color: #38bdf8;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+.textarea-codigo:focus {
+  border-color: #00c853;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid var(--panel-border);
+}
+
+/* Toast Notificación */
+.toast-notificacion {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1e293b;
+  color: #f8fafc;
+  border: 1px solid #334155;
+  border-left: 4px solid #00c853;
+  border-radius: 10px;
+  padding: 12px 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 100000;
+  animation: slideInToast 0.25s ease forwards;
+}
+
+@keyframes slideInToast {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
 }

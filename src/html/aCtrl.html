@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Acceso (aCtrl) - Liturgia de las Horas</title>
+    <title>Control de Acceso - Liturgia de las Horas</title>
     <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../css/buttons.css">
@@ -17,7 +17,7 @@
             <div class="titulo-box">
                 <h1>
                     <span class="material-symbols-outlined" style="font-size: 2rem;">admin_panel_settings</span>
-                    Control de Acceso (aCtrl)
+                    Control de Acceso
                 </h1>
                 <p>Gestión de usuarios, grupos con herencia (Active Directory) y permisos de navegación</p>
             </div>
@@ -77,7 +77,7 @@
                         <div>
                             <span id="auth-admin-badge" class="badge-rol admin" style="display: none;">
                                 <span class="material-symbols-outlined" style="font-size: 1rem;">admin_panel_settings</span>
-                                Administrador
+                                Administrador General
                             </span>
                             <span id="auth-regular-badge" class="badge-rol hermano" style="display: none;">
                                 <span class="material-symbols-outlined" style="font-size: 1rem;">person</span>
@@ -96,9 +96,9 @@
                             </button>
                         </div>
 
-                        <!-- Acciones exclusivas de Administrador -->
+                        <!-- Acciones exclusivas de Administrador General -->
                         <div id="auth-admin-actions" class="panel-admin-box" style="display: none;">
-                            <h4 style="margin: 0; font-size: 0.92rem; text-align: center; color: var(--accent-color);">Acciones de Administrador</h4>
+                            <h4 style="margin: 0; font-size: 0.92rem; text-align: center; color: var(--accent-color);">Acciones de Administrador General</h4>
                             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                                 <button onclick="window.accessControlAPI.saveGroupConfigToCloud(); alert('Configuración guardada en Firebase.');" class="btn-cuenta-accion primario">
                                     <span class="material-symbols-outlined">cloud_upload</span>
@@ -128,7 +128,7 @@
 
                 <!-- Subpanel 1: Miembros -->
                 <div id="access-subpanel-members" class="access-subpanel" style="display: block;">
-                    <div class="buscador-caja">
+                    <div class="buscador-caja" id="ac-members-search-box">
                         <span class="material-symbols-outlined" style="color: var(--text-muted);">search</span>
                         <input type="text" id="ac-search-members-input" placeholder="Buscar hermano por nombre o correo...">
                     </div>
@@ -183,11 +183,28 @@
 
                 <!-- Subpanel 4: Permisos -->
                 <div id="access-subpanel-permissions" class="access-subpanel" style="display: none;">
-                    <div class="form-group" style="margin-bottom: 16px;">
+                    <div class="form-group" style="margin-bottom: 12px;">
                         <label for="ac-select-group-perm">Selecciona el Grupo a Configurar:</label>
                         <select id="ac-select-group-perm" class="form-control"></select>
                     </div>
-                    <h5 style="margin: 0 0 8px 0; font-size: 0.95rem;">Permisos Asignados al Grupo:</h5>
+
+                    <!-- Buscador de Permisos -->
+                    <div class="buscador-caja" id="ac-permissions-search-box" style="margin-bottom: 12px;">
+                        <span class="material-symbols-outlined" style="color: var(--text-muted);">search</span>
+                        <input type="text" id="ac-search-permissions-input" placeholder="Buscar permisos por nombre o sección...">
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h5 style="margin: 0; font-size: 0.95rem;">Permisos Asignados al Grupo:</h5>
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" id="ac-btn-expand-perms" class="btn-nav-system" style="padding: 2px 8px; font-size: 0.78rem; border-radius: 4px; border: 1px solid var(--panel-border); background: var(--panel-bg); cursor: pointer;" title="Expandir todo">
+                                <span class="material-symbols-outlined" style="font-size: 0.95rem; vertical-align: middle;">unfold_more</span> Expandir
+                            </button>
+                            <button type="button" id="ac-btn-collapse-perms" class="btn-nav-system" style="padding: 2px 8px; font-size: 0.78rem; border-radius: 4px; border: 1px solid var(--panel-border); background: var(--panel-bg); cursor: pointer;" title="Contraer todo">
+                                <span class="material-symbols-outlined" style="font-size: 0.95rem; vertical-align: middle;">unfold_less</span> Contraer
+                            </button>
+                        </div>
+                    </div>
                     <div id="ac-permissions-checkboxes" style="border: 1px solid var(--panel-border); border-radius: 8px; overflow: hidden;"></div>
                 </div>
 
@@ -244,11 +261,55 @@
 
                         <a href="system.html" class="btn-actualizar-accion secundario" style="text-decoration: none; margin-top: 4px;">
                             <span class="material-symbols-outlined">folder_special</span>
-                            Archivos del Sistema
+                            Archivos de Sistema
+                        </a>
+
+                        <a href="ipaddr.html" class="btn-actualizar-accion secundario" style="text-decoration: none; margin-top: 4px;">
+                            <span class="material-symbols-outlined">lan</span>
+                            Registro de Direcciones IP
                         </a>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Grupo -->
+    <div id="modal-grupo" class="modal-actrl-overlay" style="display: none;">
+        <div class="modal-actrl-card">
+            <div class="modal-actrl-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="color: var(--accent-color); font-size: 1.5rem;">edit_note</span>
+                    <h3 id="modal-grupo-title" style="margin: 0; font-size: 1.15rem;">Editar Grupo</h3>
+                </div>
+                <button type="button" class="btn-cerrar-modal" id="btn-cerrar-modal-grupo" title="Cerrar">&times;</button>
+            </div>
+            <form id="form-modal-grupo" class="modal-actrl-body">
+                <input type="hidden" id="modal-grupo-id">
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-weight: 600; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">ID del Grupo (Identificador del sistema)</label>
+                    <input type="text" id="modal-grupo-id-display" class="form-control" disabled style="opacity: 0.7; background: rgba(0,0,0,0.04); cursor: not-allowed;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label for="modal-grupo-name" style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 4px;">Nombre Visible *</label>
+                    <input type="text" id="modal-grupo-name" class="form-control" required placeholder="Nombre descriptivo del grupo">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="modal-grupo-desc" style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 4px;">Descripción</label>
+                    <input type="text" id="modal-grupo-desc" class="form-control" placeholder="Propósito u objetivo del grupo">
+                </div>
+
+                <div class="modal-actrl-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+                    <button type="button" class="btn-cuenta-accion secundario" id="btn-cancelar-modal-grupo">Cancelar</button>
+                    <button type="submit" class="btn-cuenta-accion primario">
+                        <span class="material-symbols-outlined">save</span>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 

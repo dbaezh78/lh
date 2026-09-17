@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archivos del Sistema — Liturgia de las Horas</title>
+    <title>Archivos de Sistema — Liturgia de las Horas</title>
     <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../css/buttons.css">
@@ -17,11 +17,22 @@
             <div class="titulo-box">
                 <h1>
                     <span class="material-symbols-outlined" style="font-size: 2.2rem; color: #00c853;">folder_special</span>
-                    Archivos del Sistema
+                    Archivos de Sistema
                 </h1>
                 <p>Monitoreo en tiempo real, verificación de integridad y estado de sincronización de archivos</p>
             </div>
             <div class="header-controles">
+                <button id="btn-guardar-orden" class="btn-nav-system btn-guardar-orden" style="display: none;" title="Guardar orden en la nube (Firebase)">
+                    <span class="material-symbols-outlined">cloud_upload</span>
+                    Guardar Orden
+                </button>
+                <button id="btn-copiar-orden" class="btn-nav-system btn-admin-tool" style="display: none;" title="Copiar orden actual para compartir">
+                    <span class="material-symbols-outlined">share</span>
+                    Compartir Orden
+                </button>
+                <button id="btn-restablecer-orden" class="btn-nav-system btn-admin-tool" style="display: none;" title="Restablecer orden por defecto">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                </button>
                 <button id="btn-comprobar-archivos" class="btn-nav-system btn-primario" title="Comprobar estado de todos los archivos">
                     <span class="material-symbols-outlined">sync</span>
                     Comprobar Archivos
@@ -37,6 +48,19 @@
             </div>
         </header>
 
+        <!-- Banner Exclusivo para Administrador -->
+        <div id="admin-banner-orden" class="admin-banner-orden" style="display: none;">
+            <div class="admin-banner-content">
+                <span class="material-symbols-outlined icon-admin">admin_panel_settings</span>
+                <div>
+                    <strong>Modo Administrador Activo:</strong> Puedes cambiar el orden arrastrando las filas <span class="material-symbols-outlined" style="font-size: 15px; vertical-align: middle;">drag_indicator</span> o usando las flechas <span class="material-symbols-outlined" style="font-size: 15px; vertical-align: middle;">keyboard_arrow_up</span> <span class="material-symbols-outlined" style="font-size: 15px; vertical-align: middle;">keyboard_arrow_down</span>. Haz clic en <strong>Guardar Orden</strong> para salvar en Firebase, o en <strong>Compartir Orden</strong> para pasármelo en el chat.
+                </div>
+            </div>
+            <div id="status-orden-cambios" class="status-orden-cambios" style="display: none;">
+                <span class="dot-cambios"></span> Cambios sin guardar
+            </div>
+        </div>
+
         <!-- Tarjetas de Resumen -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -44,18 +68,28 @@
                     <span class="material-symbols-outlined">inventory_2</span>
                 </div>
                 <div class="stat-data">
-                    <span class="stat-label">Total Archivos</span>
+                    <span class="stat-label">Total Módulos</span>
                     <strong class="stat-value" id="stat-total">0</strong>
                 </div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon-wrapper" style="background: rgba(46, 125, 50, 0.12); color: #2e7d32;">
+                <div class="stat-icon-wrapper" style="background: rgba(0, 200, 83, 0.12); color: #00c853;">
                     <span class="material-symbols-outlined">check_circle</span>
                 </div>
                 <div class="stat-data">
-                    <span class="stat-label">En el Sistema</span>
+                    <span class="stat-label">Completos</span>
                     <strong class="stat-value" id="stat-ok" style="color: #00c853;">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: rgba(255, 179, 0, 0.12); color: #ffb300;">
+                    <span class="material-symbols-outlined">warning</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Incompletos</span>
+                    <strong class="stat-value" id="stat-parcial" style="color: #ffb300;">0</strong>
                 </div>
             </div>
 
@@ -64,7 +98,7 @@
                     <span class="material-symbols-outlined">cancel</span>
                 </div>
                 <div class="stat-data">
-                    <span class="stat-label">No Encontrados</span>
+                    <span class="stat-label">Faltantes</span>
                     <strong class="stat-value" id="stat-faltantes" style="color: #e53935;">0</strong>
                 </div>
             </div>
@@ -84,23 +118,21 @@
         <div class="toolbar-filtros">
             <div class="search-box">
                 <span class="material-symbols-outlined">search</span>
-                <input type="text" id="input-buscar-archivo" placeholder="Buscar archivo por nombre o ruta...">
+                <input type="text" id="input-buscar-archivo" placeholder="Buscar archivo por nombre...">
             </div>
 
             <div class="filtro-tipo-box">
                 <select id="select-filtro-tipo" class="select-filtro">
-                    <option value="todos">Todos los tipos</option>
-                    <option value="html">HTML (.html)</option>
-                    <option value="js">JavaScript (.js)</option>
-                    <option value="css">Estilos (.css)</option>
-                    <option value="img">Imágenes (.png, .jpg, .ico)</option>
-                    <option value="font">Fuentes (.woff2, .ttf)</option>
+                    <option value="todos">Todos los módulos</option>
+                    <option value="oracion">Horas Litúrgicas</option>
+                    <option value="gestion">Gestión y Sistema</option>
                 </select>
 
                 <select id="select-filtro-estado" class="select-filtro">
                     <option value="todos">Todos los estados</option>
-                    <option value="actualizado">Actualizados (Círculo Verde)</option>
-                    <option value="error">No en Sistema (Círculo Rojo)</option>
+                    <option value="verde">Completos (Verde - Todos OK)</option>
+                    <option value="amarillo">Incompletos (Amarillo - Falta 1)</option>
+                    <option value="rojo">Faltantes (Rojo - Falta 2 o más)</option>
                 </select>
             </div>
         </div>
@@ -110,18 +142,19 @@
             <table class="tabla-archivos-sistema" id="tabla-archivos">
                 <thead>
                     <tr>
-                        <th style="width: 50px; text-align: center;">Estado</th>
+                        <th id="th-orden" class="th-orden" style="width: 46px; text-align: center; display: none;" title="Mover y reordenar">#</th>
+                        <th style="width: 55px; text-align: center;">Estado</th>
                         <th>Nombre</th>
-                        <th>Ruta</th>
-                        <th style="width: 95px; text-align: center;">Versión</th>
-                        <th style="width: 140px;">Fecha</th>
-                        <th style="width: 130px; text-align: center;">¿Actualizado?</th>
-                        <th style="width: 80px; text-align: center;">Acción</th>
+                        <th style="width: 150px; text-align: center;">Complementos</th>
+                        <th style="width: 90px; text-align: center;">Versión</th>
+                        <th style="width: 160px; text-align: center;">Fecha</th>
+                        <th class="th-actualizado" style="width: 140px; text-align: center;">¿Actualizado?</th>
+                        <th style="width: 95px; text-align: center;">Acción</th>
                     </tr>
                 </thead>
                 <tbody id="tbody-archivos-sistema">
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
                             <span class="material-symbols-outlined spin-icon" style="font-size: 32px; color: #00c853;">sync</span>
                             <p style="margin: 8px 0 0 0;">Cargando inventario de archivos del sistema...</p>
                         </td>
@@ -130,6 +163,37 @@
             </table>
         </div>
     </div>
+
+    <!-- Modal Compartir / Copiar Orden -->
+    <div id="modal-compartir-orden" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="material-symbols-outlined" style="color: #00c853; font-size: 24px;">share</span>
+                    <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-color);">Compartir Orden de Archivos</h3>
+                </div>
+                <button type="button" class="btn-cerrar-modal" id="btn-cerrar-modal-orden" title="Cerrar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="margin: 0 0 10px 0; font-size: 0.88rem; color: var(--text-muted);">
+                    Copia este código y compártemelo aquí en el chat para establecerlo como el <strong>orden por defecto definitivo</strong>:
+                </p>
+                <textarea id="textarea-codigo-orden" class="textarea-codigo" readonly rows="8" spellcheck="false"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-nav-system" id="btn-cancelar-modal-orden">Cerrar</button>
+                <button type="button" class="btn-nav-system btn-primario" id="btn-copiar-portapapeles">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    Copiar al Portapapeles
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Flotante de Notificaciones -->
+    <div id="toast-notificacion" class="toast-notificacion" style="display: none;"></div>
 
     <!-- Scripts -->
     <script src="../js/firebase-config.js" type="module"></script>

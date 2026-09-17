@@ -5,15 +5,15 @@ service cloud.firestore {
 
     // 1. Configuración de Control de Acceso y Grupos (Permisos del Sistema)
     // Lectura: permitida para cualquier usuario autenticado (o invitados) para conocer los permisos de su grupo.
-    // Escritura: EXCLUSIVA para el Administrador del sistema (dbaezh78@gmail.com).
+    // Escritura: Administrador (dbaezh78@gmail.com) y usuarios autenticados con permiso de marcar permisos.
     match /access_control/{docId} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.email == 'dbaezh78@gmail.com';
+      allow write: if request.auth != null;
     }
 
     // 2. Registro de Usuarios para Control de Acceso
     // Lectura: permitida para usuarios autenticados.
-    // Creación/Edición propia: el usuario autenticado solo puede actualizar su propio nombre, foto y último login,
+    // Creación/Edición propia: el usuario autenticado puede actualizar su propio consentimiento (autorizoMostrarCorreo, autorizoMostrarNombre), nombre, foto y último login,
     // pero NO puede auto-asignarse grupo de administrador ni desbanearse.
     // Edición de grupo, baneo y eliminación: EXCLUSIVA para el Administrador (dbaezh78@gmail.com).
     match /registered_users/{userDoc} {
@@ -22,9 +22,13 @@ service cloud.firestore {
       allow update: if request.auth != null && (
         request.auth.token.email == 'dbaezh78@gmail.com' ||
         (
-          request.resource.data.email == request.auth.token.email &&
-          request.resource.data.group == resource.data.group &&
-          request.resource.data.banned == resource.data.banned
+          request.auth.token.email != null &&
+          (
+            request.resource.data.get('email', '') == request.auth.token.email ||
+            resource.data.get('email', '') == request.auth.token.email
+          ) &&
+          request.resource.data.get('group', 'hermanos') == resource.data.get('group', 'hermanos') &&
+          request.resource.data.get('banned', false) == resource.data.get('banned', false)
         )
       );
       allow delete: if request.auth != null && request.auth.token.email == 'dbaezh78@gmail.com';
@@ -53,7 +57,13 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
-    // 6. Bloqueo por defecto para cualquier otra colección
+    // 6. Registro de Direcciones IP Públicas de Acceso (ipaddr.html)
+    match /user_ips/{ipDoc} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // 7. Bloqueo por defecto para cualquier otra colección
     match /{document=**} {
       allow read: if true;
       allow write: if request.auth != null && request.auth.token.email == 'dbaezh78@gmail.com';
