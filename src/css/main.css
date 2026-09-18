@@ -87,8 +87,8 @@ body.portada-body {
     background: white;
     color: black;
     border-radius: 50%;
-    width: 40px;
-    height: 36px;
+    /*width: 40px;
+    height: 36px;*/
     place-content: center;
     text-align: center;
 }

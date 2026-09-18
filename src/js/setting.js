@@ -1002,6 +1002,52 @@ window.cambioEnExpandir = false;
                     }
                 }
             ]
+        },
+        // ==========================================
+        // MODULO: TAB CHAT (ASISTENCIA Y SOPORTE)
+        // ==========================================
+        {
+            id: 'tab-chat',
+            label: 'Chat',
+            icon: 'chat',
+            secciones: [
+                {
+                    id: 'chat-set-reaction-size',
+                    label: 'Tamaño del icono de reacción',
+                    tipo: 'select',
+                    storageKey: 'pref-chat-reaction-size',
+                    default: '24px',
+                    options: [
+                        { val: '18px', text: 'Pequeño (18px)' },
+                        { val: '22px', text: 'Normal (22px)' },
+                        { val: '26px', text: 'Grande (26px)' },
+                        { val: '32px', text: 'Muy Grande (32px)' },
+                        { val: '40px', text: 'Extra Grande (40px)' }
+                    ],
+                    accion: (val) => {
+                        localStorage.setItem('pref-chat-reaction-size', val);
+                        document.documentElement.style.setProperty('--chat-reaction-size', val);
+                        window.dispatchEvent(new CustomEvent('lh-chat-reaction-size-changed', { detail: { size: val } }));
+                    }
+                },
+                {
+                    id: 'chat-set-reaction-range',
+                    label: 'Ajuste fino tamaño de reacción (px)',
+                    tipo: 'range',
+                    storageKey: 'pref-chat-reaction-size-num',
+                    default: '24',
+                    min: 16,
+                    max: 48,
+                    step: 2,
+                    accion: (val) => {
+                        const sizeStr = `${val}px`;
+                        localStorage.setItem('pref-chat-reaction-size', sizeStr);
+                        localStorage.setItem('pref-chat-reaction-size-num', val);
+                        document.documentElement.style.setProperty('--chat-reaction-size', sizeStr);
+                        window.dispatchEvent(new CustomEvent('lh-chat-reaction-size-changed', { detail: { size: sizeStr } }));
+                    }
+                }
+            ]
         }
     ];
 

@@ -122,6 +122,16 @@
         </div>
       </header>
 
+      <!-- Banner de Mensaje Fijado estilo WhatsApp -->
+      <div class="wa-pinned-banner" id="wa-pinned-banner" style="display: none;">
+        <span class="material-symbols-outlined wa-pinned-banner-icon">keep</span>
+        <div class="wa-pinned-banner-body">
+          <span class="wa-pinned-banner-title">Mensaje fijado</span>
+          <span class="wa-pinned-banner-text" id="wa-pinned-banner-text"></span>
+        </div>
+        <button type="button" class="wa-pinned-banner-close" id="btn-unpin-banner" title="Desfijar mensaje">&times;</button>
+      </div>
+
       <!-- Área de Mensajes -->
       <div class="wa-messages-area" id="wa-messages-area">
         <div class="wa-date-divider">Hoy</div>
@@ -135,6 +145,18 @@
           <img src="" id="img-preview-thumb" class="wa-img-preview-thumb" alt="Preview">
           <div class="wa-img-preview-info" id="img-preview-name">foto.jpg</div>
           <button type="button" class="wa-img-preview-remove" id="btn-remove-img" title="Quitar imagen">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Previsualización de Respuesta Citada -->
+        <div class="wa-reply-preview-bar" id="reply-preview-bar" style="display: none;">
+          <div class="wa-reply-bar-border"></div>
+          <div class="wa-reply-bar-content">
+            <span class="wa-reply-bar-sender" id="reply-sender-name">Hermano</span>
+            <span class="wa-reply-bar-text" id="reply-msg-text">Mensaje citado</span>
+          </div>
+          <button type="button" class="wa-reply-bar-close" id="btn-cancel-reply" title="Cancelar respuesta">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
@@ -201,8 +223,8 @@
           </div>
         </div>
 
-        <!-- Barra de Controles (Idéntica a WhatsApp Web) -->
-        <div class="wa-input-row">
+        <!-- Barra de Controles Estándar (Idéntica a WhatsApp Web) -->
+        <div class="wa-input-row" id="wa-input-row-standard">
           <input type="file" id="file-input-image" accept="image/*" style="display: none;">
           
           <button type="button" class="wa-icon-btn" id="btn-attach-clip" title="Adjuntar imagen o archivo">
@@ -218,6 +240,39 @@
           <button type="button" class="wa-btn-send" id="btn-send-message" title="Mensaje de voz o enviar">
             <span class="material-symbols-outlined" style="font-size: 24px;">mic</span>
           </button>
+        </div>
+
+        <!-- Barra de Grabación de Nota de Voz (Límite 20 segundos - Estilo WhatsApp Web) -->
+        <div class="wa-voice-record-bar" id="wa-voice-record-bar" style="display: none;">
+          <button type="button" class="wa-voice-btn-discard" id="btn-discard-voice" title="Cancelar grabación">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+
+          <div class="wa-voice-status-wrap">
+            <span class="wa-voice-pulse-dot"></span>
+            <span class="wa-voice-timer" id="wa-voice-record-time">0:00</span>
+            <span class="wa-voice-limit-badge">máx. 0:20</span>
+          </div>
+
+          <div class="wa-voice-wave-anim">
+            <span class="wa-voice-bar"></span>
+            <span class="wa-voice-bar"></span>
+            <span class="wa-voice-bar"></span>
+            <span class="wa-voice-bar"></span>
+            <span class="wa-voice-bar"></span>
+            <span class="wa-voice-bar"></span>
+            <span class="wa-voice-bar"></span>
+          </div>
+
+          <button type="button" class="wa-voice-btn-send" id="btn-send-voice" title="Enviar audio">
+            <span class="material-symbols-outlined">send</span>
+          </button>
+        </div>
+
+        <!-- Nube indicadora al responder -->
+        <div id="wa-cloud-tooltip" class="wa-cloud-tooltip" style="display: none;">
+          <span class="material-symbols-outlined" style="font-size: 16px;">chat_bubble</span>
+          <span>Ponga su mensaje aquí</span>
         </div>
       </footer>
     </main>
@@ -244,7 +299,7 @@
     <div class="wa-modal-card">
       <h3>¿Deseas eliminar este mensaje?</h3>
       <p id="modal-delete-desc">
-        Puedes eliminar este mensaje para todos si lo enviaste hace menos de 5 minutos, o solo eliminarlo para ti.
+        Puedes eliminar este mensaje para todos si lo enviaste hace menos de 10 minutos, o solo eliminarlo para ti.
       </p>
       <div class="wa-modal-actions">
         <button type="button" class="wa-btn-modal danger" id="btn-delete-for-everyone" style="display: none;">
@@ -264,7 +319,7 @@
   <div class="wa-modal-overlay" id="modal-edit-overlay">
     <div class="wa-modal-card">
       <h3>Editar mensaje</h3>
-      <p style="margin-bottom: 8px;">Modifica el texto antes de los 5 minutos:</p>
+      <p id="modal-edit-desc" style="margin-bottom: 8px;">Modifica el texto antes de los 8 minutos:</p>
       <textarea id="modal-edit-text" class="wa-modal-edit-input"></textarea>
       <div class="wa-modal-actions" style="flex-direction: row; justify-content: flex-end;">
         <button type="button" class="wa-btn-modal cancel" id="btn-cancel-edit">Cancelar</button>
@@ -273,11 +328,105 @@
     </div>
   </div>
 
+  <!-- MODAL: DETALLE DE REACCIONES (ESTILO WHATSAPP WEB - IMÁGENES 1 Y 2) -->
+  <div class="wa-modal-overlay" id="modal-reactions-overlay">
+    <div class="wa-reactions-modal-card">
+      <div class="wa-reactions-modal-header">
+        <h4 id="reactions-modal-title">Reacciones</h4>
+        <button type="button" class="wa-reactions-close-btn" id="btn-close-reactions-modal" title="Cerrar">&times;</button>
+      </div>
+      <!-- Pestañas superiores de reacciones -->
+      <div class="wa-reactions-tabs" id="reactions-tabs-container">
+        <button type="button" class="wa-reactions-tab-add" id="btn-reactions-modal-add" title="Añadir reacción">
+          <span class="material-symbols-outlined">add_reaction</span>
+        </button>
+        <div class="wa-reactions-chips-list" id="reactions-chips-list">
+          <!-- Chips dinámicos estilo WhatsApp Web: 😂 1, 👍 1 -->
+        </div>
+      </div>
+      <!-- Listado de personas que reaccionaron -->
+      <div class="wa-reactions-users-list" id="reactions-users-list">
+        <!-- Filas dinámicas -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INFO DEL MENSAJE -->
+  <div class="wa-modal-overlay" id="modal-msg-info-overlay">
+    <div class="wa-modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+          <span class="material-symbols-outlined" style="color: var(--wa-accent);">info</span>
+          Info. del mensaje
+        </h3>
+        <button type="button" class="wa-reactions-close-btn" id="btn-close-msg-info" title="Cerrar">&times;</button>
+      </div>
+      <div id="msg-info-content" style="color: var(--wa-text-primary); font-size: 13.5px; line-height: 1.6;">
+      </div>
+    </div>
+  </div>
+
+  <!-- MENÚ CONTEXTUAL GLOBAL (CLIC DERECHO EN MENSAJE / IMAGEN - IMAGEN 5) -->
+  <div class="wa-context-menu" id="wa-global-context-menu" style="display: none;">
+    <!-- Barra superior integrada de reacciones rápidas -->
+    <div class="wa-ctx-reactions-bar">
+      <button type="button" class="wa-ctx-emoji-btn" data-emoji="👍">👍</button>
+      <button type="button" class="wa-ctx-emoji-btn" data-emoji="❤️">❤️</button>
+      <button type="button" class="wa-ctx-emoji-btn" data-emoji="😂">😂</button>
+      <button type="button" class="wa-ctx-emoji-btn" data-emoji="😮">😮</button>
+      <button type="button" class="wa-ctx-emoji-btn" data-emoji="😢">😢</button>
+      <button type="button" class="wa-ctx-emoji-btn" data-emoji="🙏">🙏</button>
+      <button type="button" class="wa-ctx-emoji-btn wa-ctx-add-btn" id="btn-ctx-add-reaction" title="Más emojis">+</button>
+    </div>
+    <div class="wa-ctx-divider"></div>
+    <div class="wa-ctx-menu-list">
+      <button type="button" class="wa-ctx-item" id="ctx-btn-info">
+        <span class="material-symbols-outlined">info</span>
+        <span>Info. del mensaje</span>
+      </button>
+      <button type="button" class="wa-ctx-item" id="ctx-btn-reply">
+        <span class="material-symbols-outlined">reply</span>
+        <span>Responder</span>
+      </button>
+      <button type="button" class="wa-ctx-item" id="ctx-btn-copy">
+        <span class="material-symbols-outlined">content_copy</span>
+        <span>Copiar</span>
+      </button>
+      <button type="button" class="wa-ctx-item" id="ctx-btn-react">
+        <span class="material-symbols-outlined">add_reaction</span>
+        <span>Reaccionar</span>
+      </button>
+      <button type="button" class="wa-ctx-item" id="ctx-btn-forward">
+        <span class="material-symbols-outlined">forward</span>
+        <span>Reenviar</span>
+      </button>
+      <button type="button" class="wa-ctx-item" id="ctx-btn-pin">
+        <span class="material-symbols-outlined">keep</span>
+        <span>Fijar</span>
+      </button>
+      <button type="button" class="wa-ctx-item" id="ctx-btn-star">
+        <span class="material-symbols-outlined">star</span>
+        <span>Destacar</span>
+      </button>
+      <button type="button" class="wa-ctx-item" id="ctx-btn-edit">
+        <span class="material-symbols-outlined">edit</span>
+        <span>Editar</span>
+      </button>
+      <button type="button" class="wa-ctx-item danger" id="ctx-btn-delete">
+        <span class="material-symbols-outlined">delete</span>
+        <span>Eliminar</span>
+      </button>
+    </div>
+  </div>
+
   <!-- MODAL: LIGHTBOX DE IMAGEN A TAMAÑO COMPLETO -->
   <div class="wa-lightbox-overlay" id="wa-lightbox">
     <button type="button" class="wa-lightbox-close" id="btn-close-lightbox">&times;</button>
     <img src="" id="lightbox-img" class="wa-lightbox-img" alt="Foto ampliada">
   </div>
+
+  <!-- TOAST NOTIFICACIÓN GLOBAL (ej. Copiado, Fijado) -->
+  <div class="wa-toast-notification" id="wa-toast-notification"></div>
 
   <!-- SCRIPTS -->
   <script type="module" src="/src/js/firebase-config.js"></script>
