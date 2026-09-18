@@ -241,19 +241,28 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const datos = await window.firebaseAPI.cargarActualizacionesFirestore();
             
-            // Si la colección está vacía por ser la primera vez, sembrar versión 1.0.01 inicial
+            // Si la colección está vacía por ser la primera vez, sembrar versión inicial
             if (!datos || datos.length === 0) {
                 const semillav1 = {
                     id: "v_1_0_01",
                     version: "1.0.01",
-                    fecha: new Date().toISOString().split("T")[0],
+                    fecha: "2026-09-17",
                     detalles: "• Actualización a versión 1.0.01.\n• Soporte de edición directa de hitos en el formulario de Cambio Litúrgico.\n• Nueva pestaña 'Actualización' en Control de Acceso (aCtrl).\n• Visualización de archivos actualizándose en ventana modal con progreso animado.\n• Página ver.html sincronizada con Firebase para historial de cambios.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                const semillav2 = {
+                    id: "v_1_0_02",
+                    version: "1.0.02",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.02.\n• Nuevo sistema de Chat de Asistencia y Fraterno estilo WhatsApp Web.\n• Soporte para pegar capturas de pantalla (PrintScreen / Ctrl+V).\n• Selector oficial de Emojis con categorías, búsqueda y emojis recientes.\n• Sustitución automática de atajos de texto a emojis ((Y) -> 👍, <3 -> ❤️, etc.).\n• Integración completa del Navegador del sistema dentro del Chat.",
                     autor: "dbaezh78@gmail.com",
                     ultimaModificacion: new Date().toISOString()
                 };
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav1);
-                    actualizacionesMemoria = [semillav1];
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav2);
+                    actualizacionesMemoria = [semillav2, semillav1];
                     renderListaActualizaciones(actualizacionesMemoria);
                     return;
                 } catch (e) {
@@ -261,7 +270,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            actualizacionesMemoria = datos || [];
+            // Registrar automáticamente v1.0.02 si no existe
+            const listaActualizada = datos ? [...datos] : [];
+            const tieneV2 = listaActualizada.some(d => d.version === "1.0.02" || d.id === "v_1_0_02");
+            if (!tieneV2 && window.firebaseAPI?.guardarActualizacionFirestore) {
+                const v2 = {
+                    id: "v_1_0_02",
+                    version: "1.0.02",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.02.\n• Nuevo sistema de Chat de Asistencia y Fraterno estilo WhatsApp Web.\n• Soporte para pegar capturas de pantalla (PrintScreen / Ctrl+V).\n• Selector oficial de Emojis con categorías, búsqueda y emojis recientes.\n• Sustitución automática de atajos de texto a emojis ((Y) -> 👍, <3 -> ❤️, etc.).\n• Integración completa del Navegador del sistema dentro del Chat.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                try {
+                    await window.firebaseAPI.guardarActualizacionFirestore(v2);
+                    listaActualizada.unshift(v2);
+                } catch (e) {}
+            }
+
+            actualizacionesMemoria = listaActualizada;
             renderListaActualizaciones(actualizacionesMemoria);
         } catch (err) {
             console.error("Error cargando actualizaciones:", err);

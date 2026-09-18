@@ -7,7 +7,7 @@
     "css": "src/css/main.css",
     "js": "src/js/main.js",
     "fecha": "2026-09-15 10:38:27",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -18,7 +18,7 @@
     "css": "src/css/aCtrl.css",
     "js": "src/js/aCtrl-ui.js",
     "fecha": "2026-09-16 17:43:03",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -29,7 +29,7 @@
     "css": "src/css/añoliturgico.css",
     "js": "src/js/añoliturgico.js",
     "fecha": "2026-09-16 16:21:38",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -40,7 +40,7 @@
     "css": "src/css/system.css",
     "js": "src/js/system.js",
     "fecha": "2026-09-17 11:26:00",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -51,7 +51,7 @@
     "css": "src/css/completas.css",
     "js": "src/js/completas.js",
     "fecha": "2026-09-11 14:22:57",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "oracion"
   },
   {
@@ -62,7 +62,7 @@
     "css": "src/css/datos.css",
     "js": "src/js/datos.js",
     "fecha": "2026-09-16 14:29:59",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -73,7 +73,7 @@
     "css": "src/css/form_etiempo.css",
     "js": "src/js/form_etiempo.js",
     "fecha": "2026-09-16 17:11:56",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -84,7 +84,7 @@
     "css": "src/css/laudes.css",
     "js": "src/js/laudes.js",
     "fecha": "2026-09-11 13:28:20",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "oracion"
   },
   {
@@ -95,7 +95,7 @@
     "css": "src/css/nombresanto.css",
     "js": "src/js/nombresanto.js",
     "fecha": "2026-09-16 17:02:58",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -106,7 +106,7 @@
     "css": "src/css/nona.css",
     "js": "src/js/nona.js",
     "fecha": "2026-09-11 14:22:47",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "oracion"
   },
   {
@@ -117,7 +117,7 @@
     "css": "src/css/oficio.css",
     "js": "src/js/oficio.js",
     "fecha": "2026-04-13 06:58:41",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "oracion"
   },
   {
@@ -128,7 +128,7 @@
     "css": "src/css/santo.css",
     "js": "src/js/santo.js",
     "fecha": "2026-09-16 16:36:29",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -139,7 +139,7 @@
     "css": "src/css/sexta.css",
     "js": "src/js/sexta.js",
     "fecha": "2026-09-11 14:22:42",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "oracion"
   },
   {
@@ -150,7 +150,7 @@
     "css": "src/css/tercia.css",
     "js": "src/js/tercia.js",
     "fecha": "2026-09-11 14:22:37",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "oracion"
   },
   {
@@ -161,7 +161,7 @@
     "css": "src/css/ver.css",
     "js": "src/js/ver.js",
     "fecha": "2026-09-16 17:16:09",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -172,7 +172,7 @@
     "css": "src/css/visperas.css",
     "js": "src/js/visperas.js",
     "fecha": "2026-09-11 14:22:51",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "oracion"
   },
   {
@@ -183,7 +183,7 @@
     "css": "src/css/ipaddr.css",
     "js": "src/js/ipaddr.js",
     "fecha": "2026-09-17 11:45:00",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   },
   {
@@ -194,7 +194,7 @@
     "css": "src/css/chat.css",
     "js": "src/js/chat.js",
     "fecha": "2026-09-18 15:30:00",
-    "version": "1.0.01",
+    "version": "1.0.02",
     "categoria": "gestion"
   }
 ]
