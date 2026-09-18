@@ -865,7 +865,17 @@
             tr.querySelector('input').focus();
         });
 
+        function obtenerUsuarioActual() {
+            return window.firebaseAPI?.getCurrentUser?.()
+                || window.currentUser
+                || (localStorage.getItem('lh_auth_email') ? { email: localStorage.getItem('lh_auth_email') } : null);
+        }
+
         function actualizarEstadoAdmin(user) {
+            if (!user) {
+                user = obtenerUsuarioActual();
+            }
+
             const label = document.getElementById('auth-user-label-ns');
             const btnLogin = document.getElementById('btn-auth-login-ns');
             const btnLogout = document.getElementById('btn-auth-logout-ns');
@@ -876,11 +886,12 @@
             const btnSincronizarFb = document.getElementById('btn-sincronizar-firebase');
             const btnAddHijo = document.getElementById('btn-add-hijo');
 
-            const puedeGuardar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_guardar');
-            const puedeImportar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_importar_csv');
-            const puedeExportar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_exportar_csv');
-            const puedeSincronizar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_sincronizar_firebase');
-            const puedeAddHijo = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_agregar_nombre');
+            const emailUser = user?.email || "";
+            const puedeGuardar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_guardar', emailUser);
+            const puedeImportar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_importar_csv', emailUser);
+            const puedeExportar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_exportar_csv', emailUser);
+            const puedeSincronizar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_sincronizar_firebase', emailUser);
+            const puedeAddHijo = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_agregar_nombre', emailUser);
 
             if (user && user.email) {
                 const esAdmin = user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
@@ -937,7 +948,7 @@
             }
 
             const modalPencil = document.getElementById('btn-modal-editar-santo');
-            const puedeEditar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_editar');
+            const puedeEditar = (typeof window.hasPermission !== 'function') || window.hasPermission('registro_editar', emailUser);
             if (modalPencil) {
                 const activoPencil = modoAdmin && puedeEditar;
                 modalPencil.style.display = 'inline-flex';
@@ -952,11 +963,18 @@
             }
         }
 
+        // Inicialización inmediata del estado de sesión con datos disponibles en caché
+        actualizarEstadoAdmin(obtenerUsuarioActual());
+
         window.iniciarSesionAdmin = async function() {
             if (window.firebaseAPI && window.firebaseAPI.login) {
                 try {
                     const res = await window.firebaseAPI.login();
-                    const u = res.user;
+                    const u = res?.user;
+                    if (u) {
+                        window.currentUser = u;
+                        actualizarEstadoAdmin(u);
+                    }
                     if (u && u.email && u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
                         alert(`¡Bienvenido Administrador (${u.email})! Modo edición y eliminación habilitado.`);
                     } else {
@@ -975,6 +993,10 @@
             if (window.firebaseAPI && window.firebaseAPI.logout) {
                 try {
                     await window.firebaseAPI.logout();
+                    window.currentUser = null;
+                    localStorage.removeItem('lh_auth_email');
+                    localStorage.setItem('lh_auth_is_admin', 'false');
+                    actualizarEstadoAdmin(null);
                     alert("Sesión cerrada. Regresando a Modo Lectura.");
                 } catch (err) {
                     console.error("Error al salir:", err);
@@ -2780,19 +2802,21 @@
 
         renderTablaRegistrados();
 
-        window.addEventListener('lh-user-changed', () => {
-            if (window.currentUser) {
-                actualizarEstadoAdmin(window.currentUser);
-            } else {
-                actualizarEstadoAdmin(null);
-            }
+        window.addEventListener('lh-user-changed', (e) => {
+            const user = e.detail?.user || obtenerUsuarioActual();
+            actualizarEstadoAdmin(user);
         });
 
         window.addEventListener('lh-access-control-updated', () => {
-            actualizarEstadoAdmin(window.currentUser || null);
+            const user = obtenerUsuarioActual();
+            actualizarEstadoAdmin(user);
         });
 
-        if (window.onAuthReady) {
+        if (window.firebaseAPI?.onAuthReady) {
+            window.firebaseAPI.onAuthReady((user) => {
+                actualizarEstadoAdmin(user);
+            });
+        } else if (window.onAuthReady) {
             window.onAuthReady((user) => {
                 actualizarEstadoAdmin(user);
             });

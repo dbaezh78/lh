@@ -63,7 +63,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         { id: "sexta", nombre: "Sexta", icono: "wb_sunny", ruta: "src/html/sexta.html", css: "src/css/sexta.css", js: "src/js/sexta.js", fecha: "2026-09-11 14:22:42", version: appVer, categoria: "oracion" },
         { id: "tercia", nombre: "Tercia", icono: "alarm", ruta: "src/html/tercia.html", css: "src/css/tercia.css", js: "src/js/tercia.js", fecha: "2026-09-11 14:22:37", version: appVer, categoria: "oracion" },
         { id: "ver", nombre: "Versión de la aplicación", icono: "history_edu", ruta: "src/html/ver.html", css: "src/css/ver.css", js: "src/js/ver.js", fecha: "2026-09-16 17:16:09", version: appVer, categoria: "gestion" },
-        { id: "visperas", nombre: "Visperas", icono: "nights_stay", ruta: "src/html/visperas.html", css: "src/css/visperas.css", js: "src/js/visperas.js", fecha: "2026-09-11 14:22:51", version: appVer, categoria: "oracion" }
+        { id: "visperas", nombre: "Visperas", icono: "nights_stay", ruta: "src/html/visperas.html", css: "src/css/visperas.css", js: "src/js/visperas.js", fecha: "2026-09-11 14:22:51", version: appVer, categoria: "oracion" },
+        { id: "ipaddr", nombre: "Registro de IPs", icono: "lan", ruta: "src/html/ipaddr.html", css: "src/css/ipaddr.css", js: "src/js/ipaddr.js", fecha: "2026-09-17 11:45:00", version: appVer, categoria: "gestion" },
+        { id: "chat", nombre: "Asistencia y Chat", icono: "forum", ruta: "src/html/chat.html", css: "src/css/chat.css", js: "src/js/chat.js", fecha: "2026-09-18 15:30:00", version: appVer, categoria: "gestion" }
     ];
 
     // Resuelve la URL de un recurso con respecto a la raíz del repositorio

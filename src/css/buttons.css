@@ -177,6 +177,7 @@
 .btn-tts-portada {
     background: var(--player-santo-bg, transparent);
     border: 1.5px solid var(--player-santo-border, transparent);
+    border: 1.5px solid #2990de;
     cursor: pointer;
     color: var(--player-santo-icon, #0288d1);
     padding: 0;
@@ -187,8 +188,8 @@
     transition: transform 0.15s ease, color 0.2s ease, background-color 0.2s ease;
     line-height: 1;
     position: relative;
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
     min-width: 32px;
     flex-shrink: 0;
     box-sizing: border-box;

@@ -185,5 +185,16 @@
     "fecha": "2026-09-17 11:45:00",
     "version": "1.0.01",
     "categoria": "gestion"
+  },
+  {
+    "id": "chat",
+    "nombre": "Asistencia y Chat",
+    "icono": "forum",
+    "ruta": "src/html/chat.html",
+    "css": "src/css/chat.css",
+    "js": "src/js/chat.js",
+    "fecha": "2026-09-18 15:30:00",
+    "version": "1.0.01",
+    "categoria": "gestion"
   }
 ]

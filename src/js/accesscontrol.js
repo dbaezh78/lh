@@ -131,7 +131,13 @@ export const PERMISSIONS = {
   IPADDR_MOTIVO: "ipaddr_motivo",
   IPADDR_BANEAR: "ipaddr_banear",
   IPADDR_EDITAR: "ipaddr_editar",
-  IPADDR_ELIMINAR: "ipaddr_eliminar"
+  IPADDR_ELIMINAR: "ipaddr_eliminar",
+
+  // 13. ASISTENCIA Y CHAT (chat.html)
+  PAGE_CHAT: "page_chat",
+  CHAT_VER_TODOS: "chat_ver_todos",
+  CHAT_ENVIAR: "chat_enviar",
+  CHAT_ELIMINAR: "chat_eliminar"
 };
 
 // Árbol jerárquico anidado para la interfaz visual
@@ -373,6 +379,18 @@ export const PERMISSION_TREE = [
       { key: "ipaddr_editar", label: "editar" },
       { key: "ipaddr_eliminar", label: "eliminar" }
     ]
+  },
+
+  // 11. Asistencia y Chat (chat.html)
+  {
+    key: "group_chat",
+    label: "Página: Asistencia y Chat",
+    children: [
+      { key: "page_chat", label: "Ver página y acceder al chat" },
+      { key: "chat_ver_todos", label: "Ver todos los chats (soporte/admin)" },
+      { key: "chat_enviar", label: "Enviar mensajes y archivos" },
+      { key: "chat_eliminar", label: "Eliminar mensajes" }
+    ]
   }
 ];
 
@@ -387,11 +405,30 @@ function llenarLabels(nodes, parentPrefix = "") {
 }
 llenarLabels(PERMISSION_TREE);
 
+// Claves de permisos obsoletas que han sido reemplazadas por permisos granulares
+export const OBSOLETE_PERMISSIONS = [
+  "actrl_grupos",
+  "actrl_miembros",
+  "actrl_permisos",
+  "actrl_inspector",
+  "inicio_ver_permisos_autorizados"
+];
+
+export function cleanObsoletePermissions(setOrObj) {
+  if (!setOrObj) return;
+  OBSOLETE_PERMISSIONS.forEach(k => {
+    if (typeof setOrObj.delete === "function") {
+      setOrObj.delete(k);
+    }
+  });
+}
+
 // Estado local
 export const accessControlState = {
   groups: {},
   userDirectPermissions: {},
   userDirectGroups: {},
+  userConsents: {},
   registeredUsers: new Set(),
   registeredUserNames: {},
   registeredUserPhotos: {},
@@ -419,6 +456,7 @@ export function initAccessControl() {
           subgroupIds: new Set(g.subgroupIds || []),
           permissions: new Set(g.permissions || [])
         };
+        cleanObsoletePermissions(accessControlState.groups[gid].permissions);
       });
       Object.keys(parsed.userDirectPermissions || {}).forEach(uid => {
         accessControlState.userDirectPermissions[uid] = new Set(parsed.userDirectPermissions[uid] || []);
@@ -426,6 +464,11 @@ export function initAccessControl() {
       Object.keys(parsed.userDirectGroups || {}).forEach(uid => {
         accessControlState.userDirectGroups[uid] = new Set(parsed.userDirectGroups[uid] || []);
       });
+      if (parsed.userConsents && typeof parsed.userConsents === "object") {
+        accessControlState.userConsents = { ...parsed.userConsents };
+      } else {
+        accessControlState.userConsents = {};
+      }
       if (Array.isArray(parsed.registeredUsers)) {
         accessControlState.registeredUsers = new Set(parsed.registeredUsers);
       }
@@ -464,7 +507,7 @@ function crearGruposPorDefecto() {
   
   // 2. Hermanos (grupo por defecto al autenticarse)
   // Incluye permisos de lectura y uso interactivo de todas las páginas y herramientas
-  const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && !p.startsWith("actrl_") && !p.startsWith("ipaddr_"));
+  const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && p !== "chat_ver_todos" && !p.startsWith("actrl_") && !p.startsWith("ipaddr_"));
   permisosHermano.push(PERMISSIONS.ACTRL_CUENTA_LOGOUT);
   createGroup("hermanos", "Hermano", permisosHermano, "Hermanos registrados y autenticados");
 
@@ -475,6 +518,7 @@ function crearGruposPorDefecto() {
     PERMISSIONS.PAGE_DATOS_ANIOS,
     PERMISSIONS.PAGE_SANTOS_IGLESIA,
     PERMISSIONS.PAGE_REGISTRO_SANTO,
+    PERMISSIONS.PAGE_CHAT,
     PERMISSIONS.PAGE_VER,
     PERMISSIONS.PAGE_SYSTEM,
     PERMISSIONS.VIEW_SETTINGS_GENERAL,
@@ -499,13 +543,17 @@ function asegurarGruposBase() {
     Object.values(PERMISSIONS).forEach(p => accessControlState.groups["administradores"].permissions.add(p));
   }
   if (!accessControlState.groups["hermanos"]) {
-    const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && !p.startsWith("actrl_") && !p.startsWith("ipaddr_"));
+    const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && p !== "chat_ver_todos" && !p.startsWith("actrl_") && !p.startsWith("ipaddr_"));
     permisosHermano.push(PERMISSIONS.ACTRL_CUENTA_LOGOUT);
     createGroup("hermanos", "Hermano", permisosHermano, "Hermanos registrados y autenticados");
   } else {
     // Actualizar nombre a Hermano si estaba guardado como Grupo General de Hermanos
     accessControlState.groups["hermanos"].name = "Hermano";
-    accessControlState.groups["hermanos"].permissions.delete("inicio_ver_permisos_autorizados");
+    cleanObsoletePermissions(accessControlState.groups["hermanos"].permissions);
+    accessControlState.groups["hermanos"].permissions.add(PERMISSIONS.PAGE_CHAT);
+    accessControlState.groups["hermanos"].permissions.add(PERMISSIONS.CHAT_ENVIAR);
+    accessControlState.groups["hermanos"].permissions.add(PERMISSIONS.CHAT_ELIMINAR);
+    accessControlState.groups["hermanos"].permissions.delete("chat_ver_todos");
   }
   if (!accessControlState.groups["invitados"]) {
     createGroup("invitados", "Usuarios Invitados", [
@@ -514,8 +562,11 @@ function asegurarGruposBase() {
       PERMISSIONS.PAGE_DATOS_ANIOS,
       PERMISSIONS.PAGE_SANTOS_IGLESIA,
       PERMISSIONS.PAGE_REGISTRO_SANTO,
+      PERMISSIONS.PAGE_CHAT,
       PERMISSIONS.ACTRL_CUENTA_LOGIN
     ], "Usuarios visitantes sin inicio de sesión");
+  } else {
+    accessControlState.groups["invitados"].permissions.add(PERMISSIONS.PAGE_CHAT);
   }
   
   // Asegurar siempre a dbaezh78@gmail.com como Administrador General
@@ -888,6 +939,12 @@ export function getUserEffectivePermissions(userIdOrEmail) {
   if (!uid && typeof window !== 'undefined' && window.firebaseAPI?.getCurrentUser) {
     uid = (window.firebaseAPI.getCurrentUser()?.email || "").toLowerCase().trim();
   }
+  if (!uid && typeof window !== 'undefined' && window.currentUser?.email) {
+    uid = (window.currentUser.email || "").toLowerCase().trim();
+  }
+  if (!uid && typeof localStorage !== 'undefined' && localStorage.getItem('lh_auth_email')) {
+    uid = (localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
+  }
 
   const effective = new Set();
 
@@ -911,7 +968,10 @@ export function getUserEffectivePermissions(userIdOrEmail) {
     visitedGroups.add(gid);
     const g = accessControlState.groups[gid];
     if (!g) return;
-    g.permissions.forEach(p => effective.add(p));
+    cleanObsoletePermissions(g.permissions);
+    g.permissions.forEach(p => {
+      if (!OBSOLETE_PERMISSIONS.includes(p)) effective.add(p);
+    });
     g.subgroupIds.forEach(sub => collect(sub));
   }
 
@@ -954,6 +1014,11 @@ export function getUserEffectivePermissions(userIdOrEmail) {
 export function setUserEmailConsent(userEmail, authorized) {
   const uid = (userEmail || "").toLowerCase().trim();
   if (!uid || !isValidEmail(uid)) return;
+
+  if (!accessControlState.userConsents) accessControlState.userConsents = {};
+  if (!accessControlState.userConsents[uid]) accessControlState.userConsents[uid] = {};
+  accessControlState.userConsents[uid].email = !!authorized;
+
   if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
   if (!accessControlState.userDirectPermissions[uid]) {
     accessControlState.userDirectPermissions[uid] = new Set();
@@ -964,16 +1029,6 @@ export function setUserEmailConsent(userEmail, authorized) {
     accessControlState.userDirectPermissions[uid].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
   }
   saveAccessControl();
-
-  const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
-  const currentEmail = (currentUser?.email || localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
-  const cachedIsAdmin = localStorage.getItem('lh_auth_is_admin') === 'true';
-  const isAdmin = (currentEmail === ADMIN_EMAIL.toLowerCase()) || (!currentEmail && cachedIsAdmin);
-
-  // Solo el administrador actualiza la configuración global de grupos en la nube
-  if (isAdmin) {
-    saveGroupConfigToCloud();
-  }
 
   // Sincronizar en el documento individual del usuario en Firestore (registered_users)
   if (window.firebaseAPI && window.firebaseAPI.db) {
@@ -998,6 +1053,11 @@ export function setUserEmailConsent(userEmail, authorized) {
 export function setUserNameConsent(userEmail, authorized) {
   const uid = (userEmail || "").toLowerCase().trim();
   if (!uid || !isValidEmail(uid)) return;
+
+  if (!accessControlState.userConsents) accessControlState.userConsents = {};
+  if (!accessControlState.userConsents[uid]) accessControlState.userConsents[uid] = {};
+  accessControlState.userConsents[uid].name = !!authorized;
+
   if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
   if (!accessControlState.userDirectPermissions[uid]) {
     accessControlState.userDirectPermissions[uid] = new Set();
@@ -1008,16 +1068,6 @@ export function setUserNameConsent(userEmail, authorized) {
     accessControlState.userDirectPermissions[uid].delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
   }
   saveAccessControl();
-
-  const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
-  const currentEmail = (currentUser?.email || localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
-  const cachedIsAdmin = localStorage.getItem('lh_auth_is_admin') === 'true';
-  const isAdmin = (currentEmail === ADMIN_EMAIL.toLowerCase()) || (!currentEmail && cachedIsAdmin);
-
-  // Solo el administrador actualiza la configuración global de grupos en la nube
-  if (isAdmin) {
-    saveGroupConfigToCloud();
-  }
 
   // Sincronizar en el documento individual del usuario en Firestore (registered_users)
   if (window.firebaseAPI && window.firebaseAPI.db) {
@@ -1043,10 +1093,19 @@ export function setUserNameConsent(userEmail, authorized) {
 export function isUserNameAuthorized(userEmail) {
   const uid = (userEmail || "").toLowerCase().trim();
   if (!uid) return false;
+
+  // Si el usuario (incluyendo el Administrador) ha establecido su consentimiento explícito
+  if (accessControlState.userConsents?.[uid]?.name !== undefined) {
+    return !!accessControlState.userConsents[uid].name;
+  }
+  if (accessControlState.userDirectPermissions?.[uid]?.has(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE)) {
+    return true;
+  }
+
+  // Por defecto el administrador está autorizado si no lo ha desactivado
   if (uid === ADMIN_EMAIL.toLowerCase()) return true;
 
-  // Consentimiento directo individual asignado al usuario
-  return !!(accessControlState.userDirectPermissions?.[uid]?.has(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE));
+  return false;
 }
 
 /**
@@ -1056,10 +1115,19 @@ export function isUserNameAuthorized(userEmail) {
 export function isUserEmailAuthorized(userEmail) {
   const uid = (userEmail || "").toLowerCase().trim();
   if (!uid) return false;
+
+  // Si el usuario (incluyendo el Administrador) ha establecido su consentimiento explícito
+  if (accessControlState.userConsents?.[uid]?.email !== undefined) {
+    return !!accessControlState.userConsents[uid].email;
+  }
+  if (accessControlState.userDirectPermissions?.[uid]?.has(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO)) {
+    return true;
+  }
+
+  // Por defecto el administrador está autorizado si no lo ha desactivado
   if (uid === ADMIN_EMAIL.toLowerCase()) return true;
 
-  // Consentimiento directo individual asignado al usuario
-  return !!(accessControlState.userDirectPermissions?.[uid]?.has(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO));
+  return false;
 }
 
 export function hasPermission(permissionKey, userEmail) {
@@ -1079,6 +1147,7 @@ export function saveAccessControl() {
     groups: {},
     userDirectPermissions: {},
     userDirectGroups: {},
+    userConsents: accessControlState.userConsents || {},
     registeredUsers: Array.from(accessControlState.registeredUsers),
     registeredUserNames: accessControlState.registeredUserNames,
     registeredUserPhotos: accessControlState.registeredUserPhotos,
@@ -1131,6 +1200,7 @@ export async function saveGroupConfigToCloud() {
     const serializableGroups = {};
     Object.keys(accessControlState.groups).forEach(gid => {
       const g = accessControlState.groups[gid];
+      cleanObsoletePermissions(g.permissions);
       serializableGroups[gid] = {
         id: g.id,
         name: g.name,
@@ -1142,7 +1212,12 @@ export async function saveGroupConfigToCloud() {
 
     const serializableUserDirectPerms = {};
     Object.keys(accessControlState.userDirectPermissions || {}).forEach(uid => {
-      serializableUserDirectPerms[uid] = Array.from(accessControlState.userDirectPermissions[uid] || []);
+      // Filtrar consentimientos individuales para que pertenezcan exclusivamente a registered_users
+      const perms = Array.from(accessControlState.userDirectPermissions[uid] || [])
+        .filter(p => p !== PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO && p !== PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+      if (perms.length > 0) {
+        serializableUserDirectPerms[uid] = perms;
+      }
     });
 
     // Guardar reemplazando el mapa completo para purgar grupos eliminados
@@ -1175,9 +1250,14 @@ export async function syncRegisteredUsersFromFirebase() {
         if (d.group) setUserPrimaryGroup(em, d.group, true);
         if (d.banned) accessControlState.bannedUsers.add(em);
         else accessControlState.bannedUsers.delete(em);
+
+        if (!accessControlState.userConsents) accessControlState.userConsents = {};
+        if (!accessControlState.userConsents[em]) accessControlState.userConsents[em] = {};
+        if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+        if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+
         if (d.autorizoMostrarCorreo !== undefined) {
-          if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
-          if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+          accessControlState.userConsents[em].email = !!d.autorizoMostrarCorreo;
           if (d.autorizoMostrarCorreo) {
             accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
           } else {
@@ -1185,8 +1265,7 @@ export async function syncRegisteredUsersFromFirebase() {
           }
         }
         if (d.autorizoMostrarNombre !== undefined) {
-          if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
-          if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+          accessControlState.userConsents[em].name = !!d.autorizoMostrarNombre;
           if (d.autorizoMostrarNombre) {
             accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
           } else {
@@ -1196,6 +1275,7 @@ export async function syncRegisteredUsersFromFirebase() {
       }
     });
     saveAccessControl();
+    window.dispatchEvent(new CustomEvent('lh-access-control-updated'));
   } catch (err) {
     console.warn("⚠️ Error sincronizando usuarios de Firebase:", err);
   }
@@ -1206,6 +1286,7 @@ export async function syncRegisteredUsersFromFirebase() {
 // =========================================================================
 let unsubGroupsListener = null;
 let unsubUsersListener = null;
+let currentUsersListenerType = null;
 
 export async function iniciarSincronizacionEnTiempoRealFirebase() {
   if (!window.firebaseAPI?.db) {
@@ -1239,9 +1320,9 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
                 accessControlState.groups[gid].name = remote.name || accessControlState.groups[gid].name;
                 accessControlState.groups[gid].description = remote.description || accessControlState.groups[gid].description;
                 accessControlState.groups[gid].permissions = new Set(remote.permissions || []);
-                accessControlState.groups[gid].permissions.delete("inicio_ver_permisos_autorizados");
                 accessControlState.groups[gid].subgroupIds = new Set(remote.subgroupIds || []);
               }
+              cleanObsoletePermissions(accessControlState.groups[gid].permissions);
             });
 
             // Si un grupo no-base fue eliminado de Firestore, purgarlo de la memoria local
@@ -1258,7 +1339,20 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
             if (data.userDirectPermissions) {
               if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
               Object.keys(data.userDirectPermissions).forEach(uid => {
-                accessControlState.userDirectPermissions[uid] = new Set(data.userDirectPermissions[uid] || []);
+                const currentSet = accessControlState.userDirectPermissions[uid] || new Set();
+                const newSet = new Set(data.userDirectPermissions[uid] || []);
+
+                // Conservar consentimientos del usuario si ya estaban cargados o en accessControlState.userConsents
+                const nameConsent = accessControlState.userConsents?.[uid]?.name ?? currentSet.has(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+                const emailConsent = accessControlState.userConsents?.[uid]?.email ?? currentSet.has(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+
+                if (nameConsent) newSet.add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+                else newSet.delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
+
+                if (emailConsent) newSet.add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+                else newSet.delete(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
+
+                accessControlState.userDirectPermissions[uid] = newSet;
               });
             }
 
@@ -1270,16 +1364,18 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
     }
 
     // 2. Escuchar usuarios registrados:
-    // OPTIMIZACIÓN DE CUOTA: Solo si estamos en aCtrl.html y somos admin escuchamos toda la colección.
-    // En las demás páginas o para usuarios normales, escuchamos ÚNICAMENTE el documento propio del usuario.
-    // Esto ahorra el 99% de lecturas y previene bloqueos por límites de cuota de Firebase.
+    // En aCtrl.html, cualquier usuario escucha toda la colección para sincronizar miembros y consentimientos en tiempo real.
+    // En las demás páginas, se escucha únicamente el documento propio del usuario para optimizar cuota.
     const isActrlPage = (typeof window !== 'undefined') && window.location.pathname.toLowerCase().includes("actrl.html");
     const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
-    const currentEmail = (currentUser?.email || "").toLowerCase().trim();
-    const isAdmin = (currentEmail === ADMIN_EMAIL.toLowerCase());
+    const currentEmail = (currentUser?.email || localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
 
-    if (isActrlPage && isAdmin) {
-      if (!unsubUsersListener) {
+    if (isActrlPage) {
+      if (currentUsersListenerType !== 'collection') {
+        if (typeof unsubUsersListener === 'function') {
+          unsubUsersListener();
+        }
+        currentUsersListenerType = 'collection';
         const usersColRef = collection(window.firebaseAPI.db, "registered_users");
         unsubUsersListener = onSnapshot(usersColRef, (snapshot) => {
           snapshot.forEach(docSnap => {
@@ -1301,9 +1397,14 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
               }
               if (d.banned) accessControlState.bannedUsers.add(em);
               else accessControlState.bannedUsers.delete(em);
+
+              if (!accessControlState.userConsents) accessControlState.userConsents = {};
+              if (!accessControlState.userConsents[em]) accessControlState.userConsents[em] = {};
+              if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+              if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+
               if (d.autorizoMostrarCorreo !== undefined) {
-                if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
-                if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+                accessControlState.userConsents[em].email = !!d.autorizoMostrarCorreo;
                 if (d.autorizoMostrarCorreo) {
                   accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
                 } else {
@@ -1311,8 +1412,7 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
                 }
               }
               if (d.autorizoMostrarNombre !== undefined) {
-                if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
-                if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+                accessControlState.userConsents[em].name = !!d.autorizoMostrarNombre;
                 if (d.autorizoMostrarNombre) {
                   accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
                 } else {
@@ -1326,7 +1426,11 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
         }, err => console.warn("Aviso listener usuarios Firestore:", err.message));
       }
     } else if (currentEmail) {
-      if (!unsubUsersListener) {
+      if (currentUsersListenerType !== currentEmail) {
+        if (typeof unsubUsersListener === 'function') {
+          unsubUsersListener();
+        }
+        currentUsersListenerType = currentEmail;
         const cleanDocId = currentEmail.replace(/[^a-zA-Z0-9_-]/g, "_");
         const userDocRef = doc(window.firebaseAPI.db, "registered_users", cleanDocId);
         unsubUsersListener = onSnapshot(userDocRef, (docSnap) => {
@@ -1346,9 +1450,14 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
               }
               if (d.banned) accessControlState.bannedUsers.add(em);
               else accessControlState.bannedUsers.delete(em);
+
+              if (!accessControlState.userConsents) accessControlState.userConsents = {};
+              if (!accessControlState.userConsents[em]) accessControlState.userConsents[em] = {};
+              if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
+              if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+
               if (d.autorizoMostrarCorreo !== undefined) {
-                if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
-                if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+                accessControlState.userConsents[em].email = !!d.autorizoMostrarCorreo;
                 if (d.autorizoMostrarCorreo) {
                   accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_CORREO);
                 } else {
@@ -1356,8 +1465,7 @@ export async function iniciarSincronizacionEnTiempoRealFirebase() {
                 }
               }
               if (d.autorizoMostrarNombre !== undefined) {
-                if (!accessControlState.userDirectPermissions) accessControlState.userDirectPermissions = {};
-                if (!accessControlState.userDirectPermissions[em]) accessControlState.userDirectPermissions[em] = new Set();
+                accessControlState.userConsents[em].name = !!d.autorizoMostrarNombre;
                 if (d.autorizoMostrarNombre) {
                   accessControlState.userDirectPermissions[em].add(PERMISSIONS.ACTRL_MIEMBROS_AUTORIZO_MOSTRAR_NOMBRE);
                 } else {
@@ -1386,6 +1494,12 @@ if (window.firebaseAPI?.onAuthReady) {
   });
 } else {
   setTimeout(iniciarSincronizacionEnTiempoRealFirebase, 1000);
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('lh-user-changed', () => {
+    iniciarSincronizacionEnTiempoRealFirebase();
+  });
 }
 
 // =========================================================================

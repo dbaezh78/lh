@@ -927,7 +927,17 @@
         const ADMIN_EMAIL = 'dbaezh78@gmail.com';
         let modoAdminSanto = false; // Solo true si está logueado dbaezh78@gmail.com
 
+        function obtenerUsuarioActual() {
+            return window.firebaseAPI?.getCurrentUser?.()
+                || window.currentUser
+                || (localStorage.getItem('lh_auth_email') ? { email: localStorage.getItem('lh_auth_email') } : null);
+        }
+
         function actualizarEstadoAdmin(user) {
+            if (!user) {
+                user = obtenerUsuarioActual();
+            }
+
             const label = document.getElementById('auth-user-label');
             const btnLogin = document.getElementById('btn-auth-login');
             const btnLogout = document.getElementById('btn-auth-logout');
@@ -935,8 +945,9 @@
             const btnSubir = document.getElementById('btn-subir-firebase-santo');
             const btnGuardar = document.getElementById('btn-guardar-asignaciones');
 
-            const puedeSubir = (typeof window.hasPermission !== 'function') || window.hasPermission('santos_subir_firebase');
-            const puedeCrearEditar = (typeof window.hasPermission !== 'function') || window.hasPermission('santos_crear_editar');
+            const emailUser = user?.email || "";
+            const puedeSubir = (typeof window.hasPermission !== 'function') || window.hasPermission('santos_subir_firebase', emailUser);
+            const puedeCrearEditar = (typeof window.hasPermission !== 'function') || window.hasPermission('santos_crear_editar', emailUser);
 
             if (user && user.email) {
                 const esAdmin = user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
@@ -991,16 +1002,24 @@
             }
         }
 
+        // Inicialización inmediata del estado de sesión con datos disponibles en caché
+        actualizarEstadoAdmin(obtenerUsuarioActual());
+
         window.iniciarSesionAdmin = async function() {
             if (window.firebaseAPI && window.firebaseAPI.login) {
                 try {
                     const res = await window.firebaseAPI.login();
-                    const u = res.user;
+                    const u = res?.user;
+                    if (u) {
+                        window.currentUser = u;
+                        actualizarEstadoAdmin(u);
+                    }
                     if (u && u.email && u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
                         alert(`¡Bienvenido Administrador (${u.email})! Modo edición activado.`);
                     } else {
                         alert(`Sesión iniciada como ${u ? u.email : 'usuario'}. Permisos en Modo Lectura.`);
                     }
+                    renderTabla();
                 } catch (err) {
                     console.error("Error al iniciar sesión:", err);
                     alert("Error al iniciar sesión: " + (err.message || err));
@@ -1038,7 +1057,12 @@
             if (window.firebaseAPI && window.firebaseAPI.logout) {
                 try {
                     await window.firebaseAPI.logout();
+                    window.currentUser = null;
+                    localStorage.removeItem('lh_auth_email');
+                    localStorage.setItem('lh_auth_is_admin', 'false');
+                    actualizarEstadoAdmin(null);
                     alert("Sesión cerrada. Regresando a Modo Lectura.");
+                    renderTabla();
                 } catch (err) {
                     console.error("Error al salir:", err);
                 }
@@ -1486,19 +1510,24 @@
         actualizarSelectorFiltroSantos();
         renderTabla();
 
-        window.addEventListener('lh-user-changed', () => {
-            if (window.currentUser) {
-                actualizarEstadoAdmin(window.currentUser);
-            }
+        window.addEventListener('lh-user-changed', (e) => {
+            const user = e.detail?.user || obtenerUsuarioActual();
+            actualizarEstadoAdmin(user);
             renderTabla();
         });
 
         window.addEventListener('lh-access-control-updated', () => {
-            actualizarEstadoAdmin(window.currentUser || null);
+            const user = obtenerUsuarioActual();
+            actualizarEstadoAdmin(user);
             renderTabla();
         });
 
-        if (window.onAuthReady) {
+        if (window.firebaseAPI?.onAuthReady) {
+            window.firebaseAPI.onAuthReady((user) => {
+                actualizarEstadoAdmin(user);
+                renderTabla();
+            });
+        } else if (window.onAuthReady) {
             window.onAuthReady((user) => {
                 actualizarEstadoAdmin(user);
                 renderTabla();

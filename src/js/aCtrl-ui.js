@@ -73,15 +73,15 @@ function inicializarACtrlUI() {
   // Controla qué subpestañas de Acceso son visibles según permisos
   function actualizarVisibilidadSubtabsAcceso() {
     const permSubtabs = {
-      "members": "actrl_miembros",
-      "groups": "actrl_grupos",
-      "internal-members": "actrl_miembros_internos_agregar",
+      "members": "actrl_miembros_ver_todo",
+      "groups": "actrl_grupos_ver_grupo",
+      "internal-members": "actrl_miembros_internos_ver",
       "permissions": "actrl_permisos_ver",
       "inspector": "actrl_inspector_ver"
     };
 
     const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
-    const email = currentUser?.email || "";
+    const email = (currentUser?.email || localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
 
     let firstAvailable = null;
     const currentSavedSubtab = localStorage.getItem("lh_actrl_subtab") || "members";
@@ -92,8 +92,7 @@ function inicializarACtrlUI() {
       let allowed = true;
       if (typeof window.hasPermission === 'function') {
         if (subtab === "members") {
-          allowed = window.hasPermission("actrl_miembros", email) ||
-                    window.hasPermission("actrl_miembros_ver_todo", email) ||
+          allowed = window.hasPermission("actrl_miembros_ver_todo", email) ||
                     window.hasPermission("actrl_miembros_buscador", email) ||
                     window.hasPermission("actrl_miembros_ver_correo", email) ||
                     window.hasPermission("actrl_miembros_ver_botones", email) ||
@@ -103,12 +102,7 @@ function inicializarACtrlUI() {
                     window.hasPermission("actrl_miembros_eliminar_registro", email) ||
                     window.hasPermission("actrl_miembros_cambiar_grupo", email);
         } else if (subtab === "groups") {
-          allowed = window.hasPermission("actrl_grupos", email) ||
-                    window.hasPermission("actrl_grupos_ver_grupo", email) ||
-                    window.hasPermission("actrl_grupos_ver_miembros", email) ||
-                    window.hasPermission("actrl_grupos_crear", email) ||
-                    window.hasPermission("actrl_grupos_editar", email) ||
-                    window.hasPermission("actrl_grupos_eliminar", email);
+          allowed = window.hasPermission("actrl_grupos_ver_grupo", email);
         } else if (subtab === "internal-members") {
           allowed = window.hasPermission("actrl_miembros_internos_ver", email) ||
                     window.hasPermission("actrl_miembros_internos_agregar", email);
@@ -139,12 +133,12 @@ function inicializarACtrlUI() {
     renderGruposList();
 
     const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
-    const email = currentUser?.email || "";
+    const email = (currentUser?.email || localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
 
     // Grupos: Crear Grupo
     const formCrearGrupo = document.querySelector("#access-subpanel-groups .form-box");
     if (formCrearGrupo) {
-      const pCrear = (typeof window.hasPermission === 'function') ? window.hasPermission("actrl_grupos_crear", email) : true;
+      const pCrear = (typeof window.hasPermission === 'function') ? window.hasPermission("actrl_grupos_crear", email) : false;
       formCrearGrupo.style.display = pCrear ? "block" : "none";
     }
 
@@ -235,6 +229,7 @@ function inicializarACtrlUI() {
       renderPermissionsPanel();
     }
     if (targetSubtab === "members") renderMiembrosList();
+    if (targetSubtab === "groups") renderGruposList();
   }
 
   // Eventos de clic en Pestañas Principales
@@ -333,7 +328,15 @@ function inicializarACtrlUI() {
   // Escuchar estado de autenticación
   if (window.firebaseAPI?.onAuthReady) {
     window.firebaseAPI.onAuthReady((user) => {
-      if (user) registrarIpAccesoUsuario(user);
+      if (user) {
+        registrarIpAccesoUsuario(user);
+        if (typeof syncRegisteredUsersFromFirebase === "function") {
+          syncRegisteredUsersFromFirebase().then(() => {
+            renderMiembrosList();
+            renderGruposList();
+          });
+        }
+      }
       verificarVisibilidadPestanaAcceso(user);
       actualizarVisibilidadSubtabsAcceso();
       actualizarControlesSubpanelesAcceso();
@@ -876,37 +879,35 @@ function renderMiembrosList() {
       : false;
 
     if (canVerCorreo) {
-      if (isViewerAdmin || isSelf || isTargetAdmin || userAuthorized) {
+      if (isViewerAdmin || isSelf || userAuthorized) {
         let authBadge = "";
-        if (isViewerAdmin && !isTargetAdmin) {
+        if (isViewerAdmin) {
           authBadge = userAuthorized
             ? ' <span style="font-size:0.72rem; color:#16a34a; font-weight:600;">(Correo Autorizado)</span>'
             : ' <span style="font-size:0.72rem; color:#dc2626; font-weight:500;">(Correo No autorizado)</span>';
         }
         emailHtml = `<p>${userEmail}${authBadge} ${isBanned ? '<span style="color:red; font-weight:bold;">(Baneado)</span>' : ''}</p>`;
       } else {
-        emailHtml = `<p style="color:var(--text-muted); font-size:0.8rem; font-style:italic;">Correo privado ${isBanned ? '<span style="color:red; font-weight:bold;">(Baneado)</span>' : ''}</p>`;
+        emailHtml = isBanned ? `<p><span style="color:red; font-weight:bold;">(Baneado)</span></p>` : "";
       }
     } else if (isBanned) {
       emailHtml = `<p><span style="color:red; font-weight:bold;">(Baneado)</span></p>`;
     }
 
     // Ocultar nombre real si no está autorizado
-    let displayName = name || "Hermano Registrado";
-    if (!isTargetAdmin && !isViewerAdmin && !isSelf && !userNameAuthorized) {
-      displayName = "Hermano Registrado";
+    let displayName = name || (isTargetAdmin ? "Carlos David Báez (Administrador General)" : "Hermano Registrado");
+    if (!isViewerAdmin && !isSelf && !userNameAuthorized) {
+      displayName = isTargetAdmin ? "Administrador General" : "Hermano Registrado";
     }
 
     let authNameBadge = "";
-    if (isViewerAdmin && !isTargetAdmin) {
+    if (isViewerAdmin) {
       authNameBadge = userNameAuthorized
         ? ' <span style="font-size:0.72rem; color:#16a34a; font-weight:600;">(Nombre Autorizado)</span>'
         : ' <span style="font-size:0.72rem; color:#dc2626; font-weight:500;">(Nombre No autorizado)</span>';
     }
 
-    const titleText = isTargetAdmin
-      ? (name || "Carlos David Báez (Administrador General)")
-      : `${displayName}${authNameBadge}`;
+    const titleText = `${displayName}${authNameBadge}`;
 
     // 6. Control de "ver Grupo actual"
     const currentName = (currentGid === "hermanos") ? "Hermano" : (accessControlState.groups[currentGid]?.name || currentGid);
@@ -916,21 +917,18 @@ function renderMiembrosList() {
 
     // Control de Autorizo mostrar mi Nombre y Autorizo mostrar mi correo en la tarjeta
     const canToggleConsent = isViewerAdmin || isSelf;
-    let consentHtml = "";
-    if (!isTargetAdmin) {
-      consentHtml = `
-        <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
-          <label style="font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px; cursor: ${canToggleConsent ? 'pointer' : 'default'}; color: ${userNameAuthorized ? '#16a34a' : 'var(--text-muted)'}; font-weight: ${userNameAuthorized ? '600' : '400'};">
-            <input type="checkbox" class="ac-toggle-name-consent" data-email="${userEmail}" ${userNameAuthorized ? 'checked' : ''} ${!canToggleConsent ? 'disabled title="Solo el hermano o el Administrador pueden modificar este permiso"' : ''} style="cursor: ${canToggleConsent ? 'pointer' : 'default'}; accent-color: #16a34a;">
-            <span>Autorizo mostrar mi Nombre</span>
-          </label>
-          <label style="font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px; cursor: ${canToggleConsent ? 'pointer' : 'default'}; color: ${userAuthorized ? '#16a34a' : 'var(--text-muted)'}; font-weight: ${userAuthorized ? '600' : '400'};">
-            <input type="checkbox" class="ac-toggle-email-consent" data-email="${userEmail}" ${userAuthorized ? 'checked' : ''} ${!canToggleConsent ? 'disabled title="Solo el hermano o el Administrador pueden modificar este permiso"' : ''} style="cursor: ${canToggleConsent ? 'pointer' : 'default'}; accent-color: #16a34a;">
-            <span>Autorizo mostrar mi correo</span>
-          </label>
-        </div>
-      `;
-    }
+    const consentHtml = `
+      <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px; cursor: ${canToggleConsent ? 'pointer' : 'default'}; color: ${userNameAuthorized ? '#16a34a' : 'var(--text-muted)'}; font-weight: ${userNameAuthorized ? '600' : '400'};">
+          <input type="checkbox" class="ac-toggle-name-consent" data-email="${userEmail}" ${userNameAuthorized ? 'checked' : ''} ${!canToggleConsent ? 'disabled title="Solo el hermano o el Administrador pueden modificar este permiso"' : ''} style="cursor: ${canToggleConsent ? 'pointer' : 'default'}; accent-color: #16a34a;">
+          <span>Autorizo mostrar mi Nombre</span>
+        </label>
+        <label style="font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px; cursor: ${canToggleConsent ? 'pointer' : 'default'}; color: ${userAuthorized ? '#16a34a' : 'var(--text-muted)'}; font-weight: ${userAuthorized ? '600' : '400'};">
+          <input type="checkbox" class="ac-toggle-email-consent" data-email="${userEmail}" ${userAuthorized ? 'checked' : ''} ${!canToggleConsent ? 'disabled title="Solo el hermano o el Administrador pueden modificar este permiso"' : ''} style="cursor: ${canToggleConsent ? 'pointer' : 'default'}; accent-color: #16a34a;">
+          <span>Autorizo mostrar mi correo</span>
+        </label>
+      </div>
+    `;
 
     // 5. Control de "ver grupo" y 9. "cambiar grupo"
     let grupoControlHtml = "";
@@ -1074,11 +1072,11 @@ function renderGruposList() {
   if (!container) return;
 
   const currentUser = window.firebaseAPI?.getCurrentUser ? window.firebaseAPI.getCurrentUser() : null;
-  const email = currentUser?.email || "";
-  const canVerGrupo = (typeof window.hasPermission === 'function') ? (window.hasPermission("actrl_grupos_ver_grupo", email) || window.hasPermission("actrl_grupos", email)) : true;
-  const canVerMiembros = (typeof window.hasPermission === 'function') ? (window.hasPermission("actrl_grupos_ver_miembros", email) || window.hasPermission("actrl_grupos", email)) : true;
-  const canEditar = (typeof window.hasPermission === 'function') ? window.hasPermission("actrl_grupos_editar", email) : true;
-  const canEliminar = (typeof window.hasPermission === 'function') ? window.hasPermission("actrl_grupos_eliminar", email) : true;
+  const email = (currentUser?.email || localStorage.getItem('lh_auth_email') || "").toLowerCase().trim();
+  const canVerGrupo = (typeof window.hasPermission === 'function') ? window.hasPermission("actrl_grupos_ver_grupo", email) : false;
+  const canVerMiembros = (typeof window.hasPermission === 'function') ? window.hasPermission("actrl_grupos_ver_miembros", email) : false;
+  const canEditar = (typeof window.hasPermission === 'function') ? window.hasPermission("actrl_grupos_editar", email) : false;
+  const canEliminar = (typeof window.hasPermission === 'function') ? window.hasPermission("actrl_grupos_eliminar", email) : false;
 
   if (!canVerGrupo) {
     container.innerHTML = `
@@ -1106,9 +1104,12 @@ function renderGruposList() {
     const countSub = g.subgroupIds ? g.subgroupIds.size : 0;
     const gName = (gid === "hermanos") ? "Hermano" : g.name;
 
-    const miembrosSpan = canVerMiembros
-      ? `<b>Miembros:</b> ${countMembers} | <b>Subgrupos anidados:</b> ${countSub}`
-      : `<b>Subgrupos anidados:</b> ${countSub}`;
+    let miembrosSpan = "";
+    if (canVerMiembros) {
+      miembrosSpan = `<b>Miembros:</b> ${countMembers} | <b>Subgrupos anidados:</b> ${countSub}`;
+    } else if (countSub > 0) {
+      miembrosSpan = `<b>Subgrupos anidados:</b> ${countSub}`;
+    }
 
     return `
       <div class="ac-member-card">
@@ -1116,9 +1117,7 @@ function renderGruposList() {
           <div class="ac-member-info">
             <h4>${gName} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">(${g.id})</span></h4>
             <p>${g.description || 'Sin descripción'}</p>
-            <span style="font-size:0.75rem; color:var(--text-muted);">
-              ${miembrosSpan}
-            </span>
+            ${miembrosSpan ? `<span style="font-size:0.75rem; color:var(--text-muted);">${miembrosSpan}</span>` : ''}
           </div>
           <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
             ${canEditar ? `

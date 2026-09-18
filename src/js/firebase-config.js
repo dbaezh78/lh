@@ -50,9 +50,17 @@ window.firebaseAPI = {
     auth,
     db,
     adminEmail: ADMIN_EMAIL,
-    login: () => signInWithPopup(auth, provider),
-    logout: () => signOut(auth),
+    login: () => signInWithPopup(auth, provider).then(res => {
+        window.currentUser = res.user;
+        return res;
+    }),
+    logout: () => signOut(auth).then(() => {
+        window.currentUser = null;
+        localStorage.removeItem('lh_auth_email');
+        localStorage.setItem('lh_auth_is_admin', 'false');
+    }),
     onAuthReady: (callback) => onAuthStateChanged(auth, (user) => {
+        window.currentUser = user;
         const isAdmin = user && user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
         localStorage.setItem('lh_auth_is_admin', isAdmin ? 'true' : 'false');
         if (user && user.email) {
@@ -64,10 +72,11 @@ window.firebaseAPI = {
             window.accessControlAPI.registerUser(user);
         }
         if (callback) callback(user, isAdmin);
+        window.dispatchEvent(new CustomEvent('lh-user-changed', { detail: { user, isAdmin } }));
     }),
-    getCurrentUser: () => auth.currentUser,
+    getCurrentUser: () => auth.currentUser || window.currentUser,
     isAdmin: () => {
-        const user = auth.currentUser;
+        const user = auth.currentUser || window.currentUser;
         return !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
     },
     // Métodos para sincronizar Santos con Cloud Firestore (Cada santo como documento individual)
@@ -300,5 +309,8 @@ window.firebaseAPI = {
         }
     }
 };
+
+window.onAuthReady = window.firebaseAPI.onAuthReady;
+window.getCurrentUser = window.firebaseAPI.getCurrentUser;
 
 console.log("🔥 [Firebase] Inicializado correctamente con CDN modular. Admin autorizado:", ADMIN_EMAIL);

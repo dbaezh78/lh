@@ -383,11 +383,10 @@ body.dark-theme #modal-global-settings select option {
 
 .material-symbols-outlined:hover {
     background: white;
-    background: white;
     color: black;
     border-radius: 50%;
-/*    width: 20px;
-    height: 20px;*/
+    width: 33px;
+    height: 33px;
     place-content: center;
     text-align: center;
 }

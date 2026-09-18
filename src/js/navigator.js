@@ -137,6 +137,7 @@
         const modulos = [
             { nombre: 'Inicio', icono: 'home', files: ['index.html', 'src/css/main.css', 'src/js/main.js'] },
             { nombre: 'Control de Acceso', icono: 'admin_panel_settings', files: ['src/html/aCtrl.html', 'src/css/aCtrl.css', 'src/js/aCtrl-ui.js', 'src/js/accesscontrol.js'] },
+            { nombre: 'Asistencia y Chat', icono: 'forum', files: ['src/html/chat.html', 'src/css/chat.css', 'src/js/chat.js', 'chat.html'] },
             { nombre: 'Año Liturgico', icono: 'calendar_month', files: ['src/html/añoliturgico.html', 'src/css/añoliturgico.css', 'src/js/añoliturgico.js'] },
             { nombre: 'Archivos de Sistema', icono: 'folder_special', files: ['src/html/system.html', 'src/css/system.css', 'src/js/system.js'] },
             { nombre: 'Completas', icono: 'bedtime', files: ['src/html/completas.html', 'src/css/completas.css', 'src/js/completas.js'] },
@@ -326,6 +327,11 @@
                     </div>
 
                     <div class="account-actions-list" id="account-actions-list">
+                        <button class="account-action-item" id="account-action-chat">
+                            <span class="material-symbols-outlined">forum</span>
+                            <span>Asistencia y Chat</span>
+                        </button>
+
                         <button class="account-action-item" id="account-action-ajustes">
                             <span class="material-symbols-outlined">settings</span>
                             <span>Ajustes</span>
@@ -419,6 +425,7 @@
                         <a href="/src/html/datos.html"><span class="material-symbols-outlined">dataset</span> Datos y Años</a>
                         <a href="/src/html/santo.html"><span class="material-symbols-outlined">calendar_today</span> Santo</a>
                         <a href="/src/html/nombresanto.html"><span class="material-symbols-outlined">person_add</span> Nombre Santo</a>
+                        <a href="/src/html/chat.html"><span class="material-symbols-outlined">forum</span> Asistencia y Chat</a>
                         <a href="/src/html/ver.html"><span class="material-symbols-outlined">history_edu</span> Historial de Cambios</a>
                         <a href="/src/html/system.html"><span class="material-symbols-outlined">folder_special</span> Archivos del Sistema</a>
                     </div>
@@ -558,6 +565,15 @@
 
     if (manageBtn) manageBtn.addEventListener('click', goToPerfil);
     if (perfilBtn) perfilBtn.addEventListener('click', goToPerfil);
+
+    const chatBtn = document.getElementById('account-action-chat');
+    if (chatBtn) {
+        chatBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (accountCard) accountCard.classList.add('hidden');
+            window.location.href = '/src/html/chat.html';
+        });
+    }
 
     if (ajustesBtn) {
         ajustesBtn.addEventListener('click', (e) => {
@@ -731,6 +747,7 @@
             else if (href.includes('datos.html')) perm = 'page_datos_anios';
             else if (href.includes('santo.html')) perm = 'page_santos_iglesia';
             else if (href.includes('nombresanto.html')) perm = 'page_registro_santo';
+            else if (href.includes('chat.html')) perm = 'page_chat';
             else if (href.includes('ver.html')) perm = 'page_ver';
             else if (href.includes('system.html')) perm = 'page_system';
 
@@ -774,6 +791,9 @@
         } else if (path.includes("nombresanto.html")) {
             requiredPerm = "page_registro_santo";
             pageTitle = "Registro del Santo";
+        } else if (path.includes("chat.html")) {
+            requiredPerm = "page_chat";
+            pageTitle = "Asistencia y Chat";
         }
 
         if (requiredPerm) {
