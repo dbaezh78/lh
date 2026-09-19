@@ -103,6 +103,9 @@ body.theme-sepia {
 html, body {
   width: 100%;
   height: 100%;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
   background-color: var(--wa-bg-deep);
   color: var(--wa-text-primary);
@@ -113,16 +116,21 @@ html, body {
 /* Layout General - Espacio reservado para el Navegador inferior (60px) */
 .wa-app {
   display: flex;
+  width: 100%;
   width: 100vw;
-  height: calc(100vh - 60px);
+  height: 100%;
+  height: 100dvh;
+  box-sizing: border-box;
+  padding-bottom: 60px; /* Deja espacio exacto al fondo para el navbar fijo (#nav-wrapper) */
   background-color: var(--wa-bg-panel);
   position: relative;
   overflow: hidden;
-  transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: padding-bottom 0.25s ease;
 }
 
-body:has(#nav-wrapper.hidden) .wa-app {
-  height: 100vh;
+body:has(#nav-wrapper.hidden) .wa-app,
+body.nav-hidden .wa-app {
+  padding-bottom: 0px !important;
 }
 
 /* --- SIDEBAR IZQUIERDA --- */
@@ -341,6 +349,7 @@ body:has(#nav-wrapper.hidden) .wa-app {
 .wa-main {
   flex: 1;
   height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background-color: var(--wa-bg-chat);
@@ -392,7 +401,9 @@ body:has(#nav-wrapper.hidden) .wa-app {
 /* Área de Mensajes con Fondo WhatsApp Doodle */
 .wa-messages-area {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 16px 24px;
   display: flex;
   flex-direction: column;
@@ -1464,13 +1475,83 @@ body.theme-light .wa-voice-limit-badge {
   color: #667781;
 }
 
+/* --- REPRODUCTOR DE AUDIO EN MODO CLARO (COLOR NEGRO NÍTIDO - SIN ASPECTO PÁLIDO) --- */
+body.theme-light .wa-bubble.out .wa-audio-play-btn,
+body.theme-light .wa-bubble.in .wa-audio-play-btn,
+body.theme-light .wa-audio-play-btn {
+  color: #111b21 !important;
+}
+
+body.theme-light .wa-bubble.out .wa-audio-play-btn:hover,
+body.theme-light .wa-bubble.in .wa-audio-play-btn:hover {
+  color: #000000 !important;
+}
+
+body.theme-light .wa-audio-slider {
+  background: rgba(0, 0, 0, 0.22) !important;
+}
+
+body.theme-light .wa-bubble.out .wa-audio-slider::-webkit-slider-thumb,
+body.theme-light .wa-bubble.in .wa-audio-slider::-webkit-slider-thumb {
+  background-color: #111b21 !important;
+}
+
+body.theme-light .wa-bubble.out .wa-audio-slider::-moz-range-thumb,
+body.theme-light .wa-bubble.in .wa-audio-slider::-moz-range-thumb {
+  background-color: #111b21 !important;
+}
+
+body.theme-light .wa-audio-meta-row,
+body.theme-light .wa-bubble.out .wa-audio-meta-row,
+body.theme-light .wa-bubble.in .wa-audio-meta-row {
+  color: #111b21 !important;
+}
+
+body.theme-light .wa-audio-timer {
+  color: #111b21 !important;
+  font-weight: 600 !important;
+}
+
 body.theme-light .wa-audio-speed-btn {
-  background: rgba(0, 0, 0, 0.08);
-  color: #111b21;
+  background: rgba(0, 0, 0, 0.09) !important;
+  color: #111b21 !important;
+  border: 1px solid rgba(0, 0, 0, 0.16) !important;
+  font-weight: 700 !important;
 }
 
 body.theme-light .wa-audio-speed-btn:hover {
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.18) !important;
+  color: #000000 !important;
+}
+
+/* Soporte para modo Sepia */
+body.theme-sepia .wa-bubble.out .wa-audio-play-btn,
+body.theme-sepia .wa-bubble.in .wa-audio-play-btn,
+body.theme-sepia .wa-audio-play-btn {
+  color: #2c2217 !important;
+}
+
+body.theme-sepia .wa-audio-slider {
+  background: rgba(44, 34, 23, 0.25) !important;
+}
+
+body.theme-sepia .wa-bubble.out .wa-audio-slider::-webkit-slider-thumb,
+body.theme-sepia .wa-bubble.in .wa-audio-slider::-webkit-slider-thumb,
+body.theme-sepia .wa-bubble.out .wa-audio-slider::-moz-range-thumb,
+body.theme-sepia .wa-bubble.in .wa-audio-slider::-moz-range-thumb {
+  background-color: #2c2217 !important;
+}
+
+body.theme-sepia .wa-audio-meta-row,
+body.theme-sepia .wa-audio-timer {
+  color: #2c2217 !important;
+  font-weight: 600 !important;
+}
+
+body.theme-sepia .wa-audio-speed-btn {
+  background: rgba(44, 34, 23, 0.1) !important;
+  color: #2c2217 !important;
+  border: 1px solid rgba(44, 34, 23, 0.16) !important;
 }
 
 body.theme-light .wa-pinned-banner {
@@ -1715,6 +1796,7 @@ body.theme-light .wa-toast-notification {
   flex-direction: column;
   position: relative;
   flex-shrink: 0;
+  z-index: 20;
 }
 
 /* Barra de Previsualización de Imagen Adjunta */
@@ -1760,6 +1842,7 @@ body.theme-light .wa-toast-notification {
 
 .wa-input-box {
   flex: 1;
+  min-width: 0;
   background-color: var(--wa-bg-input);
   border-radius: 10px;
   padding: 9px 14px;
@@ -2290,11 +2373,37 @@ body.theme-light .wa-toast-notification {
   }
 
   .wa-bubble {
-    max-width: 85%;
+    max-width: 88%;
+  }
+
+  .wa-messages-area {
+    padding: 12px 10px;
+  }
+
+  .wa-chat-footer {
+    padding: 8px 10px;
+  }
+
+  .wa-input-row {
+    gap: 6px;
+  }
+
+  .wa-icon-btn {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .wa-btn-send {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
   }
 
   .wa-emoji-panel {
-    width: calc(100vw - 32px);
+    width: calc(100vw - 20px);
+    left: 10px;
+    bottom: 60px;
   }
 }
 

@@ -2086,6 +2086,82 @@ function ocultarModalLogin() {
 
 // 18. Configurar Eventos del DOM
 function setupDomEvents() {
+  // 18.1 Ajuste Dinámico de Altura para Móvil, Teclado Virtual y Barra de Navegación Inferior (#nav-wrapper)
+  function sincronizarAlturaMobileYTeclado() {
+    const appRoot = document.getElementById('wa-app-root') || document.querySelector('.wa-app');
+    const navWrapper = document.getElementById('nav-wrapper');
+    if (!appRoot) return;
+
+    const isNavHidden = !navWrapper || navWrapper.classList.contains('hidden');
+    const navHeight = isNavHidden ? 0 : 60;
+
+    if (window.visualViewport) {
+      const vpHeight = Math.round(window.visualViewport.height);
+      const winHeight = Math.round(window.innerHeight);
+      // Detección fiable de teclado virtual en móviles (viewport significativamente menor que ventana)
+      const isKeyboardOpen = (winHeight - vpHeight) > 100;
+
+      if (isKeyboardOpen) {
+        appRoot.style.height = `${vpHeight}px`;
+        appRoot.style.paddingBottom = '0px';
+        if (navWrapper) navWrapper.style.display = 'none';
+      } else {
+        appRoot.style.height = `${vpHeight}px`;
+        appRoot.style.paddingBottom = `${navHeight}px`;
+        if (navWrapper) navWrapper.style.display = '';
+      }
+    } else {
+      appRoot.style.paddingBottom = `${navHeight}px`;
+    }
+
+    // Mantener scroll abajo si el input está enfocado
+    const inputEl = document.getElementById('chat-input-text');
+    if (document.activeElement === inputEl) {
+      const messagesArea = document.getElementById('wa-messages-area');
+      if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+  }
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', sincronizarAlturaMobileYTeclado);
+    window.visualViewport.addEventListener('scroll', sincronizarAlturaMobileYTeclado);
+  }
+  window.addEventListener('resize', sincronizarAlturaMobileYTeclado);
+  window.addEventListener('orientationchange', () => setTimeout(sincronizarAlturaMobileYTeclado, 150));
+
+  // Clic en el botón #nav-toggle o cambios en el wrapper del menú
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#nav-toggle')) {
+      setTimeout(sincronizarAlturaMobileYTeclado, 60);
+    }
+  });
+
+  const navWrapperInit = document.getElementById('nav-wrapper');
+  if (navWrapperInit) {
+    const navObs = new MutationObserver(sincronizarAlturaMobileYTeclado);
+    navObs.observe(navWrapperInit, { attributes: true, attributeFilter: ['class', 'style'] });
+  }
+
+  // Foco y desenfoque del campo de texto
+  const inputChatText = document.getElementById('chat-input-text');
+  if (inputChatText) {
+    inputChatText.addEventListener('focus', () => {
+      setTimeout(() => {
+        sincronizarAlturaMobileYTeclado();
+        const messagesArea = document.getElementById('wa-messages-area');
+        if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
+      }, 100);
+    });
+    inputChatText.addEventListener('blur', () => {
+      setTimeout(sincronizarAlturaMobileYTeclado, 100);
+    });
+  }
+
+  // Sincronizaciones con retardo para asegurar que navigator.js haya inyectado el nav
+  sincronizarAlturaMobileYTeclado();
+  setTimeout(sincronizarAlturaMobileYTeclado, 200);
+  setTimeout(sincronizarAlturaMobileYTeclado, 600);
+
   // Pegar capturas de pantalla desde el portapapeles (PrintScreen / Recorte / Ctrl+V)
   window.addEventListener('paste', (e) => {
     const clipboardData = e.clipboardData || window.clipboardData;
