@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Lectura Breve y Responsorio — Liturgia de las Horas</title>
+    <link rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="src/css/lecturabreve.css">
+    <link rel="stylesheet" href="src/css/buttons.css">
+</head>
+<body>
+
+    <div class="contenedor-lecturabreve">
+        <!-- Cabecera -->
+        <header class="header-lecturabreve">
+            <div class="titulo-box">
+                <h1>
+                    <span class="material-symbols-outlined" style="font-size: 2.2rem; color: var(--accent-red);">auto_stories</span>
+                    Gestor de Lectura Breve y Responsorio
+                </h1>
+                <p>Registro, edición y repositorio en texto plano de Lecturas Breves y Responsorios canónicos</p>
+            </div>
+            <div class="header-controles">
+                <button id="btn-restaurar-semilla" class="btn-lb" title="Restaurar lecturas desde src/data/lecturabreve.js">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                    Restaurar Base
+                </button>
+                <button id="btn-subir-semilla" class="btn-lb btn-verde" title="Subir catálogo completo a Firebase Firestore">
+                    <span class="material-symbols-outlined">cloud_upload</span>
+                    Subir a Firebase
+                </button>
+                <button id="btn-exportar-json" class="btn-lb" title="Descargar respaldo en JSON">
+                    <span class="material-symbols-outlined">download</span>
+                    Exportar JSON
+                </button>
+                <a href="src/html/salmos.html" class="btn-lb" title="Ir al Gestor de Salmos">
+                    <span class="material-symbols-outlined">library_books</span>
+                    Salmos
+                </a>
+                <a href="src/html/himno.html" class="btn-lb" title="Ir al Gestor de Himnos">
+                    <span class="material-symbols-outlined">music_note</span>
+                    Himnos
+                </a>
+                <a href="antifonas.html" class="btn-lb" title="Ir al Gestor de Antífonas">
+                    <span class="material-symbols-outlined">auto_stories</span>
+                    Antífonas
+                </a>
+                <a href="frm_salterios.html" class="btn-lb btn-primario" title="Ir al Formulario Salterios">
+                    <span class="material-symbols-outlined">edit_calendar</span>
+                    Formulario
+                </a>
+                <a href="index.html" class="btn-lb" title="Ir al Inicio">
+                    <span class="material-symbols-outlined">home</span>
+                    Inicio
+                </a>
+            </div>
+        </header>
+
+        <!-- Banner de estado dinámico -->
+        <div id="banner-estado" class="estado-banner info" style="display: none;">
+            <span class="material-symbols-outlined">info</span> Cargando...
+        </div>
+
+        <!-- Grid Principal -->
+        <div class="grid-lecturabreve">
+            <!-- Columna Izquierda: Formulario y Vista Previa -->
+            <section class="card-form-lectura">
+                <h2>
+                    <span class="material-symbols-outlined" style="color: var(--accent-red);">edit_note</span>
+                    Registrar / Editar Lectura Breve y Responsorio
+                </h2>
+                <form id="form-lectura">
+                    <div class="row-campos">
+                        <div class="campo-grupo">
+                            <label for="form-id">ID / Clave Primaria:</label>
+                            <input type="text" id="form-id" placeholder="ej: tos1LAdo, Is_61_1_2a" required spellcheck="false">
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="form-cita">Cita / Código de la Lectura (Fijo Rojo):</label>
+                            <input type="text" id="form-cita" placeholder="ej: Is 61, 1-2a" required spellcheck="false" value="Is 61, 1-2a">
+                        </div>
+                    </div>
+
+                    <div class="row-campos-4">
+                        <div class="campo-grupo">
+                            <label for="form-tiempo">Tiempo:</label>
+                            <select id="form-tiempo">
+                                <option value="ordinario" selected>Ordinario</option>
+                                <option value="adviento">Adviento</option>
+                                <option value="navidad">Navidad</option>
+                                <option value="cuaresma">Cuaresma</option>
+                                <option value="pascua">Pascua</option>
+                                <option value="santos">Santos</option>
+                            </select>
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="form-semana">Semana:</label>
+                            <select id="form-semana">
+                                <option value="1" selected>Semana 1</option>
+                                <option value="2">Semana 2</option>
+                                <option value="3">Semana 3</option>
+                                <option value="4">Semana 4</option>
+                                <option value="5">Semana 5</option>
+                                <option value="6">Semana 6</option>
+                                <option value="7">Semana 7</option>
+                            </select>
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="form-dia">Día:</label>
+                            <select id="form-dia">
+                                <option value="domingo" selected>Domingo</option>
+                                <option value="lunes">Lunes</option>
+                                <option value="martes">Martes</option>
+                                <option value="miercoles">Miércoles</option>
+                                <option value="jueves">Jueves</option>
+                                <option value="viernes">Viernes</option>
+                                <option value="sabado">Sábado</option>
+                            </select>
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="form-libro">Hora / Libro:</label>
+                            <select id="form-libro">
+                                <option value="laudes" selected>Laudes</option>
+                                <option value="visperas">Vísperas</option>
+                                <option value="tercia">Tercia</option>
+                                <option value="sexta">Sexta</option>
+                                <option value="nona">Nona</option>
+                                <option value="completas">Completas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="form-texto">Texto de la Lectura (Texto plano en negro):</label>
+                        <textarea id="form-texto" placeholder="Pega o escribe el texto de la lectura bíblica..." required spellcheck="false">El Espíritu del Señor está sobre mí, porque el Señor me ha ungido. Me ha enviado para dar la buena noticia a los pobres, para vendar los corazones desgarrados, para proclamar la amnistía a los cautivos, la libertad a los prisioneros, para proclamar el año de gracia del Señor.</textarea>
+                    </div>
+
+                    <!-- Campos del Responsorio Breve -->
+                    <div class="seccion-form-responsorio">
+                        <h3>
+                            <span class="material-symbols-outlined" style="font-size: 1.2rem;">format_quote</span>
+                            RESPONSORIO BREVE
+                        </h3>
+                        
+                        <div class="campo-grupo">
+                            <label for="form-rb1">
+                                <span style="color: #ff8a80; font-weight: bold;">V. y R. Principal:</span> (Se repite 3 veces en V.1, R.1 y tras el Gloria en R.3)
+                            </label>
+                            <input type="text" id="form-rb1" placeholder="ej: Cristo, Hijo de Dios vivo, ten piedad de nosotros." required value="Cristo, Hijo de Dios vivo, ten piedad de nosotros.">
+                        </div>
+
+                        <div class="row-campos">
+                            <div class="campo-grupo">
+                                <label for="form-rb2"><span style="color: #ff8a80; font-weight: bold;">V. Segundo Versículo:</span></label>
+                                <input type="text" id="form-rb2" placeholder="ej: Tú que hoy te has manifestado." required value="Tú que hoy te has manifestado.">
+                            </div>
+                            <div class="campo-grupo">
+                                <label for="form-rb3"><span style="color: #ff8a80; font-weight: bold;">R. Segunda Respuesta:</span></label>
+                                <input type="text" id="form-rb3" placeholder="ej: Ten piedad de nosotros." required value="Ten piedad de nosotros.">
+                            </div>
+                        </div>
+
+                        <div class="nota-fija">
+                            <strong>Dato litúrgico fijo:</strong> Los rótulos <em>"LECTURA BREVE"</em> y <em>"RESPONSORIO BREVE"</em> son invariables. El tercer versículo <em>"V. Gloria al Padre, y al Hijo, y al Espíritu Santo."</em> se genera automáticamente.
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 16px;">
+                        <button type="submit" class="btn-lb btn-primario" style="flex: 1; justify-content: center;">
+                            <span class="material-symbols-outlined">save</span>
+                            Guardar Lectura y Responsorio
+                        </button>
+                        <button type="button" id="btn-limpiar-form" class="btn-lb" title="Limpiar formulario">
+                            <span class="material-symbols-outlined">restart_alt</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Vista Previa Fiel (Imagen de Referencia) -->
+                <div class="contenedor-preview-liturgico">
+                    <div class="header-preview-box">
+                        <span class="badge-preview-tag">
+                            <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">visibility</span>
+                            Vista Previa Litúrgica Fiel
+                        </span>
+                        <span style="font-size: 0.78rem; color: #888;">Verdana, Arial • Títulos en Rojo</span>
+                    </div>
+
+                    <!-- 1. Encabezado Lectura Breve + Cita -->
+                    <div class="preview-titulo-lectura">
+                        <span>LECTURA BREVE</span>
+                        <span class="preview-cita-lectura" id="preview-cita">Is 61, 1-2a</span>
+                    </div>
+
+                    <!-- 2. Texto de la Lectura -->
+                    <div class="preview-texto-lectura" id="preview-texto">
+                        El Espíritu del Señor está sobre mí, porque el Señor me ha ungido. Me ha enviado para dar la buena noticia a los pobres, para vendar los corazones desgarrados, para proclamar la amnistía a los cautivos, la libertad a los prisioneros, para proclamar el año de gracia del Señor.
+                    </div>
+
+                    <!-- 3. Encabezado Responsorio Breve -->
+                    <div class="preview-titulo-responsorio">RESPONSORIO BREVE</div>
+
+                    <!-- 4. Responsorios con sus respectivos espacios -->
+                    <div class="preview-fila-resp">
+                        <span class="preview-letra-roja">V.</span>
+                        <span class="preview-texto-resp" id="preview-v1">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
+                    </div>
+                    <div class="preview-fila-resp">
+                        <span class="preview-letra-roja">R.</span>
+                        <span class="preview-texto-resp" id="preview-r1">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
+                    </div>
+
+                    <!-- Espacio entre estrofas -->
+                    <div class="preview-espacio-resp"></div>
+
+                    <div class="preview-fila-resp">
+                        <span class="preview-letra-roja">V.</span>
+                        <span class="preview-texto-resp" id="preview-v2">Tú que hoy te has manifestado.</span>
+                    </div>
+                    <div class="preview-fila-resp">
+                        <span class="preview-letra-roja">R.</span>
+                        <span class="preview-texto-resp" id="preview-r2">Ten piedad de nosotros.</span>
+                    </div>
+
+                    <!-- Espacio entre estrofas -->
+                    <div class="preview-espacio-resp"></div>
+
+                    <div class="preview-fila-resp">
+                        <span class="preview-letra-roja">V.</span>
+                        <span class="preview-texto-resp">Gloria al Padre, y al Hijo, y al Espíritu Santo.</span>
+                    </div>
+                    <div class="preview-fila-resp">
+                        <span class="preview-letra-roja">R.</span>
+                        <span class="preview-texto-resp" id="preview-r3">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Columna Derecha: Catálogo y Filtros -->
+            <section class="card-lista-lecturas">
+                <div class="header-filtros">
+                    <h2>
+                        <span class="material-symbols-outlined" style="color: var(--accent-red);">format_list_bulleted</span>
+                        Catálogo de Lecturas Breves
+                    </h2>
+
+                    <div class="buscador-box">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="filtro-buscar" placeholder="Buscar por cita bíblica, texto o responsorio...">
+                    </div>
+
+                    <div class="filtros-selects">
+                        <select id="filtro-tiempo">
+                            <option value="">Todos los Tiempos</option>
+                            <option value="ordinario">Ordinario</option>
+                            <option value="adviento">Adviento</option>
+                            <option value="navidad">Navidad</option>
+                            <option value="cuaresma">Cuaresma</option>
+                            <option value="pascua">Pascua</option>
+                            <option value="santos">Santos</option>
+                        </select>
+                        <select id="filtro-dia">
+                            <option value="">Todos los Días</option>
+                            <option value="domingo">Domingo</option>
+                            <option value="lunes">Lunes</option>
+                            <option value="martes">Martes</option>
+                            <option value="miercoles">Miércoles</option>
+                            <option value="jueves">Jueves</option>
+                            <option value="viernes">Viernes</option>
+                            <option value="sabado">Sábado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Total en catálogo: <strong id="contador-lecturas" style="color: #fff;">0</strong>
+                    </span>
+                    <span style="font-size: 0.8rem; color: var(--accent-gold); font-style: italic;">
+                        Click en cualquier tarjeta para editar
+                    </span>
+                </div>
+
+                <!-- Lista de Lecturas -->
+                <div id="lista-lecturas-items" class="lista-items-lectura">
+                    <!-- Rellenado dinámicamente -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Scripts de inicialización -->
+    <script src="src/data/db-lecturabreve.js" type="module"></script>
+    <script src="src/js/firebase-config.js" type="module"></script>
+    <script src="src/js/lecturabreve-manager.js" type="module"></script>
+    <script src="src/js/navigator.js"></script>
+</body>
+</html>

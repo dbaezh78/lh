@@ -1,0 +1,150 @@
+ahora mismo tenemos este archivo
+C:\db\Github\lh\src\data\db-laudes.js
+y otros archivos iguales, pero vamos a cambiar la estructura, quiero que hagamos un archivo llamado salterios.html, en el vamos a crear toda la estructura de todos los libros con todos los tiempos, la idea seria tener o poner todos los datos en este archivo y guardarlo en firebase y luego que termine, haremos una copia local y la otra quedará en firebase como respaldo.
+los datos del archivo serán
+
+Tiempo Liturgico:
+los datos seran
+	* Adviento
+	* Navidad
+	* Ordinario 
+		(como sabes el tiempo ordinario tiene 34 semanas que se divide en dos, antes de cuaresma y despues de cuaresma, y que despues de cuaresma como sabes, la semana que continua tiene que hacer que la semana 34 termine una semana antes del primer domingo de adviento, el cual es el domingo mas cercano al 30 de noviembre.
+	* Cuaresma
+	* Pascua
+	* Santos
+		(Santos no es un tiempo liturgico pero lo trataremos como tal, ya que tenemos que crear una estructura parecida, donde en vez de los dias de la semana tendremos los dias del año, ej 29/06 que es 29 de Junio y corresponde a San Pablo y San Pedro. Y como tal tendrán todos los libros (Oficio de Lectura, Laudes, etc.) pero con datos que podré cargar para todos los libros y todos los satos, será una estructura donde cargaré los salmos, las antifonas y todos los datos para todos los santos.
+		
+
+cada tiempo tiene todos los libros	
+Libro: los datos son.
+	Oficio de Lectura
+	Laudes
+	Tercia
+	Sexta
+	Nona
+	Víspera
+	Completas
+	
+como sabes adviento tiene 4 semanas y cada semana tiene los dias
+	domingo
+	lunes
+	martes
+	miercoles
+	jueves
+	viernes
+	sabado
+	
+
+aunque adviento no usa las cuatro semanas hay que ponerla porque cada año lo que caia en lunes puede caer en martes y asi susecivamente para poder tener los datos disponible.
+
+	Navidad tiene 2 semanas, 
+	
+	Ordinario tiene 34 semana
+	
+	cuaresma tiene 7 semanas
+	
+	Pascua tiene 7 semanas y el domingo despues del sabado de la septima semana es Pentecostes.
+	
+	entonces el formulario salterios.html será de la siguiente forma.
+	
+	
+	iniciaremos con la estructura 
+	OFICIO DE LECTURA
+
+te dejo una carpeta donde veras las imagenes de lo que es la estructura de cada uno de los LIBROS.
+C:\db\Github\lh\tmp
+
+cada Libro tiene una estructura diferentes, aunque en esencia se parecen mucho.
+
+para OFICIO DE LECTURA las imagenes son OL1, OL2, OL3, OL4, OL5 todas png
+
+para LAUDES las imagenes son LA1, LA2, LA3, LA4, LA5 todas png
+
+para Tercia: TE1 TE2
+
+para SEXTA: SE1 SE2
+
+para NONA: NO1 NO2
+
+para VISPERA: VI1 VI2
+
+para COMPLETAS: CO1 CO2 CO3
+
+
+como ves todas las imagenes tienen una estructura que hay que diseñar.
+
+todas empiezan con su LIBRO.
+
+LAUDES en color rojo
+
+a laudes le continua: (Oración de la mañana) en cursiva y en rojo 
+
+luego sigue INVITATORIO
+y la nota: 
+(Si Laudes no es la primera oración del día
+se sigue el esquema del Invitatorio explicado en el Oficio de Lectura)
+
+este es otra informacion que no cambia:
+
+V. Señor abre mis labios
+R. Y mi boca proclamará tu alabanza
+
+
+luego de eso que es comun en todos los laudes sigue.
+
+la Antifona de invitatoria, esta antifona tiene que seleccionarse de un archivo que tenemos que crear llamado antifonas.html y que se guardará en firebase.
+será un formulario que tiene que tener todas las antifonas invitatorias de todos los tiempos liturgicos, este formulario tendrá.
+
+Tiempo Liturgico: para poder seleccionar el tiempo liturgico
+
+semana
+dia
+Antifona
+
+luego volviendo a: salterios.html
+
+tienes que dejar: Ant. en rojo para luego en negro poder seleccionar la antifona de la invitatoria.
+
+luego viene un select para seleccionar el salmo, será otro archivo que a lo mejor tenemos pero como estamos implementando una nueva estructura usaremos el nombre del archivo llamado salmos.js, aqui estarán todo los salmos que vamos a usar, puede ser que nos falten salmos, pero si ves el archivos veras todos los salmos que he recopilado y para no registrarlo nuevamente quiero que uses todos esos salmos que están contenido no tienes que segui la misma estructura, pero si para este formulario de los salmos tendremos.
+
+salmo
+texto del salmo
+
+la parte que dice:
+
+Gloria al Padre, y al Hijo, y al Espíritu Santo.
+Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`
+
+como va en todos los salmos, tenemo que crear algo para poder utilizarlo y no tener que escribirlo y asi hacemos que sea mas flexible.
+
+luego viene la antifona que si veas la imagen podras ver que está en rojo abreviado y la antifona que seleccionamos anteriormente, se repetirá aqui.
+
+luego vendra SALMODIA en rojo.
+
+luego viene Ant 1. y la seleccion de la antifona del archivo antifonas.html
+
+los salmos tienen que cargar en texto plano, para que sean lo mas lijeros posible.
+
+sigue las imagenes para que quede lo mas parecido posible.
+
+el fondo es amarillo, pero deja en ajustes, en Tema un apartado para el color del texto de los salmos, el color de las antifonas que por defecto es rojo, para el color del fondo, el Padre nuestro que está casi al final de todos has que aparesca en rojo asi: Padre nuestro... pero si le doy que se ponga el padre nuestro completo, tambien en texto plano.
+
+el texto de las lecturas en oficio tiene que estar justificado
+
+si te fijas hay dos lecturas tanto en oficio como en laudes, has que aparezca en rojo, esta lectura tienen que tener un formulario
+
+la primera lectura hay una para año par y otra para año impar y la segunda lectura que es una sola.
+
+el primer audio que es la primera lectura como estamos en el 2026 es par y tiene que leerla con el nombre
+https://to.resucito.do/s24/sabado/lectura2.mp3
+
+
+el audio de la primera lectura para años impar como 2027,2029, etc se llama y está en la ruta: https://to.resucito.do/s24/sabado/lectura1.mp3
+
+el audio para la segunda lectura es: https://to.resucito.do/s24/sabado/lecturas.mp3 ya sea par o impar.
+
+de dejo una imagen para que veas como tiene que quedar el reproductor y puedes verlo tambien en los archivos que tengo en el proyecto, que está como cuadrado, tambien para oficio de lectura.
+
+arriba tienes que crear como una cinta parecida a la de navegación puedes ponerle cinta.html en la que pondras un reproductor para que se pueda leer el contenido de el libro en el que estemos, Oficio, laudes, etc. y otro reproductor a la izquierda al prinicipio para el evangelio del dia que ya tenemos en index
+
+vamos a empezar con esto y luego vemos los ajustes a todo.

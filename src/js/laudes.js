@@ -1,4 +1,5 @@
 import { dbLaudes } from '../data/db-laudes.js';
+import { obtenerLiturgiaHora, normalizarObjetoLiturgico } from '../firebase/descarga_liturgia_de_las_horas.js';
 
 // Esta función se encarga de "armar" el HTML con los colores correctos
 function generarTemplateLaudes(datos) {
@@ -137,13 +138,24 @@ function generarTemplateLaudes(datos) {
     `;
 }
 
-// 1. FUNCIÓN DE RENDERIZADO (LA QUE CAMBIA)
-export function renderizarLaudes(idBusqueda) {
-    const datos = dbLaudes.find(item => item.id === idBusqueda);
+// 1. FUNCIÓN DE RENDERIZADO CON INTEGRACIÓN LOCAL FIRST
+export async function renderizarLaudes(idBusqueda) {
     const contenedor = document.getElementById('contenido-dinamico');
+    let datos = null;
+
+    try {
+        datos = await obtenerLiturgiaHora(idBusqueda);
+    } catch (e) {
+        console.warn("Fallo en obtenerLiturgiaHora:", e);
+    }
 
     if (!datos) {
-        contenedor.innerHTML = "<p>Error: No se encontró la salmodia seleccionada.</p>";
+        const encontrado = dbLaudes.find(item => item.id === idBusqueda);
+        if (encontrado) datos = normalizarObjetoLiturgico(encontrado, idBusqueda);
+    }
+
+    if (!datos) {
+        contenedor.innerHTML = `<p>Error: No se encontró la salmodia seleccionada para el ID "${idBusqueda}".</p>`;
         return;
     }
 
@@ -151,7 +163,6 @@ export function renderizarLaudes(idBusqueda) {
     contenedor.innerHTML = generarTemplateLaudes(datos);
 
     // LÓGICA DE ENCADENAMIENTO DE AUDIOS
-    // Se ejecuta justo después de inyectar el HTML para encontrar los IDs
     const a1 = document.getElementById('audio1');
     const a2 = document.getElementById('audio2');
 
@@ -159,10 +170,8 @@ export function renderizarLaudes(idBusqueda) {
         a1.onended = function() {
             console.log("%c ⏭️ Cambio de audio: Iniciando Lecturas Varias", "color: #008000; font-weight: bold;");
             a2.play();
-            // Desplazamiento suave para que el usuario vea el segundo reproductor activo
             a2.scrollIntoView({ behavior: 'smooth', block: 'center' });
         };
-
         console.log(`%c 🎧 Audios vinculados para ${idBusqueda}`, "color: #bc0009; font-weight: bold;");
     }
 }
@@ -275,25 +284,17 @@ function construirUrlLiturgica(datos) {
 
 import { obtenerIdLaudesPorFecha } from '../data/calendario2026.js';
 
-// Para probarlo de inmediato, puedes ejecutarlo al cargar (luego se hará por evento)
-document.addEventListener('DOMContentLoaded', () => {
+// Para probarlo de inmediato, ejecutar al cargar con soporte Local First
+document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     
     // Intenta obtener 'oficio' o 'laudes' de la URL, o bien calcula el del día actual
-    const idUrl = params.get('oficio') || params.get('laudes') || obtenerIdLaudesPorFecha();
+    const idUrl = params.get('oficio') || params.get('laudes') || (typeof obtenerIdLaudesPorFecha === 'function' ? obtenerIdLaudesPorFecha() : 'tos1LAdo');
 
     const container = document.getElementById('contenido-dinamico');
 
     if (idUrl) {
-        // Buscamos en la base de datos el ID correspondiente
-        const datosLaudes = dbLaudes.find(item => item.id === idUrl);
-
-        if (datosLaudes) {
-            container.innerHTML = generarTemplateLaudes(datosLaudes);
-            console.log("Cargado con éxito:", datosLaudes.id);
-        } else {
-            container.innerHTML = `<h2>El ID "${idUrl}" no existe en la base de datos</h2>`;
-        }
+        await renderizarLaudes(idUrl);
     } else {
         container.innerHTML = `<h2>Por favor, selecciona un oficio del menú.</h2>`;
     }

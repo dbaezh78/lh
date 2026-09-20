@@ -822,6 +822,89 @@ window.cambioEnExpandir = false;
                             label: 'Reproductor',
                             icon: 'play_circle',
                             tipo: 'custom-reproductor'
+                        },
+
+                        // Sub-submódulo C: Salterios y Horas Litúrgicas
+                        {
+                            id: 'nested-salterios',
+                            label: 'Salterios',
+                            icon: 'menu_book',
+                            secciones: [
+                                {
+                                    id: 'salterio-set-bg',
+                                    label: 'Color de Fondo (Salterios)',
+                                    tipo: 'color',
+                                    storageKey: 'pref-salterio-bg',
+                                    default: '#FFFFCB',
+                                    accion: (val) => {
+                                        document.documentElement.style.setProperty('--salterio-bg', val);
+                                        const tema = JSON.parse(localStorage.getItem('lh_salterio_tema') || '{}');
+                                        tema.bg = val;
+                                        localStorage.setItem('lh_salterio_tema', JSON.stringify(tema));
+                                        localStorage.setItem('pref-salterio-bg', val);
+                                        if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+                                            window.firebaseAPI.guardarAjustesFirestore('salterio_tema', tema);
+                                        }
+                                    }
+                                },
+                                {
+                                    id: 'salterio-set-text',
+                                    label: 'Color Texto (Salmos y Lecturas)',
+                                    tipo: 'color',
+                                    storageKey: 'pref-salterio-text',
+                                    default: '#1a1a1a',
+                                    accion: (val) => {
+                                        document.documentElement.style.setProperty('--salterio-text', val);
+                                        const tema = JSON.parse(localStorage.getItem('lh_salterio_tema') || '{}');
+                                        tema.text = val;
+                                        localStorage.setItem('lh_salterio_tema', JSON.stringify(tema));
+                                        localStorage.setItem('pref-salterio-text', val);
+                                        if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+                                            window.firebaseAPI.guardarAjustesFirestore('salterio_tema', tema);
+                                        }
+                                    }
+                                },
+                                {
+                                    id: 'salterio-set-rubrica',
+                                    label: 'Color de Antífonas y Rúbricas',
+                                    tipo: 'color',
+                                    storageKey: 'pref-salterio-rubrica',
+                                    default: '#d01212',
+                                    accion: (val) => {
+                                        document.documentElement.style.setProperty('--salterio-rubrica', val);
+                                        const tema = JSON.parse(localStorage.getItem('lh_salterio_tema') || '{}');
+                                        tema.rubrica = val;
+                                        localStorage.setItem('lh_salterio_tema', JSON.stringify(tema));
+                                        localStorage.setItem('pref-salterio-rubrica', val);
+                                        if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+                                            window.firebaseAPI.guardarAjustesFirestore('salterio_tema', tema);
+                                        }
+                                    }
+                                },
+                                {
+                                    id: 'salterio-set-font-size',
+                                    label: 'Tamaño de Fuente Litúrgica',
+                                    tipo: 'select',
+                                    storageKey: 'pref-salterio-font-size',
+                                    default: '1.06rem',
+                                    options: [
+                                        { val: '0.92rem', text: 'Pequeño (15px)' },
+                                        { val: '1.06rem', text: 'Normal Litúrgico (17px)' },
+                                        { val: '1.18rem', text: 'Grande (19px)' },
+                                        { val: '1.35rem', text: 'Muy Grande (22px)' }
+                                    ],
+                                    accion: (val) => {
+                                        document.documentElement.style.setProperty('--salterio-font-size', val);
+                                        const tema = JSON.parse(localStorage.getItem('lh_salterio_tema') || '{}');
+                                        tema.fontSize = val;
+                                        localStorage.setItem('lh_salterio_tema', JSON.stringify(tema));
+                                        localStorage.setItem('pref-salterio-font-size', val);
+                                        if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+                                            window.firebaseAPI.guardarAjustesFirestore('salterio_tema', tema);
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }

@@ -196,5 +196,38 @@
     "fecha": "2026-09-18 15:30:00",
     "version": "1.0.02",
     "categoria": "gestion"
+  },
+  {
+    "id": "salterios",
+    "nombre": "Salterios",
+    "icono": "menu_book",
+    "ruta": "salterios.html",
+    "css": "src/css/salterios.css",
+    "js": "src/js/salterios.js",
+    "fecha": "2026-09-19 00:30:00",
+    "version": "1.0.02",
+    "categoria": "oracion"
+  },
+  {
+    "id": "antifonas",
+    "nombre": "Gestor de Antífonas",
+    "icono": "auto_stories",
+    "ruta": "antifonas.html",
+    "css": "src/css/antifonas.css",
+    "js": "src/js/antifonas-manager.js",
+    "fecha": "2026-09-19 00:30:00",
+    "version": "1.0.02",
+    "categoria": "gestion"
+  },
+  {
+    "id": "cinta",
+    "nombre": "Cinta de Audio",
+    "icono": "graphic_eq",
+    "ruta": "cinta.html",
+    "css": "src/css/cinta.css",
+    "js": "src/js/cinta.js",
+    "fecha": "2026-09-19 00:30:00",
+    "version": "1.0.02",
+    "categoria": "oracion"
   }
 ]

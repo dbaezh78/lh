@@ -1,7 +1,7 @@
 import { obtenerInfoLiturgica } from '../data/calendarioLiturgico.js';
 import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 import { obtenerParidadAño, obtenerCicloDominical } from './form_etiempo.js';
-import { generarSecuenciaLiturgica } from './añoliturgico.js';
+import { generarSecuenciaLiturgica, calcularCodigoBaseDia } from './añoliturgico.js';
 
 const app = document.getElementById('app');
 
@@ -86,6 +86,7 @@ function cargarPortada() {
     const infoHoy = obtenerInfoLiturgica();
     const tituloLiturgico = infoHoy.textoCompleto || "Tiempo Ordinario";
     const idSalmodia = infoHoy.id || "tos1lalu";
+    const codigoHoyBase = calcularCodigoBaseDia(infoHoy);
 
     // Mapeo de clase de color según el tiempo litúrgico de hoy
     const mapaClasesTiempo = {
@@ -247,31 +248,31 @@ function cargarPortada() {
 
             <!-- ===== SUB-BOTONES DESPLEGABLES (Horas Litúrgicas) ===== -->
             <div class="sub-horas-container" id="sub-horas-lista">
-                <a href="src/html/oficio.html?oficio=${idSalmodia}" class="btn-flat ${claseColorHoy}">
+                <a href="salterios.html?libro=oficio&id=${codigoHoyBase}of" class="btn-flat ${claseColorHoy}">
                     <span class="btn-flat-label">Oficio de Lectura</span>
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">menu_book</span></span>
                 </a>
-                <a href="src/html/laudes.html?laudes=${idSalmodia}" class="btn-flat ${claseColorHoy}">
+                <a href="salterios.html?libro=laudes&id=${codigoHoyBase}la" class="btn-flat ${claseColorHoy}">
                     <span class="btn-flat-label">Laudes</span>
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">wb_twilight</span></span>
                 </a>
-                <a href="src/html/tercia.html?tercia=${idSalmodia}" class="btn-flat ${claseColorHoy}">
+                <a href="salterios.html?libro=tercia&id=${codigoHoyBase}te" class="btn-flat ${claseColorHoy}">
                     <span class="btn-flat-label">Tercia</span>
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">schedule</span></span>
                 </a>
-                <a href="src/html/sexta.html?sexta=${idSalmodia}" class="btn-flat ${claseColorHoy}">
+                <a href="salterios.html?libro=sexta&id=${codigoHoyBase}se" class="btn-flat ${claseColorHoy}">
                     <span class="btn-flat-label">Sexta</span>
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">light_mode</span></span>
                 </a>
-                <a href="src/html/nona.html?nona=${idSalmodia}" class="btn-flat ${claseColorHoy}">
+                <a href="salterios.html?libro=nona&id=${codigoHoyBase}no" class="btn-flat ${claseColorHoy}">
                     <span class="btn-flat-label">Nona</span>
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">wb_sunny</span></span>
                 </a>
-                <a href="src/html/visperas.html?visperas=${idSalmodia}" class="btn-flat ${claseColorHoy}">
+                <a href="salterios.html?libro=visperas&id=${codigoHoyBase}vi" class="btn-flat ${claseColorHoy}">
                     <span class="btn-flat-label">Víspera</span>
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">wb_twilight</span></span>
                 </a>
-                <a href="src/html/completas.html?completas=${idSalmodia}" class="btn-flat ${claseColorHoy}">
+                <a href="salterios.html?libro=completas&id=${codigoHoyBase}co" class="btn-flat ${claseColorHoy}">
                     <span class="btn-flat-label">Completas</span>
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">bedtime</span></span>
                 </a>

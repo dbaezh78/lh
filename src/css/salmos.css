@@ -1,0 +1,479 @@
+/* =========================================================================
+   ESTILOS PARA EL GESTOR DE SALMOS LITÚRGICOS (salmos.css)
+   Liturgia de las Horas
+   ========================================================================= */
+
+:root {
+    --bg-primary: #12151c;
+    --bg-surface: #1a1f2c;
+    --bg-card: #222838;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #f0f4f8;
+    --text-secondary: #94a3b8;
+    --accent-red: #c00000;
+    --accent-red-hover: #e01212;
+    --accent-gold: #f59e0b;
+    --accent-green: #10b981;
+    --accent-blue: #3b82f6;
+    --card-salmo-bg: #fffef2;
+    --card-salmo-border: #e2dab8;
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-sm: 6px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+.contenedor-salmos {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 20px 100px;
+}
+
+/* Cabecera */
+.header-salmos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 20px 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    margin-bottom: 24px;
+}
+
+.titulo-box h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+}
+
+.titulo-box p {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.header-controles {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-salmo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 15px;
+    border-radius: var(--radius-md);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.btn-salmo:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.btn-salmo.btn-primario {
+    background: linear-gradient(135deg, #c00000, #960000);
+    border-color: rgba(192, 0, 0, 0.5);
+    color: #fff;
+}
+
+.btn-salmo.btn-primario:hover {
+    background: linear-gradient(135deg, #e01212, #b00000);
+}
+
+.btn-salmo.btn-verde {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #fff;
+}
+
+/* Banner de Estado */
+.estado-banner {
+    padding: 12px 18px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.estado-banner.info {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+}
+
+.estado-banner.exito {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+}
+
+.estado-banner.alerta {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+}
+
+/* Grid Principal: 2 Columnas */
+.grid-salmos {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .grid-salmos {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Columna Izquierda: Formulario */
+.card-form-salmo {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    position: sticky;
+    top: 20px;
+}
+
+.card-form-salmo h2 {
+    margin: 0 0 18px;
+    font-size: 1.25rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.campo-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.campo-grupo label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.campo-grupo input,
+.campo-grupo select,
+.campo-grupo textarea {
+    background: #ffffff;
+    border: 1.5px solid #ded8cb;
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    color: #1a1a1a;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s ease;
+    width: 100%;
+    font-family: inherit;
+}
+
+.campo-grupo input:focus,
+.campo-grupo select:focus,
+.campo-grupo textarea:focus {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 0 3px rgba(192, 0, 0, 0.2);
+}
+
+.campo-grupo textarea {
+    min-height: 240px;
+    resize: vertical;
+    line-height: 1.6;
+    font-family: Georgia, "Crimson Pro", "Times New Roman", serif;
+    font-size: 1rem;
+    color: #111111;
+}
+
+.row-campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.quick-toolbar-texto {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.btn-mini {
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    transition: all 0.15s ease;
+}
+
+.btn-mini:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Columna Derecha: Catálogo y Filtros */
+.card-lista-salmos {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.header-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.buscador-box {
+    flex: 1;
+    min-width: 250px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.buscador-box span {
+    position: absolute;
+    left: 12px;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.buscador-box input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: #fff;
+    font-size: 0.92rem;
+    outline: none;
+}
+
+.buscador-box input:focus {
+    border-color: var(--accent-red);
+}
+
+.filtros-selects {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filtros-selects select {
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: #fff;
+    font-size: 0.88rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.filtros-selects select:focus {
+    border-color: var(--accent-red);
+}
+
+/* Lista de Tarjetas de Salmos */
+.lista-items-salmos {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 750px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.lista-items-salmos::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lista-items-salmos::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.lista-items-salmos::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+/* Tarjeta individual de Salmo (Pergamino: Título en ROJO, Texto en NEGRO) */
+.item-salmo-card {
+    background-color: var(--card-salmo-bg);
+    border: 1px solid var(--card-salmo-border);
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.item-salmo-card:hover {
+    border-color: var(--accent-red);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.salmo-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 10px;
+}
+
+/* TÍTULO EN ROJO */
+.salmo-card-titulo {
+    color: var(--accent-red);
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+    line-height: 1.35;
+    font-family: Georgia, "Crimson Pro", "Times New Roman", serif;
+}
+
+.salmo-badges-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.badge-salmo {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-salmo.tipo-invitatorio {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
+}
+
+.badge-salmo.tipo-salmo {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #7dd3fc;
+}
+
+.badge-salmo.tipo-cantico {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.badge-salmo.id-badge {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    font-family: monospace;
+}
+
+.salmo-card-acciones {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-icono-card {
+    background: #ffffff;
+    border: 1px solid #ded8cb;
+    color: #555;
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.btn-icono-card:hover {
+    background: #f5f0e6;
+    color: #111;
+    border-color: #999;
+}
+
+.btn-icono-card.btn-delete:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: #f87171;
+}
+
+/* TEXTO DEL SALMO: EN TEXTO PLANO Y EN NEGRO */
+.salmo-card-cuerpo {
+    color: #111111;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-family: Georgia, "Crimson Pro", "Times New Roman", serif;
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 8px 12px;
+    background: #faf6ea;
+    border-radius: 6px;
+    border: 1px solid #eee6d0;
+}
+
+.salmo-card-cuerpo::-webkit-scrollbar {
+    width: 6px;
+}
+
+.salmo-card-cuerpo::-webkit-scrollbar-thumb {
+    background: #d4cbb3;
+    border-radius: 3px;
+}

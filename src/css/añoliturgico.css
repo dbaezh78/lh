@@ -283,18 +283,62 @@ tr:hover {
     background-color: #d32f2f;
 }
 
-.btn-ir-laudes {
-    padding: 4px 8px;
-    background: #f0f0f0;
-    color: #333;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 600;
+.celda-horas-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     white-space: nowrap;
 }
 
-.btn-ir-laudes:hover {
-    background: #e0e0e0;
+.select-codigo-hora {
+    padding: 4px 6px;
+    border: 1.5px solid var(--color-borde);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    font-weight: 700;
+    color: #1e2430;
+    background: #f8fafc;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.select-codigo-hora:focus {
+    border-color: var(--color-primario);
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.15);
+}
+
+.btn-ir-hora-salterio {
+    padding: 4px 10px;
+    background: #2e7d32;
+    color: #ffffff;
+    border: 1px solid #1b5e20;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-ir-hora-salterio:hover {
+    background: #1b5e20;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.select-cambio-hora-menu {
+    padding: 4px 4px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
 }

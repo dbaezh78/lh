@@ -351,6 +351,91 @@ export function generarSecuenciaLiturgica(añoLiturgico) {
 }
 
 /**
+ * Calcula el código base del día según la convención estándar (ej: tas1do, tos24sa)
+ */
+export function calcularCodigoBaseDia(item) {
+    if (!item) return 'tos1do';
+    if (item.codigoDia) return item.codigoDia;
+
+    const t = (item.tiempo || '').toLowerCase();
+    let codT = 'to';
+    if (t.includes('adviento')) codT = 'ta';
+    else if (t.includes('navidad')) codT = 'tn';
+    else if (t.includes('cuaresma')) codT = 'tc';
+    else if (t.includes('pascua')) codT = 'tp';
+    else if (t.includes('santo')) codT = 'san';
+
+    let semNum = '1';
+    const mSem = (item.semana || '').match(/\d+/);
+    if (mSem) {
+        semNum = mSem[0];
+    } else {
+        const sinPalabra = (item.semana || '').replace(/semana/i, '').trim();
+        const mRom = sinPalabra.match(/[IVXLCDM]+/i);
+        if (mRom) {
+            const vals = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+            let tot = 0, prev = 0;
+            const str = mRom[0].toUpperCase();
+            for (let i = str.length - 1; i >= 0; i--) {
+                const v = vals[str[i]] || 0;
+                if (v < prev) tot -= v;
+                else { tot += v; prev = v; }
+            }
+            if (tot > 0) semNum = String(tot);
+        }
+    }
+    const codSem = `s${semNum}`;
+
+    const d = (item.dia || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    let codDia = 'do';
+    if (d.startsWith('lu')) codDia = 'lu';
+    else if (d.startsWith('ma')) codDia = 'ma';
+    else if (d.startsWith('mi')) codDia = 'mi';
+    else if (d.startsWith('ju')) codDia = 'ju';
+    else if (d.startsWith('vi')) codDia = 'vi';
+    else if (d.startsWith('sa')) codDia = 'sa';
+    else if (d.startsWith('do')) codDia = 'do';
+
+    return `${codT}${codSem}${codDia}`;
+}
+
+/**
+ * Genera las opciones del select de código para el día
+ */
+export function generarOpcionesCodigoDia(codigoActual, item) {
+    const t = (item.tiempo || '').toLowerCase();
+    let codT = 'to';
+    if (t.includes('adviento')) codT = 'ta';
+    else if (t.includes('navidad')) codT = 'tn';
+    else if (t.includes('cuaresma')) codT = 'tc';
+    else if (t.includes('pascua')) codT = 'tp';
+    else if (t.includes('santo')) codT = 'san';
+
+    let semNum = '1';
+    const mSem = (item.semana || '').match(/\d+/);
+    if (mSem) semNum = mSem[0];
+    const codSem = `s${semNum}`;
+
+    const diasList = ['do', 'lu', 'ma', 'mi', 'ju', 'vi', 'sa'];
+    const codes = new Set([codigoActual]);
+    diasList.forEach(d => codes.add(`${codT}${codSem}${d}`));
+
+    // Si es un día del santoral, agregar código san
+    if (item.fecha) {
+        const partesFecha = item.fecha.split('-');
+        if (partesFecha.length >= 3) {
+            codes.add(`san${partesFecha[1]}${partesFecha[2]}`);
+        }
+    }
+
+    let html = '';
+    codes.forEach(c => {
+        html += `<option value="${c}" ${c === codigoActual ? 'selected' : ''}>${c}</option>`;
+    });
+    return html;
+}
+
+/**
  * Normaliza y añade identificadores y URLs por defecto a cada día
  */
 function crearItemDia(datos) {
@@ -360,11 +445,9 @@ function crearItemDia(datos) {
     const paridad = obtenerParidadAño(fechaObj);
     const ciclo = obtenerCicloDominical(fechaObj);
 
-    // Generar prefijo de ID litúrgico consistente
-    const tiempoCode = datos.tiempo.substring(0, 2).toLowerCase();
-    const semCode = datos.semana.toLowerCase();
-    const diaCode = datos.dia.substring(0, 2).toLowerCase();
-    const idLiturgico = `t${tiempoCode}${semCode}${diaCode}`;
+    // Generar código litúrgico estándar según convención frm_salterios (ej: tas1do, tos24sa)
+    const codigoBase = calcularCodigoBaseDia(datos);
+    const idLiturgico = codigoBase;
 
     // URLs de Evangelio estándar estructuradas
     // En domingos: Ciclos A, B y C
@@ -638,7 +721,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                 </td>
                 <td>
-                    <a class="btn-ir-laudes" href="laudes.html?laudes=${item.id}" target="_blank">Laudes</a>
+                    <div class="celda-horas-container">
+                        <select class="select-codigo-hora" data-index="${index}" title="Código litúrgico del día">
+                            ${generarOpcionesCodigoDia(item.codigoDia || calcularCodigoBaseDia(item), item)}
+                        </select>
+                        <a class="btn-ir-hora-salterio" href="../../salterios.html?libro=laudes&id=${(item.codigoDia || calcularCodigoBaseDia(item))}la" target="_blank" title="Abrir Laudes (${(item.codigoDia || calcularCodigoBaseDia(item))}la)">
+                            Laudes
+                        </a>
+                        <select class="select-cambio-hora-menu" data-index="${index}" title="Abrir otra hora litúrgica">
+                            <option value="la" selected>Laudes</option>
+                            <option value="of">Oficio</option>
+                            <option value="te">Tercia</option>
+                            <option value="se">Sexta</option>
+                            <option value="no">Nona</option>
+                            <option value="vi">Víspera</option>
+                            <option value="co">Completas</option>
+                        </select>
+                    </div>
                 </td>
             `;
 
@@ -727,6 +826,59 @@ document.addEventListener('DOMContentLoaded', () => {
                         alert(`No se pudo reproducir el audio: ${url}`);
                     });
                 }
+            });
+        });
+
+        // Conectar selects de código litúrgico del día
+        cuerpoTabla.querySelectorAll('.select-codigo-hora').forEach(sel => {
+            sel.addEventListener('change', (e) => {
+                const idx = parseInt(e.target.dataset.index, 10);
+                const nuevoCodigo = e.target.value.trim().toLowerCase();
+                if (catalogoDias[idx]) {
+                    catalogoDias[idx].codigoDia = nuevoCodigo;
+                    const tr = e.target.closest('tr');
+                    if (tr) {
+                        const btnHora = tr.querySelector('.btn-ir-hora-salterio');
+                        const selHoraMenu = tr.querySelector('.select-cambio-hora-menu');
+                        const sufijo = selHoraMenu ? selHoraMenu.value : 'la';
+                        const mapaLibros = { la: 'laudes', of: 'oficio', te: 'tercia', se: 'sexta', no: 'nona', vi: 'visperas', co: 'completas' };
+                        const libroSlug = mapaLibros[sufijo] || 'laudes';
+                        if (btnHora) {
+                            btnHora.href = `../../salterios.html?libro=${libroSlug}&id=${nuevoCodigo}${sufijo}`;
+                            btnHora.title = `Abrir ${btnHora.textContent} (${nuevoCodigo}${sufijo})`;
+                        }
+                    }
+                    localStorage.setItem(`lh-catalogo-liturgico-${añoSeleccionado}`, JSON.stringify(catalogoDias));
+                }
+            });
+        });
+
+        // Conectar menú de cambio de hora
+        cuerpoTabla.querySelectorAll('.select-cambio-hora-menu').forEach(selMenu => {
+            selMenu.addEventListener('change', (e) => {
+                const idx = parseInt(e.target.dataset.index, 10);
+                const item = catalogoDias[idx];
+                const tr = e.target.closest('tr');
+                const selCodigo = tr ? tr.querySelector('.select-codigo-hora') : null;
+                const codBase = selCodigo ? selCodigo.value : (item?.codigoDia || calcularCodigoBaseDia(item));
+                const sufijo = e.target.value;
+                const mapaLibros = {
+                    la: { nombre: 'Laudes', slug: 'laudes' },
+                    of: { nombre: 'Oficio', slug: 'oficio' },
+                    te: { nombre: 'Tercia', slug: 'tercia' },
+                    se: { nombre: 'Sexta', slug: 'sexta' },
+                    no: { nombre: 'Nona', slug: 'nona' },
+                    vi: { nombre: 'Víspera', slug: 'visperas' },
+                    co: { nombre: 'Completas', slug: 'completas' }
+                };
+                const info = mapaLibros[sufijo] || mapaLibros.la;
+                const btnHora = tr.querySelector('.btn-ir-hora-salterio');
+                if (btnHora) {
+                    btnHora.textContent = info.nombre;
+                    btnHora.href = `../../salterios.html?libro=${info.slug}&id=${codBase}${sufijo}`;
+                    btnHora.title = `Abrir ${info.nombre} (${codBase}${sufijo})`;
+                }
+                window.open(`../../salterios.html?libro=${info.slug}&id=${codBase}${sufijo}`, '_blank');
             });
         });
     }

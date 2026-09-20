@@ -416,15 +416,29 @@
                     </div>
                 </button>
 
+                <button class="nav-item" id="btn-nav-formularios">
+                    <span class="material-symbols-outlined">edit_calendar</span>
+                    <span>Formularios</span>
+                    <div class="nav-submenu" id="nav-submenu-formularios">
+                        <a href="/frm_salterios.html"><span class="material-symbols-outlined">edit_note</span> Formulario Salterios</a>
+                        <a href="/src/html/salmos.html"><span class="material-symbols-outlined">format_list_bulleted</span> Salmos</a>
+                        <a href="/src/html/himno.html"><span class="material-symbols-outlined">music_note</span> Himnos</a>
+                        <a href="/src/html/lecturabreve.html"><span class="material-symbols-outlined">auto_stories</span> Lectura Breve</a>
+                        <a href="/antifonas.html"><span class="material-symbols-outlined">auto_stories</span> Antífonas</a>
+                        <a href="/src/html/form_etiempo.html"><span class="material-symbols-outlined">edit_calendar</span> Cambio litúrgico</a>
+                        <a href="/src/html/santo.html"><span class="material-symbols-outlined">calendar_today</span> Santo</a>
+                        <a href="/src/html/nombresanto.html"><span class="material-symbols-outlined">person_add</span> Nombre Santo</a>
+                    </div>
+                </button>
+
                 <button class="nav-item" id="btn-nav-resucito">
                     <span class="material-symbols-outlined">menu_book</span>
                     <span>Liturgia</span>
                     <div class="nav-submenu" id="nav-submenu-resucito">
-                        <a href="/src/html/form_etiempo.html"><span class="material-symbols-outlined">edit_calendar</span> Cambio litúrgico</a>
+                        <a href="/salterios.html"><span class="material-symbols-outlined">menu_book</span> Salterios</a>
+                        <a href="/cinta.html"><span class="material-symbols-outlined">graphic_eq</span> Cinta de Audio</a>
                         <a href="/src/html/añoliturgico.html"><span class="material-symbols-outlined">calendar_month</span> Año Liturgico</a>
                         <a href="/src/html/datos.html"><span class="material-symbols-outlined">dataset</span> Datos y Años</a>
-                        <a href="/src/html/santo.html"><span class="material-symbols-outlined">calendar_today</span> Santo</a>
-                        <a href="/src/html/nombresanto.html"><span class="material-symbols-outlined">person_add</span> Nombre Santo</a>
                         <a href="/src/html/chat.html"><span class="material-symbols-outlined">forum</span> Asistencia y Chat</a>
                         <a href="/src/html/ver.html"><span class="material-symbols-outlined">history_edu</span> Historial de Cambios</a>
                         <a href="/src/html/system.html"><span class="material-symbols-outlined">folder_special</span> Archivos del Sistema</a>
@@ -514,6 +528,7 @@
 
     setupSubmenu('btn-nav-menu', 'nav-submenu');
     setupSubmenu('btn-nav-neocate', 'nav-submenu-neocate');
+    setupSubmenu('btn-nav-formularios', 'nav-submenu-formularios');
     setupSubmenu('btn-nav-resucito', 'nav-submenu-resucito');
 
     // --- LÓGICA DEL POP-UP DE CUENTA GOOGLE ---

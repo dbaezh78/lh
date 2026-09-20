@@ -1,0 +1,862 @@
+/* =========================================================================
+   ESTILOS PARA EL FORMULARIO DE SALTERIOS (frm_salterios.css)
+   Liturgia de las Horas
+   ========================================================================= */
+
+:root {
+    --color-fondo: #f8f6f0;
+    --color-card: #ffffff;
+    --color-borde: #ded8cb;
+    --color-texto: #2b2b2b;
+    --color-texto-muted: #666666;
+    --color-primario: #8B0000;
+    --color-primario-hover: #a30000;
+    --color-acento-dorado: #b8860b;
+    --color-morado: #6a1b9a;
+    --color-verde: #2e7d32;
+    --color-azul: #0288d1;
+    --color-codigo-bg: #1e2430;
+    --color-codigo-txt: #00e676;
+    --color-sombra: rgba(0, 0, 0, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px 15px 100px;
+    font-family: Verdana, Arial, sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    line-height: 1.5;
+}
+
+.contenedor-frm-salterios {
+    max-width: 1050px;
+    margin: 0 auto;
+    background: var(--color-card);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 6px 24px var(--color-sombra);
+    border: 1px solid var(--color-borde);
+}
+
+/* Cabecera */
+.header-frm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 2px solid var(--color-primario);
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+}
+
+.titulo-box h1 {
+    margin: 0;
+    color: var(--color-primario);
+    font-size: 1.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.titulo-box p {
+    margin: 6px 0 0;
+    color: var(--color-texto-muted);
+    font-size: 0.95rem;
+}
+
+.header-nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-nav-frm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-texto);
+    background: #f1ede4;
+    border: 1px solid var(--color-borde);
+    transition: all 0.2s ease;
+}
+
+.btn-nav-frm:hover {
+    background: #e5dfd2;
+    transform: translateY(-1px);
+}
+
+.btn-nav-frm.primario {
+    background: var(--color-primario);
+    color: #fff;
+    border-color: var(--color-primario);
+}
+
+.btn-nav-frm.primario:hover {
+    background: var(--color-primario-hover);
+}
+
+/* Tarjeta del Código Combinado (Índice Principal) */
+.card-codigo-indice {
+    background: linear-gradient(135deg, #1e2430 0%, #151922 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 28px;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-codigo-indice::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: var(--color-codigo-txt);
+}
+
+.codigo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.codigo-label-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.codigo-display-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.input-codigo-indice {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1.5px solid rgba(0, 230, 118, 0.5);
+    border-radius: 10px;
+    color: var(--color-codigo-txt);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    padding: 8px 18px;
+    letter-spacing: 2px;
+    min-width: 240px;
+    max-width: 100%;
+    outline: none;
+    box-shadow: 0 0 14px rgba(0, 230, 118, 0.2);
+}
+
+.codigo-acciones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-copiar-codigo {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-copiar-codigo:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.btn-guardar-firebase {
+    background: linear-gradient(135deg, #00c853 0%, #009624 100%);
+    border: 1px solid #b9f6ca;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 200, 83, 0.35);
+    transition: all 0.2s ease;
+}
+
+.btn-guardar-firebase:hover {
+    background: linear-gradient(135deg, #00e676 0%, #00b248 100%);
+    box-shadow: 0 6px 16px rgba(0, 230, 118, 0.45);
+    transform: translateY(-1.5px);
+}
+
+.btn-guardar-firebase:active {
+    transform: translateY(0);
+}
+
+.btn-guardar-firebase:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.badge-estado-guardado {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    margin-left: 8px;
+}
+
+.badge-estado-guardado.guardado {
+    background: rgba(0, 230, 118, 0.15);
+    border-color: rgba(0, 230, 118, 0.4);
+    color: #00e676;
+}
+
+.codigo-desglose-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.badge-desglose {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+}
+
+.badge-desglose strong {
+    color: #fbbf24;
+}
+
+.texto-descriptivo-completo {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    margin-left: auto;
+    font-style: italic;
+}
+
+/* Sección de Campos / Selectores */
+.seccion-selectores {
+    background: #faf8f5;
+    border: 1px solid var(--color-borde);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 28px;
+}
+
+.seccion-selectores h2 {
+    margin: 0 0 18px 0;
+    font-size: 1.25rem;
+    color: var(--color-primario);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.grid-selectores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+.campo-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-box label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-texto-muted);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.select-liturgico,
+.input-liturgico {
+    background: #ffffff;
+    border: 1.5px solid var(--color-borde);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    color: var(--color-texto);
+    font-weight: 600;
+    outline: none;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.select-liturgico:focus,
+.input-liturgico:focus {
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.15);
+}
+
+/* Área de Datos Fijos vs Datos a Llamar */
+.seccion-arquitectura-hora {
+    background: #ffffff;
+    border: 1px solid var(--color-borde);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.seccion-arquitectura-hora h3 {
+    margin: 0 0 16px;
+    font-size: 1.2rem;
+    color: var(--color-primario);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.grid-columnas-datos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .grid-columnas-datos {
+        grid-template-columns: 1fr;
+    }
+}
+
+.col-datos-card {
+    background: #fdfbf7;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.col-datos-card.fijos {
+    border-left: 4px solid var(--color-primario);
+}
+
+.col-datos-card.dinamicos {
+    border-left: 4px solid var(--color-azul);
+}
+
+.col-datos-card h4 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.col-datos-card.fijos h4 {
+    color: var(--color-primario);
+}
+
+.col-datos-card.dinamicos h4 {
+    color: var(--color-azul);
+}
+
+.lista-elementos-hora {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 0.92rem;
+    color: #444;
+}
+
+.lista-elementos-hora li {
+    margin-bottom: 8px;
+}
+
+.lista-elementos-hora strong {
+    color: #222;
+}
+
+/* =========================================================================
+   CONSTRUCTOR LITÚRGICO: INVITATORIO (SEGÚN IMAGEN 2)
+   ========================================================================= */
+.seccion-constructor-liturgia {
+    background: #ffffff;
+    border: 1px solid var(--color-borde);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.panel-controles-liturgia {
+    background: #faf8f5;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+}
+
+.panel-controles-liturgia h3 {
+    margin: 0 0 14px;
+    font-size: 1.15rem;
+    color: var(--color-primario);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.grid-controles-invitatorio {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .grid-controles-invitatorio {
+        grid-template-columns: 1fr;
+    }
+}
+
+.control-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.control-box label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-texto-muted);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Hoja Pergamino Litúrgica (Exacta a Imagen 2) */
+.pergamino-liturgia-hoja {
+    background-color: #ffffd6;
+    border: 1px solid #e6dfbd;
+    border-radius: 6px;
+    padding: 34px 30px 40px;
+    font-family: Verdana, Arial, sans-serif;
+    color: #1a1a1a;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* 1. Título de la Hora: EN NEGRITA */
+.liturgia-titulo-hora {
+    color: #c00000;
+    font-weight: 700;
+    font-size: 2.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+/* 2. Subtítulo: ROJO, CURSIVA, SIN NEGRITA */
+.liturgia-subtitulo-hora {
+    color: #c00000;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.15rem;
+    margin: 0 0 28px 0;
+    line-height: 1.3;
+}
+
+/* 3. Título de Sección INVITATORIO: ROJO, MAYÚSCULAS, SIN NEGRITA */
+.liturgia-seccion-invitatorio {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 10px 0;
+    line-height: 1.3;
+}
+
+/* 4. Rúbrica: ROJO, CURSIVA, SIN NEGRITA */
+.liturgia-rubrica-invitatorio {
+    color: #c00000;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin: 0 0 22px 0;
+}
+
+/* 5. Versículo y Respuesta: Datos Fijos */
+.liturgia-versiculo-fila {
+    font-size: 1.15rem;
+    line-height: 1.65;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.liturgia-letra-roja {
+    color: #c00000;
+    font-weight: 700;
+    font-size: 1.15rem;
+    min-width: 18px;
+}
+
+.liturgia-texto-verso {
+    color: #1a1a1a;
+    font-weight: 400;
+}
+
+/* 6. Antífonas: SIN RECUADRO, FLUJO NATURAL EN LÍNEA */
+.liturgia-antifona-fila,
+.recuadro-antifona-invitatorio {
+    border: none;
+    padding: 0;
+    margin: 18px 0 22px 0;
+    display: block;
+    font-size: 1.15rem;
+    line-height: 1.65;
+    color: #1a1a1a;
+    background: transparent;
+}
+
+.liturgia-antifona-fila .liturgia-letra-roja,
+.recuadro-antifona-invitatorio .liturgia-letra-roja {
+    margin-right: 4px;
+    display: inline;
+}
+
+.liturgia-texto-antifona {
+    font-weight: 400;
+    color: #1a1a1a;
+    display: inline;
+}
+
+/* 7. Salmo Invitatorio: TÍTULO EN ROJO, MAYÚSCULAS, SIN NEGRITA */
+.liturgia-titulo-salmo {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+/* Texto del Salmo: TEXTO PLANO EN NEGRO */
+.liturgia-texto-salmo {
+    color: #111111;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    white-space: pre-line;
+    font-family: Verdana, Arial, sans-serif;
+    margin-top: 8px;
+    margin-bottom: 24px;
+}
+
+/* 8. Sección del Himno (debajo del Invitatorio) */
+.liturgia-seccion-himno {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px dashed rgba(192, 0, 0, 0.2);
+}
+
+.liturgia-titulo-himno {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+.liturgia-texto-himno {
+    color: #111111;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    white-space: pre-line;
+    font-family: Verdana, Arial, sans-serif;
+    margin-top: 8px;
+    margin-bottom: 24px;
+}
+
+/* 9. Sección de la Salmodia (debajo del Himno) */
+.liturgia-seccion-salmodia {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px dashed rgba(192, 0, 0, 0.2);
+}
+
+.liturgia-titulo-salmodia {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    line-height: 1.3;
+}
+
+.liturgia-bloque-salmodia {
+    margin-top: 28px;
+    margin-bottom: 28px;
+}
+
+.liturgia-bloque-salmodia:first-of-type {
+    margin-top: 10px;
+}
+
+/* 10. Sección de Lectura Breve y Responsorio Breve (debajo de la Salmodia) */
+.liturgia-seccion-lectura-breve {
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px dashed rgba(192, 0, 0, 0.25);
+}
+
+.liturgia-titulo-lectura-breve {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.liturgia-cita-lectura {
+    color: #c00000;
+    font-weight: 400;
+    text-transform: none;
+    font-size: 1.2rem;
+}
+
+.liturgia-texto-lectura {
+    color: #111111;
+    font-size: 1.05rem;
+    line-height: 1.68;
+    white-space: pre-line;
+    font-family: Verdana, Arial, sans-serif;
+    margin-top: 8px;
+    margin-bottom: 26px;
+    text-align: justify;
+}
+
+.liturgia-titulo-responsorio {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 24px;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.liturgia-espacio-resp {
+    height: 14px;
+}
+
+/* 11. Sección de Cántico Evangélico (debajo de Lectura Breve) */
+.liturgia-seccion-cantico-evangelico {
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px dashed rgba(192, 0, 0, 0.25);
+}
+
+.liturgia-titulo-cantico-evangelico {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+.liturgia-titulo-cantico {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.liturgia-cita-cantico {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.15rem;
+}
+
+.liturgia-texto-cantico {
+    color: #111111;
+    font-size: 1.02rem;
+    line-height: 1.68;
+    white-space: pre-line;
+    font-family: Verdana, Arial, sans-serif;
+    margin-top: 8px;
+    margin-bottom: 22px;
+}
+
+/* 12. Sección de Preces */
+.liturgia-seccion-preces {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px dashed rgba(192, 0, 0, 0.2);
+}
+
+.liturgia-titulo-preces {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+.liturgia-texto-preces {
+    color: #111111;
+    font-size: 1.02rem;
+    line-height: 1.68;
+    white-space: pre-line;
+    font-family: Verdana, Arial, sans-serif;
+    margin-bottom: 16px;
+}
+
+.liturgia-rubrica-roja {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin: 18px 0 14px 0;
+}
+
+.liturgia-intro-padrenuestro {
+    color: #1a1a1a;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.liturgia-padrenuestro-rojo {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.15rem;
+    margin-bottom: 24px;
+}
+
+/* 13. Sección de Oración */
+.liturgia-seccion-oracion {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px dashed rgba(192, 0, 0, 0.2);
+}
+
+.liturgia-titulo-oracion {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+.liturgia-texto-oracion {
+    color: #111111;
+    font-size: 1.02rem;
+    line-height: 1.68;
+    font-family: Verdana, Arial, sans-serif;
+    margin-bottom: 24px;
+    text-align: justify;
+}
+
+/* 14. Sección de Conclusión */
+.liturgia-seccion-conclusion {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px dashed rgba(192, 0, 0, 0.2);
+}
+
+.liturgia-titulo-conclusion {
+    color: #c00000;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+
+/* Pie y Siguiente Paso */
+.footer-status-paso {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: #eef7ee;
+    border: 1px solid #c8e6c9;
+    color: #2e7d32;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+}

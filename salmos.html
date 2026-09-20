@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Salmos Litúrgicos — Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="../css/salmos.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+</head>
+<body>
+
+    <div class="contenedor-salmos">
+        <!-- Cabecera -->
+        <header class="header-salmos">
+            <div class="titulo-box">
+                <h1>
+                    <span class="material-symbols-outlined" style="font-size: 2.2rem; color: var(--accent-red);">menu_book</span>
+                    Gestor de Salmos Litúrgicos
+                </h1>
+                <p>Registro, edición y repositorio en texto plano de Salmos y Cánticos con sincronización</p>
+            </div>
+            <div class="header-controles">
+                <button id="btn-restaurar-semilla" class="btn-salmo" title="Restaurar todos los salmos desde src/data/salmos.js">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                    Restaurar Salmos
+                </button>
+                <button id="btn-subir-semilla" class="btn-salmo btn-verde" title="Subir catálogo completo de salmos a Firebase">
+                    <span class="material-symbols-outlined">cloud_upload</span>
+                    Subir a Firebase
+                </button>
+                <button id="btn-exportar-json" class="btn-salmo" title="Descargar respaldo en JSON">
+                    <span class="material-symbols-outlined">download</span>
+                    Exportar JSON
+                </button>
+                <button id="btn-exportar-js" class="btn-salmo" title="Generar archivo JS local para offline">
+                    <span class="material-symbols-outlined">code</span>
+                    Respaldo JS
+                </button>
+                <a href="himno.html" class="btn-salmo" title="Ir al Gestor de Himnos">
+                    <span class="material-symbols-outlined">music_note</span>
+                    Himnos
+                </a>
+                <a href="lecturabreve.html" class="btn-salmo" title="Ir al Gestor de Lectura Breve">
+                    <span class="material-symbols-outlined">auto_stories</span>
+                    Lectura Breve
+                </a>
+                <a href="frm_salterios.html" class="btn-salmo btn-primario" title="Ir al Formulario Salterios">
+                    <span class="material-symbols-outlined">edit_calendar</span>
+                    Formulario
+                </a>
+                <a href="antifonas.html" class="btn-salmo" title="Ir al Gestor de Antífonas">
+                    <span class="material-symbols-outlined">auto_stories</span>
+                    Antífonas
+                </a>
+                <a href="../../index.html" class="btn-salmo" title="Ir al Inicio">
+                    <span class="material-symbols-outlined">home</span>
+                    Inicio
+                </a>
+            </div>
+        </header>
+
+        <!-- Banner de estado dinámico -->
+        <div id="banner-estado" class="estado-banner info" style="display: none;">
+            <span class="material-symbols-outlined">info</span> Cargando...
+        </div>
+
+        <!-- Grid Principal -->
+        <div class="grid-salmos">
+            <!-- Columna Izquierda: Formulario de Registro / Edición -->
+            <section class="card-form-salmo">
+                <h2>
+                    <span class="material-symbols-outlined" style="color: var(--accent-red);">edit_note</span>
+                    Registrar / Editar Salmo
+                </h2>
+                <form id="form-salmo">
+                    <div class="row-campos">
+                        <div class="campo-grupo">
+                            <label for="form-id">ID / Clave:</label>
+                            <input type="text" id="form-id" placeholder="ej: salmo94, salmo23" required spellcheck="false">
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="form-tipo">Tipo / Categoría:</label>
+                            <select id="form-tipo" required>
+                                <option value="invitatorio">Invitatorio (Salmo 94, etc.)</option>
+                                <option value="salmo" selected>Salmo (Salterio)</option>
+                                <option value="cantico_at">Cántico AT (Antiguo Testamento)</option>
+                                <option value="cantico_nt">Cántico NT (Nuevo Testamento)</option>
+                                <option value="cantico_evangelico">Cántico Evangélico</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="form-titulo">Título Representativo (Rojo):</label>
+                        <input type="text" id="form-titulo" placeholder="ej: SALMO 94 - INVITACIÓN A LA ALABANZA DIVINA" required>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="form-texto">Texto del Salmo (Texto plano en negro):</label>
+                        <textarea id="form-texto" placeholder="Pega o escribe el texto del salmo en texto plano..." required spellcheck="false"></textarea>
+                        <div class="quick-toolbar-texto">
+                            <button type="button" id="btn-add-gloria" class="btn-mini" title="Añadir Gloria al Padre al final">+ Gloria al Padre</button>
+                            <button type="button" id="btn-add-aleluya" class="btn-mini" title="Añadir Aleluya">+ Aleluya.</button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 16px;">
+                        <button type="submit" class="btn-salmo btn-primario" style="flex: 1; justify-content: center;">
+                            <span class="material-symbols-outlined">save</span>
+                            Guardar Salmo
+                        </button>
+                        <button type="button" id="btn-limpiar-form" class="btn-salmo" title="Limpiar formulario">
+                            <span class="material-symbols-outlined">restart_alt</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Columna Derecha: Catálogo y Filtros -->
+            <section class="card-lista-salmos">
+                <div class="header-filtros">
+                    <div class="buscador-box">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="filtro-buscar" placeholder="Buscar salmo por número, título o texto...">
+                    </div>
+                    <div class="filtros-selects">
+                        <select id="filtro-tipo">
+                            <option value="">Todos los Tipos</option>
+                            <option value="invitatorio">Invitatorios</option>
+                            <option value="salmo">Salmos</option>
+                            <option value="cantico">Cánticos</option>
+                            <option value="cantico_at">Cántico AT</option>
+                            <option value="cantico_nt">Cántico NT</option>
+                            <option value="cantico_evangelico">Cántico Evangélico</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Total en catálogo: <strong id="contador-salmos" style="color: #fff;">0</strong>
+                    </span>
+                    <span style="font-size: 0.8rem; color: var(--accent-gold); font-style: italic;">
+                        El título siempre en rojo y el cuerpo en texto plano negro
+                    </span>
+                </div>
+
+                <!-- Lista de Salmos -->
+                <div id="lista-salmos-items" class="lista-items-salmos">
+                    <!-- Rellenado dinámicamente -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Scripts de inicialización -->
+    <script src="../data/salmos.js"></script>
+    <script src="../js/firebase-config.js" type="module"></script>
+    <script src="../js/salmos-manager.js" type="module"></script>
+    <script src="../js/navigator.js"></script>
+</body>
+</html>

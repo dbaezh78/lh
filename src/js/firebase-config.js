@@ -165,6 +165,126 @@ window.firebaseAPI = {
         }
         return null;
     },
+    // =====================================================================
+    // MÉTODOS PARA ANTÍFONAS (Colección 'antifonas')
+    // =====================================================================
+    guardarAntifonaFirestore: async (antifona) => {
+        const user = auth.currentUser;
+        if (!user) throw new Error("Debes iniciar sesión para guardar antífonas.");
+        if (!antifona || !antifona.texto) throw new Error("Datos de antífona inválidos.");
+        const docId = antifona.id || `ant_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const docRef = doc(db, "antifonas", docId);
+        const payload = {
+            ...antifona,
+            id: docId,
+            modificadoPor: user.email,
+            ultimaActualizacion: new Date().toISOString()
+        };
+        await setDoc(docRef, payload, { merge: true });
+        console.log(`☁️ [Firebase] Antífona '${docId}' guardada en Firestore.`);
+        return payload;
+    },
+    guardarLoteAntifonasFirestore: async (listaAntifonas) => {
+        const user = auth.currentUser;
+        if (!user) throw new Error("Debes iniciar sesión para guardar antífonas.");
+        if (!Array.isArray(listaAntifonas)) throw new Error("listaAntifonas debe ser un array.");
+        const BATCH_SIZE = 25;
+        let count = 0;
+        for (let i = 0; i < listaAntifonas.length; i += BATCH_SIZE) {
+            const chunk = listaAntifonas.slice(i, i + BATCH_SIZE);
+            const batch = writeBatch(db);
+            for (const ant of chunk) {
+                if (!ant || !ant.texto) continue;
+                const docId = ant.id || `ant_${Date.now()}_${count}_${Math.random().toString(36).substr(2, 4)}`;
+                const docRef = doc(db, "antifonas", docId);
+                batch.set(docRef, {
+                    ...ant,
+                    id: docId,
+                    modificadoPor: user.email,
+                    ultimaActualizacion: new Date().toISOString()
+                }, { merge: true });
+                count++;
+            }
+            await batch.commit();
+            await new Promise(res => setTimeout(res, 200));
+        }
+        console.log(`✅ [Firebase] ${count} antífonas guardadas en lote.`);
+        return count;
+    },
+    cargarAntifonasFirestore: async () => {
+        try {
+            const querySnapshot = await getDocs(collection(db, "antifonas"));
+            if (!querySnapshot.empty) {
+                const lista = [];
+                querySnapshot.forEach((doc) => {
+                    lista.push({ id: doc.id, ...doc.data() });
+                });
+                return lista;
+            }
+        } catch (e) {
+            console.warn("⚠️ Error cargando antífonas de Firestore:", e);
+        }
+        return null;
+    },
+    eliminarAntifonaFirestore: async (docId) => {
+        const user = auth.currentUser;
+        if (!user) throw new Error("Debes iniciar sesión para eliminar.");
+        const docRef = doc(db, "antifonas", docId);
+        await deleteDoc(docRef);
+        console.log(`🗑️ [Firebase] Antífona '${docId}' eliminada.`);
+        return true;
+    },
+    // =====================================================================
+    // MÉTODOS PARA SALTERIOS Y HORAS LITÚRGICAS (Colección 'salterios')
+    // =====================================================================
+    guardarSalterioFirestore: async (docId, datosHora) => {
+        const user = auth.currentUser;
+        if (!user) throw new Error("Debes iniciar sesión para guardar horas litúrgicas.");
+        if (!docId || !datosHora) throw new Error("Identificador y datos de la hora requeridos.");
+        const docRef = doc(db, "salterios", docId);
+        const payload = {
+            ...datosHora,
+            id: docId,
+            modificadoPor: user.email,
+            ultimaActualizacion: new Date().toISOString()
+        };
+        await setDoc(docRef, payload, { merge: true });
+        console.log(`☁️ [Firebase] Hora litúrgica '${docId}' guardada en Firestore.`);
+        return payload;
+    },
+    cargarSalterioFirestore: async (docId) => {
+        try {
+            const docRef = doc(db, "salterios", docId);
+            const snapshot = await getDoc(docRef);
+            if (snapshot.exists()) {
+                return snapshot.data();
+            }
+        } catch (e) {
+            console.warn(`⚠️ Error al cargar salterio '${docId}' de Firestore:`, e);
+        }
+        return null;
+    },
+    cargarTodosSalteriosFirestore: async () => {
+        try {
+            const querySnapshot = await getDocs(collection(db, "salterios"));
+            const lista = [];
+            querySnapshot.forEach((doc) => {
+                lista.push({ id: doc.id, ...doc.data() });
+            });
+            return lista;
+        } catch (e) {
+            console.warn("⚠️ Error cargando salterios de Firestore:", e);
+            return [];
+        }
+    },
+    eliminarSalterioFirestore: async (docId) => {
+        const user = auth.currentUser;
+        if (!user) throw new Error("Debes iniciar sesión para eliminar.");
+        const docRef = doc(db, "salterios", docId);
+        await deleteDoc(docRef);
+        console.log(`🗑️ [Firebase] Salterio '${docId}' eliminado.`);
+        return true;
+    },
     // Métodos para el orden personalizado de Archivos del Sistema
     guardarOrdenArchivosSistema: async (ordenIds) => {
         const user = auth.currentUser;

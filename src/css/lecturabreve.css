@@ -1,0 +1,533 @@
+/* =========================================================================
+   ESTILOS PARA EL GESTOR DE LECTURA BREVE Y RESPONSORIO (lecturabreve.css)
+   Liturgia de las Horas
+   ========================================================================= */
+
+:root {
+    --bg-primary: #12151c;
+    --bg-surface: #1a1f2c;
+    --bg-card: #222838;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #f0f4f8;
+    --text-secondary: #94a3b8;
+    --accent-red: #c00000;
+    --accent-red-hover: #e01212;
+    --accent-gold: #f59e0b;
+    --accent-green: #10b981;
+    --accent-blue: #3b82f6;
+    --card-preview-bg: #ffffea;
+    --card-preview-border: #e2dab8;
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-sm: 6px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: Verdana, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+.contenedor-lecturabreve {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 20px 100px;
+}
+
+/* Cabecera */
+.header-lecturabreve {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 20px 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    margin-bottom: 24px;
+}
+
+.titulo-box h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.titulo-box p {
+    margin: 6px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.header-controles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-lb {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-lb:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.btn-lb.btn-primario {
+    background: linear-gradient(135deg, var(--accent-red) 0%, #8b0000 100%);
+    border-color: #ff6b6b;
+    color: #ffffff;
+}
+
+.btn-lb.btn-primario:hover {
+    background: linear-gradient(135deg, var(--accent-red-hover) 0%, var(--accent-red) 100%);
+    box-shadow: 0 4px 14px rgba(192, 0, 0, 0.4);
+}
+
+.btn-lb.btn-verde {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #6ee7b7;
+    color: #ffffff;
+}
+
+.btn-lb.btn-verde:hover {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+
+/* Banner de Estado */
+.estado-banner {
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.estado-banner.info {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+}
+
+.estado-banner.exito {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+.estado-banner.alerta {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fcd34d;
+}
+
+/* Grid Principal */
+.grid-lecturabreve {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 1080px) {
+    .grid-lecturabreve {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Tarjeta Formulario */
+.card-form-lectura,
+.card-lista-lecturas {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+}
+
+.card-form-lectura h2,
+.card-lista-lecturas h2 {
+    margin: 0 0 20px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.campo-grupo {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-grupo label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.campo-grupo input,
+.campo-grupo select,
+.campo-grupo textarea {
+    background: #0f131a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.campo-grupo input:focus,
+.campo-grupo select:focus,
+.campo-grupo textarea:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(192, 0, 0, 0.25);
+}
+
+.campo-grupo textarea {
+    min-height: 110px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.row-campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.row-campos-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .row-campos,
+    .row-campos-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Sección Responsorio Breve dentro del formulario */
+.seccion-form-responsorio {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    margin-top: 18px;
+    margin-bottom: 20px;
+}
+
+.seccion-form-responsorio h3 {
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+    color: #ff8a80;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nota-fija {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+/* =========================================================================
+   VISTA PREVIA LITÚRGICA (SEGÚN IMAGEN media_1789935317896.png)
+   ========================================================================= */
+
+.contenedor-preview-liturgico {
+    margin-top: 24px;
+    background: var(--card-preview-bg);
+    border: 1px solid var(--card-preview-border);
+    border-radius: var(--radius-md);
+    padding: 24px 28px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    color: #111111;
+    font-family: Verdana, Arial, sans-serif;
+}
+
+.header-preview-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+.badge-preview-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #666;
+    letter-spacing: 0.5px;
+}
+
+/* 1. TÍTULO LECTURA BREVE (ROJO, MAYÚSCULAS) */
+.preview-titulo-lectura {
+    color: var(--accent-red);
+    font-size: 1.25rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.preview-cita-lectura {
+    color: var(--accent-red);
+    font-weight: 400;
+    text-transform: none;
+    font-size: 1.2rem;
+}
+
+/* 2. TEXTO DE LA LECTURA (TEXTO PLANO EN NEGRO) */
+.preview-texto-lectura {
+    color: #111111;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    margin-bottom: 26px;
+    text-align: justify;
+}
+
+/* 3. TÍTULO RESPONSORIO BREVE (ROJO, MAYÚSCULAS) */
+.preview-titulo-responsorio {
+    color: var(--accent-red);
+    font-size: 1.25rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 24px;
+    margin-bottom: 16px;
+}
+
+/* 4. FILAS DE RESPONSORIO */
+.preview-fila-resp {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #111111;
+    margin-bottom: 4px;
+}
+
+.preview-letra-roja {
+    color: var(--accent-red);
+    font-weight: 700;
+    margin-right: 6px;
+    display: inline;
+}
+
+.preview-texto-resp {
+    display: inline;
+}
+
+/* Espaciador del responsorio (exacto al de la imagen) */
+.preview-espacio-resp {
+    height: 14px;
+}
+
+/* =========================================================================
+   COLUMNA DERECHA: CATÁLOGO Y LISTA DE ELEMENTOS
+   ========================================================================= */
+
+.header-filtros {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.buscador-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #0f131a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+}
+
+.buscador-box input {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    width: 100%;
+    outline: none;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.filtros-selects {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.filtros-selects select {
+    background: #0f131a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    outline: none;
+    font-size: 0.88rem;
+}
+
+.lista-items-lectura {
+    max-height: 680px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 6px;
+}
+
+.lista-items-lectura::-webkit-scrollbar {
+    width: 6px;
+}
+
+.lista-items-lectura::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.item-lectura-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.item-lectura-card:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.item-lectura-card.activo {
+    border-color: #ff6b6b;
+    background: rgba(192, 0, 0, 0.12);
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.item-cita {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ff8a80;
+}
+
+.item-badge-tiempo {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+}
+
+.item-snippet {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.45;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.item-rb-refrain {
+    font-size: 0.82rem;
+    color: #fcd34d;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 8px;
+}
+
+.btn-mini-accion {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.btn-mini-accion:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-mini-accion.eliminar:hover {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.15);
+}

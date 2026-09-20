@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Salterios — Liturgia de las Horas</title>
+    <link rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="src/css/cinta.css">
+    <link rel="stylesheet" href="src/css/salterios.css">
+    <link rel="stylesheet" href="src/css/buttons.css">
+</head>
+<body class="pagina-salterios">
+
+    <!-- Cinta superior flotante con doble reproductor (Evangelio + Hora actual) -->
+    <div id="cinta-container"></div>
+
+    <!-- Contenedor principal de lectura y rezo litúrgico -->
+    <main class="salterios-wrapper">
+        <article id="salterio-contenido">
+            <p style="text-align: center; color: var(--salterio-rubrica); padding: 40px;">Cargando hora litúrgica...</p>
+        </article>
+    </main>
+
+    <!-- Barra de Herramientas Flotante / Acceso al Constructor -->
+    <div class="admin-toolbar-salterios">
+        <button class="btn-fab-admin" id="btn-abrir-constructor" title="Abrir Panel Constructor / Guardar en Firebase">
+            <span class="material-symbols-outlined">tune</span>
+        </button>
+    </div>
+
+    <!-- Panel Lateral Drawer: Constructor y Administrador de Salterios -->
+    <aside class="constructor-drawer" id="constructor-drawer">
+        <div class="constructor-header">
+            <h3>
+                <span class="material-symbols-outlined">auto_fix_high</span>
+                Constructor de Salterio
+            </h3>
+            <button class="btn-cerrar-drawer" id="btn-cerrar-drawer">&times;</button>
+        </div>
+
+        <form id="form-constructor-salterio" onsubmit="event.preventDefault();">
+            <div class="form-constructor-campo">
+                <label for="c-tiempo">Tiempo Litúrgico:</label>
+                <select id="c-tiempo" onchange="window.location.search = `?tiempo=${this.value}&semana=24&dia=sabado&libro=laudes`;">
+                    <option value="ordinario">Tiempo Ordinario (34 semanas)</option>
+                    <option value="adviento">Adviento (4 semanas)</option>
+                    <option value="navidad">Navidad (2 semanas)</option>
+                    <option value="cuaresma">Cuaresma (7 semanas)</option>
+                    <option value="pascua">Pascua (7 semanas)</option>
+                    <option value="santos">Santos (Calendario / Festividades)</option>
+                </select>
+            </div>
+
+            <div class="form-constructor-campo">
+                <label for="c-libro">Libro Litúrgico:</label>
+                <select id="c-libro" onchange="const p = new URLSearchParams(window.location.search); p.set('libro', this.value); window.location.search = p.toString();">
+                    <option value="oficio">Oficio de Lectura</option>
+                    <option value="laudes" selected>Laudes</option>
+                    <option value="tercia">Tercia</option>
+                    <option value="sexta">Sexta</option>
+                    <option value="nona">Nona</option>
+                    <option value="visperas">Vísperas</option>
+                    <option value="completas">Completas</option>
+                </select>
+            </div>
+
+            <div class="form-constructor-campo">
+                <label for="c-semana">Semana:</label>
+                <input type="text" id="c-semana" value="24">
+            </div>
+
+            <div class="form-constructor-campo">
+                <label for="c-dia">Día:</label>
+                <select id="c-dia" onchange="const p = new URLSearchParams(window.location.search); p.set('dia', this.value); window.location.search = p.toString();">
+                    <option value="domingo">Domingo</option>
+                    <option value="lunes">Lunes</option>
+                    <option value="martes">Martes</option>
+                    <option value="miercoles">Miércoles</option>
+                    <option value="jueves">Jueves</option>
+                    <option value="viernes">Viernes</option>
+                    <option value="sabado" selected>Sábado</option>
+                </select>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0; padding-top: 10px;">
+                <p style="font-size: 0.85rem; color: #94a3b8; margin: 0 0 12px;">Acciones de Sincronización y Respaldo:</p>
+                <div class="constructor-btn-group">
+                    <button type="button" class="btn-c-accion guardar" id="btn-c-guardar-firebase">
+                        <span class="material-symbols-outlined">cloud_upload</span>
+                        Salvar en Firebase
+                    </button>
+                    <button type="button" class="btn-c-accion verde" id="btn-c-exportar-json">
+                        <span class="material-symbols-outlined">download</span>
+                        Exportar JSON
+                    </button>
+                    <button type="button" class="btn-c-accion" id="btn-c-exportar-js">
+                        <span class="material-symbols-outlined">code</span>
+                        Respaldo JS
+                    </button>
+                    <a href="antifonas.html" class="btn-c-accion" style="text-decoration: none;">
+                        <span class="material-symbols-outlined">auto_stories</span>
+                        Antífonas
+                    </a>
+                </div>
+            </div>
+        </form>
+    </aside>
+
+    <!-- Scripts -->
+    <script src="src/data/salmos.js"></script>
+    <script src="src/data/db-antifonas.js" type="module"></script>
+    <script src="src/js/firebase-config.js" type="module"></script>
+    <script src="src/js/cinta.js" type="module"></script>
+    <script src="src/js/salterios.js" type="module"></script>
+    <script src="src/js/navigator.js"></script>
+</body>
+</html>

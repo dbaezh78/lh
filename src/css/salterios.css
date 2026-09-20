@@ -1,0 +1,430 @@
+/* =========================================================================
+   ESTILOS PARA EL VISOR Y CONSTRUCTOR DE SALTERIOS (salterios.css)
+   Fidelidad visual con capturas OL1-5, LA1-5, TE1-2, SE1-2, NO1-2, VI1-3, CO1-3
+   ========================================================================= */
+
+:root {
+    --salterio-bg: #FFFFCB; /* Fondo amarillo litúrgico por defecto */
+    --salterio-text: #1a1a1a;
+    --salterio-rubrica: #d01212; /* Rojo litúrgico estándar */
+    --salterio-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Times New Roman", Georgia, serif;
+    --salterio-font-size: 1.06rem;
+    --salterio-line-height: 1.6;
+    --salterio-max-width: 860px;
+}
+
+body.pagina-salterios {
+    background-color: var(--salterio-bg);
+    color: var(--salterio-text);
+    font-family: var(--salterio-font-family);
+    font-size: var(--salterio-font-size);
+    line-height: var(--salterio-line-height);
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.salterios-wrapper {
+    max-width: var(--salterio-max-width);
+    margin: 0 auto;
+    padding: 24px 20px 120px;
+    box-sizing: border-box;
+}
+
+/* =========================================================================
+   TIPOGRAFÍA LITÚRGICA (RÚBRICAS Y TEXTO PLANO)
+   ========================================================================= */
+
+/* Título del Libro */
+.salterio-libro-titulo {
+    color: var(--salterio-rubrica);
+    font-size: 1.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0 0 4px 0;
+    letter-spacing: 0.5px;
+}
+
+/* Subtítulo del Libro (en cursiva roja) */
+.salterio-libro-subtitulo {
+    color: var(--salterio-rubrica);
+    font-style: italic;
+    font-size: 1.05rem;
+    margin: 0 0 20px 0;
+}
+
+/* Encabezados de Sección */
+.salterio-seccion-header {
+    color: var(--salterio-rubrica);
+    font-size: 1.12rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 24px 0 10px 0;
+    letter-spacing: 0.5px;
+}
+
+/* Indicador de versículos V. y R. */
+.rubrica-vr {
+    color: var(--salterio-rubrica);
+    font-weight: 700;
+    margin-right: 4px;
+}
+
+.linea-vr {
+    margin: 4px 0;
+    display: block;
+}
+
+/* Antífonas */
+.antifona-bloque {
+    margin: 14px 0;
+    line-height: 1.55;
+}
+
+.rubrica-ant {
+    color: var(--salterio-rubrica);
+    font-weight: 700;
+    margin-right: 4px;
+}
+
+/* Título de Salmos y Cánticos */
+.salmo-titulo-rubrica {
+    color: var(--salterio-rubrica);
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 14px 0 10px 0;
+    text-transform: uppercase;
+}
+
+/* Cuerpo de Salmos, Himnos y Estrofas (Texto Plano con separaciones) */
+.texto-estrofas-salmo {
+    white-space: pre-line;
+    margin: 12px 0 16px 0;
+    line-height: 1.6;
+    font-size: 1.02rem;
+}
+
+/* Doxología fija Gloria al Padre */
+.gloria-patri-bloque {
+    margin: 16px 0;
+    white-space: pre-line;
+    line-height: 1.55;
+}
+
+/* Rúbricas auxiliares */
+.rubrica-nota {
+    color: var(--salterio-rubrica);
+    font-style: italic;
+    font-size: 0.95rem;
+    margin: 6px 0 14px;
+}
+
+/* =========================================================================
+   LECTURAS Y REPRODUCTOR CUADRADO (OFICIO Y LAUDES)
+   ========================================================================= */
+
+.lectura-oficio-contenedor {
+    margin: 26px 0;
+}
+
+.lectura-etiqueta-roja {
+    color: var(--salterio-rubrica);
+    font-style: italic;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Reproductor cuadrado plano sobre la lectura (como en OL4.png) */
+.reproductor-lectura-box {
+    margin: 8px 0 16px 0;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    padding: 6px 10px;
+}
+
+.audio-lectura-cuadrado {
+    width: 100%;
+    height: 42px;
+    outline: none;
+    border-radius: 4px;
+}
+
+.lectura-cita-rubrica {
+    font-size: 0.98rem;
+    margin: 4px 0 6px 0;
+    font-weight: 600;
+}
+
+.lectura-subtitulo-rubrica {
+    color: var(--salterio-rubrica);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 1.02rem;
+    margin: 6px 0 12px 0;
+}
+
+/* TEXTO DE LAS LECTURAS JUSTIFICADO */
+.texto-lectura-justificado {
+    text-align: justify;
+    text-justify: inter-word;
+    line-height: 1.65;
+    margin: 14px 0 18px 0;
+    font-size: 1.02rem;
+}
+
+/* Responsorio de las lecturas */
+.responsorio-bloque {
+    margin: 16px 0;
+    line-height: 1.6;
+}
+
+.rubrica-asterisco {
+    color: var(--salterio-rubrica);
+    font-weight: bold;
+    margin: 0 4px;
+}
+
+/* =========================================================================
+   PRECES Y PADRE NUESTRO DESPLEGABLE
+   ========================================================================= */
+
+.preces-bloque {
+    margin: 20px 0;
+}
+
+.preces-intro {
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.preces-respuesta-pueblo {
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.preces-intencion {
+    margin: 10px 0;
+    line-height: 1.55;
+}
+
+.rubrica-intenciones-libres {
+    color: var(--salterio-rubrica);
+    margin: 14px 0;
+}
+
+/* Padre Nuestro Interactivo y Desplegable */
+.padre-nuestro-trigger {
+    color: var(--salterio-rubrica);
+    font-size: 1.08rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 16px 0 8px 0;
+    user-select: none;
+    transition: opacity 0.2s ease;
+}
+
+.padre-nuestro-trigger:hover {
+    opacity: 0.8;
+}
+
+.padre-nuestro-expandido {
+    display: none;
+    white-space: pre-line;
+    line-height: 1.65;
+    padding: 10px 16px;
+    margin: 6px 0 16px 0;
+    background: rgba(0, 0, 0, 0.03);
+    border-left: 3px solid var(--salterio-rubrica);
+    border-radius: 4px;
+    animation: fadeInExpand 0.25s ease forwards;
+}
+
+.padre-nuestro-expandido.activo {
+    display: block;
+}
+
+@keyframes fadeInExpand {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================================
+   BARRA DE HERRAMIENTAS FLOTANTE / MODO CONSTRUCTOR (ADMIN)
+   ========================================================================= */
+
+.admin-toolbar-salterios {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    z-index: 10000;
+}
+
+.btn-fab-admin {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #1e2430;
+    border: 2px solid #d01212;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-fab-admin:hover {
+    transform: scale(1.08);
+    background: #d01212;
+}
+
+/* Panel Modal / Drawer del Constructor */
+.constructor-drawer {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 480px;
+    max-width: 95vw;
+    height: 100vh;
+    background: #1a1f2c;
+    color: #f1f5f9;
+    box-shadow: -6px 0 30px rgba(0, 0, 0, 0.5);
+    z-index: 10001;
+    overflow-y: auto;
+    padding: 24px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.95rem;
+    animation: slideInDrawer 0.25s ease forwards;
+}
+
+.constructor-drawer.abierto {
+    display: block;
+}
+
+@keyframes slideInDrawer {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+.constructor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+}
+
+.constructor-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #fbbf24;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-cerrar-drawer {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.btn-cerrar-drawer:hover {
+    color: #fff;
+}
+
+.form-constructor-campo {
+    margin-bottom: 14px;
+}
+
+.form-constructor-campo label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.form-constructor-campo select,
+.form-constructor-campo input[type="text"],
+.form-constructor-campo textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: #242b3d;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    outline: none;
+}
+
+.form-constructor-campo textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-constructor-campo select:focus,
+.form-constructor-campo input[type="text"]:focus,
+.form-constructor-campo textarea:focus {
+    border-color: #d01212;
+}
+
+.constructor-btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.btn-c-accion {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: #222838;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-c-accion:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.btn-c-accion.guardar {
+    background: #d01212;
+    border-color: #b00f0f;
+}
+
+.btn-c-accion.guardar:hover {
+    background: #b00f0f;
+}
+
+.btn-c-accion.verde {
+    background: #10b981;
+    border-color: #059669;
+}

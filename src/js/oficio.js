@@ -1,4 +1,5 @@
 import { dbOficio } from '../data/db-Oficio.js';
+import { obtenerLiturgiaHora, normalizarObjetoLiturgico } from '../firebase/descarga_liturgia_de_las_horas.js';
 
 //*********************************************************************** */
 
@@ -157,13 +158,24 @@ function generarTemplateLaudes(datos) {
     `;
 }
 
-// 1. FUNCIÓN DE RENDERIZADO (LA QUE CAMBIA)
-export function renderizarLaudes(idBusqueda) {
-    const datos = dbOficio.find(item => item.id === idBusqueda);
+// 1. FUNCIÓN DE RENDERIZADO CON INTEGRACIÓN LOCAL FIRST (OFICIO)
+export async function renderizarLaudes(idBusqueda) {
     const contenedor = document.getElementById('contenido-dinamico');
+    let datos = null;
+
+    try {
+        datos = await obtenerLiturgiaHora(idBusqueda, { libro: 'oficio' });
+    } catch (e) {
+        console.warn("Fallo en obtenerLiturgiaHora para oficio:", e);
+    }
 
     if (!datos) {
-        contenedor.innerHTML = "<p>Error: No se encontró la salmodia seleccionada.</p>";
+        const encontrado = dbOficio.find(item => item.id === idBusqueda);
+        if (encontrado) datos = normalizarObjetoLiturgico(encontrado, idBusqueda, { libro: 'oficio' });
+    }
+
+    if (!datos) {
+        contenedor.innerHTML = `<p>Error: No se encontró la salmodia seleccionada para el ID "${idBusqueda}".</p>`;
         return;
     }
 
@@ -171,7 +183,6 @@ export function renderizarLaudes(idBusqueda) {
     contenedor.innerHTML = generarTemplateLaudes(datos);
 
     // LÓGICA DE ENCADENAMIENTO DE AUDIOS
-    // Se ejecuta justo después de inyectar el HTML para encontrar los IDs
     const a1 = document.getElementById('audio1');
     const a2 = document.getElementById('audio2');
 
@@ -179,10 +190,8 @@ export function renderizarLaudes(idBusqueda) {
         a1.onended = function() {
             console.log("%c ⏭️ Cambio de audio: Iniciando Lecturas Varias", "color: #008000; font-weight: bold;");
             a2.play();
-            // Desplazamiento suave para que el usuario vea el segundo reproductor activo
             a2.scrollIntoView({ behavior: 'smooth', block: 'center' });
         };
-
         console.log(`%c 🎧 Audios vinculados para ${idBusqueda}`, "color: #bc0009; font-weight: bold;");
     }
 }
@@ -291,27 +300,18 @@ function construirUrlLiturgica(datos) {
 // Función para determinar si el audio debe ser el de año par o impar
 
 
-// Para probarlo de inmediato, puedes ejecutarlo al cargar (luego se hará por evento)
-document.addEventListener('DOMContentLoaded', () => {
+// Para probarlo de inmediato, ejecutar al cargar con soporte Local First
+document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     
     // Intenta obtener 'oficio', y si no existe, intenta con 'laudes'
-    const idUrl = params.get('oficio') || params.get('laudes');
+    const idUrl = params.get('oficio') || params.get('laudes') || 'tos1OFjs';
 
     const container = document.getElementById('contenido-dinamico');
 
     if (idUrl) {
-        // Buscamos en la base de datos el ID que llegó por URL
-        const datosOficio = dbOficio.find(item => item.id === idUrl);
-
-        if (datosOficio) {
-            container.innerHTML = generarTemplateLaudes(datosOficio);
-            console.log("Cargado con éxito:", datosOficio.id);
-        } else {
-            container.innerHTML = `<h2>El ID "${idUrl}" no existe en la base de datos</h2>`;
-        }
+        await renderizarLaudes(idUrl);
     } else {
-        // Si no hay ID en la URL, no carga el Jueves, muestra este mensaje:
         container.innerHTML = `<h2>Por favor, selecciona un oficio del menú.</h2>`;
     }
 });

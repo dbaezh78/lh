@@ -1,0 +1,217 @@
+/* =========================================================================
+   ESTILOS PARA LA CINTA SUPERIOR CON DOBLE REPRODUCTOR (cinta.css)
+   ========================================================================= */
+
+.cinta-top-bar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background: #1e2430;
+    background: linear-gradient(180deg, #1e2430 0%, #151922 100%);
+    border-bottom: 2px solid #d01212;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+    padding: 8px 16px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Columna Izquierda: Reproductor Evangelio del Día */
+.cinta-seccion-izq {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 240px;
+    max-width: 440px;
+}
+
+.cinta-badge-titulo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fbbf24;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Columna Central: Información y Selector de Horas */
+.cinta-seccion-centro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+}
+
+.cinta-liturgia-info {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.cinta-tag-tiempo {
+    background: rgba(208, 18, 18, 0.25);
+    color: #fca5a5;
+    border: 1px solid rgba(208, 18, 18, 0.4);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cinta-horas-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+    max-width: 100%;
+    padding: 2px 0;
+}
+
+.cinta-btn-hora {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.cinta-btn-hora:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.cinta-btn-hora.activo {
+    background: #d01212;
+    border-color: #b00f0f;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(208, 18, 18, 0.4);
+}
+
+/* Columna Derecha: Reproductor Libro/Hora Actual */
+.cinta-seccion-der {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 240px;
+    max-width: 440px;
+    justify-content: flex-end;
+}
+
+/* Reproductor Compacto Cuadrado y Limpio */
+.cinta-mini-player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 4px 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.cinta-btn-play {
+    background: #d01212;
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.cinta-btn-play:hover {
+    background: #b00f0f;
+    transform: scale(1.05);
+}
+
+.cinta-btn-play span {
+    font-size: 20px;
+}
+
+.cinta-player-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.cinta-player-label {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cinta-slider-barra {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    margin: 4px 0 2px;
+}
+
+.cinta-slider-barra::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fbbf24;
+    cursor: pointer;
+}
+
+.cinta-player-tiempo {
+    font-size: 0.68rem;
+    color: #cbd5e1;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Responsividad */
+@media (max-width: 900px) {
+    .cinta-top-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 10px;
+    }
+    .cinta-seccion-izq, .cinta-seccion-der {
+        max-width: 100%;
+    }
+}

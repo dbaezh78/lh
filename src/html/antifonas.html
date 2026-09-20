@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Antífonas Litúrgicas — Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="../css/antifonas.css">
+    <link rel="stylesheet" href="../css/buttons.css">
+</head>
+<body>
+
+    <div class="contenedor-antifonas">
+        <!-- Cabecera -->
+        <header class="header-antifonas">
+            <div class="titulo-box">
+                <h1>
+                    <span class="material-symbols-outlined" style="font-size: 2.2rem; color: #d01212;">auto_stories</span>
+                    Gestor de Antífonas Litúrgicas
+                </h1>
+                <p>Registro, edición y sincronización en la nube (Firebase Firestore) con respaldo local</p>
+            </div>
+            <div class="header-controles">
+                <button id="btn-restaurar-semilla" class="btn-ant" title="Restaurar catálogo inicial completo (131 antífonas)">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                    Restaurar Base (131)
+                </button>
+                <button id="btn-subir-semilla" class="btn-ant btn-verde" title="Subir catálogo base completo a Firebase">
+                    <span class="material-symbols-outlined">cloud_upload</span>
+                    Subir a Firebase
+                </button>
+                <button id="btn-exportar-json" class="btn-ant" title="Descargar respaldo en JSON">
+                    <span class="material-symbols-outlined">download</span>
+                    Exportar JSON
+                </button>
+                <button id="btn-exportar-js" class="btn-ant" title="Generar archivo JS local para offline">
+                    <span class="material-symbols-outlined">code</span>
+                    Respaldo JS
+                </button>
+                <button id="btn-importar-json" class="btn-ant" title="Importar antífonas desde JSON">
+                    <span class="material-symbols-outlined">file_upload</span>
+                    Importar
+                </button>
+                <input type="file" id="input-importar-json" accept=".json" style="display: none;">
+                <a href="salmos.html" class="btn-ant" title="Ir al Gestor de Salmos">
+                    <span class="material-symbols-outlined">library_books</span>
+                    Salmos
+                </a>
+                <a href="frm_salterios.html" class="btn-ant" title="Ir al Formulario Salterios">
+                    <span class="material-symbols-outlined">edit_calendar</span>
+                    Formulario
+                </a>
+                <a href="salterios.html" class="btn-ant btn-primario" title="Ir al Visor y Constructor de Salterios">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    Salterios
+                </a>
+                <a href="../../index.html" class="btn-ant" title="Ir al Inicio">
+                    <span class="material-symbols-outlined">home</span>
+                    Inicio
+                </a>
+            </div>
+        </header>
+
+        <!-- Banner de estado dinámico -->
+        <div id="banner-estado" class="estado-banner info" style="display: none;">
+            <span class="material-symbols-outlined">info</span> Cargando...
+        </div>
+
+        <!-- Grid Principal -->
+        <div class="grid-antifonas">
+            <!-- Columna Izquierda: Formulario -->
+            <section class="card-form-antifona">
+                <h2>
+                    <span class="material-symbols-outlined" style="color: #d01212;">edit_note</span>
+                    Registrar Antífona
+                </h2>
+                <form id="form-antifona">
+                    <div class="campo-grupo">
+                        <label for="form-tiempo">Tiempo Litúrgico:</label>
+                        <select id="form-tiempo" required>
+                            <option value="ordinario" selected>Tiempo Ordinario (34 semanas)</option>
+                            <option value="adviento">Adviento (4 semanas)</option>
+                            <option value="navidad">Navidad (2 semanas)</option>
+                            <option value="cuaresma">Cuaresma (7 semanas)</option>
+                            <option value="pascua">Pascua (7 semanas hasta Pentecostés)</option>
+                            <option value="santos">Santos (Calendario / Festividades)</option>
+                        </select>
+                    </div>
+
+                    <div class="row-campos">
+                        <div class="campo-grupo">
+                            <label for="form-semana">Semana:</label>
+                            <select id="form-semana">
+                                <option value="">Cualquiera</option>
+                            </select>
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="form-dia">Día:</label>
+                            <select id="form-dia">
+                                <option value="">Cualquiera</option>
+                                <option value="domingo">Domingo</option>
+                                <option value="lunes">Lunes</option>
+                                <option value="martes">Martes</option>
+                                <option value="miercoles">Miércoles</option>
+                                <option value="jueves">Jueves</option>
+                                <option value="viernes">Viernes</option>
+                                <option value="sabado">Sábado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Campos exclusivos de Santos -->
+                    <div id="box-fecha-santo" class="campo-grupo" style="display: none;">
+                        <label for="form-fecha">Fecha del Santo (DD/MM ej: 29/06):</label>
+                        <input type="text" id="form-fecha" placeholder="29/06">
+                    </div>
+                    <div id="box-nombre-santo" class="campo-grupo" style="display: none;">
+                        <label for="form-santo">Nombre del Santo / Fiesta:</label>
+                        <input type="text" id="form-santo" placeholder="San Pedro y San Pablo">
+                    </div>
+
+                    <div class="row-campos">
+                        <div class="campo-grupo">
+                            <label for="form-libro">Libro / Hora:</label>
+                            <select id="form-libro">
+                                <option value="general">General (Cualquier hora)</option>
+                                <option value="oficio">Oficio de Lectura</option>
+                                <option value="laudes" selected>Laudes</option>
+                                <option value="tercia">Tercia</option>
+                                <option value="sexta">Sexta</option>
+                                <option value="nona">Nona</option>
+                                <option value="visperas">Vísperas</option>
+                                <option value="completas">Completas</option>
+                            </select>
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="form-tipo">Tipo de Antífona:</label>
+                            <select id="form-tipo">
+                                <option value="invitatoria" selected>Invitatoria (Ant.)</option>
+                                <option value="salmodia_1">Salmodia 1 (Ant 1.)</option>
+                                <option value="salmodia_2">Salmodia 2 (Ant 2.)</option>
+                                <option value="salmodia_3">Salmodia 3 (Ant 3.)</option>
+                                <option value="cantico_at">Cántico AT</option>
+                                <option value="cantico_nt">Cántico NT</option>
+                                <option value="evangelico">Cántico Evangélico</option>
+                                <option value="virgen">Virgen María (Completas)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="form-texto">Texto de la Antífona:</label>
+                        <textarea id="form-texto" placeholder="Escribe el texto de la antífona..." required></textarea>
+                        <div class="quick-toolbar-texto">
+                            <button type="button" id="btn-add-aleluya" class="btn-mini">+ Aleluya.</button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 16px;">
+                        <button type="submit" class="btn-ant btn-primario" style="flex: 1; justify-content: center;">
+                            <span class="material-symbols-outlined">save</span>
+                            Guardar Antífona
+                        </button>
+                        <button type="button" id="btn-limpiar-form" class="btn-ant" title="Limpiar formulario">
+                            <span class="material-symbols-outlined">restart_alt</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Columna Derecha: Catálogo y Filtros -->
+            <section class="card-lista-antifonas">
+                <div class="header-filtros">
+                    <div class="buscador-box">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="filtro-buscar" placeholder="Buscar antífona por texto o nombre de santo...">
+                    </div>
+                    <div class="filtros-selects">
+                        <select id="filtro-tiempo">
+                            <option value="">Todos los Tiempos</option>
+                            <option value="ordinario">Tiempo Ordinario</option>
+                            <option value="adviento">Adviento</option>
+                            <option value="navidad">Navidad</option>
+                            <option value="cuaresma">Cuaresma</option>
+                            <option value="pascua">Pascua</option>
+                            <option value="santos">Santos</option>
+                        </select>
+                        <select id="filtro-libro">
+                            <option value="">Todos los Libros</option>
+                            <option value="laudes">Laudes</option>
+                            <option value="oficio">Oficio de Lectura</option>
+                            <option value="visperas">Vísperas</option>
+                            <option value="tercia">Tercia</option>
+                            <option value="sexta">Sexta</option>
+                            <option value="nona">Nona</option>
+                            <option value="completas">Completas</option>
+                        </select>
+                        <select id="filtro-tipo">
+                            <option value="">Todos los Tipos</option>
+                            <option value="invitatoria">Invitatoria</option>
+                            <option value="salmodia_1">Salmodia 1</option>
+                            <option value="salmodia_2">Salmodia 2</option>
+                            <option value="salmodia_3">Salmodia 3</option>
+                            <option value="evangelico">Cántico Evangélico</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Total filtradas: <strong id="contador-antifonas" style="color: #fff;">0</strong>
+                    </span>
+                </div>
+
+                <!-- Contenedor scrollable de antífonas -->
+                <div id="lista-antifonas-items" class="lista-items-antifonas">
+                    <!-- Rellenado dinámicamente -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../data/db-antifonas.js" type="module"></script>
+    <script src="../js/firebase-config.js" type="module"></script>
+    <script src="../js/antifonas-manager.js" type="module"></script>
+    <script src="../js/navigator.js"></script>
+</body>
+</html>

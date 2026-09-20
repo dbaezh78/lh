@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Salterios — Liturgia de las Horas</title>
+    <link rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="src/css/frm_salterios.css">
+</head>
+<body>
+
+    <div class="contenedor-frm-salterios">
+        
+        <!-- Cabecera -->
+        <header class="header-frm">
+            <div class="titulo-box">
+                <h1>
+                    <span class="material-symbols-outlined" style="color: var(--color-primario); font-size: 32px;">menu_book</span>
+                    Formulario Salterios
+                </h1>
+                <p>Generador de Índices y Estructura Diaria de la Liturgia de las Horas</p>
+            </div>
+            <nav class="header-nav">
+                <a href="src/html/salmos.html" class="btn-nav-frm" title="Ir al Gestor de Salmos">
+                    <span class="material-symbols-outlined" style="font-size:18px;">library_books</span> Salmos
+                </a>
+                <a href="src/html/himno.html" class="btn-nav-frm" title="Ir al Gestor de Himnos">
+                    <span class="material-symbols-outlined" style="font-size:18px;">music_note</span> Himnos
+                </a>
+                <a href="src/html/lecturabreve.html" class="btn-nav-frm" title="Ir al Gestor de Lectura Breve">
+                    <span class="material-symbols-outlined" style="font-size:18px;">auto_stories</span> Lectura Breve
+                </a>
+                <a href="antifonas.html" class="btn-nav-frm" title="Ir al Gestor de Antífonas">
+                    <span class="material-symbols-outlined" style="font-size:18px;">auto_stories</span> Antífonas
+                </a>
+                <a href="salterios.html" class="btn-nav-frm primario">
+                    <span class="material-symbols-outlined" style="font-size:18px;">menu_book</span> Salterio
+                </a>
+                <a href="index.html" class="btn-nav-frm">
+                    <span class="material-symbols-outlined" style="font-size:18px;">home</span> Inicio
+                </a>
+            </nav>
+        </header>
+
+        <!-- PRIMER CAMPO: Código Combinado (Índice Clave) -->
+        <section class="card-codigo-indice">
+            <div class="codigo-header">
+                <div class="codigo-label-wrapper">
+                    <span class="material-symbols-outlined" style="color: var(--color-codigo-txt); font-size: 20px;">key</span>
+                    <span>Código Índice del Formulario (ID Primario):</span>
+                    <span class="badge-estado-guardado" id="badgeEstadoGuardado">
+                        <span class="material-symbols-outlined" style="font-size: 14px;">cloud_queue</span>
+                        <span id="txtEstadoGuardado">Sin guardar</span>
+                    </span>
+                </div>
+                <div class="codigo-acciones">
+                    <button type="button" class="btn-copiar-codigo" id="btnCopiarCodigo" title="Copiar código al portapapeles">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">content_copy</span>
+                        <span>Copiar</span>
+                    </button>
+                    <button type="button" class="btn-guardar-firebase" id="btnGuardarFirebase" title="Guardar en Firebase y Local con este ID Primario">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">cloud_upload</span>
+                        <span>Guardar</span>
+                        <span class="material-symbols-outlined" style="font-size: 18px;">save</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="codigo-display-row">
+                <input type="text" id="inputCodigoIndice" class="input-codigo-indice" readonly value="tos1dola" spellcheck="false">
+            </div>
+
+            <div class="codigo-desglose-row">
+                <div class="badge-desglose" id="badgeTiempo">Tiempo: <strong>to</strong> (Ordinario)</div>
+                <div class="badge-desglose" id="badgeSemana">Semana: <strong>s1</strong></div>
+                <div class="badge-desglose" id="badgeDia">Día: <strong>do</strong> (Domingo)</div>
+                <div class="badge-desglose" id="badgeLibro">Hora: <strong>la</strong> (Laudes)</div>
+                <div class="texto-descriptivo-completo" id="textoDescriptivo">Tiempo Ordinario • S1 • Domingo • Laudes</div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE SELECTORES BÁSICOS -->
+        <section class="seccion-selectores">
+            <h2>
+                <span class="material-symbols-outlined">tune</span>
+                Parámetros Litúrgicos
+            </h2>
+
+            <div class="grid-selectores">
+                <!-- Select 1: Tiempo Litúrgico -->
+                <div class="campo-box">
+                    <label for="selectTiempo">
+                        <span class="material-symbols-outlined" style="font-size:16px;">calendar_month</span>
+                        Tiempo Litúrgico
+                    </label>
+                    <select id="selectTiempo" class="select-liturgico">
+                        <option value="ordinario" selected>Ordinario</option>
+                        <option value="adviento">Adviento</option>
+                        <option value="navidad">Navidad</option>
+                        <option value="cuaresma">Cuaresma</option>
+                        <option value="pascua">Pascua</option>
+                        <option value="santos">Santos</option>
+                    </select>
+                </div>
+
+                <!-- Select 2: Semana -->
+                <div class="campo-box">
+                    <label for="selectSemana">
+                        <span class="material-symbols-outlined" style="font-size:16px;">date_range</span>
+                        Semana
+                    </label>
+                    <select id="selectSemana" class="select-liturgico">
+                        <!-- Generado dinámicamente según el Tiempo -->
+                    </select>
+                </div>
+
+                <!-- Select 3: Días -->
+                <div class="campo-box">
+                    <label for="selectDia">
+                        <span class="material-symbols-outlined" style="font-size:16px;">today</span>
+                        Días
+                    </label>
+                    <select id="selectDia" class="select-liturgico">
+                        <option value="domingo" selected>Domingo</option>
+                        <option value="lunes">Lunes</option>
+                        <option value="martes">Martes</option>
+                        <option value="miercoles">Miércoles</option>
+                        <option value="jueves">Jueves</option>
+                        <option value="viernes">Viernes</option>
+                        <option value="sabado">Sábado</option>
+                    </select>
+                </div>
+
+                <!-- Select 4: Libro de las Horas -->
+                <div class="campo-box">
+                    <label for="selectLibro">
+                        <span class="material-symbols-outlined" style="font-size:16px;">schedule</span>
+                        Libro de las Horas
+                    </label>
+                    <select id="selectLibro" class="select-liturgico">
+                        <option value="oficio">Oficio de Lectura</option>
+                        <option value="laudes" selected>Laudes</option>
+                        <option value="tercia">Tercia</option>
+                        <option value="sexta">Sexta</option>
+                        <option value="nona">Nona</option>
+                        <option value="vispera">Víspera</option>
+                        <option value="completas">Completas</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONSTRUCTOR LITÚRGICO: INVITATORIO (SEGÚN IMAGEN 2) -->
+        <section class="seccion-constructor-liturgia">
+            <!-- Barra de configuración de selectores del Invitatorio -->
+            <div class="panel-controles-liturgia">
+                <h3>
+                    <span class="material-symbols-outlined">tune</span>
+                    Configuración del Invitatorio
+                </h3>
+                <div class="grid-controles-invitatorio">
+                    <!-- Selector de Antífona del Invitatorio -->
+                    <div class="control-box">
+                        <label for="selectAntifonaInvitatorio">
+                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                            Antífona del Invitatorio
+                        </label>
+                        <select id="selectAntifonaInvitatorio" class="select-liturgico">
+                            <!-- Rellenado dinámicamente con las antífonas invitatorias -->
+                        </select>
+                    </div>
+
+                    <!-- Selector de Salmo Invitatorio -->
+                    <div class="control-box">
+                        <label for="selectSalmoInvitatorio">
+                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                            Salmo Invitatorio
+                        </label>
+                        <select id="selectSalmoInvitatorio" class="select-liturgico">
+                            <option value="salmo94" selected>Salmo 94 - INVITACIÓN A LA ALABANZA DIVINA</option>
+                            <option value="salmo99">Salmo 99 - ALEGRÍA DE LOS QUE ENTRAN EN EL TEMPLO</option>
+                            <option value="salmo66">Salmo 66 - QUE TODOS LOS PUEBLOS ALABEN AL SEÑOR</option>
+                            <option value="salmo23">Salmo 23 - ENTRADA SOLEMNE DE DIOS EN SU TEMPLO</option>
+                        </select>
+                    </div>
+
+                    <!-- Selector de Himno -->
+                    <div class="control-box">
+                        <label for="selectHimno">
+                            <span class="material-symbols-outlined" style="font-size:16px;">music_note</span>
+                            Himno
+                        </label>
+                        <select id="selectHimno" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde himnos.js / himno.html -->
+                        </select>
+                    </div>
+
+                    <!-- Selector de Antífona 1 -->
+                    <div class="control-box">
+                        <label for="selectAntifona1">
+                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                            Antífona 1
+                        </label>
+                        <select id="selectAntifona1" class="select-liturgico">
+                            <!-- Rellenado dinámicamente con las antífonas de Salmodia 1 -->
+                        </select>
+                    </div>
+
+                    <!-- Selector de Salmo 1 -->
+                    <div class="control-box">
+                        <label for="selectSalmo1">
+                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                            Salmo 1
+                        </label>
+                        <select id="selectSalmo1" class="select-liturgico">
+                            <option value="salmo62_2_9" selected>SALMO 62, 2-9 - EL ALMA SEDIENTA DE DIOS</option>
+                        </select>
+                    </div>
+
+                    <!-- Selector de Antífona 2 -->
+                    <div class="control-box">
+                        <label for="selectAntifona2">
+                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                            Antífona 2
+                        </label>
+                        <select id="selectAntifona2" class="select-liturgico">
+                            <!-- Rellenado dinámicamente con las antífonas de Salmodia 2 -->
+                        </select>
+                    </div>
+
+                    <!-- Selector de Salmo 2 -->
+                    <div class="control-box">
+                        <label for="selectSalmo2">
+                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                            Salmo 2 (Cántico)
+                        </label>
+                        <select id="selectSalmo2" class="select-liturgico">
+                            <option value="dn_3_57_88_56" selected>Cántico: TODA LA CREACIÓN ALABE AL SEÑOR - Dn 3, 57-88. 56</option>
+                        </select>
+                    </div>
+
+                    <!-- Selector de Antífona 3 -->
+                    <div class="control-box">
+                        <label for="selectAntifona3">
+                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                            Antífona 3
+                        </label>
+                        <select id="selectAntifona3" class="select-liturgico">
+                            <!-- Rellenado dinámicamente con las antífonas de Salmodia 3 -->
+                        </select>
+                    </div>
+
+                    <!-- Selector de Salmo 3 -->
+                    <div class="control-box">
+                        <label for="selectSalmo3">
+                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                            Salmo 3
+                        </label>
+                        <select id="selectSalmo3" class="select-liturgico">
+                            <option value="salmo149" selected>Salmo 149 - ALEGRÍA DE LOS SANTOS</option>
+                        </select>
+                    </div>
+
+                    <!-- Selector de Lectura Breve -->
+                    <div class="control-box">
+                        <label for="selectLecturaBreve">
+                            <span class="material-symbols-outlined" style="font-size:16px;">auto_stories</span>
+                            Lectura Breve
+                        </label>
+                        <select id="selectLecturaBreve" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-lecturabreve.js / lh_lecturabreve_cache -->
+                        </select>
+                    </div>
+
+                    <!-- Selector de Antífona Cántico Evangélico -->
+                    <div class="control-box">
+                        <label for="selectAntifonaCantico">
+                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                            Antífona Cántico Evangélico
+                        </label>
+                        <select id="selectAntifonaCantico" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-cantico-evangelico.js -->
+                        </select>
+                    </div>
+
+                    <!-- Selector de Cántico Evangélico -->
+                    <div class="control-box">
+                        <label for="selectCantico">
+                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                            Cántico Evangélico
+                        </label>
+                        <select id="selectCantico" class="select-liturgico">
+                            <option value="cantico_zacarias" selected>CÁNTICO DE ZACARÍAS. EL MESÍAS Y SU PRECURSOR - Lc 1, 68-79</option>
+                            <option value="magnificat">CÁNTICO DE LA SANTÍSIMA VIRGEN MARÍA (MAGNÍFICAT) - Lc 1, 46-55</option>
+                            <option value="nunc_dimittis">CÁNTICO DE SIMEÓN (NUNC DIMITTIS) - Lc 2, 29-32</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HOJA PERGAMINO LITÚRGICA (REPRESENTACIÓN FIEL DE LA IMAGEN 2) -->
+            <div class="pergamino-liturgia-hoja">
+                
+                <!-- 1. TÍTULO DE LA HORA (EN NEGRITA) -->
+                <h1 class="liturgia-titulo-hora" id="previewTituloHora">LAUDES</h1>
+
+                <!-- 2. SUBTÍTULO (ROJO, CURSIVA, SIN NEGRITA) -->
+                <div class="liturgia-subtitulo-hora" id="previewSubtituloHora">(Oración de la mañana)</div>
+
+                <!-- 3. TÍTULO DE SECCIÓN INVITATORIO (ROJO, MAYÚSCULAS, SIN NEGRITA) -->
+                <div class="liturgia-seccion-invitatorio">INVITATORIO</div>
+
+                <!-- 4. RÚBRICA INICIAL (ROJO, CURSIVA, SIN NEGRITA) -->
+                <div class="liturgia-rubrica-invitatorio">
+                    (Si esta no es la primera oración del día, se omite el Invitatorio y se inicia directamente con la Invocación inicial)
+                </div>
+
+                <!-- 5. VERSÍCULO Y RESPUESTA (DATOS FIJOS) -->
+                <div class="liturgia-versiculo-fila">
+                    <span class="liturgia-letra-roja">V.</span>
+                    <span class="liturgia-texto-verso">Señor abre mis labios</span>
+                </div>
+                <div class="liturgia-versiculo-fila">
+                    <span class="liturgia-letra-roja">R.</span>
+                    <span class="liturgia-texto-verso">Y mi boca proclamará tu alabanza</span>
+                </div>
+
+                <!-- 6. ANTÍFONA DEL INVITATORIO (SIN RECUADRO) -->
+                <div class="liturgia-antifona-fila" id="recuadroAntifonaInvitatorio">
+                    <span class="liturgia-letra-roja">Ant.</span>
+                    <span class="liturgia-texto-antifona" id="txtAntifonaInvitatorio">Pueblo del Señor, rebaño que él guía, bendice a tu Dios. Aleluya.</span>
+                </div>
+
+                <!-- 7. SALMO INVITATORIO (TÍTULO EN ROJO, MAYÚSCULAS, SIN NEGRITA) -->
+                <div class="liturgia-titulo-salmo" id="previewTituloSalmo">
+                    SALMO 94 - INVITACIÓN A LA ALABANZA DIVINA
+                </div>
+                <!-- TEXTO DEL SALMO (TEXTO PLANO EN NEGRO) -->
+                <div class="liturgia-texto-salmo" id="previewTextoSalmo"></div>
+
+                <!-- 8. ANTÍFONA DEL INVITATORIO (REPETICIÓN TRAS EL SALMO) -->
+                <div class="liturgia-antifona-fila" id="recuadroAntifonaInvitatorioFin">
+                    <span class="liturgia-letra-roja">Ant.</span>
+                    <span class="liturgia-texto-antifona" id="txtAntifonaInvitatorioFin">Pueblo del Señor, rebaño que él guía, bendice a tu Dios. Aleluya.</span>
+                </div>
+
+                <!-- 9. SECCIÓN DEL HIMNO (DEBAJO DEL INVITATORIO) -->
+                <div class="liturgia-seccion-himno" id="seccionHimnoPreview">
+                    <div class="liturgia-titulo-himno" id="previewTituloHimno">HIMNO: ES VERDAD QUE LAS LUCES DEL ALBA</div>
+                    <div class="liturgia-texto-himno" id="previewTextoHimno"></div>
+                </div>
+
+                <!-- 10. SECCIÓN DE LA SALMODIA (DEBAJO DEL HIMNO) -->
+                <div class="liturgia-seccion-salmodia" id="seccionSalmodiaPreview">
+                    <div class="liturgia-titulo-salmodia" id="previewTituloSalmodia">SALMODIA</div>
+
+                    <!-- SALMODIA 1 -->
+                    <div class="liturgia-bloque-salmodia" id="bloqueSalmodia1">
+                        <!-- Antífona 1 -->
+                        <div class="liturgia-antifona-fila" id="filaAntifona1">
+                            <span class="liturgia-letra-roja">Ant 1.</span>
+                            <span class="liturgia-texto-antifona" id="txtAntifona1"></span>
+                        </div>
+
+                        <!-- Salmo 1 (Título en rojo, mayúsculas, sin negrita) -->
+                        <div class="liturgia-titulo-salmo" id="previewTituloSalmo1">SALMO 62, 2-9 - EL ALMA SEDIENTA DE DIOS</div>
+
+                        <!-- Texto del Salmo 1 (Completo, nunca truncado) -->
+                        <div class="liturgia-texto-salmo" id="previewTextoSalmo1"></div>
+
+                        <!-- Antífona 1 (Repetición tras el Salmo) -->
+                        <div class="liturgia-antifona-fila" id="filaAntifona1Fin">
+                            <span class="liturgia-letra-roja">Ant 1.</span>
+                            <span class="liturgia-texto-antifona" id="txtAntifona1Fin"></span>
+                        </div>
+                    </div>
+
+                    <!-- SALMODIA 2 -->
+                    <div class="liturgia-bloque-salmodia" id="bloqueSalmodia2">
+                        <!-- Antífona 2 -->
+                        <div class="liturgia-antifona-fila" id="filaAntifona2">
+                            <span class="liturgia-letra-roja">Ant 2.</span>
+                            <span class="liturgia-texto-antifona" id="txtAntifona2"></span>
+                        </div>
+
+                        <!-- Salmo 2 (Título en rojo, mayúsculas, sin negrita) -->
+                        <div class="liturgia-titulo-salmo" id="previewTituloSalmo2">CÁNTICO: TODA LA CREACIÓN ALABE AL SEÑOR - DN 3, 57-88. 56</div>
+
+                        <!-- Texto del Salmo 2 (Completo, nunca truncado) -->
+                        <div class="liturgia-texto-salmo" id="previewTextoSalmo2"></div>
+
+                        <!-- Antífona 2 (Repetición tras el Salmo) -->
+                        <div class="liturgia-antifona-fila" id="filaAntifona2Fin">
+                            <span class="liturgia-letra-roja">Ant 2.</span>
+                            <span class="liturgia-texto-antifona" id="txtAntifona2Fin"></span>
+                        </div>
+                    </div>
+
+                    <!-- SALMODIA 3 -->
+                    <div class="liturgia-bloque-salmodia" id="bloqueSalmodia3">
+                        <!-- Antífona 3 -->
+                        <div class="liturgia-antifona-fila" id="filaAntifona3">
+                            <span class="liturgia-letra-roja">Ant 3.</span>
+                            <span class="liturgia-texto-antifona" id="txtAntifona3"></span>
+                        </div>
+
+                        <!-- Salmo 3 (Título en rojo, mayúsculas, sin negrita) -->
+                        <div class="liturgia-titulo-salmo" id="previewTituloSalmo3">SALMO 149 - ALEGRÍA DE LOS SANTOS</div>
+
+                        <!-- Texto del Salmo 3 (Completo, nunca truncado) -->
+                        <div class="liturgia-texto-salmo" id="previewTextoSalmo3"></div>
+
+                        <!-- Antífona 3 (Repetición tras el Salmo) -->
+                        <div class="liturgia-antifona-fila" id="filaAntifona3Fin">
+                            <span class="liturgia-letra-roja">Ant 3.</span>
+                            <span class="liturgia-texto-antifona" id="txtAntifona3Fin"></span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 11. SECCIÓN DE LECTURA BREVE Y RESPONSORIO (DEBAJO DE LA SALMODIA) -->
+                <div class="liturgia-seccion-lectura-breve" id="seccionLecturaBrevePreview">
+                    <!-- Encabezado Lectura Breve + Cita -->
+                    <div class="liturgia-titulo-lectura-breve">
+                        <span>LECTURA BREVE</span>
+                        <span class="liturgia-cita-lectura" id="previewCitaLectura">Is 61, 1-2a</span>
+                    </div>
+
+                    <!-- Texto de la Lectura -->
+                    <div class="liturgia-texto-lectura" id="previewTextoLectura">El Espíritu del Señor está sobre mí, porque el Señor me ha ungido. Me ha enviado para dar la buena noticia a los pobres, para vendar los corazones desgarrados, para proclamar la amnistía a los cautivos, la libertad a los prisioneros, para proclamar el año de gracia del Señor.</div>
+
+                    <!-- Encabezado Responsorio Breve -->
+                    <div class="liturgia-titulo-responsorio">RESPONSORIO BREVE</div>
+
+                    <!-- Versículos del Responsorio Breve con sus respectivos espacios -->
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">V.</span>
+                        <span class="liturgia-texto-verso" id="previewRespV1">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">R.</span>
+                        <span class="liturgia-texto-verso" id="previewRespR1">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
+                    </div>
+
+                    <div class="liturgia-espacio-resp"></div>
+
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">V.</span>
+                        <span class="liturgia-texto-verso" id="previewRespV2">Tú que hoy te has manifestado.</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">R.</span>
+                        <span class="liturgia-texto-verso" id="previewRespR2">Ten piedad de nosotros.</span>
+                    </div>
+
+                    <div class="liturgia-espacio-resp"></div>
+
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">V.</span>
+                        <span class="liturgia-texto-verso">Gloria al Padre, y al Hijo, y al Espíritu Santo.</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">R.</span>
+                        <span class="liturgia-texto-verso" id="previewRespR3">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
+                    </div>
+                </div>
+
+                <!-- 12. SECCIÓN DE CÁNTICO EVANGÉLICO (SEGÚN IMAGEN media_1789937648394.png) -->
+                <div class="liturgia-seccion-cantico-evangelico" id="seccionCanticoEvangelicoPreview">
+                    <div class="liturgia-titulo-cantico-evangelico" id="previewTituloCanticoEvangelico">CÁNTICO EVANGÉLICO</div>
+
+                    <!-- Antífona del Cántico Evangélico (Inicial) -->
+                    <div class="liturgia-antifona-fila" id="filaAntifonaCantico">
+                        <span class="liturgia-letra-roja">Ant.</span>
+                        <span class="liturgia-texto-antifona" id="txtAntifonaCantico">Bendito sea el Señor, Dios nuestro.</span>
+                    </div>
+
+                    <!-- Título y Cita del Cántico Evangélico (en rojo) -->
+                    <div class="liturgia-titulo-cantico" id="previewTituloCantico">
+                        <span id="previewNombreCantico">Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR</span>
+                        <span class="liturgia-cita-cantico" id="previewCitaCantico">Lc 1, 68-79</span>
+                    </div>
+
+                    <!-- Texto del Cántico Evangélico (con sus estrofas y Gloria Patri) -->
+                    <div class="liturgia-texto-cantico" id="previewTextoCantico">Bendito sea el Señor, Dios de Israel,
+porque ha visitado y redimido a su pueblo.
+suscitándonos una fuerza de salvación
+en la casa de David, su siervo,
+según lo había predicho desde antiguo
+por boca de sus santos profetas:
+
+Es la salvación que nos libra de nuestros enemigos
+y de la mano de todos los que nos odian;
+ha realizado así la misericordia que tuvo con nuestros padres,
+recordando su santa alianza
+y el juramento que juró a nuestro padre Abraham.
+
+Para concedernos que, libres de temor,
+arrancados de la mano de los enemigos,
+le sirvamos con santidad y justicia,
+en su presencia, todos nuestros días.
+
+Y a ti, niño, te llamarán Profeta del Altísimo,
+porque irás delante del Señor
+a preparar sus caminos,
+anunciando a su pueblo la salvación,
+el perdón de sus pecados.
+
+Por la entrañable misericordia de nuestro Dios,
+nos visitará el sol que nace de lo alto,
+para iluminar a los que viven en tiniebla
+y en sombra de muerte,
+para guiar nuestros pasos
+por el camino de la paz.
+
+Gloria al Padre, y al Hijo, y al Espíritu Santo.
+Como era en el principio, ahora y siempre, por los siglos de los siglos.
+Amén.</div>
+
+                    <!-- Antífona del Cántico Evangélico (Repetición Final) -->
+                    <div class="liturgia-antifona-fila" id="filaAntifonaCanticoFin">
+                        <span class="liturgia-letra-roja">Ant.</span>
+                        <span class="liturgia-texto-antifona" id="txtAntifonaCanticoFin">Bendito sea el Señor, Dios nuestro.</span>
+                    </div>
+                </div>
+
+                <!-- 13. SECCIÓN DE PRECES (SEGÚN IMAGEN media_1789937648394.png) -->
+                <div class="liturgia-seccion-preces" id="seccionPrecesPreview">
+                    <div class="liturgia-titulo-preces" id="previewTituloPreces">PRECES</div>
+
+                    <!-- Texto de las Preces -->
+                    <div class="liturgia-texto-preces" id="previewTextoPreces">Proclamemos la grandeza de Cristo, lleno de gracia y del Espíritu Santo, y acudamos a él diciendo:
+
+Concédenos, Señor, tu Espíritu.
+
+Concédenos, Señor, un día lleno de paz, de alegría y de inocencia para que, al llegar a la noche, podamos alabarte con gozo y limpios de pecado.
+
+Que baje hoy a nosotros tu bondad
+y haga prósperas las obras de nuestras manos.
+
+Muéstranos tu rostro propicio y danos tu paz
+para que durante todo el día sintamos cómo tu mano nos protege.
+
+Mira con bondad a cuantos se han encomendado a nuestras oraciones y enriquécelos con toda clase de bienes.</div>
+
+                    <!-- Rúbrica en rojo: Se pueden añadir algunas intenciones libres -->
+                    <div class="liturgia-rubrica-roja">Se pueden añadir algunas intenciones libres</div>
+
+                    <!-- Conclusión al Padre Nuestro -->
+                    <div class="liturgia-intro-padrenuestro" id="previewIntroPadreNuestro">Terminemos nuestra oración con la plegaria que Cristo nos enseñó:</div>
+
+                    <!-- Padre nuestro en rojo -->
+                    <div class="liturgia-padrenuestro-rojo">Padre nuestro...</div>
+                </div>
+
+                <!-- 14. SECCIÓN DE ORACIÓN (SEGÚN IMAGEN media_1789937648394.png) -->
+                <div class="liturgia-seccion-oracion" id="seccionOracionPreview">
+                    <div class="liturgia-titulo-oracion" id="previewTituloOracion">ORACION</div>
+                    <div class="liturgia-texto-oracion" id="previewTextoOracion">Tu gracia, Señor, inspire nuestras obras, las sostenga y acompañe; para que todo nuestro trabajo brote de ti, como de su fuente, y tienda a ti, como a su fin. Por nuestro Señor Jesucristo, tu Hijo, que vive y reina contigo en la unidad del Espíritu Santo y es Dios, por los siglos de los siglos. Amén.</div>
+                </div>
+
+                <!-- 15. SECCIÓN DE CONCLUSIÓN (SEGÚN IMAGEN media_1789937648394.png) -->
+                <div class="liturgia-seccion-conclusion" id="seccionConclusionPreview">
+                    <div class="liturgia-titulo-conclusion" id="previewTituloConclusion">CONCLUSIÓN</div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">V.</span>
+                        <span class="liturgia-texto-verso" id="previewConclusionV">El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">R.</span>
+                        <span class="liturgia-texto-verso" id="previewConclusionR">Amén.</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Mensaje de Estado / Próximo Paso -->
+        <footer class="footer-status-paso">
+            <div>
+                <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 4px;">check_circle</span>
+                <strong>Liturgia completa:</strong> Invitatorio, Himno, Salmodia (1, 2 y 3), Lectura Breve, Cántico Evangélico, Preces, Padre nuestro, Oración y Conclusión.
+            </div>
+            <div>
+                <em>Estructura visual litúrgica completa según especificación canónica.</em>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Scripts de inicialización -->
+    <script src="src/data/salmos.js"></script>
+    <script src="src/js/firebase-config.js" type="module"></script>
+    <script src="src/js/frm_salterios.js" type="module"></script>
+    <script src="src/js/navigator.js"></script>
+</body>
+</html>
