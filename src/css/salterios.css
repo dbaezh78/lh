@@ -29,6 +29,8 @@ body.pagina-salterios {
     margin: 0 auto;
     padding: 24px 20px 120px;
     box-sizing: border-box;
+
+    @media (min-width: 411px){    padding: 24px 7px 120px;}
 }
 
 /* =========================================================================

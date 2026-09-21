@@ -85,16 +85,16 @@
 
 .cinta-btn-hora {
     background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
     color: #cbd5e1;
-    padding: 3px 9px;
-    border-radius: 6px;
     font-size: 0.76rem;
-    font-weight: 600;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s ease;
-    white-space: nowrap;
+    /*border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-weight: 600;
+    */
 }
 
 .cinta-btn-hora:hover {

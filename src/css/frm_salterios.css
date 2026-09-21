@@ -18,6 +18,10 @@
     --color-codigo-bg: #1e2430;
     --color-codigo-txt: #00e676;
     --color-sombra: rgba(0, 0, 0, 0.08);
+    --size: 16px;   /* 1.02rem;*/
+    --font-zoom: (1);
+    --lHeight: 1.5;
+
 }
 
 * {
@@ -293,7 +297,7 @@ body {
 
 .seccion-selectores h2 {
     margin: 0 0 18px 0;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     color: var(--color-primario);
     display: flex;
     align-items: center;
@@ -489,9 +493,11 @@ body {
 
 /* 1. Título de la Hora: EN NEGRITA */
 .liturgia-titulo-hora {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 700;
-    font-size: 2.1rem;
+    /*font-size: 2.1rem;*/
+    font-size: calc(2.1rem * var(--font-zoom));
+    
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0 0 4px 0;
@@ -500,7 +506,7 @@ body {
 
 /* 2. Subtítulo: ROJO, CURSIVA, SIN NEGRITA */
 .liturgia-subtitulo-hora {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-style: italic;
     font-weight: 400;
     font-size: 1.15rem;
@@ -510,9 +516,10 @@ body {
 
 /* 3. Título de Sección INVITATORIO: ROJO, MAYÚSCULAS, SIN NEGRITA */
 .liturgia-seccion-invitatorio {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.25rem;
+    /*font-size: calc(var(--size) * var(--font-zoom));*/
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0 0 10px 0;
@@ -521,7 +528,7 @@ body {
 
 /* 4. Rúbrica: ROJO, CURSIVA, SIN NEGRITA */
 .liturgia-rubrica-invitatorio {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-style: italic;
     font-weight: 400;
     font-size: 1.05rem;
@@ -531,9 +538,9 @@ body {
 
 /* 5. Versículo y Respuesta: Datos Fijos */
 .liturgia-versiculo-fila {
-    font-size: 1.15rem;
-    line-height: 1.65;
-    margin-bottom: 8px;
+    font-size: calc(var(--size) * var(--font-zoom));
+    line-height: var(--lHeight);
+    margin-bottom: 0px;
     color: #1a1a1a;
     display: flex;
     align-items: baseline;
@@ -541,9 +548,9 @@ body {
 }
 
 .liturgia-letra-roja {
-    color: #c00000;
-    font-weight: 700;
-    font-size: 1.15rem;
+    color: rgb(255, 0, 0);
+    font-weight: 100;
+    font-size: calc(var(--size) * var(--font-zoom));
     min-width: 18px;
 }
 
@@ -559,7 +566,7 @@ body {
     padding: 0;
     margin: 18px 0 22px 0;
     display: block;
-    font-size: 1.15rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     line-height: 1.65;
     color: #1a1a1a;
     background: transparent;
@@ -579,9 +586,9 @@ body {
 
 /* 7. Salmo Invitatorio: TÍTULO EN ROJO, MAYÚSCULAS, SIN NEGRITA */
 .liturgia-titulo-salmo {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 24px;
@@ -592,8 +599,8 @@ body {
 /* Texto del Salmo: TEXTO PLANO EN NEGRO */
 .liturgia-texto-salmo {
     color: #111111;
-    font-size: 1.02rem;
-    line-height: 1.7;
+    font-size: calc(var(--size) * var(--font-zoom));
+    line-height: var(--lHeight);
     white-space: pre-line;
     font-family: Verdana, Arial, sans-serif;
     margin-top: 8px;
@@ -608,19 +615,19 @@ body {
 }
 
 .liturgia-titulo-himno {
-    color: #c00000;
+    color: rgb(255, 0, 0);;
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 14px;
-    line-height: 1.4;
+    line-height: var(--lHeight);
 }
 
 .liturgia-texto-himno {
     color: #111111;
-    font-size: 1.02rem;
-    line-height: 1.7;
+    font-size: calc(var(--size) * var(--font-zoom));
+    line-height: var(--lHeight);
     white-space: pre-line;
     font-family: Verdana, Arial, sans-serif;
     margin-top: 8px;
@@ -635,9 +642,9 @@ body {
 }
 
 .liturgia-titulo-salmodia {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 4px;
@@ -662,9 +669,9 @@ body {
 }
 
 .liturgia-titulo-lectura-breve {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 14px;
@@ -676,16 +683,16 @@ body {
 }
 
 .liturgia-cita-lectura {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
     text-transform: none;
-    font-size: 1.2rem;
+    font-size: calc(var(--size) * var(--font-zoom));
 }
 
 .liturgia-texto-lectura {
     color: #111111;
-    font-size: 1.05rem;
-    line-height: 1.68;
+    font-size: calc(var(--size) * var(--font-zoom));
+    line-height: var(--lHeight);
     white-space: pre-line;
     font-family: Verdana, Arial, sans-serif;
     margin-top: 8px;
@@ -694,9 +701,9 @@ body {
 }
 
 .liturgia-titulo-responsorio {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 24px;
@@ -716,9 +723,9 @@ body {
 }
 
 .liturgia-titulo-cantico-evangelico {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 14px;
@@ -726,11 +733,11 @@ body {
 }
 
 .liturgia-titulo-cantico {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.2rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     display: flex;
-    justify-content: space-between;
+    /*justify-content: space-between;*/
     align-items: baseline;
     flex-wrap: wrap;
     gap: 12px;
@@ -740,15 +747,15 @@ body {
 }
 
 .liturgia-cita-cantico {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.15rem;
+    font-size: calc(var(--size) * var(--font-zoom));
 }
 
 .liturgia-texto-cantico {
     color: #111111;
-    font-size: 1.02rem;
-    line-height: 1.68;
+    font-size: calc(var(--size) * var(--font-zoom));
+    line-height: var(--lHeight);
     white-space: pre-line;
     font-family: Verdana, Arial, sans-serif;
     margin-top: 8px;
@@ -763,9 +770,9 @@ body {
 }
 
 .liturgia-titulo-preces {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 14px;
@@ -774,32 +781,32 @@ body {
 
 .liturgia-texto-preces {
     color: #111111;
-    font-size: 1.02rem;
-    line-height: 1.68;
+    font-size: calc(var(--size) * var(--font-zoom));
+    line-height: var(--lHeight);
     white-space: pre-line;
     font-family: Verdana, Arial, sans-serif;
     margin-bottom: 16px;
 }
 
 .liturgia-rubrica-roja {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.05rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     line-height: 1.5;
     margin: 18px 0 14px 0;
 }
 
 .liturgia-intro-padrenuestro {
     color: #1a1a1a;
-    font-size: 1.05rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     line-height: 1.6;
     margin-bottom: 12px;
 }
 
 .liturgia-padrenuestro-rojo {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.15rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     margin-bottom: 24px;
 }
 
@@ -811,9 +818,9 @@ body {
 }
 
 .liturgia-titulo-oracion {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 14px;
@@ -822,8 +829,8 @@ body {
 
 .liturgia-texto-oracion {
     color: #111111;
-    font-size: 1.02rem;
-    line-height: 1.68;
+    font-size: calc(var(--size) * var(--font-zoom));
+    line-height: var(--lHeight);
     font-family: Verdana, Arial, sans-serif;
     margin-bottom: 24px;
     text-align: justify;
@@ -837,9 +844,9 @@ body {
 }
 
 .liturgia-titulo-conclusion {
-    color: #c00000;
+    color: rgb(255, 0, 0);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: calc(var(--size) * var(--font-zoom));
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 14px;
