@@ -1,6 +1,17 @@
 // Catálogo Estructurado de Himnos Litúrgicos
 export const CATALOGO_HIMNOS_SEED = [
   {
+    "id": "ordinario_s1_domingo_oficio_himno_hbautismoOF",
+    "varName": "hbautismoOF",
+    "titulo": "HIMNO: HOY DOS EXTREMOS SE HAN VISTO",
+    "texto": "Hoy dos extremos se han visto,\r\ncuales nunca se verán:\r\nCristo arrodillado a Juan,\r\ny Juan bautizando a Cristo.\r\n\r\nEl mar y abismo profundo\r\nde la pureza infinita,\r\nque las inmundicias quita\r\ny los pecados del mundo,\r\n\r\nhoy del Bautista se ha visto\r\nser lavado en el Jordán;\r\nCristo arrodillado a Juan,\r\ny Juan bautizando a Cristo.\r\n\r\nBautiza la voz al Verbo,\r\nel criado al Criador;\r\nved qué humildad de Señor\r\ny qué autoridad de siervo.\r\n\r\nFavor otra vez no visto\r\nentre los hijos de Adán,\r\nCristo arrodillado a Juan,\r\ny Juan bautizando a Cristo. Amén.",
+    "tiempo": "ordinario",
+    "semana": 1,
+    "dia": "domingo",
+    "libro": "oficio",
+    "tipo": "himno"
+  },
+  {
     "id": "pascua_s1_jueves_oficio_himno_htps1jsOf",
     "varName": "htps1jsOf",
     "titulo": "Himno: OH REY PERPETUO DE LOS ELEGIDOS",
@@ -765,6 +776,15 @@ export const HimnosDB = {
     lista: CATALOGO_HIMNOS_SEED,
     listar: () => CATALOGO_HIMNOS_SEED,
     obtenerPorId: (id) => CATALOGO_HIMNOS_SEED.find(h => h.id === id || h.varName === id),
+    filtrar: (tiempo, semana, dia, libro) => {
+        return CATALOGO_HIMNOS_SEED.filter(h => {
+            if (tiempo && h.tiempo !== tiempo) return false;
+            if (semana !== undefined && semana !== null && semana !== '' && h.semana != semana) return false;
+            if (dia && h.dia !== dia) return false;
+            if (libro && h.libro !== libro) return false;
+            return true;
+        });
+    },
     buscar: (termino) => {
         if (!termino) return CATALOGO_HIMNOS_SEED;
         const t = termino.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");

@@ -301,7 +301,7 @@ export class CintaLiturgica {
 
         const horaBtnsHtml = horas.map(h => {
             const activo = (libro.toLowerCase() === h.id.toLowerCase()) ? 'activo' : '';
-            const href = `?tiempo=${tiempoSlug}&semana=${semana}&dia=${diaSlug}&libro=${h.id}`;
+            const href = `?tiempo=${tiempoSlug}&semana=${semana}&dia=${diaSlug}&libro=${h.id}&hora=${h.id}`;
             return `<a href="${href}" class="cinta-btn-hora ${activo}" data-libro="${h.id}">${h.label}</a>`;
         }).join('');
 

@@ -10,7 +10,7 @@
     --border-color: rgba(255, 255, 255, 0.1);
     --text-primary: #f0f4f8;
     --text-secondary: #94a3b8;
-    --accent-red: #c00000;
+    --accent-red: #ff0000;
     --accent-red-hover: #e01212;
     --accent-gold: #f59e0b;
     --accent-green: #10b981;
@@ -100,8 +100,8 @@ body {
 }
 
 .btn-salmo.btn-primario {
-    background: linear-gradient(135deg, #c00000, #960000);
-    border-color: rgba(192, 0, 0, 0.5);
+    background: linear-gradient(135deg, #ff0000, #960000);
+    border-color: rgba(255, 0, 0, 0.5);
     color: #fff;
 }
 

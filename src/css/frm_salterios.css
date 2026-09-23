@@ -683,10 +683,18 @@ body {
 }
 
 .liturgia-cita-lectura {
-    color: rgb(255, 0, 0);
-    font-weight: 400;
+    color: #000000 !important;
+    font-weight: 500;
     text-transform: none;
     font-size: calc(var(--size) * var(--font-zoom));
+}
+
+.liturgia-subtitulo-hora,
+#previewLec1Desc,
+#previewLec2Desc {
+    color: #ff0000 !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
 }
 
 .liturgia-texto-lectura {

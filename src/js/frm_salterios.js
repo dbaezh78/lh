@@ -246,7 +246,7 @@ export function obtenerTodasLasLecturasOficioDesdeCatalogo() {
 
 export function formatAsterisco(texto) {
     if (!texto) return '';
-    return texto.replace(/\*/g, '<span style="color: #c00000; font-weight: bold;">*</span>');
+    return texto.replace(/\*/g, '<span style="color: #ff0000; font-weight: bold;">*</span>');
 }
 
 /**

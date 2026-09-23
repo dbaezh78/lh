@@ -104,11 +104,51 @@ export const CATALOGO_ANTIFONAS_SEED = [
     "texto": "Se presentó Jesús en medio de sus discípulos y les dijo: «La paz sea con vosotros.» Aleluya."
   },
   {
+    "id": "ordinario_s1_domingo_oficio_invitatoria_inv_bautismoOF",
+    "varName": "inv_bautismoOF",
+    "tiempo": "ordinario",
+    "semana": 1,
+    "dia": "domingo",
+    "libro": "oficio",
+    "tipo": "invitatoria",
+    "texto": "Venid, adoremos a Cristo, el Hijo amado, en quien el Padre tiene sus complacencias."
+  },
+  {
+    "id": "ordinario_s1_domingo_oficio_salmodia_1_bautismoOF1",
+    "varName": "bautismoOF1",
+    "tiempo": "ordinario",
+    "semana": 1,
+    "dia": "domingo",
+    "libro": "oficio",
+    "tipo": "salmodia_1",
+    "texto": "El soldado bautizaba a su Rey, el siervo a su Señor, Juan al Salvador: el agua del Jordán se estremece, la Paloma da testimonio, la voz del Padre declara: «Éste es mi Hijo.»"
+  },
+  {
+    "id": "ordinario_s1_domingo_oficio_salmodia_2_bautismoOF2",
+    "varName": "bautismoOF2",
+    "tiempo": "ordinario",
+    "semana": 1,
+    "dia": "domingo",
+    "libro": "oficio",
+    "tipo": "salmodia_2",
+    "texto": "Al manifestarse al mundo la gloria de Cristo, las aguas del Jordán fueron santificadas: sacad aguas con gozo de las fuentes del Salvador; Cristo, el Señor, ha santificado la creación entera."
+  },
+  {
+    "id": "ordinario_s1_domingo_oficio_salmodia_3_bautismoOF3",
+    "varName": "bautismoOF3",
+    "tiempo": "ordinario",
+    "semana": 1,
+    "dia": "domingo",
+    "libro": "oficio",
+    "tipo": "salmodia_3",
+    "texto": "Te glorificamos, Señor, Dios y redentor, a ti que con el Espíritu y el fuego purificas a los hombres de su pecado."
+  },
+  {
     "id": "ordinario_s0_general_general_general_inv_bautismoLA",
     "varName": "inv_bautismoLA",
     "tiempo": "ordinario",
-    "semana": null,
-    "dia": null,
+    "semana": 1,
+    "dia": "domingo",
     "libro": "laudes",
     "tipo": "invitatoria",
     "texto": "Venid, adoremos a Cristo, el Hijo amado, en quien el Padre tiene sus complacencias."

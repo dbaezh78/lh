@@ -11,7 +11,7 @@
     z-index: 10000;
     background: #161c24;
     background: linear-gradient(180deg, #1b212c 0%, #13171f 100%);
-    border-bottom: 2px solid #c00000;
+    border-bottom: 2px solid #ff0000;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
     padding: 0px 2px;
     box-sizing: border-box;
@@ -244,7 +244,7 @@
 
 .cinta-menu-item.activo {
     background: rgba(255, 255, 255, 0.14);
-    border-left: 3px solid #c00000;
+    border-left: 3px solid #ff0000;
 }
 
 .cinta-item-badge {
@@ -445,11 +445,11 @@ color: red !important;
 }
 
 .cinta-btn-hora.activo {
-    background: #c00000 !important;
-    border-color: #c00000 !important;
+    background: #ff0000 !important;
+    border-color: #ff0000 !important;
     color: #ffffff !important;
     font-weight: 700;
-    box-shadow: 0 1px 6px rgba(192, 0, 0, 0.45);
+    box-shadow: 0 1px 6px rgba(255, 0, 0, 0.45);
 }
 
 /* Barra de Progreso con Scrubber Amarillo */

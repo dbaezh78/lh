@@ -231,18 +231,23 @@ export function obtenerIdsEquivalentes(codigo) {
     if (dec) {
         const codT = REVERSO_TIEMPOS[dec.tiempo] || 'to';
         const codS = `s${dec.semana}`;
+        const codSPadded = `s${String(dec.semana).padStart(2, '0')}`;
         const codD = REVERSO_DIAS[dec.dia] || 'sa';
         const codH = REVERSO_HORAS[dec.libro] || 'la';
 
-        // Formato nuevo estándar: ej. tos24sala
+        // Formato nuevo estándar: ej. tos24sala, tos1doof, tos01doof
         resultado.add(`${codT}${codS}${codD}${codH}`);
+        resultado.add(`${codT}${codSPadded}${codD}${codH}`);
 
-        // Formato histórico dbLaudes: ej. tos24lasa
+        // Formato histórico: ej. tos24lasa, tos1ofdo, tos01ofdo
         resultado.add(`${codT}${codS}${codH}${codD}`);
+        resultado.add(`${codT}${codSPadded}${codH}${codD}`);
 
         // Formato verboso
         resultado.add(`${dec.tiempo}_semana_${dec.semana}_${dec.dia}_${dec.libro}`);
+        resultado.add(`${dec.tiempo}_semana_${String(dec.semana).padStart(2, '0')}_${dec.dia}_${dec.libro}`);
         resultado.add(`${dec.tiempo}_s${dec.semana}_${dec.dia}_${dec.libro}`);
+        resultado.add(`${dec.tiempo}_s${String(dec.semana).padStart(2, '0')}_${dec.dia}_${dec.libro}`);
     }
 
     return Array.from(resultado);

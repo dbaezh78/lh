@@ -4,6 +4,7 @@
 
 import { CintaLiturgica } from './cinta.js';
 import { AntifonasDB } from '../data/db-antifonas.js';
+import { HimnosDB } from '../data/db-himnos.js';
 import { PrecesDB } from '../data/db-preces.js';
 import { ResponsoriosDB } from '../data/db-responsorios.js';
 import { LecturasDB } from '../data/db-lecturas.js';
@@ -137,13 +138,14 @@ export function decodificarCodigoLiturgico(codigo) {
 function obtenerParametrosUrl() {
     const search = window.location.search || '';
     const p = new URLSearchParams(search);
+    const horaParam = p.get('libro') || p.get('hora');
 
     // 1. Detectar si viene ?id=tos24sala, ?codigo=..., o ?laudes=tas1dola
     const posibleCodigo = p.get('id') || p.get('codigo') || p.get('laudes') || p.get('oficio') || p.get('tercia') || p.get('visperas') || p.get('completas');
     if (posibleCodigo) {
         const dec = decodificarCodigoLiturgico(posibleCodigo);
         if (dec) {
-            if (p.get('libro')) dec.libro = p.get('libro');
+            if (horaParam) dec.libro = horaParam.toLowerCase();
             return dec;
         }
     }
@@ -152,12 +154,12 @@ function obtenerParametrosUrl() {
     for (const [key, val] of p.entries()) {
         const decK = decodificarCodigoLiturgico(key);
         if (decK) {
-            if (p.get('libro')) decK.libro = p.get('libro');
+            if (horaParam) decK.libro = horaParam.toLowerCase();
             return decK;
         }
         const decV = decodificarCodigoLiturgico(val);
         if (decV) {
-            if (p.get('libro')) decV.libro = p.get('libro');
+            if (horaParam) decV.libro = horaParam.toLowerCase();
             return decV;
         }
     }
@@ -166,7 +168,7 @@ function obtenerParametrosUrl() {
         tiempo: p.get('tiempo') || 'ordinario',
         semana: p.get('semana') ? parseInt(p.get('semana'), 10) : 24,
         dia: p.get('dia') || 'sabado',
-        libro: p.get('libro') || 'laudes',
+        libro: (horaParam || 'laudes').toLowerCase(),
         fecha: p.get('fecha') || null,
         santo: p.get('santo') || null,
         codigoCompleto: null
@@ -264,24 +266,65 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
 
     // Buscar antífonas de la base de datos de antífonas
     const antInvObj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'invitatoria')[0] 
+                   || AntifonasDB.filtrar('ordinario', 1, dia, libro, 'invitatoria')[0]
+                   || AntifonasDB.filtrar(tiempo, semana, dia, 'laudes', 'invitatoria')[0]
                    || AntifonasDB.filtrar('ordinario', 1, dia, 'laudes', 'invitatoria')[0]
                    || { texto: 'Venid, adoremos al Señor, porque él es nuestro Dios.' };
 
-    const ant1Obj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'salmodia_1')[0] || { texto: 'Día tras día te bendeciré, Señor.' };
-    const ant2Obj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'salmodia_2')[0] || { texto: 'Canten al Señor un cántico nuevo.' };
-    const ant3Obj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'salmodia_3')[0] || { texto: 'Grandes y maravillosas son tus obras, Señor.' };
+    const ant1Obj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'salmodia_1')[0] 
+                 || AntifonasDB.filtrar('ordinario', 1, dia, libro, 'salmodia_1')[0]
+                 || AntifonasDB.filtrar(tiempo, semana, dia, 'laudes', 'salmodia_1')[0]
+                 || { texto: 'Día tras día te bendeciré, Señor.' };
+    const ant2Obj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'salmodia_2')[0] 
+                 || AntifonasDB.filtrar('ordinario', 1, dia, libro, 'salmodia_2')[0]
+                 || AntifonasDB.filtrar(tiempo, semana, dia, 'laudes', 'salmodia_2')[0]
+                 || { texto: 'Canten al Señor un cántico nuevo.' };
+    const ant3Obj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'salmodia_3')[0] 
+                 || AntifonasDB.filtrar('ordinario', 1, dia, libro, 'salmodia_3')[0]
+                 || AntifonasDB.filtrar(tiempo, semana, dia, 'laudes', 'salmodia_3')[0]
+                 || { texto: 'Grandes y maravillosas son tus obras, Señor.' };
     const antEvObj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'evangelico')[0] || { texto: 'Se presentó Jesús en medio de sus discípulos y les dijo: Paz a vosotros.' };
 
     // Determinar salmos según el libro
-    let salmo1 = salmosDB ? salmosDB.obtener('salmo144') || salmosDB.obtener('salmo62_2_9') : null;
-    let salmo2 = salmosDB ? salmosDB.obtener('canticoZacarias') || salmosDB.obtener('ISa2_1_10') : null;
-    let salmo3 = salmosDB ? salmosDB.obtener('salmo149') || salmosDB.obtener('salmo150') : null;
+    let salmo1 = null;
+    let salmo2 = null;
+    let salmo3 = null;
+
+    if (libro === 'oficio') {
+        salmo1 = salmosDB ? (salmosDB.obtener('salmo23') || salmosDB.obtener('salmo144')) : null;
+        salmo2 = salmosDB ? (salmosDB.obtener('salmo66') || salmosDB.obtener('salmo100') || salmosDB.obtener('salmo117')) : null;
+        salmo3 = salmosDB ? (salmosDB.obtener('salmo99') || salmosDB.obtener('salmo149')) : null;
+    } else {
+        salmo1 = salmosDB ? (salmosDB.obtener('salmo144') || salmosDB.obtener('salmo62_2_9')) : null;
+        salmo2 = salmosDB ? (salmosDB.obtener('canticoZacarias') || salmosDB.obtener('ISa2_1_10')) : null;
+        salmo3 = salmosDB ? (salmosDB.obtener('salmo149') || salmosDB.obtener('salmo150')) : null;
+    }
 
     // Calcular URLs de audio para Oficio de Lectura (Par vs Impar)
     const esPar = currentYear % 2 === 0;
     const rutaOficio = construirRutaOficioLectura({ tiempo, semana, dia });
     const audioLectura1 = esPar ? rutaOficio.lecturaPar : rutaOficio.lecturaImpar;
     const audioLectura2 = rutaOficio.segundaLectura;
+
+    // Buscar himno en el catálogo de himnos
+    const himnoObj = (HimnosDB && typeof HimnosDB.filtrar === 'function')
+        ? (HimnosDB.filtrar(tiempo, semana, dia, libro)[0] 
+           || (libro === 'oficio' ? HimnosDB.obtenerPorId('hbautismoOF') : null)
+           || HimnosDB.filtrar(tiempo, semana, dia, 'laudes')[0]
+           || HimnosDB.filtrar('ordinario', 1, dia, libro)[0])
+        : null;
+
+    const himnoFinal = himnoObj ? {
+        id: himnoObj.id || himnoObj.varName,
+        titulo: himnoObj.titulo || 'HIMNO',
+        texto: himnoObj.texto || ''
+    } : (libro === 'oficio' ? {
+        titulo: 'HIMNO: HOY DOS EXTREMOS SE HAN VISTO',
+        texto: `Hoy dos extremos se han visto,\r\ncuales nunca se verán:\r\nCristo arrodillado a Juan,\r\ny Juan bautizando a Cristo.\r\n\r\nEl mar y abismo profundo\r\nde la pureza infinita,\r\nque las inmundicias quita\r\ny los pecados del mundo,\r\n\r\nhoy del Bautista se ha visto\r\nser lavado en el Jordán;\r\nCristo arrodillado a Juan,\r\ny Juan bautizando a Cristo.\r\n\r\nBautiza la voz al Verbo,\r\nel criado al Criador;\r\nved qué humildad de Señor\r\ny qué autoridad de siervo.\r\n\r\nFavor otra vez no visto\r\nentre los hijos de Adán,\r\nCristo arrodillado a Juan,\r\ny Juan bautizando a Cristo. Amén.`
+    } : {
+        titulo: 'HIMNO: ERES LA LUZ Y SIEMBRAS CLARIDADES.',
+        texto: `Eres la luz y siembras claridades,\neres amor y siembras armonía\ndesde tu eternidad de eternidades.\n\nPor tu roja frescura de alegría,\nla tierra se estremece de rocío,\nHijo eterno del Padre y de María.\n\nEntro en tus esplendores, Cristo, ciego;\nmientras corre la vida paso a paso,\npongo mis horas grises en tu brazo,\ny a ti, Señor, mi corazón entrego. Amén.`
+    });
 
     return {
         tiempo,
@@ -304,19 +347,16 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
             v: 'Dios mío, ven en mi auxilio',
             r: `Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo.\nComo era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${tiempo === 'pascua' ? ' Aleluya.' : ''}`
         },
-        himno: {
-            titulo: 'HIMNO: ERES LA LUZ Y SIEMBRAS CLARIDADES.',
-            texto: `Eres la luz y siembras claridades,\neres amor y siembras armonía\ndesde tu eternidad de eternidades.\n\nPor tu roja frescura de alegría,\nla tierra se estremece de rocío,\nHijo eterno del Padre y de María.\n\nEntro en tus esplendores, Cristo, ciego;\nmientras corre la vida paso a paso,\npongo mis horas grises en tu brazo,\ny a ti, Señor, mi corazón entrego. Amén.`
-        },
+        himno: himnoFinal,
         salmodia: {
             ant1: ant1Obj.texto,
-            salmo1Titulo: salmo1 ? salmo1.titulo : 'Salmo 62 - EL ALMA SEDIENTA DE DIOS',
+            salmo1Titulo: salmo1 ? salmo1.titulo : (libro === 'oficio' ? 'Salmo 23 - ENTRADA SOLEMNE DE DIOS EN SU SANTUARIO' : 'Salmo 62 - EL ALMA SEDIENTA DE DIOS'),
             salmo1Texto: salmo1 ? salmo1.texto : '',
             ant2: ant2Obj.texto,
-            salmo2Titulo: salmo2 ? salmo2.titulo : 'Cántico: BENEFICIOS DE DIOS',
+            salmo2Titulo: salmo2 ? salmo2.titulo : (libro === 'oficio' ? 'Salmo 66 - INVITACIÓN A LOS PUEBLOS A ALABAR A DIOS' : 'Cántico: BENEFICIOS DE DIOS'),
             salmo2Texto: salmo2 ? salmo2.texto : '',
             ant3: ant3Obj.texto,
-            salmo3Titulo: salmo3 ? salmo3.titulo : 'Salmo 149 - ALEGRÍA DE LOS SANTOS',
+            salmo3Titulo: salmo3 ? salmo3.titulo : (libro === 'oficio' ? 'Salmo 99 - ALEGRÍA DE LOS QUE ENTRAN EN EL TEMPLO' : 'Salmo 149 - ALEGRÍA DE LOS SANTOS'),
             salmo3Texto: salmo3 ? salmo3.texto : ''
         },
         versiculo: (() => {
@@ -523,7 +563,7 @@ function renderizarCuerpoLiturgico(d) {
 
     // 2. INVITATORIO E INVOCACIÓN INICIAL (Fiel a Imagen 2 para Oficio)
     if (libroKey === 'oficio') {
-        const antInv = d.invitatorio?.antifona || 'Venid, adoremos al Señor, porque él es nuestro Dios.';
+        const antInv = d.invitatorio?.antifonaTexto || d.invitatorio?.antifona || 'Venid, adoremos a Cristo, el Hijo amado, en quien el Padre tiene sus complacencias.';
         html += `
             <div class="salterio-seccion-header">INVITATORIO</div>
             <div class="rubrica-nota">Si ésta es la primera oración del día:</div>
@@ -532,7 +572,7 @@ function renderizarCuerpoLiturgico(d) {
             <div class="rubrica-nota" style="margin-top: 8px;">Se añade el Salmo del Invitatorio con la siguiente antífona:</div>
             <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${antInv}</div>
             <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
-            <div class="rubrica-nota-roja" style="color: #c00000; font-style: italic; margin-bottom: 8px;">Si antes se ha rezado ya alguna otra Hora:</div>
+            <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">Si antes se ha rezado ya alguna otra Hora:</div>
             <div class="linea-vr"><span class="rubrica-vr">V.</span> Dios mío, ven en mi auxilio</div>
             <div class="linea-vr"><span class="rubrica-vr">R.</span> Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${d.tiempo === 'pascua' ? ' Aleluya.' : ''}</div>
             <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
@@ -618,20 +658,20 @@ function renderizarCuerpoLiturgico(d) {
         if (l1) {
             const resp1Obj = l1.responsorio || {};
             const r1Txt = l1.respR1 || resp1Obj.r1 || '';
-            const r1Formateado = r1Txt.replace(/\*/g, '<span class="asterisco-rojo" style="color: #c00000; font-weight: bold; font-size: 1.25rem;">*</span>');
+            const r1Formateado = r1Txt.replace(/\*/g, '<span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; font-size: 1.25rem;">*</span>');
             const v1Txt = l1.respV || resp1Obj.v || '';
             const r2Txt = l1.respR2 || resp1Obj.r2 || '';
             const citaResp1 = l1.respCita || resp1Obj.ref || '';
 
             html += `
                 <div class="lectura-oficio-contenedor" style="margin-top: 26px;">
-                    <div class="salterio-seccion-header" style="color: #c00000; font-size: 1.15rem; margin-bottom: 4px;">${l1.epigrafeTipo || l1.titulo || 'PRIMERA LECTURA'}</div>
-                    <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px;">${l1.cita || ''}</div>
-                    <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: inherit;">${l1.descripcion || l1.subtitulo || ''}</div>
+                    <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.15rem; margin-bottom: 4px;">${l1.epigrafeTipo || l1.titulo || 'PRIMERA LECTURA'}</div>
+                    <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000;">${l1.cita || ''}</div>
+                    <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l1.descripcion || l1.subtitulo || ''}</div>
                     <div class="texto-lectura-justificado">${l1.texto || ''}</div>
                     ${r1Txt ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
-                            <div class="salterio-seccion-header" style="color: #c00000; font-size: 1.05rem; margin-bottom: 8px;">
+                            <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.05rem; margin-bottom: 8px;">
                                 RESPONSORIO <span style="font-weight: normal; font-size: 0.9rem; color: #555555; margin-left: 8px;">${citaResp1}</span>
                             </div>
                             <div class="linea-vr"><span class="rubrica-vr">R.</span> ${r1Formateado}</div>
@@ -648,20 +688,20 @@ function renderizarCuerpoLiturgico(d) {
         if (l2) {
             const resp2Obj = l2.responsorio || {};
             const r1Txt2 = l2.respR1 || resp2Obj.r1 || '';
-            const r1Formateado2 = r1Txt2.replace(/\*/g, '<span class="asterisco-rojo" style="color: #c00000; font-weight: bold; font-size: 1.25rem;">*</span>');
+            const r1Formateado2 = r1Txt2.replace(/\*/g, '<span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; font-size: 1.25rem;">*</span>');
             const v2Txt = l2.respV || resp2Obj.v || '';
             const r2Txt2 = l2.respR2 || resp2Obj.r2 || '';
             const citaResp2 = l2.respCita || resp2Obj.ref || '';
 
             html += `
                 <div class="lectura-oficio-contenedor" style="margin-top: 28px;">
-                    <div class="salterio-seccion-header" style="color: #c00000; font-size: 1.15rem; margin-bottom: 4px;">${l2.epigrafeTipo || l2.titulo || 'SEGUNDA LECTURA'}</div>
-                    <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px;">${l2.cita || ''}</div>
-                    <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: inherit;">${l2.descripcion || l2.subtitulo || ''}</div>
+                    <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.15rem; margin-bottom: 4px;">${l2.epigrafeTipo || l2.titulo || 'SEGUNDA LECTURA'}</div>
+                    <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000;">${l2.cita || ''}</div>
+                    <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l2.descripcion || l2.subtitulo || ''}</div>
                     <div class="texto-lectura-justificado">${l2.texto || ''}</div>
                     ${r1Txt2 ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
-                            <div class="salterio-seccion-header" style="color: #c00000; font-size: 1.05rem; margin-bottom: 8px;">
+                            <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.05rem; margin-bottom: 8px;">
                                 RESPONSORIO <span style="font-weight: normal; font-size: 0.9rem; color: #555555; margin-left: 8px;">${citaResp2}</span>
                             </div>
                             <div class="linea-vr"><span class="rubrica-vr">R.</span> ${r1Formateado2}</div>
@@ -710,7 +750,7 @@ Haz que seamos contados entre tus santos en la gloria eterna.`;
         // Sección opcional (Vigilia)
         html += `
             <div class="seccion-opcional-oficio" style="margin: 26px 0;">
-                <div class="rubrica-nota-roja" style="color: #c00000; font-style: italic; margin-bottom: 8px;">La parte que sigue puede omitirse, si se cree oportuno.</div>
+                <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">La parte que sigue puede omitirse, si se cree oportuno.</div>
                 ${d.seccionOpcional?.texto ? `<div class="texto-lectura-justificado">${d.seccionOpcional.texto}</div>` : ''}
             </div>
         `;
