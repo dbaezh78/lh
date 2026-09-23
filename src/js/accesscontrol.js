@@ -137,7 +137,29 @@ export const PERMISSIONS = {
   PAGE_CHAT: "page_chat",
   CHAT_VER_TODOS: "chat_ver_todos",
   CHAT_ENVIAR: "chat_enviar",
-  CHAT_ELIMINAR: "chat_eliminar"
+  CHAT_ELIMINAR: "chat_eliminar",
+
+  // 14. FORMULARIO (Menú y Submódulos de Formulario)
+  PAGE_FORMULARIO: "page_formulario",
+  PAGE_FRM_SALTERIOS: "page_frm_salterios",
+  FRM_SALTERIOS_GUARDAR: "frm_salterios_guardar",
+  FRM_SALTERIOS_COPIAR: "frm_salterios_copiar",
+  PAGE_FRM_SALMOS: "page_frm_salmos",
+  FRM_SALMOS_GUARDAR: "frm_salmos_guardar",
+  PAGE_FRM_HIMNOS: "page_frm_himnos",
+  FRM_HIMNOS_GUARDAR: "frm_himnos_guardar",
+  PAGE_FRM_LECTURABREVE: "page_frm_lecturabreve",
+  FRM_LECTURABREVE_GUARDAR: "frm_lecturabreve_guardar",
+  PAGE_FRM_ANTIFONAS: "page_frm_antifonas",
+  FRM_ANTIFONAS_GUARDAR: "frm_antifonas_guardar",
+  PAGE_FRM_PRECES: "page_frm_preces",
+  FRM_PRECES_GUARDAR: "frm_preces_guardar",
+  PAGE_FRM_ORACION: "page_frm_oracion",
+  FRM_ORACION_GUARDAR: "frm_oracion_guardar",
+  PAGE_FRM_RESPONSORIO: "page_frm_responsorio",
+  FRM_RESPONSORIO_GUARDAR: "frm_responsorio_guardar",
+  PAGE_FRM_LECTURA: "page_frm_lectura",
+  FRM_LECTURA_GUARDAR: "frm_lectura_guardar"
 };
 
 // Árbol jerárquico anidado para la interfaz visual
@@ -153,22 +175,7 @@ export const PERMISSION_TREE = [
     ]
   },
 
-  // 1. Cambio Litúrgico
-  {
-    key: "group_cambio_liturgico",
-    label: "Página: Cambio litúrgico",
-    children: [
-      { key: "page_cambio_liturgico", label: "Ver página" },
-      { key: "cambio_liturgico_guardar", label: "Guardar cambios" },
-      { key: "cambio_liturgico_agregar_tabla", label: "Agregar Tabla" },
-      { key: "cambio_liturgico_restablecer", label: "Restablecer valores originales" },
-      { key: "cambio_liturgico_cambiar_fecha", label: "Cambiar fecha" },
-      { key: "cambio_liturgico_borrar", label: "Borrar" },
-      { key: "cambio_liturgico_editar", label: "Editar" }
-    ]
-  },
-
-  // 2. Año Litúrgico
+  // 1. Año Litúrgico
   {
     key: "group_ano_liturgico",
     label: "Página: Año Litúrgico",
@@ -180,7 +187,7 @@ export const PERMISSION_TREE = [
     ]
   },
 
-  // 3. Datos y Años
+  // 2. Datos y Años
   {
     key: "group_datos_anios",
     label: "Página: Datos y Años",
@@ -193,37 +200,6 @@ export const PERMISSION_TREE = [
       { key: "datos_cargar_bisiestos", label: "Cargar Bisiestos" },
       { key: "datos_restablecer", label: "Restablecer por Defecto" },
       { key: "datos_borrar", label: "Borrar" }
-    ]
-  },
-
-  // 4. Santos de la Iglesia Católica
-  {
-    key: "group_santos_iglesia",
-    label: "Página: Santos de la Iglesia Católica",
-    children: [
-      { key: "page_santos_iglesia", label: "Ver página" },
-      { key: "santos_subir_firebase", label: "Subir a Firebase" },
-      { key: "santos_crear_editar", label: "Crear / Editar Santo" },
-      { key: "santos_nombre_select", label: "Nombre del Santo (Select interactivo)" }
-    ]
-  },
-
-  // 5. Registro del Santo
-  {
-    key: "group_registro_santo",
-    label: "Página: Registro del Santo",
-    children: [
-      { key: "page_registro_santo", label: "Ver página" },
-      { key: "registro_agregar_nuevo", label: "Agregar nuevo santo" },
-      { key: "registro_agregar_nombre", label: "Agregar Nombre" },
-      { key: "registro_guardar", label: "Guardar Santo" },
-      { key: "registro_importar_csv", label: "Importar Archivo CSV" },
-      { key: "registro_exportar_csv", label: "Exportar / descargar CSV" },
-      { key: "registro_sincronizar_firebase", label: "Sincronizar / Subir a Firebase" },
-      { key: "registro_editar", label: "Editar el registro del santo" },
-      { key: "registro_eliminar", label: "Eliminar el registro del santo" },
-      { key: "registro_ordenar", label: "Ordenar columnas" },
-      { key: "registro_columnas_visibilidad", label: "Mostrar u ocultar columnas" }
     ]
   },
 
@@ -391,6 +367,128 @@ export const PERMISSION_TREE = [
       { key: "chat_enviar", label: "Enviar mensajes y archivos" },
       { key: "chat_eliminar", label: "Eliminar mensajes" }
     ]
+  },
+
+  // 12. Página: Formulario (de último)
+  {
+    key: "group_formulario",
+    label: "Página: Formulario",
+    children: [
+      { key: "page_formulario", label: "Ver menú de Formularios" },
+      {
+        key: "group_frm_salterios",
+        label: "Formulario Salterios",
+        children: [
+          { key: "page_frm_salterios", label: "Ver página" },
+          { key: "frm_salterios_guardar", label: "Guardar en Firebase" },
+          { key: "frm_salterios_copiar", label: "Copiar código" }
+        ]
+      },
+      {
+        key: "group_frm_salmos",
+        label: "Salmos",
+        children: [
+          { key: "page_frm_salmos", label: "Ver página" },
+          { key: "frm_salmos_guardar", label: "Guardar / Modificar" }
+        ]
+      },
+      {
+        key: "group_frm_himnos",
+        label: "Himnos",
+        children: [
+          { key: "page_frm_himnos", label: "Ver página" },
+          { key: "frm_himnos_guardar", label: "Guardar / Modificar" }
+        ]
+      },
+      {
+        key: "group_frm_lecturabreve",
+        label: "Lectura Breve",
+        children: [
+          { key: "page_frm_lecturabreve", label: "Ver página" },
+          { key: "frm_lecturabreve_guardar", label: "Guardar / Modificar" }
+        ]
+      },
+      {
+        key: "group_frm_antifonas",
+        label: "Antífonas",
+        children: [
+          { key: "page_frm_antifonas", label: "Ver página" },
+          { key: "frm_antifonas_guardar", label: "Guardar / Modificar" }
+        ]
+      },
+      {
+        key: "group_frm_preces",
+        label: "Preces",
+        children: [
+          { key: "page_frm_preces", label: "Ver página" },
+          { key: "frm_preces_guardar", label: "Guardar / Modificar" }
+        ]
+      },
+      {
+        key: "group_frm_oracion",
+        label: "Oración",
+        children: [
+          { key: "page_frm_oracion", label: "Ver página" },
+          { key: "frm_oracion_guardar", label: "Guardar / Modificar" }
+        ]
+      },
+      {
+        key: "group_frm_responsorio",
+        label: "Responsorios",
+        children: [
+          { key: "page_frm_responsorio", label: "Ver página" },
+          { key: "frm_responsorio_guardar", label: "Guardar / Modificar" }
+        ]
+      },
+      {
+        key: "group_frm_lectura",
+        label: "Lecturas Oficio",
+        children: [
+          { key: "page_frm_lectura", label: "Ver página" },
+          { key: "frm_lectura_guardar", label: "Guardar / Modificar" }
+        ]
+      },
+      {
+        key: "group_cambio_liturgico",
+        label: "Cambio litúrgico",
+        children: [
+          { key: "page_cambio_liturgico", label: "Ver página" },
+          { key: "cambio_liturgico_guardar", label: "Guardar cambios" },
+          { key: "cambio_liturgico_agregar_tabla", label: "Agregar Tabla" },
+          { key: "cambio_liturgico_restablecer", label: "Restablecer valores originales" },
+          { key: "cambio_liturgico_cambiar_fecha", label: "Cambiar fecha" },
+          { key: "cambio_liturgico_borrar", label: "Borrar" },
+          { key: "cambio_liturgico_editar", label: "Editar" }
+        ]
+      },
+      {
+        key: "group_santos_iglesia",
+        label: "Santo",
+        children: [
+          { key: "page_santos_iglesia", label: "Ver página" },
+          { key: "santos_subir_firebase", label: "Subir a Firebase" },
+          { key: "santos_crear_editar", label: "Crear / Editar Santo" },
+          { key: "santos_nombre_select", label: "Nombre del Santo (Select interactivo)" }
+        ]
+      },
+      {
+        key: "group_registro_santo",
+        label: "Nombre Santo",
+        children: [
+          { key: "page_registro_santo", label: "Ver página" },
+          { key: "registro_agregar_nuevo", label: "Agregar nuevo santo" },
+          { key: "registro_agregar_nombre", label: "Agregar Nombre" },
+          { key: "registro_guardar", label: "Guardar Santo" },
+          { key: "registro_importar_csv", label: "Importar Archivo CSV" },
+          { key: "registro_exportar_csv", label: "Exportar / descargar CSV" },
+          { key: "registro_sincronizar_firebase", label: "Sincronizar / Subir a Firebase" },
+          { key: "registro_editar", label: "Editar el registro del santo" },
+          { key: "registro_eliminar", label: "Eliminar el registro del santo" },
+          { key: "registro_ordenar", label: "Ordenar columnas" },
+          { key: "registro_columnas_visibilidad", label: "Mostrar u ocultar columnas" }
+        ]
+      }
+    ]
   }
 ];
 
@@ -501,23 +599,42 @@ export function initAccessControl() {
   crearGruposPorDefecto();
 }
 
+export function esPermisoFormulario(p) {
+  if (!p) return false;
+  return (
+    p === "page_formulario" ||
+    p === "page_cambio_liturgico" ||
+    p === "page_santos_iglesia" ||
+    p === "page_registro_santo" ||
+    p.startsWith("frm_") ||
+    p.startsWith("page_frm_") ||
+    p.startsWith("cambio_liturgico_") ||
+    p.startsWith("santos_") ||
+    p.startsWith("registro_")
+  );
+}
+
 function crearGruposPorDefecto() {
   // 1. Administradores (Acceso Total)
   createGroup("administradores", "Administradores del Sistema", [PERMISSIONS.ALL, ...Object.values(PERMISSIONS)], "Grupo con control total del sistema");
   
   // 2. Hermanos (grupo por defecto al autenticarse)
-  // Incluye permisos de lectura y uso interactivo de todas las páginas y herramientas
-  const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && p !== "chat_ver_todos" && !p.startsWith("actrl_") && !p.startsWith("ipaddr_"));
+  // Incluye permisos de lectura y uso interactivo de todas las páginas y herramientas excepto administración y formularios
+  const permisosHermano = Object.values(PERMISSIONS).filter(p => 
+    p !== "*" && 
+    p !== "manage_access" && 
+    p !== "chat_ver_todos" && 
+    !p.startsWith("actrl_") && 
+    !p.startsWith("ipaddr_") &&
+    !esPermisoFormulario(p)
+  );
   permisosHermano.push(PERMISSIONS.ACTRL_CUENTA_LOGOUT);
   createGroup("hermanos", "Hermano", permisosHermano, "Hermanos registrados y autenticados");
 
   // 3. Invitados (sin inicio de sesión: solo lectura básica + botón de login)
   createGroup("invitados", "Usuarios Invitados", [
-    PERMISSIONS.PAGE_CAMBIO_LITURGICO,
     PERMISSIONS.PAGE_ANO_LITURGICO,
     PERMISSIONS.PAGE_DATOS_ANIOS,
-    PERMISSIONS.PAGE_SANTOS_IGLESIA,
-    PERMISSIONS.PAGE_REGISTRO_SANTO,
     PERMISSIONS.PAGE_CHAT,
     PERMISSIONS.PAGE_VER,
     PERMISSIONS.PAGE_SYSTEM,
@@ -543,13 +660,26 @@ function asegurarGruposBase() {
     Object.values(PERMISSIONS).forEach(p => accessControlState.groups["administradores"].permissions.add(p));
   }
   if (!accessControlState.groups["hermanos"]) {
-    const permisosHermano = Object.values(PERMISSIONS).filter(p => p !== "*" && p !== "manage_access" && p !== "chat_ver_todos" && !p.startsWith("actrl_") && !p.startsWith("ipaddr_"));
+    const permisosHermano = Object.values(PERMISSIONS).filter(p => 
+      p !== "*" && 
+      p !== "manage_access" && 
+      p !== "chat_ver_todos" && 
+      !p.startsWith("actrl_") && 
+      !p.startsWith("ipaddr_") &&
+      !esPermisoFormulario(p)
+    );
     permisosHermano.push(PERMISSIONS.ACTRL_CUENTA_LOGOUT);
     createGroup("hermanos", "Hermano", permisosHermano, "Hermanos registrados y autenticados");
   } else {
     // Actualizar nombre a Hermano si estaba guardado como Grupo General de Hermanos
     accessControlState.groups["hermanos"].name = "Hermano";
     cleanObsoletePermissions(accessControlState.groups["hermanos"].permissions);
+    // Purgar permisos de formulario de 'hermanos' para que solo Administradores tengan acceso
+    accessControlState.groups["hermanos"].permissions.forEach(p => {
+      if (esPermisoFormulario(p)) {
+        accessControlState.groups["hermanos"].permissions.delete(p);
+      }
+    });
     accessControlState.groups["hermanos"].permissions.add(PERMISSIONS.PAGE_CHAT);
     accessControlState.groups["hermanos"].permissions.add(PERMISSIONS.CHAT_ENVIAR);
     accessControlState.groups["hermanos"].permissions.add(PERMISSIONS.CHAT_ELIMINAR);
@@ -557,15 +687,25 @@ function asegurarGruposBase() {
   }
   if (!accessControlState.groups["invitados"]) {
     createGroup("invitados", "Usuarios Invitados", [
-      PERMISSIONS.PAGE_CAMBIO_LITURGICO,
       PERMISSIONS.PAGE_ANO_LITURGICO,
       PERMISSIONS.PAGE_DATOS_ANIOS,
-      PERMISSIONS.PAGE_SANTOS_IGLESIA,
-      PERMISSIONS.PAGE_REGISTRO_SANTO,
       PERMISSIONS.PAGE_CHAT,
+      PERMISSIONS.PAGE_VER,
+      PERMISSIONS.PAGE_SYSTEM,
+      PERMISSIONS.VIEW_SETTINGS_GENERAL,
+      PERMISSIONS.VIEW_SETTINGS_THEME,
+      PERMISSIONS.VIEW_SETTINGS_TTS,
+      PERMISSIONS.VIEW_SETTINGS_CALENDARIO,
       PERMISSIONS.ACTRL_CUENTA_LOGIN
     ], "Usuarios visitantes sin inicio de sesión");
   } else {
+    cleanObsoletePermissions(accessControlState.groups["invitados"].permissions);
+    // Purgar permisos de formulario de 'invitados'
+    accessControlState.groups["invitados"].permissions.forEach(p => {
+      if (esPermisoFormulario(p)) {
+        accessControlState.groups["invitados"].permissions.delete(p);
+      }
+    });
     accessControlState.groups["invitados"].permissions.add(PERMISSIONS.PAGE_CHAT);
   }
   
@@ -1513,6 +1653,8 @@ window.setUserNameConsent = setUserNameConsent;
 window.isUserEmailAuthorized = isUserEmailAuthorized;
 window.setUserEmailConsent = setUserEmailConsent;
 
+window.esPermisoFormulario = esPermisoFormulario;
+
 window.accessControlAPI = {
   initAccessControl,
   createGroup,
@@ -1539,6 +1681,7 @@ window.accessControlAPI = {
   saveGroupConfigToCloud,
   syncRegisteredUsersFromFirebase,
   iniciarSincronizacionEnTiempoRealFirebase,
+  esPermisoFormulario,
   accessControlState,
   PERMISSIONS,
   PERMISSION_TREE,

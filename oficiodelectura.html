@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oficio de Lectura - Rutas y Audios Litúrgicos</title>
+    <link rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="src/css/buttons.css">
+    <link rel="stylesheet" href="src/css/oficiodelectura.css">
+</head>
+<body>
+
+    <div class="contenedor-oficio">
+        <header class="header-oficio">
+            <div class="titulo-box">
+                <h1>
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: #8B0000;">menu_book</span>
+                    Oficio de Lectura - Catálogo de Audios
+                </h1>
+                <p>Gestión de las 3 lecturas oficiales: 1ª Lectura Año Impar (<code>lectura1.mp3</code>), 1ª Lectura Año Par (<code>lectura2.mp3</code>) y 2ª Lectura Patrística (<code>lecturas.mp3</code>)</p>
+            </div>
+            <div class="header-controles">
+                <a href="añoliturgico.html" class="btn-nav-header" title="Ir al Año Litúrgico">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    Año Litúrgico
+                </a>
+                <a href="salterios.html?libro=oficio" class="btn-nav-header btn-primario" title="Abrir Visor del Oficio de Lectura">
+                    <span class="material-symbols-outlined">auto_stories</span>
+                    Visor de Salterios
+                </a>
+                <a href="index.html" class="btn-nav-header">
+                    <span class="material-symbols-outlined">home</span>
+                    Inicio
+                </a>
+            </div>
+        </header>
+
+        <!-- Barra de Filtros y Selector de Servidor -->
+        <div class="barra-filtros">
+            <div class="grupo-filtro-izq">
+                <label for="filtro-tiempo" style="font-weight: 600;">Tiempo:</label>
+                <select id="filtro-tiempo" class="select-filtro">
+                    <option value="">Todos los Tiempos</option>
+                    <option value="Adviento">Adviento (ta)</option>
+                    <option value="Navidad">Navidad (tn)</option>
+                    <option value="Tiempo Ordinario">Tiempo Ordinario (to)</option>
+                    <option value="Cuaresma">Cuaresma (tc)</option>
+                    <option value="Pascua">Pascua (tp)</option>
+                </select>
+
+                <label for="filtro-semana" style="font-weight: 600;">Semana:</label>
+                <select id="filtro-semana" class="select-filtro">
+                    <option value="">Todas las Semanas</option>
+                </select>
+
+                <span class="badge-info-año" id="badge-año-paridad">Año 2026</span>
+
+                <!-- Conmutador de Servidor: Principal vs GitHub Mirror -->
+                <div class="switch-servidor-box">
+                    <label class="switch" title="Alternar entre servidor principal y espejo de GitHub">
+                        <input type="checkbox" id="switch-servidor">
+                        <span class="slider-switch"></span>
+                    </label>
+                    <span id="label-servidor-activo" style="color: #16a34a;">Servidor: Principal (resucito.do)</span>
+                </div>
+            </div>
+
+            <div>
+                <input type="text" id="buscador" class="input-buscador" placeholder="Buscar por día, semana, fiesta...">
+            </div>
+        </div>
+
+        <!-- Tabla Completa de Lecturas del Oficio -->
+        <div class="tabla-responsive">
+            <table id="tabla-oficio-lectura">
+                <thead>
+                    <tr>
+                        <th style="width: 130px;">Tiempo</th>
+                        <th style="width: 75px;">Semana</th>
+                        <th style="width: 95px;">Día</th>
+                        <th>Celebración / Ubicación en Servidor</th>
+                        <th style="width: 145px;">1ª Lectura (Impar)</th>
+                        <th style="width: 145px;">1ª Lectura (Par)</th>
+                        <th style="width: 145px;">2ª Lectura (Patrística)</th>
+                        <th style="width: 50px; text-align: center;">Rezar</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-tabla">
+                    <!-- Filas generadas dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Barra Flotante de Reproducción -->
+    <div class="reproductor-barra-oficio" id="reproductor-barra-oficio">
+        <div class="reproductor-info">
+            <div class="reproductor-audio-titulo" id="reproductor-audio-titulo">Selecciona un audio para reproducir</div>
+            <div class="reproductor-tiempo" id="reproductor-tiempo">0:00 / 0:00</div>
+        </div>
+        <div class="reproductor-controles-centro">
+            <button type="button" class="btn-reproductor-play" id="btn-reproductor-play" title="Reproducir / Pausar">
+                <span class="material-symbols-outlined">play_arrow</span>
+            </button>
+            <input type="range" class="reproductor-slider" id="reproductor-slider" min="0" max="100" value="0">
+        </div>
+    </div>
+
+    <script src="src/js/accesscontrol.js" type="module"></script>
+    <script src="src/js/oficiodelectura.js" type="module"></script>
+    <script src="src/js/navigator.js"></script>
+</body>
+</html>

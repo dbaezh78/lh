@@ -7,7 +7,7 @@
     "css": "src/css/main.css",
     "js": "src/js/main.js",
     "fecha": "2026-09-15 10:38:27",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -18,7 +18,7 @@
     "css": "src/css/aCtrl.css",
     "js": "src/js/aCtrl-ui.js",
     "fecha": "2026-09-16 17:43:03",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -29,7 +29,7 @@
     "css": "src/css/añoliturgico.css",
     "js": "src/js/añoliturgico.js",
     "fecha": "2026-09-16 16:21:38",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -40,7 +40,7 @@
     "css": "src/css/system.css",
     "js": "src/js/system.js",
     "fecha": "2026-09-17 11:26:00",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -51,7 +51,7 @@
     "css": "src/css/completas.css",
     "js": "src/js/completas.js",
     "fecha": "2026-09-11 14:22:57",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "oracion"
   },
   {
@@ -62,7 +62,7 @@
     "css": "src/css/datos.css",
     "js": "src/js/datos.js",
     "fecha": "2026-09-16 14:29:59",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -73,7 +73,7 @@
     "css": "src/css/form_etiempo.css",
     "js": "src/js/form_etiempo.js",
     "fecha": "2026-09-16 17:11:56",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -84,7 +84,7 @@
     "css": "src/css/laudes.css",
     "js": "src/js/laudes.js",
     "fecha": "2026-09-11 13:28:20",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "oracion"
   },
   {
@@ -95,7 +95,7 @@
     "css": "src/css/nombresanto.css",
     "js": "src/js/nombresanto.js",
     "fecha": "2026-09-16 17:02:58",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -106,7 +106,7 @@
     "css": "src/css/nona.css",
     "js": "src/js/nona.js",
     "fecha": "2026-09-11 14:22:47",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "oracion"
   },
   {
@@ -117,7 +117,7 @@
     "css": "src/css/oficio.css",
     "js": "src/js/oficio.js",
     "fecha": "2026-04-13 06:58:41",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "oracion"
   },
   {
@@ -128,7 +128,7 @@
     "css": "src/css/santo.css",
     "js": "src/js/santo.js",
     "fecha": "2026-09-16 16:36:29",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -139,7 +139,7 @@
     "css": "src/css/sexta.css",
     "js": "src/js/sexta.js",
     "fecha": "2026-09-11 14:22:42",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "oracion"
   },
   {
@@ -150,7 +150,7 @@
     "css": "src/css/tercia.css",
     "js": "src/js/tercia.js",
     "fecha": "2026-09-11 14:22:37",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "oracion"
   },
   {
@@ -161,7 +161,7 @@
     "css": "src/css/ver.css",
     "js": "src/js/ver.js",
     "fecha": "2026-09-16 17:16:09",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -172,7 +172,7 @@
     "css": "src/css/visperas.css",
     "js": "src/js/visperas.js",
     "fecha": "2026-09-11 14:22:51",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "oracion"
   },
   {
@@ -183,7 +183,7 @@
     "css": "src/css/ipaddr.css",
     "js": "src/js/ipaddr.js",
     "fecha": "2026-09-17 11:45:00",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -194,7 +194,7 @@
     "css": "src/css/chat.css",
     "js": "src/js/chat.js",
     "fecha": "2026-09-18 15:30:00",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -205,7 +205,7 @@
     "css": "src/css/salterios.css",
     "js": "src/js/salterios.js",
     "fecha": "2026-09-19 00:30:00",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "oracion"
   },
   {
@@ -216,7 +216,7 @@
     "css": "src/css/antifonas.css",
     "js": "src/js/antifonas-manager.js",
     "fecha": "2026-09-19 00:30:00",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "gestion"
   },
   {
@@ -227,7 +227,106 @@
     "css": "src/css/cinta.css",
     "js": "src/js/cinta.js",
     "fecha": "2026-09-19 00:30:00",
-    "version": "1.0.02",
+    "version": "1.0.03",
     "categoria": "oracion"
+  },
+  {
+    "id": "frm_salterios",
+    "nombre": "Constructor de Salterios",
+    "icono": "tune",
+    "ruta": "frm_salterios.html",
+    "css": "src/css/frm_salterios.css",
+    "js": "src/js/frm_salterios.js",
+    "fecha": "2026-09-23 07:00:00",
+    "version": "1.0.03",
+    "categoria": "gestion"
+  },
+  {
+    "id": "salmos",
+    "nombre": "Gestor de Salmos",
+    "icono": "library_books",
+    "ruta": "salmos.html",
+    "css": "src/css/salmos.css",
+    "js": "src/js/salmos-manager.js",
+    "fecha": "2026-09-20 00:00:00",
+    "version": "1.0.03",
+    "categoria": "gestion"
+  },
+  {
+    "id": "himno",
+    "nombre": "Gestor de Himnos",
+    "icono": "music_note",
+    "ruta": "himno.html",
+    "css": "src/css/himnos.css",
+    "js": "src/js/himnos-manager.js",
+    "fecha": "2026-09-21 00:00:00",
+    "version": "1.0.03",
+    "categoria": "gestion"
+  },
+  {
+    "id": "lecturabreve",
+    "nombre": "Gestor de Lectura Breve",
+    "icono": "menu_book",
+    "ruta": "lecturabreve.html",
+    "css": "src/css/lecturabreve.css",
+    "js": "src/js/lecturabreve-manager.js",
+    "fecha": "2026-09-22 00:00:00",
+    "version": "1.0.03",
+    "categoria": "gestion"
+  },
+  {
+    "id": "preces",
+    "nombre": "Gestor de Preces",
+    "icono": "volunteer_activism",
+    "ruta": "preces.html",
+    "css": "src/css/preces.css",
+    "js": "src/js/preces-manager.js",
+    "fecha": "2026-09-23 07:00:00",
+    "version": "1.0.03",
+    "categoria": "gestion"
+  },
+  {
+    "id": "oracion",
+    "nombre": "Gestor de Oraciones",
+    "icono": "church",
+    "ruta": "oracion.html",
+    "css": "src/css/oracion.css",
+    "js": "src/js/oracion-manager.js",
+    "fecha": "2026-09-23 07:50:00",
+    "version": "1.0.03",
+    "categoria": "gestion"
+  },
+  {
+    "id": "oficiodelectura",
+    "nombre": "Oficio de Lectura (Audios)",
+    "icono": "auto_stories",
+    "ruta": "oficiodelectura.html",
+    "css": "src/css/oficiodelectura.css",
+    "js": "src/js/oficiodelectura.js",
+    "fecha": "2026-09-23 13:00:00",
+    "version": "1.0.03",
+    "categoria": "gestion"
+  },
+  {
+    "id": "responsorio",
+    "nombre": "Gestor de Responsorios (Oficio)",
+    "icono": "church",
+    "ruta": "responsorio.html",
+    "css": "src/css/responsorio.css",
+    "js": "src/js/responsorio-manager.js",
+    "fecha": "2026-09-23 14:00:00",
+    "version": "1.0.03",
+    "categoria": "gestion"
+  },
+  {
+    "id": "lectura",
+    "nombre": "Gestor de Lecturas (Oficio)",
+    "icono": "import_contacts",
+    "ruta": "lectura.html",
+    "css": "src/css/lectura.css",
+    "js": "src/js/lectura-manager.js",
+    "fecha": "2026-09-23 14:30:00",
+    "version": "1.0.03",
+    "categoria": "gestion"
   }
 ]

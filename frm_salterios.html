@@ -23,17 +23,23 @@
                 <p>Generador de Índices y Estructura Diaria de la Liturgia de las Horas</p>
             </div>
             <nav class="header-nav">
-                <a href="src/html/salmos.html" class="btn-nav-frm" title="Ir al Gestor de Salmos">
+                <a href="salmos.html" class="btn-nav-frm" title="Ir al Gestor de Salmos">
                     <span class="material-symbols-outlined" style="font-size:18px;">library_books</span> Salmos
                 </a>
-                <a href="src/html/himno.html" class="btn-nav-frm" title="Ir al Gestor de Himnos">
+                <a href="himno.html" class="btn-nav-frm" title="Ir al Gestor de Himnos">
                     <span class="material-symbols-outlined" style="font-size:18px;">music_note</span> Himnos
                 </a>
-                <a href="src/html/lecturabreve.html" class="btn-nav-frm" title="Ir al Gestor de Lectura Breve">
+                <a href="lecturabreve.html" class="btn-nav-frm" title="Ir al Gestor de Lectura Breve">
                     <span class="material-symbols-outlined" style="font-size:18px;">auto_stories</span> Lectura Breve
                 </a>
                 <a href="antifonas.html" class="btn-nav-frm" title="Ir al Gestor de Antífonas">
                     <span class="material-symbols-outlined" style="font-size:18px;">auto_stories</span> Antífonas
+                </a>
+                <a href="preces.html" class="btn-nav-frm" title="Ir al Gestor de Preces">
+                    <span class="material-symbols-outlined" style="font-size:18px;">volunteer_activism</span> Preces
+                </a>
+                <a href="oracion.html" class="btn-nav-frm" title="Ir al Gestor de Oración">
+                    <span class="material-symbols-outlined" style="font-size:18px;">church</span> Oración
                 </a>
                 <a href="salterios.html" class="btn-nav-frm primario">
                     <span class="material-symbols-outlined" style="font-size:18px;">menu_book</span> Salterio
@@ -264,7 +270,7 @@
                     </div>
 
                     <!-- Selector de Lectura Breve -->
-                    <div class="control-box">
+                    <div class="control-box" id="ctrlBoxLecturaBreve">
                         <label for="selectLecturaBreve">
                             <span class="material-symbols-outlined" style="font-size:16px;">auto_stories</span>
                             Lectura Breve
@@ -275,7 +281,7 @@
                     </div>
 
                     <!-- Selector de Antífona Cántico Evangélico -->
-                    <div class="control-box">
+                    <div class="control-box" id="ctrlBoxAntifonaCantico">
                         <label for="selectAntifonaCantico">
                             <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
                             Antífona Cántico Evangélico
@@ -286,7 +292,7 @@
                     </div>
 
                     <!-- Selector de Cántico Evangélico -->
-                    <div class="control-box">
+                    <div class="control-box" id="ctrlBoxCantico">
                         <label for="selectCantico">
                             <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
                             Cántico Evangélico
@@ -296,6 +302,78 @@
                             <option value="magnificat">CÁNTICO DE LA SANTÍSIMA VIRGEN MARÍA (MAGNÍFICAT) - Lc 1, 46-55</option>
                             <option value="nunc_dimittis">CÁNTICO DE SIMEÓN (NUNC DIMITTIS) - Lc 2, 29-32</option>
                         </select>
+                    </div>
+
+                    <!-- Selector de Preces -->
+                    <div class="control-box" id="ctrlBoxPreces">
+                        <label for="selectPreces">
+                            <span class="material-symbols-outlined" style="font-size:16px;">volunteer_activism</span>
+                            Preces
+                        </label>
+                        <select id="selectPreces" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-preces.js / lh_preces_cache -->
+                        </select>
+                    </div>
+
+                    <!-- Selector de Oración -->
+                    <div class="control-box" id="ctrlBoxOracion">
+                        <label for="selectOracion">
+                            <span class="material-symbols-outlined" style="font-size:16px;">church</span>
+                            Oración
+                        </label>
+                        <select id="selectOracion" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-oracion.js / lh_oracion_cache -->
+                        </select>
+                    </div>
+
+                    <!-- CONTROLES ESPECÍFICOS DE OFICIO DE LECTURA -->
+                    <div class="control-box" id="ctrlBoxResponsorioOficio" style="display: none;">
+                        <label for="selectResponsorioOficio">
+                            <span class="material-symbols-outlined" style="font-size:16px;">church</span>
+                            Responsorio Salmodia (Post-Salmo 3)
+                        </label>
+                        <select id="selectResponsorioOficio" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-responsorios.js -->
+                        </select>
+                    </div>
+
+                    <div class="control-box" id="ctrlBoxLectura1Oficio" style="display: none;">
+                        <label for="selectLectura1Oficio">
+                            <span class="material-symbols-outlined" style="font-size:16px;">auto_stories</span>
+                            1ª Lectura Bíblica (Oficio)
+                        </label>
+                        <select id="selectLectura1Oficio" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-lecturas.js -->
+                        </select>
+                    </div>
+
+                    <div class="control-box" id="ctrlBoxLectura2Oficio" style="display: none;">
+                        <label for="selectLectura2Oficio">
+                            <span class="material-symbols-outlined" style="font-size:16px;">import_contacts</span>
+                            2ª Lectura Patrística (Oficio)
+                        </label>
+                        <select id="selectLectura2Oficio" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-lecturas.js -->
+                        </select>
+                    </div>
+
+                    <div class="control-box" id="ctrlBoxTeDeumOficio" style="display: none;">
+                        <label for="selectTeDeumOficio">
+                            <span class="material-symbols-outlined" style="font-size:16px;">music_note</span>
+                            Himno Post-Lecturas (Te Deum)
+                        </label>
+                        <select id="selectTeDeumOficio" class="select-liturgico">
+                            <option value="tedeum_canonico" selected>A ti, oh Dios (Te Deum)</option>
+                            <option value="ninguno">Ninguno / Día ferial</option>
+                        </select>
+                    </div>
+
+                    <div class="control-box" id="ctrlBoxOpcionalOficio" style="display: none;">
+                        <label for="inputOpcionalOficio">
+                            <span class="material-symbols-outlined" style="font-size:16px;">edit_note</span>
+                            Sección Opcional (Rúbrica en rojo)
+                        </label>
+                        <input type="text" id="inputOpcionalOficio" class="select-liturgico" placeholder="Texto o referencia opcional...">
                     </div>
                 </div>
             </div>
@@ -309,41 +387,62 @@
                 <!-- 2. SUBTÍTULO (ROJO, CURSIVA, SIN NEGRITA) -->
                 <div class="liturgia-subtitulo-hora" id="previewSubtituloHora">(Oración de la mañana)</div>
 
-                <!-- 3. TÍTULO DE SECCIÓN INVITATORIO (ROJO, MAYÚSCULAS, SIN NEGRITA) -->
-                <div class="liturgia-seccion-invitatorio">INVITATORIO</div>
-
-                <!-- 4. RÚBRICA INICIAL (ROJO, CURSIVA, SIN NEGRITA) -->
-                <div class="liturgia-rubrica-invitatorio">
-                    (Si esta no es la primera oración del día, se omite el Invitatorio y se inicia directamente con la Invocación inicial)
+                <!-- 3. SECCIÓN INVITATORIO ESTÁNDAR (LAUDES) -->
+                <div id="seccionInvitatorioLaudesPreview">
+                    <div class="liturgia-seccion-invitatorio">INVITATORIO</div>
+                    <div class="liturgia-rubrica-invitatorio">
+                        (Si esta no es la primera oración del día, se omite el Invitatorio y se inicia directamente con la Invocación inicial)
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">V.</span>
+                        <span class="liturgia-texto-verso">Señor abre mis labios</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">R.</span>
+                        <span class="liturgia-texto-verso">Y mi boca proclamará tu alabanza</span>
+                    </div>
+                    <div class="liturgia-antifona-fila" id="recuadroAntifonaInvitatorio">
+                        <span class="liturgia-letra-roja">Ant.</span>
+                        <span class="liturgia-texto-antifona" id="txtAntifonaInvitatorio">Pueblo del Señor, rebaño que él guía, bendice a tu Dios. Aleluya.</span>
+                    </div>
+                    <div class="liturgia-titulo-salmo" id="previewTituloSalmo">
+                        SALMO 94 - INVITACIÓN A LA ALABANZA DIVINA
+                    </div>
+                    <div class="liturgia-texto-salmo" id="previewTextoSalmo"></div>
+                    <div class="liturgia-antifona-fila" id="recuadroAntifonaInvitatorioFin">
+                        <span class="liturgia-letra-roja">Ant.</span>
+                        <span class="liturgia-texto-antifona" id="txtAntifonaInvitatorioFin">Pueblo del Señor, rebaño que él guía, bendice a tu Dios. Aleluya.</span>
+                    </div>
                 </div>
 
-                <!-- 5. VERSÍCULO Y RESPUESTA (DATOS FIJOS) -->
-                <div class="liturgia-versiculo-fila">
-                    <span class="liturgia-letra-roja">V.</span>
-                    <span class="liturgia-texto-verso">Señor abre mis labios</span>
-                </div>
-                <div class="liturgia-versiculo-fila">
-                    <span class="liturgia-letra-roja">R.</span>
-                    <span class="liturgia-texto-verso">Y mi boca proclamará tu alabanza</span>
-                </div>
-
-                <!-- 6. ANTÍFONA DEL INVITATORIO (SIN RECUADRO) -->
-                <div class="liturgia-antifona-fila" id="recuadroAntifonaInvitatorio">
-                    <span class="liturgia-letra-roja">Ant.</span>
-                    <span class="liturgia-texto-antifona" id="txtAntifonaInvitatorio">Pueblo del Señor, rebaño que él guía, bendice a tu Dios. Aleluya.</span>
-                </div>
-
-                <!-- 7. SALMO INVITATORIO (TÍTULO EN ROJO, MAYÚSCULAS, SIN NEGRITA) -->
-                <div class="liturgia-titulo-salmo" id="previewTituloSalmo">
-                    SALMO 94 - INVITACIÓN A LA ALABANZA DIVINA
-                </div>
-                <!-- TEXTO DEL SALMO (TEXTO PLANO EN NEGRO) -->
-                <div class="liturgia-texto-salmo" id="previewTextoSalmo"></div>
-
-                <!-- 8. ANTÍFONA DEL INVITATORIO (REPETICIÓN TRAS EL SALMO) -->
-                <div class="liturgia-antifona-fila" id="recuadroAntifonaInvitatorioFin">
-                    <span class="liturgia-letra-roja">Ant.</span>
-                    <span class="liturgia-texto-antifona" id="txtAntifonaInvitatorioFin">Pueblo del Señor, rebaño que él guía, bendice a tu Dios. Aleluya.</span>
+                <!-- 3B. SECCIÓN INVITATORIO FIEL DE OFICIO (IMAGEN 2) -->
+                <div id="seccionInvitatorioOficioPreview" style="display: none;">
+                    <div class="liturgia-seccion-invitatorio">INVITATORIO</div>
+                    <div class="liturgia-rubrica-invitatorio">Si ésta es la primera oración del día:</div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">V.</span>
+                        <span class="liturgia-texto-verso">Señor abre mis labios</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">R.</span>
+                        <span class="liturgia-texto-verso">Y mi boca proclamará tu alabanza</span>
+                    </div>
+                    <div class="liturgia-rubrica-invitatorio" style="margin-top: 8px;">Se añade el Salmo del Invitatorio con la siguiente antífona:</div>
+                    <div class="liturgia-antifona-fila">
+                        <span class="liturgia-letra-roja">Ant.</span>
+                        <span class="liturgia-texto-antifona" id="txtAntifonaOficio">Venid, adoremos al Señor, porque él es nuestro Dios.</span>
+                    </div>
+                    <hr style="margin: 16px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
+                    <div class="liturgia-rubrica-invitatorio" style="color: #c00000; font-style: italic; margin-bottom: 8px;">Si antes se ha rezado ya alguna otra Hora:</div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">V.</span>
+                        <span class="liturgia-texto-verso">Dios mío, ven en mi auxilio</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">R.</span>
+                        <span class="liturgia-texto-verso" id="previewInvocacionOficioR">Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén. Aleluya.</span>
+                    </div>
+                    <hr style="margin: 16px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
                 </div>
 
                 <!-- 9. SECCIÓN DEL HIMNO (DEBAJO DEL INVITATORIO) -->
@@ -419,6 +518,85 @@
                         </div>
                     </div>
 
+                </div>
+
+                <!-- RESPONSORIO POST-SALMODIA (OFICIO - IMAGEN 3) -->
+                <div class="liturgia-seccion-resp-oficio" id="seccionResponsorioOficioPreview" style="display: none; margin: 20px 0;">
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">V.</span>
+                        <span class="liturgia-texto-verso" id="previewRespOficioV">Éste es mi Hijo amado.</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">R.</span>
+                        <span class="liturgia-texto-verso" id="previewRespOficioR">Escuchadlo.</span>
+                    </div>
+                </div>
+
+                <!-- 1ª LECTURA DE OFICIO (IMAGEN 4) -->
+                <div class="liturgia-seccion-lectura1-oficio" id="seccionLectura1OficioPreview" style="display: none; margin: 24px 0;">
+                    <div class="liturgia-seccion-invitatorio" style="color: #c00000; margin-bottom: 4px;" id="previewLec1Epigrafe">PRIMERA LECTURA</div>
+                    <div class="liturgia-cita-lectura" style="font-weight: 500; margin-bottom: 4px; display: block;" id="previewLec1Cita">Del libro del profeta Isaías 42, 1-9; 49, 1-9</div>
+                    <div class="liturgia-subtitulo-hora" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: inherit; font-style: normal;" id="previewLec1Desc">EL SIERVO HUMILDE DEL SEÑOR ES LA LUZ DE LAS NACIONES</div>
+                    <div class="liturgia-texto-lectura" style="text-align: justify; white-space: pre-line; margin-bottom: 16px;" id="previewLec1Texto"></div>
+                    <div class="liturgia-responsorio-bloque" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
+                        <div class="liturgia-seccion-invitatorio" style="color: #c00000; font-size: 1rem; margin-bottom: 8px;">
+                            RESPONSORIO <span style="font-weight: normal; font-size: 0.9rem; color: #555555; margin-left: 8px;" id="previewLec1RespCita">Cf. Mt 3, 16. 17; Lc 3, 22</span>
+                        </div>
+                        <div class="liturgia-versiculo-fila">
+                            <span class="liturgia-letra-roja">R.</span>
+                            <span class="liturgia-texto-verso" id="previewLec1RespR1"></span>
+                        </div>
+                        <div class="liturgia-versiculo-fila">
+                            <span class="liturgia-letra-roja">V.</span>
+                            <span class="liturgia-texto-verso" id="previewLec1RespV"></span>
+                        </div>
+                        <div class="liturgia-versiculo-fila">
+                            <span class="liturgia-letra-roja">R.</span>
+                            <span class="liturgia-texto-verso" id="previewLec1RespR2"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2ª LECTURA DE OFICIO (PATRÍSTICA) -->
+                <div class="liturgia-seccion-lectura2-oficio" id="seccionLectura2OficioPreview" style="display: none; margin: 28px 0;">
+                    <div class="liturgia-seccion-invitatorio" style="color: #c00000; margin-bottom: 4px;" id="previewLec2Epigrafe">SEGUNDA LECTURA</div>
+                    <div class="liturgia-cita-lectura" style="font-weight: 500; margin-bottom: 4px; display: block;" id="previewLec2Cita">De los Sermones de san Máximo de Turín, obispo</div>
+                    <div class="liturgia-subtitulo-hora" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: inherit; font-style: normal;" id="previewLec2Desc">CRISTO ES BAUTIZADO PARA SANTIFICAR LAS AGUAS</div>
+                    <div class="liturgia-texto-lectura" style="text-align: justify; white-space: pre-line; margin-bottom: 16px;" id="previewLec2Texto"></div>
+                    <div class="liturgia-responsorio-bloque" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
+                        <div class="liturgia-seccion-invitatorio" style="color: #c00000; font-size: 1rem; margin-bottom: 8px;">
+                            RESPONSORIO <span style="font-weight: normal; font-size: 0.9rem; color: #555555; margin-left: 8px;" id="previewLec2RespCita">Cf. Sal 28, 3. 4; Lc 3, 22</span>
+                        </div>
+                        <div class="liturgia-versiculo-fila">
+                            <span class="liturgia-letra-roja">R.</span>
+                            <span class="liturgia-texto-verso" id="previewLec2RespR1"></span>
+                        </div>
+                        <div class="liturgia-versiculo-fila">
+                            <span class="liturgia-letra-roja">V.</span>
+                            <span class="liturgia-texto-verso" id="previewLec2RespV"></span>
+                        </div>
+                        <div class="liturgia-versiculo-fila">
+                            <span class="liturgia-letra-roja">R.</span>
+                            <span class="liturgia-texto-verso" id="previewLec2RespR2"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HIMNO POST-LECTURAS (TE DEUM) -->
+                <div class="liturgia-seccion-tedeum" id="seccionTeDeumPreview" style="display: none; margin: 28px 0;">
+                    <div class="liturgia-seccion-invitatorio" style="color: #c00000;">HIMNO: A TI, OH DIOS (TE DEUM)</div>
+                    <div class="liturgia-texto-salmo" id="previewTextoTeDeum">A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
+A ti, eterno Padre, te venera toda la creación.
+Los ángeles todos, los cielos y todas las potestades te honran.
+Los querubines y serafines te cantan sin cesar:
+Santo, Santo, Santo es el Señor, Dios del universo.
+Llenos están el cielo y la tierra de la majestad de tu gloria.</div>
+                </div>
+
+                <!-- SECCIÓN OPCIONAL (VIGILIA) -->
+                <div class="liturgia-seccion-opcional-oficio" id="seccionOpcionalOficioPreview" style="display: none; margin: 24px 0;">
+                    <div class="liturgia-rubrica-invitatorio" style="color: #c00000; font-style: italic; margin-bottom: 8px;">La parte que sigue puede omitirse, si se cree oportuno.</div>
+                    <div class="liturgia-texto-lectura" id="previewTextoOpcionalOficio"></div>
                 </div>
 
                 <!-- 11. SECCIÓN DE LECTURA BREVE Y RESPONSORIO (DEBAJO DE LA SALMODIA) -->
@@ -532,25 +710,25 @@ Amén.</div>
                     <div class="liturgia-titulo-preces" id="previewTituloPreces">PRECES</div>
 
                     <!-- Texto de las Preces -->
-                    <div class="liturgia-texto-preces" id="previewTextoPreces">Proclamemos la grandeza de Cristo, lleno de gracia y del Espíritu Santo, y acudamos a él diciendo:
+                    <div class="liturgia-texto-preces" id="previewTextoPreces">Roguemos a nuestro Redentor, bautizado por Juan en el Jordán, y digámosle:
 
-Concédenos, Señor, tu Espíritu.
+Señor, ten piedad.
 
-Concédenos, Señor, un día lleno de paz, de alegría y de inocencia para que, al llegar a la noche, podamos alabarte con gozo y limpios de pecado.
+Cristo Jesús, que al manifestarte al mundo has iluminado a todos los hombres, concede luz abundante a cuantos hoy se relacionen con nosotros.
 
-Que baje hoy a nosotros tu bondad
-y haga prósperas las obras de nuestras manos.
+Cristo Jesús, que para enseñarnos un camino de humildad te humillaste recibiendo el bautismo de Juan, danos un espíritu de humilde servicio para con todos los hombres.
 
-Muéstranos tu rostro propicio y danos tu paz
-para que durante todo el día sintamos cómo tu mano nos protege.
+Cristo Jesús, que por tu bautismo nos purificaste de todo pecado y nos hiciste hijos del Padre, concede el espíritu de adopción a todos los que buscan a Dios con sinceridad.
 
-Mira con bondad a cuantos se han encomendado a nuestras oraciones y enriquécelos con toda clase de bienes.</div>
+Cristo Jesús, que en tu bautismo abriste una puerta de salvación para los cristianos y santificaste la creación entera, haz de todos nosotros ministros de tu Evangelio en el mundo.
+
+Cristo Jesús, que en tu bautismo nos revelaste a la Trinidad, renueva el espíritu de adopción y el sacerdocio real de los bautizados.</div>
 
                     <!-- Rúbrica en rojo: Se pueden añadir algunas intenciones libres -->
                     <div class="liturgia-rubrica-roja">Se pueden añadir algunas intenciones libres</div>
 
                     <!-- Conclusión al Padre Nuestro -->
-                    <div class="liturgia-intro-padrenuestro" id="previewIntroPadreNuestro">Terminemos nuestra oración con la plegaria que Cristo nos enseñó:</div>
+                    <div class="liturgia-intro-padrenuestro" id="previewIntroPadreNuestro">Gracias a Jesucristo somos hijos de Dios; por eso nos atrevemos a decir:</div>
 
                     <!-- Padre nuestro en rojo -->
                     <div class="liturgia-padrenuestro-rojo">Padre nuestro...</div>
@@ -558,7 +736,7 @@ Mira con bondad a cuantos se han encomendado a nuestras oraciones y enriquécelo
 
                 <!-- 14. SECCIÓN DE ORACIÓN (SEGÚN IMAGEN media_1789937648394.png) -->
                 <div class="liturgia-seccion-oracion" id="seccionOracionPreview">
-                    <div class="liturgia-titulo-oracion" id="previewTituloOracion">ORACION</div>
+                    <div class="liturgia-titulo-oracion" id="previewTituloOracion">ORACIÓN</div>
                     <div class="liturgia-texto-oracion" id="previewTextoOracion">Tu gracia, Señor, inspire nuestras obras, las sostenga y acompañe; para que todo nuestro trabajo brote de ti, como de su fuente, y tienda a ti, como a su fin. Por nuestro Señor Jesucristo, tu Hijo, que vive y reina contigo en la unidad del Espíritu Santo y es Dios, por los siglos de los siglos. Amén.</div>
                 </div>
 
@@ -593,6 +771,10 @@ Mira con bondad a cuantos se han encomendado a nuestras oraciones y enriquécelo
 
     <!-- Scripts de inicialización -->
     <script src="src/data/salmos.js"></script>
+    <script src="src/data/db-preces.js" type="module"></script>
+    <script src="src/data/db-oracion.js" type="module"></script>
+    <script src="src/data/db-responsorios.js" type="module"></script>
+    <script src="src/data/db-lecturas.js" type="module"></script>
     <script src="src/js/firebase-config.js" type="module"></script>
     <script src="src/js/frm_salterios.js" type="module"></script>
     <script src="src/js/navigator.js"></script>

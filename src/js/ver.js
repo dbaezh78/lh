@@ -259,10 +259,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     autor: "dbaezh78@gmail.com",
                     ultimaModificacion: new Date().toISOString()
                 };
+                const semillav3 = {
+                    id: "v_1_0_03",
+                    version: "1.0.03",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.03.\n• Nuevo módulo de Oficio de Lectura (gestión de 1ª Lectura Impar/Par y 2ª Lectura Patrística en audio y catálogo litúrgico anual).\n• Corrección de preces litúrgicas: separación de intenciones en párrafos individuales, respuesta en negrita, rúbrica roja y resolución canónica.\n• Mejoras avanzadas en reproducción de voz (TTS) para la liturgia: velocidad por defecto 1.2x, indicador de búfer al 3% en barra de progreso, seguimiento en tiempo real del progreso y script litúrgico adaptado con pausa y aviso antes de las lecturas.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav1);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav2);
-                    actualizacionesMemoria = [semillav2, semillav1];
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav3);
+                    actualizacionesMemoria = [semillav3, semillav2, semillav1];
                     renderListaActualizaciones(actualizacionesMemoria);
                     return;
                 } catch (e) {
@@ -285,6 +294,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(v2);
                     listaActualizada.unshift(v2);
+                } catch (e) {}
+            }
+
+            // Registrar automáticamente v1.0.03 si no existe
+            const tieneV3 = listaActualizada.some(d => d.version === "1.0.03" || d.id === "v_1_0_03");
+            if (!tieneV3 && window.firebaseAPI?.guardarActualizacionFirestore) {
+                const v3 = {
+                    id: "v_1_0_03",
+                    version: "1.0.03",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.03.\n• Nuevo módulo de Oficio de Lectura (gestión de 1ª Lectura Impar/Par y 2ª Lectura Patrística en audio y catálogo litúrgico anual).\n• Corrección de preces litúrgicas: separación de intenciones en párrafos individuales, respuesta en negrita, rúbrica roja y resolución canónica.\n• Mejoras avanzadas en reproducción de voz (TTS) para la liturgia: velocidad por defecto 1.2x, indicador de búfer al 3% en barra de progreso, seguimiento en tiempo real del progreso y script litúrgico adaptado con pausa y aviso antes de las lecturas.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                try {
+                    await window.firebaseAPI.guardarActualizacionFirestore(v3);
+                    listaActualizada.unshift(v3);
                 } catch (e) {}
             }
 

@@ -21,6 +21,7 @@ import {
     getDocs, 
     setDoc 
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { CATALOGO_PRECES_SEED, PrecesDB } from '../data/db-preces.js';
 
 export const COLECCION_SALTERIOS = "salterios";
 export const PREFIJO_LOCAL = "lh_salterio_";
@@ -386,24 +387,75 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
 
     // 7. PRECES
     const precesRaw = d.preces || {};
-    const intencionesLista = Array.isArray(precesRaw.intenciones) 
+    let canonPreces = null;
+    if (typeof PrecesDB !== 'undefined' && PrecesDB.obtener) {
+        canonPreces = PrecesDB.obtener(precesRaw.id || id || d.codigo, tiempo, semana, dia, libro);
+    } else if (typeof CATALOGO_PRECES_SEED !== 'undefined') {
+        const idBuscado = (precesRaw.id || id || d.codigo || '').toLowerCase();
+        canonPreces = CATALOGO_PRECES_SEED.find(p => p.id.toLowerCase() === idBuscado || idBuscado.includes(p.id.toLowerCase()));
+    }
+
+    let introNorm = precesRaw.intro || canonPreces?.intro || (precesRaw.texto ? '' : base.preces?.intro || "Invoquemos a Cristo diciendo:");
+    let respNorm = precesRaw.respuesta || canonPreces?.respuesta || (precesRaw.texto ? '' : base.preces?.respuesta || "");
+    let intsNorm = Array.isArray(precesRaw.intenciones) && precesRaw.intenciones.length > 0 
         ? precesRaw.intenciones 
-        : [cEvanRaw.preces1, cEvanRaw.preces2].filter(Boolean);
+        : (canonPreces?.intenciones || (precesRaw.texto ? [] : (base.preces?.intenciones || [])));
+    let libreNorm = precesRaw.libre || canonPreces?.libre || base.preces?.libre || "Se pueden añadir algunas intenciones libres";
+    let conclNorm = precesRaw.concl || canonPreces?.concl || cEvanRaw.preces2 || base.preces?.concl || "Siguiendo las enseñanzas de Cristo, digamos al Padre celestial:";
+
+    // Detección estricta de preces corruptas (intro aglutinado con intenciones, respuesta fallback ajena o intenciones genéricas de relleno)
+    const introEsMuyLargo = Boolean(introNorm && (introNorm.length > 110 || introNorm.includes('Cristo Jesús, que')));
+    const respuestaEsFallbackAjeno = Boolean(respNorm === "Confirma, Señor, lo que has realizado en nosotros." && (dia !== 'sabado' || libro !== 'visperas'));
+    const intencionesSonFallback = Boolean(Array.isArray(intsNorm) && intsNorm.some(i => String(i).includes('dígnate sostener nuestra fe')));
+
+    if (canonPreces && (introEsMuyLargo || respuestaEsFallbackAjeno || intencionesSonFallback || intsNorm.length <= 1)) {
+        introNorm = canonPreces.intro;
+        respNorm = canonPreces.respuesta;
+        intsNorm = [...canonPreces.intenciones];
+        libreNorm = canonPreces.libre || "Se pueden añadir algunas intenciones libres";
+        conclNorm = canonPreces.concl || cEvanRaw.preces2 || "Gracias a Jesucristo somos hijos de Dios; por eso nos atrevemos a decir:";
+    } else {
+        // Si no hay canónico pero introNorm vino como texto agrupado sin desglosar
+        const textoOrigen = (cEvanRaw.preces1 && (!intsNorm || intsNorm.length === 0)) ? cEvanRaw.preces1 : (precesRaw.textoCompleto || precesRaw.texto || '');
+        if (textoOrigen && (!intsNorm || intsNorm.length === 0)) {
+            const bloques = textoOrigen.split(/\r?\n\s*\r?\n/).map(b => b.trim()).filter(Boolean);
+            if (bloques.length >= 3) {
+                introNorm = bloques[0];
+                respNorm = bloques[1];
+                intsNorm = bloques.slice(2);
+            } else if (bloques.length === 2) {
+                introNorm = bloques[0];
+                respNorm = bloques[1];
+            }
+        }
+    }
+
+    const textoCompletoNorm = canonPreces?.textoCompleto || precesRaw.textoCompleto || `${introNorm}\n\n${respNorm}\n\n${intsNorm.join('\n\n')}`;
 
     const precesNorm = {
-        intro: precesRaw.intro || base.preces?.intro || "Invoquemos a Cristo diciendo:",
-        respuesta: precesRaw.respuesta || base.preces?.respuesta || "Confirma, Señor, lo que has realizado en nosotros.",
-        intenciones: intencionesLista.length > 0 ? intencionesLista : (base.preces?.intenciones || [
-            "Señor Jesucristo, consuelo de los humildes, dígnate sostenernos con tu gracia.",
-            "Aparta de nosotros el mal y condúcenos por la senda de tu paz."
-        ]),
-        libre: precesRaw.libre || "Se pueden añadir algunas intenciones libres",
-        concl: precesRaw.concl || base.preces?.concl || "Siguiendo las enseñanzas de Cristo, digamos al Padre celestial:"
+        id: canonPreces?.id || precesRaw.id || base.preces?.id || null,
+        varName: canonPreces?.varName || precesRaw.varName || base.preces?.varName || null,
+        titulo: canonPreces?.titulo || precesRaw.titulo || base.preces?.titulo || "PRECES",
+        intro: introNorm,
+        respuesta: respNorm,
+        intenciones: intsNorm,
+        libre: libreNorm,
+        concl: conclNorm,
+        texto: textoCompletoNorm,
+        textoCompleto: textoCompletoNorm
     };
 
     // 8. ORACIÓN Y CONCLUSIÓN
-    const oracionTexto = d.oracion?.texto || d.oracion || cEvanRaw.oracion || base.oracion?.texto || "Dios todopoderoso y eterno, que nos has concedido llegar al inicio de este día, danos tu ayuda para que no caigamos en pecado. Por Jesucristo nuestro Señor. Amén.";
-    const oracionNorm = { texto: oracionTexto };
+    const oracionRaw = d.oracion || {};
+    const oracionTexto = (typeof oracionRaw === 'string' ? oracionRaw : oracionRaw.texto) || cEvanRaw.oracion || base.oracion?.texto || "Dios todopoderoso y eterno, que nos has concedido llegar al inicio de este día, danos tu ayuda para que no caigamos en pecado. Por Jesucristo nuestro Señor. Amén.";
+    const oracionNorm = {
+        id: (typeof oracionRaw === 'object' ? oracionRaw.id : null) || base.oracion?.id || null,
+        varName: (typeof oracionRaw === 'object' ? oracionRaw.varName : null) || base.oracion?.varName || null,
+        titulo: (typeof oracionRaw === 'object' ? oracionRaw.titulo : null) || base.oracion?.titulo || "ORACIÓN",
+        texto: oracionTexto,
+        textoCompleto: (typeof oracionRaw === 'object' ? oracionRaw.textoCompleto : null) || oracionTexto,
+        conclusion: (typeof oracionRaw === 'object' ? oracionRaw.conclusion : null) || base.oracion?.conclusion || null
+    };
 
     const conclusionNorm = {
         v: d.conclusion?.v || cEvanRaw.Conclusion1 || base.conclusion?.v || "El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.",
@@ -499,8 +551,8 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
             cEvangelicoAnt: canticoEvangelicoNorm.antifona,
             canticoZacariast: canticoEvangelicoNorm.titulo,
             canticoZacarias: canticoEvangelicoNorm.texto,
-            preces1: precesNorm.intenciones[0] || "",
-            preces2: precesNorm.intenciones.slice(1).join('\n') || "",
+            preces1: precesNorm.textoCompleto || precesNorm.texto || precesNorm.intenciones.join('\n\n'),
+            preces2: precesNorm.concl || "",
             Padren: "Padre nuestro...",
             oracion: oracionNorm.texto,
             Conclusion1: conclusionNorm.v,
@@ -630,16 +682,34 @@ Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`
             titulo: 'Cántico de Zacarías Lc 1, 68-79',
             texto: 'Bendito sea el Señor, Dios de Israel, porque ha visitado y redimido a su pueblo...'
         },
-        preces: {
-            intro: 'Invoquemos a Cristo nuestro Señor:',
-            respuesta: 'Confirma, Señor, lo que has realizado en nosotros.',
-            intenciones: [
-                'Señor Jesucristo, dígnate sostener nuestra fe en este nuevo día.',
-                'Acompaña con tu bendición nuestras palabras y acciones.'
-            ],
-            libre: 'Se pueden añadir algunas intenciones libres',
-            concl: 'Concluyamos nuestra oración diciendo las palabras de Cristo:'
-        },
+        preces: (() => {
+            const canonP = (typeof PrecesDB !== 'undefined' && PrecesDB.obtener)
+                ? (PrecesDB.obtener(null, tiempo, semana, dia, libro) || PrecesDB.obtenerRecomendada(tiempo, semana, dia, libro))
+                : null;
+            if (canonP) {
+                return {
+                    id: canonP.id || canonP.varName,
+                    varName: canonP.varName || canonP.id,
+                    titulo: canonP.titulo || 'PRECES',
+                    intro: canonP.intro,
+                    respuesta: canonP.respuesta,
+                    intenciones: Array.isArray(canonP.intenciones) ? [...canonP.intenciones] : [canonP.intenciones],
+                    libre: canonP.libre || 'Se pueden añadir algunas intenciones libres',
+                    concl: canonP.concl,
+                    textoCompleto: canonP.textoCompleto
+                };
+            }
+            return {
+                intro: 'Invoquemos a Cristo nuestro Señor:',
+                respuesta: 'Señor, ten piedad.',
+                intenciones: [
+                    'Señor Jesucristo, dígnate sostener nuestra fe en este nuevo día.',
+                    'Acompaña con tu bendición nuestras palabras y acciones.'
+                ],
+                libre: 'Se pueden añadir algunas intenciones libres',
+                concl: 'Concluyamos nuestra oración diciendo las palabras de Cristo:'
+            };
+        })(),
         oracion: {
             texto: 'Dios todopoderoso y eterno, guía nuestras acciones según tu santa voluntad. Por Jesucristo nuestro Señor. Amén.'
         },

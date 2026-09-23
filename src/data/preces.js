@@ -32,8 +32,8 @@ Cristo Jesús, que en tu bautismo nos revelaste a la Trinidad, renueva el espír
 const bautismoLA_preces2 = "Gracias a Jesucristo somos hijos de Dios; por eso nos atrevemos a decir:"
 
 
-const tos1LAdo_preces1 = ``
-const tos1LAdo_preces2 = ""
+const tos1LAdo_preces1 = bautismoLA_preces1;
+const tos1LAdo_preces2 = bautismoLA_preces2;
 
 
 

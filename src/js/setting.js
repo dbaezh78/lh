@@ -935,7 +935,7 @@ window.cambioEnExpandir = false;
                     label: 'Velocidad de Lectura',
                     tipo: 'range',
                     storageKey: 'pref-tts-rate',
-                    default: '1.0',
+                    default: '1.3',
                     min: 0.5,
                     max: 2.0,
                     step: 0.1,
@@ -1272,8 +1272,8 @@ window.cambioEnExpandir = false;
 
         if (encontrada) utter.voice = encontrada;
 
-        const rateGuardado = parseFloat(localStorage.getItem('pref-tts-rate') || '1.0');
-        utter.rate = (!isNaN(rateGuardado) && rateGuardado >= 0.5 && rateGuardado <= 2.0) ? rateGuardado : 1.0;
+        const rateGuardado = parseFloat(localStorage.getItem('pref-tts-rate') || '1.3');
+        utter.rate = (!isNaN(rateGuardado) && rateGuardado >= 0.5 && rateGuardado <= 2.0) ? rateGuardado : 1.3;
 
         window.speechSynthesis.speak(utter);
     };

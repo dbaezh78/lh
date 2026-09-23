@@ -43,11 +43,11 @@
             <span class="material-symbols-outlined" style="color: #d01212;">graphic_eq</span>
             Cinta de Navegación y Audio Litúrgico
         </h2>
-        <p>Esta cinta superior proporciona acceso simultáneo a:</p>
+        <p>Esta cinta superior fija proporciona acceso simultáneo a:</p>
         <ul>
-            <li><strong>Lado Izquierdo:</strong> Reproductor del Evangelio del Día con barra de desplazamiento y tiempos.</li>
-            <li><strong>Centro:</strong> Selector rápido de horas litúrgicas (Oficio, Laudes, Tercia, Sexta, Nona, Vísperas, Completas) con etiqueta del tiempo litúrgico actual.</li>
-            <li><strong>Lado Derecho:</strong> Reproductor del Libro/Hora actual que se está rezando.</li>
+            <li><strong>Bloque 1:</strong> Tiempo litúrgico interactivo (oculta/muestra el reproductor al tocarlo), semana y día, controles de zoom de texto (10px a 30px) y menú desplegable desde el icono de iglesia.</li>
+            <li><strong>Icono de Iglesia:</strong> Selector de 4 fuentes de audio: Evangelio (Blanco/Negro), Liturgia de las Horas (Azul/Blanco), 1ª Lectura del Oficio (Verde/Blanco) y 2ª Lectura (Rojo/Blanco).</li>
+            <li><strong>Bloque 2:</strong> Reproductor con botón dinámico, barra de horas litúrgicas compactas y barra de progreso con scrubber amarillo litúrgico y tiempos de reproducción.</li>
         </ul>
         <div style="margin-top: 24px; display: flex; gap: 12px;">
             <a href="salterios.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px; text-decoration: none; background: #d01212; color: #fff;">
@@ -71,13 +71,22 @@
         document.addEventListener('DOMContentLoaded', () => {
             const cinta = new CintaLiturgica('cinta-container', {
                 tiempo: 'Tiempo Ordinario',
-                semana: 24,
-                dia: 'Sábado',
+                semana: 25,
+                dia: 'Lunes',
                 libro: 'laudes'
             });
 
-            cinta.cargarEvangelio('https://ev.resucito.do/to/24/sabado.mp3', 'Lc 10, 17-24');
-            cinta.cargarAudioLibro('https://to.resucito.do/s24/sabado/laudes.mp3', 'Laudes');
+            // Ejemplo de audio predeterminado para los 4 modos
+            cinta.cargarAudios({
+                evangelio: 'https://ev.resucito.do/to/25/lunes.mp3',
+                subEvangelio: 'Lunes',
+                hora: 'https://to.resucito.do/s25/lunes/laudes.mp3',
+                subHora: 'Rezo de Laudes',
+                lectura1: 'https://to.resucito.do/s25/lunes/lectura2.mp3',
+                subLectura1: 'Año Par',
+                lectura2: 'https://to.resucito.do/s25/lunes/lecturas.mp3',
+                subLectura2: 'Lectura patrística'
+            });
         });
     </script>
 </body>

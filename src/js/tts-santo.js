@@ -65,9 +65,9 @@ export function obtenerVozConfigurada() {
  * Obtiene la velocidad configurada por el usuario en Ajustes (entre 0.5 y 2.0)
  */
 export function obtenerRateConfigurado() {
-    if (typeof window === 'undefined') return 1.0;
-    const rateGuardado = parseFloat(localStorage.getItem('pref-tts-rate') || '1.0');
-    return (!isNaN(rateGuardado) && rateGuardado >= 0.5 && rateGuardado <= 2.0) ? rateGuardado : 1.0;
+    if (typeof window === 'undefined') return 1.3;
+    const rateGuardado = parseFloat(localStorage.getItem('pref-tts-rate') || '1.3');
+    return (!isNaN(rateGuardado) && rateGuardado >= 0.5 && rateGuardado <= 2.0) ? rateGuardado : 1.3;
 }
 
 /**

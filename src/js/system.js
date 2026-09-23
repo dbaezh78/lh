@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const textareaCodigo = document.getElementById("textarea-codigo-orden");
     const toastEl = document.getElementById("toast-notificacion");
 
-    const appVer = window.APP_VERSION || "1.0.02";
+    const appVer = window.APP_VERSION || "1.0.03";
     if (statVersion) statVersion.textContent = `v${appVer}`;
 
     let listaArchivos = [];
@@ -65,7 +65,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         { id: "ver", nombre: "Versión de la aplicación", icono: "history_edu", ruta: "src/html/ver.html", css: "src/css/ver.css", js: "src/js/ver.js", fecha: "2026-09-16 17:16:09", version: appVer, categoria: "gestion" },
         { id: "visperas", nombre: "Visperas", icono: "nights_stay", ruta: "src/html/visperas.html", css: "src/css/visperas.css", js: "src/js/visperas.js", fecha: "2026-09-11 14:22:51", version: appVer, categoria: "oracion" },
         { id: "ipaddr", nombre: "Registro de IPs", icono: "lan", ruta: "src/html/ipaddr.html", css: "src/css/ipaddr.css", js: "src/js/ipaddr.js", fecha: "2026-09-17 11:45:00", version: appVer, categoria: "gestion" },
-        { id: "chat", nombre: "Asistencia y Chat", icono: "forum", ruta: "src/html/chat.html", css: "src/css/chat.css", js: "src/js/chat.js", fecha: "2026-09-18 15:30:00", version: appVer, categoria: "gestion" }
+        { id: "chat", nombre: "Asistencia y Chat", icono: "forum", ruta: "src/html/chat.html", css: "src/css/chat.css", js: "src/js/chat.js", fecha: "2026-09-18 15:30:00", version: appVer, categoria: "gestion" },
+        { id: "salterios", nombre: "Salterios", icono: "menu_book", ruta: "salterios.html", css: "src/css/salterios.css", js: "src/js/salterios.js", fecha: "2026-09-19 00:30:00", version: appVer, categoria: "oracion" },
+        { id: "antifonas", nombre: "Gestor de Antífonas", icono: "auto_stories", ruta: "antifonas.html", css: "src/css/antifonas.css", js: "src/js/antifonas-manager.js", fecha: "2026-09-19 00:30:00", version: appVer, categoria: "gestion" },
+        { id: "cinta", nombre: "Cinta de Audio", icono: "graphic_eq", ruta: "cinta.html", css: "src/css/cinta.css", js: "src/js/cinta.js", fecha: "2026-09-19 00:30:00", version: appVer, categoria: "oracion" },
+        { id: "frm_salterios", nombre: "Constructor de Salterios", icono: "tune", ruta: "frm_salterios.html", css: "src/css/frm_salterios.css", js: "src/js/frm_salterios.js", fecha: "2026-09-23 07:00:00", version: appVer, categoria: "gestion" },
+        { id: "salmos", nombre: "Gestor de Salmos", icono: "library_books", ruta: "salmos.html", css: "src/css/salmos.css", js: "src/js/salmos-manager.js", fecha: "2026-09-20 00:00:00", version: appVer, categoria: "gestion" },
+        { id: "himno", nombre: "Gestor de Himnos", icono: "music_note", ruta: "himno.html", css: "src/css/himnos.css", js: "src/js/himnos-manager.js", fecha: "2026-09-21 00:00:00", version: appVer, categoria: "gestion" },
+        { id: "lecturabreve", nombre: "Gestor de Lectura Breve", icono: "menu_book", ruta: "lecturabreve.html", css: "src/css/lecturabreve.css", js: "src/js/lecturabreve-manager.js", fecha: "2026-09-22 00:00:00", version: appVer, categoria: "gestion" },
+        { id: "preces", nombre: "Gestor de Preces", icono: "volunteer_activism", ruta: "preces.html", css: "src/css/preces.css", js: "src/js/preces-manager.js", fecha: "2026-09-23 07:00:00", version: appVer, categoria: "gestion" },
+        { id: "oracion", nombre: "Gestor de Oraciones", icono: "church", ruta: "oracion.html", css: "src/css/oracion.css", js: "src/js/oracion-manager.js", fecha: "2026-09-23 07:50:00", version: appVer, categoria: "gestion" }
     ];
 
     // Resuelve la URL de un recurso con respecto a la raíz del repositorio

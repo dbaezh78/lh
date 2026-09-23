@@ -30,7 +30,7 @@
     // 3. Crear el HTML de la navegación 
     // Añadimos 'style="visibility: hidden"' para evitar el parpadeo sin estilos
 // 3. Crear el HTML de la navegación 
-    window.APP_VERSION = '1.0.02';
+    window.APP_VERSION = '1.0.03';
     const appVersion = window.APP_VERSION;
 
     // Función universal para mostrar ventana modal de archivos actualizándose
@@ -425,6 +425,10 @@
                         <a href="/src/html/himno.html"><span class="material-symbols-outlined">music_note</span> Himnos</a>
                         <a href="/src/html/lecturabreve.html"><span class="material-symbols-outlined">auto_stories</span> Lectura Breve</a>
                         <a href="/antifonas.html"><span class="material-symbols-outlined">auto_stories</span> Antífonas</a>
+                        <a href="/preces.html"><span class="material-symbols-outlined">volunteer_activism</span> Preces</a>
+                        <a href="/oracion.html"><span class="material-symbols-outlined">church</span> Oración</a>
+                        <a href="/responsorio.html"><span class="material-symbols-outlined">church</span> Responsorios</a>
+                        <a href="/lectura.html"><span class="material-symbols-outlined">import_contacts</span> Lecturas Oficio</a>
                         <a href="/src/html/form_etiempo.html"><span class="material-symbols-outlined">edit_calendar</span> Cambio litúrgico</a>
                         <a href="/src/html/santo.html"><span class="material-symbols-outlined">calendar_today</span> Santo</a>
                         <a href="/src/html/nombresanto.html"><span class="material-symbols-outlined">person_add</span> Nombre Santo</a>
@@ -437,6 +441,7 @@
                     <div class="nav-submenu" id="nav-submenu-resucito">
                         <a href="/salterios.html"><span class="material-symbols-outlined">menu_book</span> Salterios</a>
                         <a href="/cinta.html"><span class="material-symbols-outlined">graphic_eq</span> Cinta de Audio</a>
+                        <a href="/oficiodelectura.html"><span class="material-symbols-outlined">auto_stories</span> Oficio de Lectura</a>
                         <a href="/src/html/añoliturgico.html"><span class="material-symbols-outlined">calendar_month</span> Año Liturgico</a>
                         <a href="/src/html/datos.html"><span class="material-symbols-outlined">dataset</span> Datos y Años</a>
                         <a href="/src/html/chat.html"><span class="material-symbols-outlined">forum</span> Asistencia y Chat</a>
@@ -772,7 +777,40 @@
             }
         });
 
-        // 2. Guardián de la página actual
+        // 2. Controlar y filtrar enlaces del submenú Formularios
+        const btnNavFormularios = document.getElementById('btn-nav-formularios');
+        const puedeVerFormularios = window.hasPermission('page_formulario');
+        const enlacesFormularios = document.querySelectorAll('#nav-submenu-formularios a');
+        let algunFormularioVisible = false;
+
+        enlacesFormularios.forEach(a => {
+            const href = a.getAttribute('href') || '';
+            let perm = null;
+            if (href.includes('frm_salterios.html')) perm = 'page_frm_salterios';
+            else if (href.includes('salmos.html')) perm = 'page_frm_salmos';
+            else if (href.includes('himno.html')) perm = 'page_frm_himnos';
+            else if (href.includes('lecturabreve.html')) perm = 'page_frm_lecturabreve';
+            else if (href.includes('antifonas.html')) perm = 'page_frm_antifonas';
+            else if (href.includes('preces.html')) perm = 'page_frm_preces';
+            else if (href.includes('oracion.html')) perm = 'page_frm_oracion';
+            else if (href.includes('responsorio.html')) perm = 'page_frm_responsorio';
+            else if (href.includes('lectura.html')) perm = 'page_frm_lectura';
+            else if (href.includes('form_etiempo.html')) perm = 'page_cambio_liturgico';
+            else if (href.includes('santo.html')) perm = 'page_santos_iglesia';
+            else if (href.includes('nombresanto.html')) perm = 'page_registro_santo';
+
+            if (perm) {
+                const tienePermiso = window.hasPermission(perm);
+                a.style.display = tienePermiso ? 'flex' : 'none';
+                if (tienePermiso) algunFormularioVisible = true;
+            }
+        });
+
+        if (btnNavFormularios) {
+            btnNavFormularios.style.display = (puedeVerFormularios || algunFormularioVisible) ? 'inline-flex' : 'none';
+        }
+
+        // 3. Guardián de la página actual
         verificarAccesoPaginaActual();
     };
 
@@ -791,7 +829,34 @@
         let requiredPerm = null;
         let pageTitle = "";
 
-        if (path.includes("form_etiempo.html")) {
+        if (path.includes("frm_salterios.html")) {
+            requiredPerm = "page_frm_salterios";
+            pageTitle = "Formulario Salterios";
+        } else if (path.includes("salmos.html")) {
+            requiredPerm = "page_frm_salmos";
+            pageTitle = "Salmos";
+        } else if (path.includes("himno.html")) {
+            requiredPerm = "page_frm_himnos";
+            pageTitle = "Himnos";
+        } else if (path.includes("lecturabreve.html")) {
+            requiredPerm = "page_frm_lecturabreve";
+            pageTitle = "Lectura Breve";
+        } else if (path.includes("antifonas.html")) {
+            requiredPerm = "page_frm_antifonas";
+            pageTitle = "Antífonas";
+        } else if (path.includes("preces.html")) {
+            requiredPerm = "page_frm_preces";
+            pageTitle = "Preces";
+        } else if (path.includes("oracion.html")) {
+            requiredPerm = "page_frm_oracion";
+            pageTitle = "Oración";
+        } else if (path.includes("responsorio.html")) {
+            requiredPerm = "page_frm_responsorio";
+            pageTitle = "Responsorios";
+        } else if (path.includes("lectura.html") && !path.includes("lecturabreve") && !path.includes("oficiodelectura")) {
+            requiredPerm = "page_frm_lectura";
+            pageTitle = "Lecturas de Oficio";
+        } else if (path.includes("form_etiempo.html")) {
             requiredPerm = "page_cambio_liturgico";
             pageTitle = "Cambio Litúrgico";
         } else if (path.includes("añoliturgico.html") || path.includes("a%c3%b1oliturgico.html")) {
@@ -809,6 +874,12 @@
         } else if (path.includes("chat.html")) {
             requiredPerm = "page_chat";
             pageTitle = "Asistencia y Chat";
+        } else if (path.includes("system.html")) {
+            requiredPerm = "page_system";
+            pageTitle = "Archivos del Sistema";
+        } else if (path.includes("ver.html")) {
+            requiredPerm = "page_ver";
+            pageTitle = "Actualizaciones";
         }
 
         if (requiredPerm) {
