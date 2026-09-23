@@ -513,12 +513,46 @@ function vincularEventos() {
                     const panelHoras = contenedor.querySelector('.semana-horas-panel');
                     const botonesSemanas = contenedor.querySelectorAll('.btn-sub-semana');
 
+                    const DIAS_SEMANA_LITURGICA = [
+                        { inicial: 'D', dia: 'domingo', cod: 'do', nombre: 'Domingo' },
+                        { inicial: 'L', dia: 'lunes', cod: 'lu', nombre: 'Lunes' },
+                        { inicial: 'M', dia: 'martes', cod: 'ma', nombre: 'Martes' },
+                        { inicial: 'M', dia: 'miercoles', cod: 'mi', nombre: 'Miércoles' },
+                        { inicial: 'J', dia: 'jueves', cod: 'ju', nombre: 'Jueves' },
+                        { inicial: 'V', dia: 'viernes', cod: 'vi', nombre: 'Viernes' },
+                        { inicial: 'S', dia: 'sabado', cod: 'sa', nombre: 'Sábado' }
+                    ];
+
+                    const generarGridHoras = (t, s, dSlug, dCod) => {
+                        const semPad = String(s).padStart(2, '0');
+                        const mapT = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'san' };
+                        const tCode = mapT[t] || 'to';
+
+                        const horasConfig = [
+                            { id: 'oficio', label: 'Oficio de Lectura', icon: 'menu_book', docId: `${tCode}s${semPad}of${dCod}` },
+                            { id: 'laudes', label: 'Laudes', icon: 'wb_twilight', docId: `${tCode}s${semPad}la${dCod}` },
+                            { id: 'tercia', label: 'Tercia', icon: 'schedule', docId: `${tCode}s${semPad}te${dCod}` },
+                            { id: 'sexta', label: 'Sexta', icon: 'light_mode', docId: `${tCode}s${semPad}se${dCod}` },
+                            { id: 'nona', label: 'Nona', icon: 'wb_sunny', docId: `${tCode}s${semPad}no${dCod}` },
+                            { id: 'visperas', label: 'Vísperas', icon: 'wb_twilight', docId: `${tCode}s${semPad}vi${dCod}` },
+                            { id: 'completas', label: 'Completas', icon: 'bedtime', docId: `${tCode}s${semPad}co${dCod}` }
+                        ];
+
+                        return horasConfig.map(h => {
+                            const url = `salterios.html?tiempo=${t}&semana=${s}&dia=${dSlug}&libro=${h.id}&hora=${h.id}&id=${h.docId}`;
+                            return `
+                                <a href="${url}" class="btn-semana-hora">
+                                    <span class="material-symbols-outlined">${h.icon}</span>
+                                    <span>${h.label}</span>
+                                </a>
+                            `;
+                        }).join('');
+                    };
+
                     botonesSemanas.forEach((bSemana, index) => {
                         bSemana.addEventListener('click', (e) => {
                             e.preventDefault();
                             const numSem = bSemana.getAttribute('data-semana');
-                            const pref = bSemana.getAttribute('data-prefijo');
-                            const targetId = `${pref}${numSem}lalu`;
 
                             // Si ya está activo, ocultar panel
                             if (bSemana.classList.contains('activo')) {
@@ -538,40 +572,38 @@ function vincularEventos() {
                             const botonFinFila = botonesSemanas[finFilaIndex];
                             botonFinFila.after(panelHoras);
 
-                            // Generar las 7 horas para esa semana con el color litúrgico
-                            panelHoras.innerHTML = `
-                                <div class="semana-horas-panel-header">Semana ${numSem} — Horas Litúrgicas</div>
-                                <div class="semana-horas-grid">
-                                    <a href="src/html/oficio.html?oficio=${targetId}" class="btn-semana-hora">
-                                        <span class="material-symbols-outlined">menu_book</span>
-                                        <span>Oficio de Lectura</span>
-                                    </a>
-                                    <a href="src/html/laudes.html?laudes=${targetId}" class="btn-semana-hora">
-                                        <span class="material-symbols-outlined">wb_twilight</span>
-                                        <span>Laudes</span>
-                                    </a>
-                                    <a href="src/html/tercia.html?tercia=${targetId}" class="btn-semana-hora">
-                                        <span class="material-symbols-outlined">schedule</span>
-                                        <span>Tercia</span>
-                                    </a>
-                                    <a href="src/html/sexta.html?sexta=${targetId}" class="btn-semana-hora">
-                                        <span class="material-symbols-outlined">light_mode</span>
-                                        <span>Sexta</span>
-                                    </a>
-                                    <a href="src/html/nona.html?nona=${targetId}" class="btn-semana-hora">
-                                        <span class="material-symbols-outlined">wb_sunny</span>
-                                        <span>Nona</span>
-                                    </a>
-                                    <a href="src/html/visperas.html?visperas=${targetId}" class="btn-semana-hora">
-                                        <span class="material-symbols-outlined">wb_twilight</span>
-                                        <span>Vísperas</span>
-                                    </a>
-                                    <a href="src/html/completas.html?completas=${targetId}" class="btn-semana-hora">
-                                        <span class="material-symbols-outlined">bedtime</span>
-                                        <span>Completas</span>
-                                    </a>
-                                </div>
-                            `;
+                            // Renderizar panel con selector de días D, L, M, M, J, V, S y horas
+                            let diaActivo = 'domingo';
+                            let codActivo = 'do';
+
+                            const actualizarPanel = (dSel, cSel) => {
+                                diaActivo = dSel;
+                                codActivo = cSel;
+                                panelHoras.innerHTML = `
+                                    <div class="semana-horas-panel-header">Semana ${numSem} — Horas Litúrgicas</div>
+                                    <div class="semana-dias-selector">
+                                        ${DIAS_SEMANA_LITURGICA.map(d => `
+                                            <button type="button" class="btn-semana-dia ${d.dia === diaActivo ? 'activo' : ''}" data-dia="${d.dia}" data-cod="${d.cod}" title="${d.nombre}">
+                                                ${d.inicial}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                    <div class="semana-horas-grid">
+                                        ${generarGridHoras(tiempo, numSem, diaActivo, codActivo)}
+                                    </div>
+                                `;
+
+                                panelHoras.querySelectorAll('.btn-semana-dia').forEach(bDia => {
+                                    bDia.addEventListener('click', (ev) => {
+                                        ev.preventDefault();
+                                        const nuevoDia = bDia.getAttribute('data-dia');
+                                        const nuevoCod = bDia.getAttribute('data-cod');
+                                        actualizarPanel(nuevoDia, nuevoCod);
+                                    });
+                                });
+                            };
+
+                            actualizarPanel(diaActivo, codActivo);
                             panelHoras.style.display = 'flex';
                         });
                     });
@@ -586,7 +618,7 @@ function vincularEventos() {
                     let htmlSolem = '<div class="sub-acordeon-v">';
                     config.items.forEach(s => {
                         htmlSolem += `
-                            <a href="src/html/laudes.html?laudes=${s.id}" class="btn-sub-solem">
+                            <a href="salterios.html?libro=laudes&id=${s.id}" class="btn-sub-solem">
                                 <span class="material-symbols-outlined">auto_awesome</span>
                                 <span>${s.nombre}</span>
                             </a>

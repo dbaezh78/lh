@@ -313,6 +313,44 @@ body.portada-body {
     letter-spacing: 0.05em;
 }
 
+/* Selector de Días de la Semana (D, L, M, M, J, V, S) */
+.semana-dias-selector {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin: 4px 0 8px;
+}
+
+.btn-semana-dia {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    color: #333333;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.btn-semana-dia:hover {
+    background: #f0f0f0;
+    border-color: var(--color-tiempo, #2e7d32);
+    transform: translateY(-1px);
+}
+
+.btn-semana-dia.activo {
+    background: var(--color-tiempo, #2e7d32) !important;
+    color: #ffffff !important;
+    border-color: var(--color-tiempo, #2e7d32) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
 .semana-horas-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

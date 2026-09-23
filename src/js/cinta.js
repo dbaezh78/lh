@@ -277,6 +277,20 @@ export class CintaLiturgica {
         this.vincularEventos();
     }
 
+    actualizarLiturgiaInfo(tiempo, semana, dia, libro, tiempoSlug, diaSlug) {
+        this.opciones = {
+            ...this.opciones,
+            tiempo: tiempo || this.opciones.tiempo,
+            semana: semana !== undefined ? semana : this.opciones.semana,
+            dia: dia || this.opciones.dia,
+            libro: libro || this.opciones.libro,
+            tiempoSlug: tiempoSlug || this.opciones.tiempoSlug,
+            diaSlug: diaSlug || this.opciones.diaSlug
+        };
+        this.render();
+        this.vincularEventos();
+    }
+
     render() {
         if (!this.contenedor) return;
 
@@ -299,9 +313,18 @@ export class CintaLiturgica {
             { id: 'completas', label: 'Completas' }
         ];
 
+        const mapT = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'san' };
+        const mapD = { domingo: 'do', lunes: 'lu', martes: 'ma', miercoles: 'mi', jueves: 'ju', viernes: 'vi', sabado: 'sa' };
+        const mapH = { oficio: 'of', laudes: 'la', tercia: 'te', sexta: 'se', nona: 'no', visperas: 'vi', completas: 'co' };
+        const tCode = mapT[tiempoSlug] || 'to';
+        const dCode = mapD[diaSlug] || 'do';
+        const semPad = String(semana).padStart(2, '0');
+
         const horaBtnsHtml = horas.map(h => {
             const activo = (libro.toLowerCase() === h.id.toLowerCase()) ? 'activo' : '';
-            const href = `?tiempo=${tiempoSlug}&semana=${semana}&dia=${diaSlug}&libro=${h.id}&hora=${h.id}`;
+            const hCode = mapH[h.id] || 'la';
+            const docId = (h.id === 'oficio') ? `${tCode}s${semPad}of${dCode}` : `${tCode}s${semPad}${dCode}${hCode}`;
+            const href = `?tiempo=${tiempoSlug}&semana=${semana}&dia=${diaSlug}&libro=${h.id}&hora=${h.id}&id=${docId}`;
             return `<a href="${href}" class="cinta-btn-hora ${activo}" data-libro="${h.id}">${h.label}</a>`;
         }).join('');
 

@@ -164,14 +164,29 @@ function obtenerParametrosUrl() {
         }
     }
 
+    const t = p.get('tiempo') || 'ordinario';
+    const s = p.get('semana') ? parseInt(p.get('semana'), 10) : 24;
+    const d = p.get('dia') || 'sabado';
+    const lib = (horaParam || 'laudes').toLowerCase();
+
+    // Auto-generar el código canónico id (ej: tos01ofdo o tos24lasa)
+    const mapT = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'san' };
+    const mapD = { domingo: 'do', lunes: 'lu', martes: 'ma', miercoles: 'mi', jueves: 'ju', viernes: 'vi', sabado: 'sa' };
+    const mapH = { oficio: 'of', laudes: 'la', tercia: 'te', sexta: 'se', nona: 'no', visperas: 'vi', completas: 'co' };
+    const tCode = mapT[t] || 'to';
+    const dCode = mapD[d] || 'do';
+    const hCode = mapH[lib] || 'la';
+    const semPad = String(s).padStart(2, '0');
+    const codigoGenerado = (lib === 'oficio') ? `${tCode}s${semPad}of${dCode}` : `${tCode}s${semPad}${dCode}${hCode}`;
+
     return {
-        tiempo: p.get('tiempo') || 'ordinario',
-        semana: p.get('semana') ? parseInt(p.get('semana'), 10) : 24,
-        dia: p.get('dia') || 'sabado',
-        libro: (horaParam || 'laudes').toLowerCase(),
+        tiempo: t,
+        semana: s,
+        dia: d,
+        libro: lib,
         fecha: p.get('fecha') || null,
         santo: p.get('santo') || null,
-        codigoCompleto: null
+        codigoCompleto: codigoGenerado
     };
 }
 

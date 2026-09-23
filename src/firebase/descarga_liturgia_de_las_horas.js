@@ -762,18 +762,18 @@ export function obtenerHoraLocalSincrona(idCodigo) {
 export async function obtenerLiturgiaHora(idCodigo, params = {}, fallbackEnsamblador = null) {
     const idPrincipal = (idCodigo || params.codigoCompleto || `${params.tiempo || 'ordinario'}_s${params.semana || 24}_${params.dia || 'sabado'}_${params.libro || 'laudes'}`).toLowerCase();
     
-    // 1. PASO 1: LOCAL FIRST
+    // 1. PASO 1: LOCAL FIRST (Retorno inmediato si proviene de Firebase y tiene datos completos)
     const localDirecto = obtenerHoraLocalSincrona(idPrincipal);
-    if (localDirecto && localDirecto.salmodia?.salmo1Texto && localDirecto.himno?.texto) {
+    if (localDirecto && localDirecto.origenCarga === 'firebase' && localDirecto.salmodia?.salmo1Texto && localDirecto.himno?.texto) {
         console.log(`⚡ [Local First] Hora '${idPrincipal}' cargada localmente sin esperas.`);
         return localDirecto;
     }
 
     let datos = localDirecto || null;
-    let origen = localDirecto ? 'local' : 'desconocido';
+    let origen = localDirecto ? (localDirecto.origenCarga || 'local') : 'desconocido';
 
-    // 2. PASO 2: FIREBASE FIRESTORE (si no está local o le faltaban textos)
-    if (!datos || !datos.salmodia?.salmo1Texto) {
+    // 2. PASO 2: FIREBASE FIRESTORE (si no está verificado de Firebase o le faltaban textos)
+    if (!datos || datos.origenCarga !== 'firebase' || !datos.salmodia?.salmo1Texto) {
         const idsABuscar = obtenerIdsEquivalentes(idPrincipal);
         for (const candId of idsABuscar) {
             try {
@@ -799,9 +799,15 @@ export async function obtenerLiturgiaHora(idCodigo, params = {}, fallbackEnsambl
     const resultadoNormalizado = normalizarObjetoLiturgico(datos, idPrincipal, params, fallbackEnsamblador);
     resultadoNormalizado.origenCarga = origen === 'firebase' ? 'firebase' : (datos ? 'local' : 'canonico');
 
-    // 4. PASO 4: ALMACENAR DE INMEDIATO EN LOCAL PARA FUTURAS CONSULTAS
+    // 4. PASO 4: ALMACENAR DE INMEDIATO EN LOCAL PARA FUTURAS CONSULTAS (EN TODOS LOS EQUIVALENTES)
     try {
         localStorage.setItem(`${PREFIJO_LOCAL}${idPrincipal}`, JSON.stringify(resultadoNormalizado));
+        const equivs = obtenerIdsEquivalentes(idPrincipal);
+        equivs.forEach(eq => {
+            try {
+                localStorage.setItem(`${PREFIJO_LOCAL}${eq}`, JSON.stringify(resultadoNormalizado));
+            } catch (_) {}
+        });
         
         // Registrar en el catálogo de IDs descargados
         const catalogo = JSON.parse(localStorage.getItem('lh_catalogo_ids_descargados') || '[]');
