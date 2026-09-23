@@ -550,12 +550,12 @@ function renderizarCuerpoLiturgico(d) {
     }
 
     // 11. PADRE NUESTRO DESPLEGABLE EN TEXTO PLANO
-    const padreNuestroTexto = window.SalmosDB ? window.SalmosDB.obtenerPadreNuestro() : `Padre nuestro, que estás en el cielo,\nsantificado sea tu Nombre;\nvenga a nosotros tu reino;\nhágase tu voluntad en la tierra como en el cielo.\nDanos hoy nuestro pan de cada día;\nperdona nuestras ofensas,\ncomo también nosotros perdonamos a los que nos ofenden;\nno nos dejes caer en la tentación,\ny líbranos del mal.`;
+    const padreNuestroTexto = window.SalmosDB ? window.SalmosDB.obtenerPadreNuestro() : `Padre nuestro, que estás en el cielo,\nsantificado sea tu Nombre;\nvenga a nosotros tu reino;\nhágase tu voluntad en la tierra como en el cielo.\nDanos hoy nuestro pan de cada día;\nperdona nuestras ofensas,\ncomo también nosotros perdonamos a los que nos ofenden;\nno nos dejes caer en la tentación,\ny líbranos del mal. \nAmen`;
 
     html += `
         <div class="padre-nuestro-trigger" id="btn-padre-nuestro">
             Padre nuestro...
-            <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">expand_more</span>
+            <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; display: none;">expand_more</span>
         </div>
         <div class="padre-nuestro-expandido" id="bloque-padre-nuestro-expandido">${padreNuestroTexto}</div>
     `;
