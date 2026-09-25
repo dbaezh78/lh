@@ -22,6 +22,25 @@ let horaActualDatos = null;
 let cintaInstancia = null;
 const currentYear = new Date().getFullYear();
 
+/**
+ * Formatea el primer verso (R1) del responsorio de lectura del Oficio:
+ * Asegura la presencia del asterisco rojo (*) y el estribillo complementario (r2).
+ */
+export function formatearResponsorioR1(r1, r2) {
+    const textoR1 = (r1 || '').trim();
+    const textoR2 = (r2 || '').trim();
+    if (!textoR1 && !textoR2) return '';
+    const asteriscoHtml = '<span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; margin: 0 4px; font-size: 1.15em;">*</span>';
+    if (!textoR1) return textoR2 ? `${asteriscoHtml} ${textoR2}` : '';
+    if (textoR1.includes('*')) {
+        return textoR1.replace(/\*/g, asteriscoHtml);
+    }
+    if (textoR2) {
+        return `${textoR1} ${asteriscoHtml} ${textoR2}`;
+    }
+    return textoR1;
+}
+
 // Configuración de libros e información fija
 const LIBROS_CONFIG = {
     oficio: {
@@ -635,14 +654,14 @@ function renderizarCuerpoLiturgico(d) {
         html += `
             <div class="salterio-seccion-header">INVITATORIO</div>
             <div class="rubrica-nota">Si ésta es la primera oración del día:</div>
-            <div class="linea-vr"><span class="rubrica-vr">V.</span> Señor abre mis labios</div>
-            <div class="linea-vr"><span class="rubrica-vr">R.</span> Y mi boca proclamará tu alabanza</div>
+            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">Señor abre mis labios</span></div>
+            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">Y mi boca proclamará tu alabanza</span></div>
             <div class="rubrica-nota" style="margin-top: 8px;">Se añade el Salmo del Invitatorio con la siguiente antífona:</div>
             <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${antInv}</div>
             <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
             <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">Si antes se ha rezado ya alguna otra Hora:</div>
-            <div class="linea-vr"><span class="rubrica-vr">V.</span> Dios mío, ven en mi auxilio</div>
-            <div class="linea-vr"><span class="rubrica-vr">R.</span> Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${d.tiempo === 'pascua' ? ' Aleluya.' : ''}</div>
+            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">Dios mío, ven en mi auxilio</span></div>
+            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${d.tiempo === 'pascua' ? ' Aleluya.' : ''}</span></div>
             <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
         `;
     } else {
@@ -650,8 +669,8 @@ function renderizarCuerpoLiturgico(d) {
             html += `
                 <div class="salterio-seccion-header">INVITATORIO</div>
                 <div class="rubrica-nota">(Si esta no es la primera oración del día, se omite el Invitatorio y se inicia directamente con la Invocación inicial)</div>
-                <div class="linea-vr"><span class="rubrica-vr">V.</span> ${d.invitatorio.v}</div>
-                <div class="linea-vr"><span class="rubrica-vr">R.</span> ${d.invitatorio.r}</div>
+                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invitatorio.v}</span></div>
+                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${d.invitatorio.r}</span></div>
                 <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>
                 <div class="salmo-titulo-rubrica">${d.invitatorio.salmoTitulo}</div>
                 <div class="texto-estrofas-salmo">${d.invitatorio.salmoTexto}</div>
@@ -660,8 +679,8 @@ function renderizarCuerpoLiturgico(d) {
         } else if (d.invocacionInicial) {
             html += `
                 <div class="salterio-seccion-header">INVOCACIÓN INICIAL</div>
-                <div class="linea-vr"><span class="rubrica-vr">V.</span> ${d.invocacionInicial.v}</div>
-                <div class="linea-vr"><span class="rubrica-vr">R.</span> ${d.invocacionInicial.r}</div>
+                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invocacionInicial.v}</span></div>
+                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${d.invocacionInicial.r}</span></div>
             `;
         }
     }
@@ -713,8 +732,8 @@ function renderizarCuerpoLiturgico(d) {
     if (d.versiculo && (libroKey === 'oficio' || libroKey === 'tercia' || libroKey === 'sexta' || libroKey === 'nona')) {
         html += `
             <div style="margin: 22px 0;">
-                <div class="linea-vr"><span class="rubrica-vr">V.</span> ${d.versiculo.v}</div>
-                <div class="linea-vr"><span class="rubrica-vr">R.</span> ${d.versiculo.r}</div>
+                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.versiculo.v}</span></div>
+                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${d.versiculo.r}</span></div>
             </div>
         `;
     }
@@ -725,11 +744,11 @@ function renderizarCuerpoLiturgico(d) {
         const l1 = d.lecturasOficio.primera;
         if (l1) {
             const resp1Obj = l1.responsorio || {};
-            const r1Txt = l1.respR1 || resp1Obj.r1 || '';
-            const r1Formateado = r1Txt.replace(/\*/g, '<span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; font-size: 1.25rem;">*</span>');
+            const r1Raw = l1.respR1 || resp1Obj.r1 || '';
             const v1Txt = l1.respV || resp1Obj.v || '';
             const r2Txt = l1.respR2 || resp1Obj.r2 || '';
             const citaResp1 = l1.respCita || resp1Obj.ref || '';
+            const r1Formateado = formatearResponsorioR1(r1Raw, r2Txt);
 
             html += `
                 <div class="lectura-oficio-contenedor" style="margin-top: 26px;">
@@ -737,14 +756,14 @@ function renderizarCuerpoLiturgico(d) {
                     <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000;">${l1.cita || ''}</div>
                     <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l1.descripcion || l1.subtitulo || ''}</div>
                     <div class="texto-lectura-justificado" style="white-space: pre-line;">${l1.texto || ''}</div>
-                    ${r1Txt ? `
+                    ${(r1Raw || r2Txt) ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
                             <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.05rem; margin-bottom: 8px;">
                                 RESPONSORIO <span style="font-weight: normal; font-size: 0.9rem; color: #555555; margin-left: 8px;">${citaResp1}</span>
                             </div>
-                            <div class="linea-vr"><span class="rubrica-vr">R.</span> ${r1Formateado}</div>
-                            <div class="linea-vr"><span class="rubrica-vr">V.</span> ${v1Txt}</div>
-                            <div class="linea-vr"><span class="rubrica-vr">R.</span> ${r2Txt}</div>
+                            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${r1Formateado}</span></div>
+                            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${v1Txt}</span></div>
+                            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${r2Txt}</span></div>
                         </div>
                     ` : ''}
                 </div>
@@ -755,11 +774,11 @@ function renderizarCuerpoLiturgico(d) {
         const l2 = d.lecturasOficio.segunda;
         if (l2) {
             const resp2Obj = l2.responsorio || {};
-            const r1Txt2 = l2.respR1 || resp2Obj.r1 || '';
-            const r1Formateado2 = r1Txt2.replace(/\*/g, '<span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; font-size: 1.25rem;">*</span>');
+            const r1Raw2 = l2.respR1 || resp2Obj.r1 || '';
             const v2Txt = l2.respV || resp2Obj.v || '';
             const r2Txt2 = l2.respR2 || resp2Obj.r2 || '';
             const citaResp2 = l2.respCita || resp2Obj.ref || '';
+            const r1Formateado2 = formatearResponsorioR1(r1Raw2, r2Txt2);
 
             html += `
                 <div class="lectura-oficio-contenedor" style="margin-top: 28px;">
@@ -767,14 +786,14 @@ function renderizarCuerpoLiturgico(d) {
                     <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000;">${l2.cita || ''}</div>
                     <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l2.descripcion || l2.subtitulo || ''}</div>
                     <div class="texto-lectura-justificado" style="white-space: pre-line;">${l2.texto || ''}</div>
-                    ${r1Txt2 ? `
+                    ${(r1Raw2 || r2Txt2) ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
                             <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.05rem; margin-bottom: 8px;">
                                 RESPONSORIO <span style="font-weight: normal; font-size: 0.9rem; color: #555555; margin-left: 8px;">${citaResp2}</span>
                             </div>
-                            <div class="linea-vr"><span class="rubrica-vr">R.</span> ${r1Formateado2}</div>
-                            <div class="linea-vr"><span class="rubrica-vr">V.</span> ${v2Txt}</div>
-                            <div class="linea-vr"><span class="rubrica-vr">R.</span> ${r2Txt2}</div>
+                            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${r1Formateado2}</span></div>
+                            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${v2Txt}</span></div>
+                            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${r2Txt2}</span></div>
                         </div>
                     ` : ''}
                 </div>
@@ -838,12 +857,12 @@ Haz que seamos contados entre tus santos en la gloria eterna.`;
             html += `
                 <div class="salterio-seccion-header">RESPONSORIO BREVE</div>
                 <div class="responsorio-bloque">
-                    <div class="linea-vr"><span class="rubrica-vr">V.</span> ${rb.v1}</div>
-                    <div class="linea-vr"><span class="rubrica-vr">R.</span> ${rb.r1}</div>
-                    <div class="linea-vr"><span class="rubrica-vr">V.</span> ${rb.v2}</div>
-                    <div class="linea-vr"><span class="rubrica-vr">R.</span> ${rb.r2}</div>
-                    <div class="linea-vr"><span class="rubrica-vr">V.</span> ${rb.v3}</div>
-                    <div class="linea-vr"><span class="rubrica-vr">R.</span> ${rb.r3}</div>
+                    <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${rb.v1}</span></div>
+                    <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rb.r1}</span></div>
+                    <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${rb.v2}</span></div>
+                    <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rb.r2}</span></div>
+                    <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${rb.v3}</span></div>
+                    <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rb.r3}</span></div>
                 </div>
             `;
         }
@@ -946,8 +965,8 @@ Haz que seamos contados entre tus santos en la gloria eterna.`;
         : (d.conclusion?.r || 'Amén.');
     html += `
         <div class="salterio-seccion-header">CONCLUSIÓN</div>
-        <div class="linea-vr"><span class="rubrica-vr">V.</span> ${vConc}</div>
-        <div class="linea-vr"><span class="rubrica-vr">R.</span> ${rConc}</div>
+        <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${vConc}</span></div>
+        <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rConc}</span></div>
     `;
 
     contenedor.innerHTML = html;

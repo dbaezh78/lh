@@ -245,9 +245,19 @@ export function obtenerTodasLasLecturasOficioDesdeCatalogo() {
     return lecturas;
 }
 
-export function formatAsterisco(texto) {
-    if (!texto) return '';
-    return texto.replace(/\*/g, '<span style="color: #ff0000; font-weight: bold;">*</span>');
+export function formatAsterisco(texto, textoR2 = '') {
+    const r1 = (texto || '').trim();
+    const r2 = (textoR2 || '').trim();
+    if (!r1 && !r2) return '';
+    const asteriscoHtml = '<span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; margin: 0 4px; font-size: 1.15em;">*</span>';
+    if (!r1) return r2 ? `${asteriscoHtml} ${r2}` : '';
+    if (r1.includes('*')) {
+        return r1.replace(/\*/g, asteriscoHtml);
+    }
+    if (r2) {
+        return `${r1} ${asteriscoHtml} ${r2}`;
+    }
+    return r1;
 }
 
 /**
@@ -2034,10 +2044,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (previewLec1Cita) previewLec1Cita.textContent = l1Obj.cita || '';
                     if (previewLec1Desc) previewLec1Desc.textContent = l1Obj.descripcion || l1Obj.subtitulo || '';
                     if (previewLec1Texto) previewLec1Texto.textContent = l1Obj.texto || '';
-                    if (previewLec1RespCita) previewLec1RespCita.textContent = l1Obj.respCita || '';
-                    if (previewLec1RespR1) previewLec1RespR1.innerHTML = formatAsterisco(l1Obj.respR1 || '');
-                    if (previewLec1RespV) previewLec1RespV.textContent = l1Obj.respV || '';
-                    if (previewLec1RespR2) previewLec1RespR2.textContent = l1Obj.respR2 || '';
+                    const r1_1 = l1Obj.respR1 || l1Obj.responsorio?.r1 || '';
+                    const r2_1 = l1Obj.respR2 || l1Obj.responsorio?.r2 || '';
+                    if (previewLec1RespCita) previewLec1RespCita.textContent = l1Obj.respCita || l1Obj.responsorio?.ref || '';
+                    if (previewLec1RespR1) previewLec1RespR1.innerHTML = formatAsterisco(r1_1, r2_1);
+                    if (previewLec1RespV) previewLec1RespV.textContent = l1Obj.respV || l1Obj.responsorio?.v || '';
+                    if (previewLec1RespR2) previewLec1RespR2.textContent = r2_1;
                 }
             }
 
@@ -2067,10 +2079,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (previewLec2Cita) previewLec2Cita.textContent = l2Obj.cita || '';
                     if (previewLec2Desc) previewLec2Desc.textContent = l2Obj.descripcion || l2Obj.subtitulo || '';
                     if (previewLec2Texto) previewLec2Texto.textContent = l2Obj.texto || '';
-                    if (previewLec2RespCita) previewLec2RespCita.textContent = l2Obj.respCita || '';
-                    if (previewLec2RespR1) previewLec2RespR1.innerHTML = formatAsterisco(l2Obj.respR1 || '');
-                    if (previewLec2RespV) previewLec2RespV.textContent = l2Obj.respV || '';
-                    if (previewLec2RespR2) previewLec2RespR2.textContent = l2Obj.respR2 || '';
+                    const r1_2 = l2Obj.respR1 || l2Obj.responsorio?.r1 || '';
+                    const r2_2 = l2Obj.respR2 || l2Obj.responsorio?.r2 || '';
+                    if (previewLec2RespCita) previewLec2RespCita.textContent = l2Obj.respCita || l2Obj.responsorio?.ref || '';
+                    if (previewLec2RespR1) previewLec2RespR1.innerHTML = formatAsterisco(r1_2, r2_2);
+                    if (previewLec2RespV) previewLec2RespV.textContent = l2Obj.respV || l2Obj.responsorio?.v || '';
+                    if (previewLec2RespR2) previewLec2RespR2.textContent = r2_2;
                 }
             }
 
@@ -2947,10 +2961,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (previewLec1Cita) previewLec1Cita.textContent = l1.cita || '';
                 if (previewLec1Desc) previewLec1Desc.textContent = l1.descripcion || l1.subtitulo || '';
                 if (previewLec1Texto) previewLec1Texto.textContent = l1.texto || '';
+                const r1_1 = l1.respR1 || l1.responsorio?.r1 || '';
+                const r2_1 = l1.respR2 || l1.responsorio?.r2 || '';
                 if (previewLec1RespCita) previewLec1RespCita.textContent = l1.respCita || l1.responsorio?.ref || '';
-                if (previewLec1RespR1) previewLec1RespR1.innerHTML = formatAsterisco(l1.respR1 || l1.responsorio?.r1 || '');
+                if (previewLec1RespR1) previewLec1RespR1.innerHTML = formatAsterisco(r1_1, r2_1);
                 if (previewLec1RespV) previewLec1RespV.textContent = l1.respV || l1.responsorio?.v || '';
-                if (previewLec1RespR2) previewLec1RespR2.textContent = l1.respR2 || l1.responsorio?.r2 || '';
+                if (previewLec1RespR2) previewLec1RespR2.textContent = r2_1;
             }
 
             const l2 = lData.segunda;
@@ -2960,10 +2976,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (previewLec2Cita) previewLec2Cita.textContent = l2.cita || '';
                 if (previewLec2Desc) previewLec2Desc.textContent = l2.descripcion || l2.subtitulo || '';
                 if (previewLec2Texto) previewLec2Texto.textContent = l2.texto || '';
+                const r1_2 = l2.respR1 || l2.responsorio?.r1 || '';
+                const r2_2 = l2.respR2 || l2.responsorio?.r2 || '';
                 if (previewLec2RespCita) previewLec2RespCita.textContent = l2.respCita || l2.responsorio?.ref || '';
-                if (previewLec2RespR1) previewLec2RespR1.innerHTML = formatAsterisco(l2.respR1 || l2.responsorio?.r1 || '');
+                if (previewLec2RespR1) previewLec2RespR1.innerHTML = formatAsterisco(r1_2, r2_2);
                 if (previewLec2RespV) previewLec2RespV.textContent = l2.respV || l2.responsorio?.v || '';
-                if (previewLec2RespR2) previewLec2RespR2.textContent = l2.respR2 || l2.responsorio?.r2 || '';
+                if (previewLec2RespR2) previewLec2RespR2.textContent = r2_2;
             }
 
             // Te Deum

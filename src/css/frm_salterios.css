@@ -540,7 +540,7 @@ body {
 .liturgia-versiculo-fila {
     font-size: calc(var(--size) * var(--font-zoom));
     line-height: var(--lHeight);
-    margin-bottom: 0px;
+    margin-bottom: 4px;
     color: #1a1a1a;
     display: flex;
     align-items: baseline;
@@ -548,15 +548,25 @@ body {
 }
 
 .liturgia-letra-roja {
-    color: rgb(255, 0, 0);
-    font-weight: 100;
+    color: #ff0000;
+    font-weight: 500;
     font-size: calc(var(--size) * var(--font-zoom));
     min-width: 18px;
+    flex-shrink: 0;
 }
 
 .liturgia-texto-verso {
     color: #1a1a1a;
     font-weight: 400;
+    flex: 1;
+}
+
+.asterisco-rojo {
+    color: #ff0000;
+    font-weight: bold;
+    margin: 0 4px;
+    font-size: 1.15em;
+    display: inline-block;
 }
 
 /* 6. Antífonas: SIN RECUADRO, FLUJO NATURAL EN LÍNEA */

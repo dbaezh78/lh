@@ -679,6 +679,7 @@ export class CintaLiturgica {
                             segmentos.push({ texto: limpiarTextoParaVoz(partes[1].trim()) });
                         } else {
                             segmentos.push({ texto: limpiarTextoParaVoz(r1) });
+                            if (r2) segmentos.push({ texto: limpiarTextoParaVoz(r2) });
                         }
                         if (v1) segmentos.push({ texto: limpiarTextoParaVoz(v1) });
                         if (r2) segmentos.push({ texto: limpiarTextoParaVoz(r2) });
@@ -704,6 +705,7 @@ export class CintaLiturgica {
                             segmentos.push({ texto: limpiarTextoParaVoz(partes[1].trim()) });
                         } else {
                             segmentos.push({ texto: limpiarTextoParaVoz(r1_2) });
+                            if (r2_2) segmentos.push({ texto: limpiarTextoParaVoz(r2_2) });
                         }
                         if (v_2) segmentos.push({ texto: limpiarTextoParaVoz(v_2) });
                         if (r2_2) segmentos.push({ texto: limpiarTextoParaVoz(r2_2) });

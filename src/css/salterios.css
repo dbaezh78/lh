@@ -75,16 +75,34 @@ body.pagina-salterios {
     letter-spacing: 0.5px;
 }
 
-/* Indicador de versículos V. y R. */
+/* Indicador de versículos V. y R. como señalizadores fijos */
 .rubrica-vr {
-    color: var(--salterio-rubrica);
-    margin-right: 4px;
+    color: #ff0000;
+    min-width: 18px;
+    flex-shrink: 0;
+    font-weight: 500;
 }
 
 .linea-vr {
     margin: 4px 0;
-    display: block;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
     font-size: calc(var(--size) * var(--font-zoom));
+    line-height: 1.55;
+}
+
+.linea-vr .texto-vr {
+    flex: 1;
+    color: var(--salterio-text, #1a1a1a);
+}
+
+.asterisco-rojo {
+    color: #ff0000;
+    font-weight: bold;
+    margin: 0 4px;
+    font-size: 1.15em;
+    display: inline-block;
 }
 
 /* Antífonas */

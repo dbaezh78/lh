@@ -368,22 +368,22 @@ function actualizarLivePreview() {
             elRespR1.innerHTML = '';
         } else if (respR1.includes('*')) {
             const r1Formateado = respR1.replace(/\*/g, '<span class="asterisco-rojo">*</span>');
-            elRespR1.innerHTML = `<span class="rubrica-roja">R.</span> ${r1Formateado}`;
+            elRespR1.innerHTML = `<span class="rubrica-roja">R.</span> <span class="texto-resp">${r1Formateado}</span>`;
         } else if (respR2) {
-            elRespR1.innerHTML = `<span class="rubrica-roja">R.</span> ${respR1} <span class="asterisco-rojo">*</span> ${respR2}`;
+            elRespR1.innerHTML = `<span class="rubrica-roja">R.</span> <span class="texto-resp">${respR1} <span class="asterisco-rojo">*</span> ${respR2}</span>`;
         } else {
-            elRespR1.innerHTML = `<span class="rubrica-roja">R.</span> ${respR1}`;
+            elRespR1.innerHTML = `<span class="rubrica-roja">R.</span> <span class="texto-resp">${respR1}</span>`;
         }
     }
 
     const elRespV = document.getElementById('preview-resp-v');
     if (elRespV) {
-        elRespV.innerHTML = respV ? `<span class="rubrica-roja">V.</span> ${respV}` : '';
+        elRespV.innerHTML = respV ? `<span class="rubrica-roja">V.</span> <span class="texto-resp">${respV}</span>` : '';
     }
 
     const elRespR2 = document.getElementById('preview-resp-r2');
     if (elRespR2) {
-        elRespR2.innerHTML = respR2 ? `<span class="rubrica-roja">R.</span> ${respR2}` : '';
+        elRespR2.innerHTML = respR2 ? `<span class="rubrica-roja">R.</span> <span class="texto-resp">${respR2}</span>` : '';
     }
 }
 

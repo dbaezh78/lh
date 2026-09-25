@@ -422,21 +422,30 @@ body {
 
 .preview-resp-linea {
     margin-bottom: 6px;
-    text-align: justify;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
     font-family: Verdana, Arial, sans-serif;
 }
 
 .rubrica-roja {
     color: #ff0000;
-    margin-right: 6px;
+    min-width: 18px;
+    flex-shrink: 0;
+    font-weight: 500;
     font-family: Verdana, Arial, sans-serif;
+}
+
+.texto-resp {
+    flex: 1;
+    text-align: justify;
 }
 
 .asterisco-rojo {
     color: #ff0000;
     font-weight: bold;
     margin: 0 4px;
-    font-size: 1.25rem;
+    font-size: 1.15em;
     line-height: 1;
     display: inline-block;
 }
