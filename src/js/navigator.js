@@ -420,15 +420,15 @@
                     <span class="material-symbols-outlined">edit_calendar</span>
                     <span>Formularios</span>
                     <div class="nav-submenu" id="nav-submenu-formularios">
-                        <a href="/frm_salterios.html"><span class="material-symbols-outlined">edit_note</span> Formulario Salterios</a>
+                        <a href="/src/html/frm_salterios.html"><span class="material-symbols-outlined">edit_note</span> Formulario Salterios</a>
                         <a href="/src/html/salmos.html"><span class="material-symbols-outlined">format_list_bulleted</span> Salmos</a>
                         <a href="/src/html/himno.html"><span class="material-symbols-outlined">music_note</span> Himnos</a>
                         <a href="/src/html/lecturabreve.html"><span class="material-symbols-outlined">auto_stories</span> Lectura Breve</a>
-                        <a href="/antifonas.html"><span class="material-symbols-outlined">auto_stories</span> Antífonas</a>
-                        <a href="/preces.html"><span class="material-symbols-outlined">volunteer_activism</span> Preces</a>
-                        <a href="/oracion.html"><span class="material-symbols-outlined">church</span> Oración</a>
-                        <a href="/responsorio.html"><span class="material-symbols-outlined">church</span> Responsorios</a>
-                        <a href="/lectura.html"><span class="material-symbols-outlined">import_contacts</span> Lecturas Oficio</a>
+                        <a href="/src/html/antifonas.html"><span class="material-symbols-outlined">auto_stories</span> Antífonas</a>
+                        <a href="/src/html/preces.html"><span class="material-symbols-outlined">volunteer_activism</span> Preces</a>
+                        <a href="/src/html/oracion.html"><span class="material-symbols-outlined">church</span> Oración</a>
+                        <a href="/src/html/responsorio.html"><span class="material-symbols-outlined">church</span> Responsorios</a>
+                        <a href="/src/html/lectura.html"><span class="material-symbols-outlined">import_contacts</span> Lecturas Oficio</a>
                         <a href="/src/html/form_etiempo.html"><span class="material-symbols-outlined">edit_calendar</span> Cambio litúrgico</a>
                         <a href="/src/html/santo.html"><span class="material-symbols-outlined">calendar_today</span> Santo</a>
                         <a href="/src/html/nombresanto.html"><span class="material-symbols-outlined">person_add</span> Nombre Santo</a>
@@ -440,8 +440,8 @@
                     <span>Liturgia</span>
                     <div class="nav-submenu" id="nav-submenu-resucito">
                         <a href="/salterios.html"><span class="material-symbols-outlined">menu_book</span> Salterios</a>
-                        <a href="/cinta.html"><span class="material-symbols-outlined">graphic_eq</span> Cinta de Audio</a>
-                        <a href="/oficiodelectura.html"><span class="material-symbols-outlined">auto_stories</span> Oficio de Lectura</a>
+                        <a href="/src/html/cinta.html"><span class="material-symbols-outlined">graphic_eq</span> Cinta de Audio</a>
+                        <a href="/src/html/oficiodelectura.html"><span class="material-symbols-outlined">auto_stories</span> Oficio de Lectura</a>
                         <a href="/src/html/añoliturgico.html"><span class="material-symbols-outlined">calendar_month</span> Año Liturgico</a>
                         <a href="/src/html/datos.html"><span class="material-symbols-outlined">dataset</span> Datos y Años</a>
                         <a href="/src/html/chat.html"><span class="material-symbols-outlined">forum</span> Asistencia y Chat</a>

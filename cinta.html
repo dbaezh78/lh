@@ -1,93 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinta de Audio y Navegación — Liturgia de las Horas</title>
-    <link rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <link rel="stylesheet" href="src/css/cinta.css">
-    <link rel="stylesheet" href="src/css/buttons.css">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #12151c;
-            color: #f1f5f9;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        .demo-container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 24px;
-            background: #1a1f2c;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .demo-container h2 {
-            margin-top: 0;
-            color: #fbbf24;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=/src/html/cinta.html">
+  <title>Redirigiendo a Cinta de Audio...</title>
+  <script>
+    window.location.replace("/src/html/cinta.html" + window.location.search + window.location.hash);
+  </script>
 </head>
 <body>
-
-    <!-- Contenedor donde se monta la cinta -->
-    <div id="cinta-container"></div>
-
-    <main class="demo-container">
-        <h2>
-            <span class="material-symbols-outlined" style="color: #d01212;">graphic_eq</span>
-            Cinta de Navegación y Audio Litúrgico
-        </h2>
-        <p>Esta cinta superior fija proporciona acceso simultáneo a:</p>
-        <ul>
-            <li><strong>Bloque 1:</strong> Tiempo litúrgico interactivo (oculta/muestra el reproductor al tocarlo), semana y día, controles de zoom de texto (10px a 30px) y menú desplegable desde el icono de iglesia.</li>
-            <li><strong>Icono de Iglesia:</strong> Selector de 4 fuentes de audio: Evangelio (Blanco/Negro), Liturgia de las Horas (Azul/Blanco), 1ª Lectura del Oficio (Verde/Blanco) y 2ª Lectura (Rojo/Blanco).</li>
-            <li><strong>Bloque 2:</strong> Reproductor con botón dinámico, barra de horas litúrgicas compactas y barra de progreso con scrubber amarillo litúrgico y tiempos de reproducción.</li>
-        </ul>
-        <div style="margin-top: 24px; display: flex; gap: 12px;">
-            <a href="salterios.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px; text-decoration: none; background: #d01212; color: #fff;">
-                <span class="material-symbols-outlined">menu_book</span>
-                Ir al Visor de Salterios
-            </a>
-            <a href="antifonas.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px; text-decoration: none; background: #222838; color: #fff; border: 1px solid rgba(255,255,255,0.2);">
-                <span class="material-symbols-outlined">auto_stories</span>
-                Gestor de Antífonas
-            </a>
-            <a href="index.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px; text-decoration: none; background: #222838; color: #fff; border: 1px solid rgba(255,255,255,0.2);">
-                <span class="material-symbols-outlined">home</span>
-                Inicio
-            </a>
-        </div>
-    </main>
-
-    <script type="module">
-        import { CintaLiturgica } from './src/js/cinta.js';
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const cinta = new CintaLiturgica('cinta-container', {
-                tiempo: 'Tiempo Ordinario',
-                semana: 25,
-                dia: 'Lunes',
-                libro: 'laudes'
-            });
-
-            // Ejemplo de audio predeterminado para los 4 modos
-            cinta.cargarAudios({
-                evangelio: 'https://ev.resucito.do/to/25/lunes.mp3',
-                subEvangelio: 'Lunes',
-                hora: 'https://to.resucito.do/s25/lunes/laudes.mp3',
-                subHora: 'Rezo de Laudes',
-                lectura1: 'https://to.resucito.do/s25/lunes/lectura2.mp3',
-                subLectura1: 'Año Par',
-                lectura2: 'https://to.resucito.do/s25/lunes/lecturas.mp3',
-                subLectura2: 'Lectura patrística'
-            });
-        });
-    </script>
+  <p>Redirigiendo a <a href="/src/html/cinta.html">Cinta de Audio</a>...</p>
 </body>
 </html>
