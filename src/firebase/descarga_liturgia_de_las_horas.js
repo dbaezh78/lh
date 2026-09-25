@@ -139,6 +139,53 @@ es un honor para todos sus fieles.
 Gloria al Padre, y al Hijo, y al Espíritu Santo.
 Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`;
 
+export const TEXTO_TEDUEM_CANONICO = `A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
+A ti, eterno Padre, te venera toda la creación.
+Los ángeles todos, los cielos y todas las potestades te honran.
+Los querubines y serafines te cantan sin cesar:
+Santo, Santo, Santo es el Señor, Dios del universo.
+Llenos están el cielo y la tierra de la majestad de tu gloria.
+
+A ti te ensalza el glorioso coro de los apóstoles,
+la multitud admirable de los profetas,
+el blanco ejército de los mártires.
+A ti la santa Iglesia confiesa por toda la redondez de la tierra:
+Padre de inmensa majestad,
+Hijo único y verdadero, digno de adoración,
+Espíritu Santo Defensor.
+
+Tú eres el Rey de la gloria, oh Cristo.
+Tú eres el Hijo eterno del Padre.
+Tú, para librar al hombre, no te horrorizaste del seno de la Virgen.
+Tú, rota la cadena de la muerte, abriste a los creyentes el reino de los cielos.
+Tú estás sentado a la derecha de Dios en la gloria del Padre.
+Creemos que vendrás como juez.
+
+Te rogamos, pues, socorras a tus siervos,
+a quienes redimiste con tu preciosa sangre.
+Haz que seamos contados entre tus santos en la gloria eterna.`;
+
+export const TEXTO_OPCIONAL_TEDUM_DOMINGO = `Salva a tu pueblo, Señor,
+y bendice a tu heredad.
+
+Sé su pastor,
+y guíalos por siempre.
+
+Día tras día te bendeciremos
+y alabaremos tu nombre por siempre jamás.
+
+Dígnate, Señor,
+guardarnos de pecado en este día.
+
+Ten piedad de nosotros, Señor,
+ten piedad de nosotros.
+
+Que tu misericordia, Señor, venga sobre nosotros,
+como lo esperamos de ti.
+
+A ti, Señor, me acojo,
+no quede yo nunca defraudado.`;
+
 
 // =========================================================================
 // DECODIFICADOR Y MAPEO DE EQUIVALENCIAS DE CÓDIGOS LITÚRGICOS
@@ -497,6 +544,8 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
         salmodia: salmodiaNorm,
         versiculo: d.versiculo || base.versiculo || { v: 'Hijo mío, haz caso de mi sabiduría.', r: 'Presta oído a mi inteligencia.' },
         lecturasOficio: d.lecturasOficio || base.lecturasOficio || null,
+        himnoTeDeum: d.himnoTeDeum || base.himnoTeDeum || null,
+        seccionOpcional: d.seccionOpcional || base.seccionOpcional || null,
         lecturaBreve: lecturaBreveNorm,
         canticoEvangelico: canticoEvangelicoNorm,
         preces: precesNorm,
@@ -767,9 +816,18 @@ Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`
         oracion: {
             texto: 'Dios todopoderoso y eterno, guía nuestras acciones según tu santa voluntad. Por Jesucristo nuestro Señor. Amén.'
         },
+        himnoTeDeum: (libro === 'oficio' && dia === 'domingo') ? {
+            id: 'tedeum_canonico',
+            titulo: 'HIMNO: A TI, OH DIOS (TE DEUM)',
+            texto: TEXTO_TEDUEM_CANONICO
+        } : null,
+        seccionOpcional: (libro === 'oficio' && dia === 'domingo') ? {
+            rubrica: 'La parte que sigue puede omitirse, si se cree oportuno.',
+            texto: TEXTO_OPCIONAL_TEDUM_DOMINGO
+        } : null,
         conclusion: {
-            v: 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.',
-            r: 'Amén.'
+            v: (libro === 'oficio' || libro === 'tercia' || libro === 'sexta' || libro === 'nona') ? 'Bendigamos al Señor.' : 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.',
+            r: (libro === 'oficio' || libro === 'tercia' || libro === 'sexta' || libro === 'nona') ? 'Demos gracias a Dios.' : 'Amén.'
         }
     };
 }

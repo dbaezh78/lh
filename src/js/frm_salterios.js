@@ -42,6 +42,53 @@ import {
 import { CATALOGO_RESPONSORIOS_SEED, ResponsoriosDB } from '../data/db-responsorios.js';
 import { CATALOGO_LECTURAS_SEED as CATALOGO_LECTURAS_OFICIO_SEED, LecturasDB } from '../data/db-lecturas.js';
 
+export const TEXTO_TEDUEM_CANONICO = `A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
+A ti, eterno Padre, te venera toda la creación.
+Los ángeles todos, los cielos y todas las potestades te honran.
+Los querubines y serafines te cantan sin cesar:
+Santo, Santo, Santo es el Señor, Dios del universo.
+Llenos están el cielo y la tierra de la majestad de tu gloria.
+
+A ti te ensalza el glorioso coro de los apóstoles,
+la multitud admirable de los profetas,
+el blanco ejército de los mártires.
+A ti la santa Iglesia confiesa por toda la redondez de la tierra:
+Padre de inmensa majestad,
+Hijo único y verdadero, digno de adoración,
+Espíritu Santo Defensor.
+
+Tú eres el Rey de la gloria, oh Cristo.
+Tú eres el Hijo eterno del Padre.
+Tú, para librar al hombre, no te horrorizaste del seno de la Virgen.
+Tú, rota la cadena de la muerte, abriste a los creyentes el reino de los cielos.
+Tú estás sentado a la derecha de Dios en la gloria del Padre.
+Creemos que vendrás como juez.
+
+Te rogamos, pues, socorras a tus siervos,
+a quienes redimiste con tu preciosa sangre.
+Haz que seamos contados entre tus santos en la gloria eterna.`;
+
+export const TEXTO_OPCIONAL_TEDUM_DOMINGO = `Salva a tu pueblo, Señor,
+y bendice a tu heredad.
+
+Sé su pastor,
+y guíalos por siempre.
+
+Día tras día te bendeciremos
+y alabaremos tu nombre por siempre jamás.
+
+Dígnate, Señor,
+guardarnos de pecado en este día.
+
+Ten piedad de nosotros, Señor,
+ten piedad de nosotros.
+
+Que tu misericordia, Señor, venga sobre nosotros,
+como lo esperamos de ti.
+
+A ti, Señor, me acojo,
+no quede yo nunca defraudado.`;
+
 // Mapeo de códigos según especificación
 export const CODIGOS_TIEMPO = {
     ordinario: { codigo: 'to', nombre: 'Tiempo Ordinario' },
@@ -694,6 +741,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const previewLec2RespR2 = document.getElementById('previewLec2RespR2');
 
     const seccionTeDeumPreview = document.getElementById('seccionTeDeumPreview');
+    const previewTituloTeDeum = document.getElementById('previewTituloTeDeum');
     const previewTextoTeDeum = document.getElementById('previewTextoTeDeum');
 
     const seccionOpcionalOficioPreview = document.getElementById('seccionOpcionalOficioPreview');
@@ -1230,6 +1278,97 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (selHimno._reaplicarFiltro) selHimno._reaplicarFiltro();
     }
 
+    // Cargar y poblar el selector de Himnos Post-Lecturas (Te Deum / Catálogo) para Oficio de Lectura (solo domingos)
+    function cargarYPoblarSelectHimnoPostLecturas(valorSeleccionadoPrevio = null) {
+        if (!selTeDeumOficio) return;
+        cacheTodosLosHimnos = obtenerTodosLosHimnosDesdeCatalogo();
+
+        selTeDeumOficio.innerHTML = '';
+
+        // 1. Te Deum Canónico por defecto
+        const optTeDeum = document.createElement('option');
+        optTeDeum.value = 'tedeum_canonico';
+        optTeDeum.setAttribute('data-titulo', 'HIMNO: A TI, OH DIOS (TE DEUM)');
+        optTeDeum.textContent = 'A ti, oh Dios (Te Deum) [Recomendado]';
+        selTeDeumOficio.appendChild(optTeDeum);
+
+        // 2. Himnos del catálogo
+        if (Array.isArray(cacheTodosLosHimnos) && cacheTodosLosHimnos.length > 0) {
+            cacheTodosLosHimnos.forEach(h => {
+                const opt = document.createElement('option');
+                const hid = h.id || h.varName;
+                opt.value = hid;
+                opt.setAttribute('data-titulo', h.titulo || hid);
+                opt.textContent = `[Himno] ${h.titulo || hid}`;
+                selTeDeumOficio.appendChild(opt);
+            });
+        }
+
+        // 3. Opción Ninguno
+        const optNinguno = document.createElement('option');
+        optNinguno.value = 'ninguno';
+        optNinguno.setAttribute('data-titulo', '');
+        optNinguno.textContent = 'Ninguno (Omitir himno)';
+        selTeDeumOficio.appendChild(optNinguno);
+
+        if (valorSeleccionadoPrevio && Array.from(selTeDeumOficio.options).some(o => o.value === valorSeleccionadoPrevio)) {
+            selTeDeumOficio.value = valorSeleccionadoPrevio;
+        } else {
+            selTeDeumOficio.value = 'tedeum_canonico';
+        }
+
+        if (typeof selTeDeumOficio._actualizarCustomSelect === 'function') {
+            selTeDeumOficio._actualizarCustomSelect();
+        }
+    }
+
+    // Actualizar vista previa del himno post-2ª lectura y sección opcional de los domingos
+    function actualizarHimnoPostLecturasPreview() {
+        const libroVal = selLibro ? selLibro.value : 'laudes';
+        const diaVal = selDia ? selDia.value : 'domingo';
+        const esOficio = (libroVal === 'oficio');
+        const esDomingo = (diaVal === 'domingo');
+        const mostrar = esOficio && esDomingo;
+
+        if (ctrlBoxTeDeumOficio) ctrlBoxTeDeumOficio.style.display = mostrar ? 'block' : 'none';
+        if (ctrlBoxOpcionalOficio) ctrlBoxOpcionalOficio.style.display = mostrar ? 'block' : 'none';
+
+        if (!mostrar || !selTeDeumOficio || selTeDeumOficio.value === 'ninguno') {
+            if (seccionTeDeumPreview) seccionTeDeumPreview.style.display = 'none';
+            if (seccionOpcionalOficioPreview) seccionOpcionalOficioPreview.style.display = 'none';
+            return;
+        }
+
+        if (seccionTeDeumPreview) seccionTeDeumPreview.style.display = 'block';
+        if (seccionOpcionalOficioPreview) seccionOpcionalOficioPreview.style.display = 'block';
+
+        const val = selTeDeumOficio.value;
+        if (val === 'tedeum_canonico') {
+            if (previewTituloTeDeum) previewTituloTeDeum.textContent = 'HIMNO: A TI, OH DIOS (TE DEUM)';
+            if (previewTextoTeDeum) previewTextoTeDeum.textContent = TEXTO_TEDUEM_CANONICO;
+        } else {
+            const hEncontrado = (Array.isArray(cacheTodosLosHimnos) ? cacheTodosLosHimnos.find(h => (h.id === val || h.varName === val)) : null) ||
+                                HimnosDB.obtener(val);
+            if (hEncontrado) {
+                if (previewTituloTeDeum) previewTituloTeDeum.textContent = hEncontrado.titulo || 'HIMNO';
+                if (previewTextoTeDeum) previewTextoTeDeum.textContent = hEncontrado.texto || '';
+            } else {
+                if (previewTituloTeDeum) previewTituloTeDeum.textContent = 'HIMNO: A TI, OH DIOS (TE DEUM)';
+                if (previewTextoTeDeum) previewTextoTeDeum.textContent = TEXTO_TEDUEM_CANONICO;
+            }
+        }
+
+        // Parte opcional en domingos
+        if (inputOpcionalOficio && !inputOpcionalOficio.value.trim()) {
+            inputOpcionalOficio.value = TEXTO_OPCIONAL_TEDUM_DOMINGO;
+        }
+        if (previewTextoOpcionalOficio) {
+            previewTextoOpcionalOficio.textContent = (inputOpcionalOficio && inputOpcionalOficio.value.trim())
+                ? inputOpcionalOficio.value.trim()
+                : TEXTO_OPCIONAL_TEDUM_DOMINGO;
+        }
+    }
+
     // Cargar y poblar el selector de Lecturas Breves desde lecturabreve.html / db-lecturabreve.js / 'lh_lecturabreve_cache'
     function cargarYPoblarSelectLecturas(valorSeleccionadoPrevio = null) {
         if (!selLectura) return;
@@ -1553,13 +1692,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const diaVal    = selDia.value;
         const libroVal  = selLibro.value;
         const esOficio  = (libroVal === 'oficio');
+        const esDomingo = (diaVal === 'domingo');
+        const mostrarHimnoPost = esOficio && esDomingo;
 
         // Alternancia de cajas de control entre Laudes y Oficio
         if (ctrlBoxResponsorioOficio) ctrlBoxResponsorioOficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxLectura1Oficio) ctrlBoxLectura1Oficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxLectura2Oficio) ctrlBoxLectura2Oficio.style.display = esOficio ? 'block' : 'none';
-        if (ctrlBoxTeDeumOficio) ctrlBoxTeDeumOficio.style.display = esOficio ? 'block' : 'none';
-        if (ctrlBoxOpcionalOficio) ctrlBoxOpcionalOficio.style.display = esOficio ? 'block' : 'none';
+        if (ctrlBoxTeDeumOficio) ctrlBoxTeDeumOficio.style.display = mostrarHimnoPost ? 'block' : 'none';
+        if (ctrlBoxOpcionalOficio) ctrlBoxOpcionalOficio.style.display = mostrarHimnoPost ? 'block' : 'none';
 
         if (ctrlBoxLecturaBreve) ctrlBoxLecturaBreve.style.display = esOficio ? 'none' : 'block';
         if (ctrlBoxAntifonaCantico) ctrlBoxAntifonaCantico.style.display = esOficio ? 'none' : 'block';
@@ -1573,16 +1714,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (seccionResponsorioOficioPreview) seccionResponsorioOficioPreview.style.display = esOficio ? 'block' : 'none';
         if (seccionLectura1OficioPreview) seccionLectura1OficioPreview.style.display = esOficio ? 'block' : 'none';
         if (seccionLectura2OficioPreview) seccionLectura2OficioPreview.style.display = esOficio ? 'block' : 'none';
-        if (seccionTeDeumPreview) seccionTeDeumPreview.style.display = (esOficio && selTeDeumOficio && selTeDeumOficio.value !== 'ninguno') ? 'block' : 'none';
-        if (seccionOpcionalOficioPreview) {
-            const txtOpc = inputOpcionalOficio ? inputOpcionalOficio.value.trim() : '';
-            seccionOpcionalOficioPreview.style.display = (esOficio && txtOpc) ? 'block' : 'none';
-            if (previewTextoOpcionalOficio) previewTextoOpcionalOficio.textContent = txtOpc;
-        }
+
+        // Himno post-2ª lectura (solo domingos) y sección opcional
+        actualizarHimnoPostLecturasPreview();
 
         if (seccionLecturaBrevePreview) seccionLecturaBrevePreview.style.display = esOficio ? 'none' : 'block';
         if (seccionCanticoEvangelicoPreview) seccionCanticoEvangelicoPreview.style.display = esOficio ? 'none' : 'block';
         if (seccionPrecesPreview) seccionPrecesPreview.style.display = esOficio ? 'none' : 'block';
+
+        // Conclusión fija
+        if (previewTituloConclusion) previewTituloConclusion.textContent = 'CONCLUSIÓN';
+        if (esOficio) {
+            if (previewConclusionV) previewConclusionV.textContent = 'Bendigamos al Señor.';
+            if (previewConclusionR) previewConclusionR.textContent = 'Demos gracias a Dios.';
+        } else {
+            if (previewConclusionV) previewConclusionV.textContent = 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.';
+            if (previewConclusionR) previewConclusionR.textContent = 'Amén.';
+        }
 
         // 1. TÍTULO DE LA HORA (EN NEGRITA Y ROJO)
         const mapaTitulos = {
@@ -2088,15 +2236,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            // Te Deum y Sección Opcional
-            if (seccionTeDeumPreview) {
-                seccionTeDeumPreview.style.display = (selTeDeumOficio && selTeDeumOficio.value !== 'ninguno') ? 'block' : 'none';
-            }
-            if (seccionOpcionalOficioPreview) {
-                const txtOpc = inputOpcionalOficio ? inputOpcionalOficio.value.trim() : '';
-                seccionOpcionalOficioPreview.style.display = txtOpc ? 'block' : 'none';
-                if (previewTextoOpcionalOficio) previewTextoOpcionalOficio.textContent = txtOpc;
-            }
+            // Himno post-2ª lectura (solo domingos) y sección opcional
+            actualizarHimnoPostLecturasPreview();
         }
 
         // 9. LECTURA BREVE Y RESPONSORIO BREVE (DEBAJO DE LA SALMODIA)
@@ -2984,19 +3125,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (previewLec2RespR2) previewLec2RespR2.textContent = r2_2;
             }
 
-            // Te Deum
-            if (datos.himnoTeDeum && selTeDeumOficio) {
-                selTeDeumOficio.value = datos.himnoTeDeum.id || 'tedeum_canonico';
-                if (seccionTeDeumPreview) seccionTeDeumPreview.style.display = (selTeDeumOficio.value !== 'ninguno') ? 'block' : 'none';
+            // Himno post-2ª lectura y sección opcional (solo domingos)
+            const diaVal = selDia ? selDia.value : 'domingo';
+            const esDomingo = (diaVal === 'domingo');
+
+            if (selTeDeumOficio) {
+                const himnoIdGuardado = datos.himnoTeDeum ? (datos.himnoTeDeum.id || datos.himnoTeDeum) : (esDomingo ? 'tedeum_canonico' : 'ninguno');
+                cargarYPoblarSelectHimnoPostLecturas(himnoIdGuardado);
             }
 
-            // Opcional
-            if (datos.seccionOpcional && inputOpcionalOficio) {
+            if (inputOpcionalOficio) {
                 const txtOpc = (typeof datos.seccionOpcional === 'object') ? datos.seccionOpcional.texto : datos.seccionOpcional;
-                inputOpcionalOficio.value = txtOpc || '';
-                if (previewTextoOpcionalOficio) previewTextoOpcionalOficio.textContent = inputOpcionalOficio.value;
-                if (seccionOpcionalOficioPreview) seccionOpcionalOficioPreview.style.display = inputOpcionalOficio.value.trim() ? 'block' : 'none';
+                inputOpcionalOficio.value = (txtOpc !== undefined && txtOpc !== null && txtOpc !== '')
+                    ? txtOpc
+                    : (esDomingo ? TEXTO_OPCIONAL_TEDUM_DOMINGO : '');
             }
+
+            actualizarHimnoPostLecturasPreview();
         }
 
         // Sincronizar todos los selectores personalizados compactos con los datos restaurados
@@ -3291,13 +3436,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        const himnoTeDeum = (selTeDeumOficio && selTeDeumOficio.value !== 'ninguno') ? {
+        const himnoTeDeum = (esOficio && diaVal === 'domingo' && selTeDeumOficio && selTeDeumOficio.value !== 'ninguno') ? {
             id: selTeDeumOficio.value,
-            titulo: 'A TI, OH DIOS (TE DEUM)',
+            titulo: (previewTituloTeDeum ? previewTituloTeDeum.textContent.trim() : 'HIMNO: A TI, OH DIOS (TE DEUM)'),
             texto: (previewTextoTeDeum ? previewTextoTeDeum.textContent.trim() : '')
         } : null;
 
-        const seccionOpcional = (inputOpcionalOficio && inputOpcionalOficio.value.trim()) ? {
+        const seccionOpcional = (esOficio && diaVal === 'domingo' && inputOpcionalOficio && inputOpcionalOficio.value.trim()) ? {
             rubrica: 'La parte que sigue puede omitirse, si se cree oportuno.',
             texto: inputOpcionalOficio.value.trim()
         } : null;
@@ -3634,9 +3779,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (selTeDeumOficio) {
         selTeDeumOficio.addEventListener('change', () => {
-            if (seccionTeDeumPreview) {
-                seccionTeDeumPreview.style.display = (selTeDeumOficio.value !== 'ninguno') ? 'block' : 'none';
-            }
+            actualizarHimnoPostLecturasPreview();
             actualizarBadgeEstado(false);
         });
     }
@@ -3683,7 +3826,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarYPoblarSelectResponsorios();
     cargarYPoblarSelectLecturasOficio();
     if (selTeDeumOficio) {
-        ordenarOpcionesAZ(selTeDeumOficio);
+        cargarYPoblarSelectHimnoPostLecturas();
     }
     configurarTodosLosCustomSelects();
     actualizarCodigoCombinado(true);

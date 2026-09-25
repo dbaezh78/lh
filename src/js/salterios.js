@@ -15,7 +15,9 @@ import {
     guardarHoraEnLocalStorage, 
     consultarHoraEnFirebase,
     purgarLocalStorageSalterios,
-    normalizarObjetoLiturgico
+    normalizarObjetoLiturgico,
+    TEXTO_TEDUEM_CANONICO,
+    TEXTO_OPCIONAL_TEDUM_DOMINGO
 } from '../firebase/descarga_liturgia_de_las_horas.js';
 
 let horaActualDatos = null;
@@ -599,6 +601,15 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
                 concl: 'Siguiendo las enseñanzas de Jesucristo, digamos al Padre celestial:'
             };
         })(),
+        himnoTeDeum: (libro === 'oficio' && dia === 'domingo') ? {
+            id: 'tedeum_canonico',
+            titulo: 'HIMNO: A TI, OH DIOS (TE DEUM)',
+            texto: TEXTO_TEDUEM_CANONICO
+        } : null,
+        seccionOpcional: (libro === 'oficio' && dia === 'domingo') ? {
+            rubrica: 'La parte que sigue puede omitirse, si se cree oportuno.',
+            texto: TEXTO_OPCIONAL_TEDUM_DOMINGO
+        } : null,
         oracion: {
             texto: 'Dios todopoderoso y eterno, que quisiste que tu Hijo sufriese por la salvación de todos, haz que, inflamados en tu amor, sepamos ofrecernos a ti como víctima viva. Por nuestro Señor Jesucristo, tu Hijo, que vive y reina contigo en la unidad del Espíritu Santo y es Dios, por los siglos de los siglos. Amén.'
         },
@@ -800,47 +811,36 @@ function renderizarCuerpoLiturgico(d) {
             `;
         }
 
-        // Himno Te Deum
-        if (d.dia === 'domingo' || d.tiempo === 'pascua' || d.tiempo === 'navidad' || d.himnoTeDeum) {
-            const textoTeDeum = d.himnoTeDeum?.texto || `A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
-A ti, eterno Padre, te venera toda la creación.
-Los ángeles todos, los cielos y todas las potestades te honran.
-Los querubines y serafines te cantan sin cesar:
-Santo, Santo, Santo es el Señor, Dios del universo.
-Llenos están el cielo y la tierra de la majestad de tu gloria.
+        // Himno post-2ª lectura y sección opcional (solo domingos o si se especificó himnoTeDeum)
+        const esDomingoOficio = (d.dia === 'domingo');
+        const omitirHimnoPost = d.himnoTeDeum && d.himnoTeDeum.id === 'ninguno';
+        const mostrarHimnoPost = (esDomingoOficio || d.himnoTeDeum) && !omitirHimnoPost;
 
-A ti te ensalza el glorioso coro de los apóstoles,
-la multitud admirable de los profetas,
-el blanco ejército de los mártires.
-A ti la santa Iglesia confiesa por toda la redondez de la tierra:
-Padre de inmensa majestad,
-Hijo único y verdadero, digno de adoración,
-Espíritu Santo Defensor.
-
-Tú eres el Rey de la gloria, oh Cristo.
-Tú eres el Hijo eterno del Padre.
-Tú, para librar al hombre, no te horrorizaste del seno de la Virgen.
-Tú, rota la cadena de la muerte, abriste a los creyentes el reino de los cielos.
-Tú estás sentado a la derecha de Dios en la gloria del Padre.
-Creemos que vendrás como juez.
-
-Te rogamos, pues, socorras a tus siervos,
-a quienes redimiste con tu preciosa sangre.
-Haz que seamos contados entre tus santos en la gloria eterna.`;
+        if (mostrarHimnoPost) {
+            const tituloTeDeum = d.himnoTeDeum?.titulo || 'HIMNO: A TI, OH DIOS (TE DEUM)';
+            const textoTeDeum = d.himnoTeDeum?.texto || TEXTO_TEDUEM_CANONICO;
 
             html += `
-                <div class="salterio-seccion-header" style="margin-top: 30px;">HIMNO: A TI, OH DIOS (TE DEUM)</div>
+                <div class="salterio-seccion-header" style="margin-top: 30px;">${tituloTeDeum}</div>
                 <div class="texto-estrofas-salmo">${textoTeDeum}</div>
             `;
-        }
 
-        // Sección opcional (Vigilia)
-        html += `
-            <div class="seccion-opcional-oficio" style="margin: 26px 0;">
-                <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">La parte que sigue puede omitirse, si se cree oportuno.</div>
-                ${d.seccionOpcional?.texto ? `<div class="texto-lectura-justificado" style="white-space: pre-line;">${d.seccionOpcional.texto}</div>` : ''}
-            </div>
-        `;
+            // Sección opcional (Solo domingos o si se especificó seccionOpcional)
+            const txtOpcionalVal = typeof d.seccionOpcional === 'object' ? d.seccionOpcional?.texto : d.seccionOpcional;
+            const textoOpcional = (txtOpcionalVal !== undefined && txtOpcionalVal !== null && txtOpcionalVal !== '')
+                ? txtOpcionalVal
+                : (esDomingoOficio ? TEXTO_OPCIONAL_TEDUM_DOMINGO : '');
+            const rubricaOpcional = (typeof d.seccionOpcional === 'object' ? d.seccionOpcional?.rubrica : null) || 'La parte que sigue puede omitirse, si se cree oportuno.';
+
+            if (textoOpcional && textoOpcional.trim()) {
+                html += `
+                    <div class="seccion-opcional-oficio" style="margin: 26px 0;">
+                        <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">${rubricaOpcional}</div>
+                        <div class="texto-lectura-justificado" style="white-space: pre-line;">${textoOpcional.trim()}</div>
+                    </div>
+                `;
+            }
+        }
     }
 
     // 8. LECTURA BREVE Y RESPONSORIO (Laudes, Horas menores, Vísperas, Completas)

@@ -315,17 +315,6 @@
                         </select>
                     </div>
 
-                    <!-- Selector de Oración -->
-                    <div class="control-box" id="ctrlBoxOracion">
-                        <label for="selectOracion">
-                            <span class="material-symbols-outlined" style="font-size:16px;">church</span>
-                            Oración
-                        </label>
-                        <select id="selectOracion" class="select-liturgico">
-                            <!-- Rellenado dinámicamente desde db-oracion.js / lh_oracion_cache -->
-                        </select>
-                    </div>
-
                     <!-- CONTROLES ESPECÍFICOS DE OFICIO DE LECTURA -->
                     <div class="control-box" id="ctrlBoxResponsorioOficio" style="display: none;">
                         <label for="selectResponsorioOficio">
@@ -360,20 +349,31 @@
                     <div class="control-box" id="ctrlBoxTeDeumOficio" style="display: none;">
                         <label for="selectTeDeumOficio">
                             <span class="material-symbols-outlined" style="font-size:16px;">music_note</span>
-                            Himno Post-Lecturas (Te Deum)
+                            Himno Post-2ª Lectura (Solo Domingos)
                         </label>
                         <select id="selectTeDeumOficio" class="select-liturgico">
-                            <option value="tedeum_canonico" selected>A ti, oh Dios (Te Deum)</option>
-                            <option value="ninguno">Ninguno / Día ferial</option>
+                            <option value="tedeum_canonico" selected>A ti, oh Dios (Te Deum) [Recomendado]</option>
+                            <option value="ninguno">Ninguno (Omitir himno)</option>
                         </select>
                     </div>
 
                     <div class="control-box" id="ctrlBoxOpcionalOficio" style="display: none;">
                         <label for="inputOpcionalOficio">
                             <span class="material-symbols-outlined" style="font-size:16px;">edit_note</span>
-                            Sección Opcional (Rúbrica en rojo)
+                            Parte Opcional Post-Himno (Solo Domingos)
                         </label>
-                        <input type="text" id="inputOpcionalOficio" class="select-liturgico" placeholder="Texto o referencia opcional...">
+                        <textarea id="inputOpcionalOficio" class="select-liturgico" rows="5" style="height: auto; font-family: inherit; font-size: 0.9rem; resize: vertical; line-height: 1.4;"></textarea>
+                    </div>
+
+                    <!-- Selector de Oración -->
+                    <div class="control-box" id="ctrlBoxOracion">
+                        <label for="selectOracion">
+                            <span class="material-symbols-outlined" style="font-size:16px;">church</span>
+                            Oración
+                        </label>
+                        <select id="selectOracion" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-oracion.js / lh_oracion_cache -->
+                        </select>
                     </div>
                 </div>
             </div>
@@ -584,19 +584,57 @@
 
                 <!-- HIMNO POST-LECTURAS (TE DEUM) -->
                 <div class="liturgia-seccion-tedeum" id="seccionTeDeumPreview" style="display: none; margin: 28px 0;">
-                    <div class="liturgia-seccion-invitatorio" style="color: #ff0000;">HIMNO: A TI, OH DIOS (TE DEUM)</div>
-                    <div class="liturgia-texto-salmo" id="previewTextoTeDeum">A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
+                    <div class="liturgia-seccion-invitatorio" style="color: #ff0000;" id="previewTituloTeDeum">HIMNO: A TI, OH DIOS (TE DEUM)</div>
+                    <div class="liturgia-texto-salmo" style="white-space: pre-line;" id="previewTextoTeDeum">A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
 A ti, eterno Padre, te venera toda la creación.
 Los ángeles todos, los cielos y todas las potestades te honran.
 Los querubines y serafines te cantan sin cesar:
 Santo, Santo, Santo es el Señor, Dios del universo.
-Llenos están el cielo y la tierra de la majestad de tu gloria.</div>
+Llenos están el cielo y la tierra de la majestad de tu gloria.
+
+A ti te ensalza el glorioso coro de los apóstoles,
+la multitud admirable de los profetas,
+el blanco ejército de los mártires.
+A ti la santa Iglesia confiesa por toda la redondez de la tierra:
+Padre de inmensa majestad,
+Hijo único y verdadero, digno de adoración,
+Espíritu Santo Defensor.
+
+Tú eres el Rey de la gloria, oh Cristo.
+Tú eres el Hijo eterno del Padre.
+Tú, para librar al hombre, no te horrorizaste del seno de la Virgen.
+Tú, rota la cadena de la muerte, abriste a los creyentes el reino de los cielos.
+Tú estás sentado a la derecha de Dios en la gloria del Padre.
+Creemos que vendrás como juez.
+
+Te rogamos, pues, socorras a tus siervos,
+a quienes redimiste con tu preciosa sangre.
+Haz que seamos contados entre tus santos en la gloria eterna.</div>
                 </div>
 
-                <!-- SECCIÓN OPCIONAL (VIGILIA) -->
+                <!-- SECCIÓN OPCIONAL (POST-HIMNO DOMINGOS) -->
                 <div class="liturgia-seccion-opcional-oficio" id="seccionOpcionalOficioPreview" style="display: none; margin: 24px 0;">
                     <div class="liturgia-rubrica-invitatorio" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">La parte que sigue puede omitirse, si se cree oportuno.</div>
-                    <div class="liturgia-texto-lectura" id="previewTextoOpcionalOficio"></div>
+                    <div class="liturgia-texto-salmo" style="white-space: pre-line;" id="previewTextoOpcionalOficio">Salva a tu pueblo, Señor,
+y bendice a tu heredad.
+
+Sé su pastor,
+y guíalos por siempre.
+
+Día tras día te bendeciremos
+y alabaremos tu nombre por siempre jamás.
+
+Dígnate, Señor,
+guardarnos de pecado en este día.
+
+Ten piedad de nosotros, Señor,
+ten piedad de nosotros.
+
+Que tu misericordia, Señor, venga sobre nosotros,
+como lo esperamos de ti.
+
+A ti, Señor, me acojo,
+no quede yo nunca defraudado.</div>
                 </div>
 
                 <!-- 11. SECCIÓN DE LECTURA BREVE Y RESPONSORIO (DEBAJO DE LA SALMODIA) -->

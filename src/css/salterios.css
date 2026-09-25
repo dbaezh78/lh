@@ -190,7 +190,7 @@ body.pagina-salterios {
 
 .lectura-subtitulo-rubrica {
     color: var(--salterio-rubrica) !important;
-    font-weight: bold !important;
+    font-weight: initial !important;
     text-transform: uppercase;
     font-size: calc(1.02 * var(--size) * var(--font-zoom));
     margin: 6px 0 12px 0;
