@@ -263,10 +263,10 @@ export function decodificarCodigoLiturgico(codigo) {
         };
     }
 
-    // 5. Formato Santos: saDDMMslug (ej: sa2906santospedroypablo, sa0101santamaria)
-    const mSanto = clean.match(/^sa(\d{2})(\d{2})([a-z0-9ñ]+)(?:_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
+    // 5. Formato Santos: saDDMMslug (ej: sa2906santospedroypabloof, sa0101santamariarla)
+    const mSanto = clean.match(/^sa(\d{2})(\d{2})([a-z0-9ñ]+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
     if (mSanto) {
-        const horaSanto = mSanto[4] ? mSanto[4].toLowerCase() : 'laudes';
+        const horaSanto = mSanto[4] ? (MAPA_HORAS[mSanto[4].toLowerCase()] || 'laudes') : (mSanto[5] ? mSanto[5].toLowerCase() : 'laudes');
         const baseId = `sa${mSanto[1]}${mSanto[2]}${mSanto[3]}`.toLowerCase();
         return {
             tiempo: 'santos',
@@ -280,7 +280,7 @@ export function decodificarCodigoLiturgico(codigo) {
         };
     }
 
-    // 6. Formato Solemnidades litúrgicas / fiestas con slug de nombre (ej: laepifaniadelSeñor, elbautismodelSeñor)
+    // 6. Formato Solemnidades litúrgicas / fiestas con slug de nombre (ej: elbautismodelSeñorof, elbautismodelSeñorla, laepifaniadelSeñor)
     const SOLEMNIDADES_CONOCIDAS = [
         'laepifaniadelseñor', 'elbautismodelseñor', 'sagradafamilia', 'santamariamadrededios',
         'miercolesdeceniza', 'domingoderamos', 'juevessanto', 'viernessanto', 'sabadosanto',
@@ -289,7 +289,7 @@ export function decodificarCodigoLiturgico(codigo) {
         'anunciaciondelseñor', 'asunciondelavirgenmaria', 'natividaddelseñor', 'todoslossantos',
         'inmaculadaconcepcion'
     ];
-    const mSolemnidad = clean.match(/^([a-z0-9ñ]+)(?:_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
+    const mSolemnidad = clean.match(/^(.+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
     if (mSolemnidad) {
         const slugNorm = mSolemnidad[1].toLowerCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -298,7 +298,7 @@ export function decodificarCodigoLiturgico(codigo) {
             return sNorm === slugNorm;
         });
         if (coincide) {
-            const horaSol = mSolemnidad[2] ? mSolemnidad[2].toLowerCase() : 'laudes';
+            const horaSol = mSolemnidad[2] ? (MAPA_HORAS[mSolemnidad[2].toLowerCase()] || 'laudes') : (mSolemnidad[3] ? mSolemnidad[3].toLowerCase() : 'laudes');
             return {
                 tiempo: 'santos',
                 semana: 3,
@@ -325,10 +325,15 @@ export function obtenerIdsEquivalentes(codigo) {
 
     if (dec) {
         if (dec.formato === 'santo' || dec.formato === 'solemnidad') {
-            const base = (dec.dia || clean).replace(/_(oficio|laudes|tercia|sexta|nona|visperas|completas)$/i, '');
+            const base = (dec.dia || clean).replace(/(?:of|la|te|se|no|vi|co)$/i, '').replace(/_(oficio|laudes|tercia|sexta|nona|visperas|completas)$/i, '');
+            const horaCod = REVERSO_HORAS[dec.libro] || 'la';
             resultado.add(clean);
-            resultado.add(base);
+            resultado.add(`${base}${horaCod}`);
             resultado.add(`${base}_${dec.libro}`);
+            resultado.add(base);
+            ['of', 'la', 'te', 'se', 'no', 'vi', 'co'].forEach(hc => {
+                resultado.add(`${base}${hc}`);
+            });
             ['laudes', 'oficio', 'visperas', 'tercia', 'sexta', 'nona', 'completas'].forEach(h => {
                 resultado.add(`${base}_${h}`);
             });
@@ -360,8 +365,11 @@ export function obtenerIdsEquivalentes(codigo) {
     } else {
         resultado.add(clean);
         if (clean.startsWith('sa')) {
-            const base = clean.replace(/_(oficio|laudes|tercia|sexta|nona|visperas|completas)$/i, '');
+            const base = clean.replace(/(?:of|la|te|se|no|vi|co)$/i, '').replace(/_(oficio|laudes|tercia|sexta|nona|visperas|completas)$/i, '');
             resultado.add(base);
+            ['of', 'la', 'te', 'se', 'no', 'vi', 'co'].forEach(hc => {
+                resultado.add(`${base}${hc}`);
+            });
             ['laudes', 'oficio', 'visperas', 'tercia', 'sexta', 'nona', 'completas'].forEach(h => {
                 resultado.add(`${base}_${h}`);
             });

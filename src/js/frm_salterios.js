@@ -3420,7 +3420,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const libroVal = selLibro ? selLibro.value : 'laudes';
 
         if (tiempoVal === 'santos') {
-            candidatos.unshift(`${idCodigo}_${libroVal}`);
+            candidatos.unshift(idCodigo);
+            candidatos.push(idCodigo.toLowerCase());
+            const idCelebracion = selDia ? selDia.value : '';
+            if (idCelebracion) {
+                candidatos.push(`${idCelebracion}_${libroVal}`);
+                candidatos.push(idCelebracion);
+                candidatos.push(idCelebracion.toLowerCase());
+            }
         }
 
         // Primero revisar si ya existe localmente bajo el ID o cualquier equivalente
@@ -3500,7 +3507,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const catNombre = (SEMANAS_POR_TIEMPO.santos.find(s => s.valor === semanaVal) || {}).texto || 'Común de Santos';
             const idCelebracion = selDia.value || 'sa0101santamaria';
 
-            codigoFinal = idCelebracion;
+            // El código final incluye el sufijo de la liturgia de las horas (ej: elbautismodelSeñorof, elbautismodelSeñorla, elbautismodelSeñorse, sa2906santospedroypabloof)
+            codigoFinal = `${idCelebracion}${infoLibro.codigo}`;
 
             if (inputCodigo) {
                 inputCodigo.value = codigoFinal;
@@ -3515,7 +3523,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (badgeTiempo) badgeTiempo.innerHTML = `Tiempo: <strong>san</strong> (${infoTiempo.nombre})`;
             if (badgeSemana) badgeSemana.innerHTML = `Categoría: <strong>${catNombre}</strong>`;
-            if (badgeDia)    badgeDia.innerHTML    = `Celebración: <strong>${codigoFinal}</strong>`;
+            if (badgeDia)    badgeDia.innerHTML    = `Celebración: <strong>${idCelebracion}</strong>`;
             if (badgeLibro)  badgeLibro.innerHTML  = `Hora: <strong>${infoLibro.codigo}</strong> (${infoLibro.nombre})`;
 
             if (textoDesc) {
@@ -3583,7 +3591,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Comprobación sincrónica inmediata de LocalStorage para evitar parpadeos o sobrescrituras
         const candidatos = (typeof obtenerIdsEquivalentes === 'function') ? obtenerIdsEquivalentes(codigoFinal) : [codigoFinal];
         if (tiempoVal === 'santos') {
-            candidatos.unshift(`${codigoFinal}_${libroVal}`);
+            candidatos.unshift(codigoFinal);
+            candidatos.push(codigoFinal.toLowerCase());
+            const idCelebracion = selDia ? selDia.value : '';
+            if (idCelebracion) {
+                candidatos.push(`${idCelebracion}_${libroVal}`);
+                candidatos.push(idCelebracion);
+                candidatos.push(idCelebracion.toLowerCase());
+            }
         }
         for (const candId of candidatos) {
             const localDataRaw = localStorage.getItem(`lh_salterio_${candId}`);
@@ -3617,7 +3632,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const idCodigo = inputCodigo.value.trim().toLowerCase();
+        const idCodigo = inputCodigo.value.trim();
         if (!idCodigo) {
             alert('No hay un código índice generado.');
             return;
@@ -3914,17 +3929,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             payload.origenCarga = 'firebase';
             guardarHoraEnLocalStorage(idCodigo, payload);
             if (tiempoVal === 'santos') {
-                localStorage.setItem(`lh_salterio_${idCodigo}_${libroVal}`, JSON.stringify(payload));
-                try {
-                    let consolidado = {};
+                localStorage.setItem(`lh_salterio_${idCodigo}`, JSON.stringify(payload));
+                localStorage.setItem(`lh_salterio_${idCodigo.toLowerCase()}`, JSON.stringify(payload));
+                const idCelebracion = selDia ? selDia.value : '';
+                if (idCelebracion && idCelebracion !== idCodigo) {
                     try {
-                        consolidado = JSON.parse(localStorage.getItem(`lh_salterio_${idCodigo}`)) || {};
+                        let consolidado = {};
+                        try {
+                            consolidado = JSON.parse(localStorage.getItem(`lh_salterio_${idCelebracion}`)) || {};
+                        } catch (_) {}
+                        if (!consolidado.horas) consolidado.horas = {};
+                        consolidado.horas[libroVal] = payload;
+                        consolidado = { ...consolidado, ...payload };
+                        localStorage.setItem(`lh_salterio_${idCelebracion}`, JSON.stringify(consolidado));
                     } catch (_) {}
-                    if (!consolidado.horas) consolidado.horas = {};
-                    consolidado.horas[libroVal] = payload;
-                    consolidado = { ...consolidado, ...payload };
-                    localStorage.setItem(`lh_salterio_${idCodigo}`, JSON.stringify(consolidado));
-                } catch (_) {}
+                }
             }
         } catch (e) {
             console.warn("Aviso al guardar copia local:", e);
@@ -3936,15 +3955,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (window.firebaseAPI && window.firebaseAPI.db) {
                 const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
                 const docRef = doc(window.firebaseAPI.db, "salterios", idCodigo);
-                if (tiempoVal === 'santos') {
-                    await setDoc(docRef, {
+                await setDoc(docRef, payload, { merge: true });
+                const idCelebracion = selDia ? selDia.value : '';
+                if (tiempoVal === 'santos' && idCelebracion && idCelebracion !== idCodigo) {
+                    const docBaseRef = doc(window.firebaseAPI.db, "salterios", idCelebracion);
+                    await setDoc(docBaseRef, {
                         ...payload,
                         horas: {
                             [libroVal]: payload
                         }
                     }, { merge: true });
-                } else {
-                    await setDoc(docRef, payload, { merge: true });
                 }
                 exitoFirebase = true;
             }

@@ -162,10 +162,10 @@ export function decodificarCodigoLiturgico(codigo) {
         };
     }
 
-    // 5. Formato Santos: saDDMMslug (ej: sa2906santospedroypablo, sa0101santamaria)
-    const mSanto = clean.match(/^sa(\d{2})(\d{2})([a-z0-9ñ]+)(?:_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
+    // 5. Formato Santos: saDDMMslug (ej: sa2906santospedroypabloof, sa0101santamariarla)
+    const mSanto = clean.match(/^sa(\d{2})(\d{2})([a-z0-9ñ]+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
     if (mSanto) {
-        const horaSanto = mSanto[4] ? mSanto[4].toLowerCase() : 'laudes';
+        const horaSanto = mSanto[4] ? (mapaL[mSanto[4].toLowerCase()] || 'laudes') : (mSanto[5] ? mSanto[5].toLowerCase() : 'laudes');
         const baseId = `sa${mSanto[1]}${mSanto[2]}${mSanto[3]}`.toLowerCase();
         return {
             tiempo: 'santos',
@@ -179,7 +179,7 @@ export function decodificarCodigoLiturgico(codigo) {
         };
     }
 
-    // 6. Formato Solemnidades litúrgicas / fiestas con slug de nombre (ej: laepifaniadelSeñor, elbautismodelSeñor)
+    // 6. Formato Solemnidades litúrgicas / fiestas con slug de nombre (ej: elbautismodelSeñorof, elbautismodelSeñorla, laepifaniadelSeñor)
     const SOLEMNIDADES_CONOCIDAS = [
         'laepifaniadelseñor', 'elbautismodelseñor', 'sagradafamilia', 'santamariamadrededios',
         'miercolesdeceniza', 'domingoderamos', 'juevessanto', 'viernessanto', 'sabadosanto',
@@ -188,7 +188,7 @@ export function decodificarCodigoLiturgico(codigo) {
         'anunciaciondelseñor', 'asunciondelavirgenmaria', 'natividaddelseñor', 'todoslossantos',
         'inmaculadaconcepcion'
     ];
-    const mSolemnidad = clean.match(/^([a-z0-9ñ]+)(?:_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
+    const mSolemnidad = clean.match(/^(.+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
     if (mSolemnidad) {
         const slugNorm = mSolemnidad[1].toLowerCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -197,7 +197,7 @@ export function decodificarCodigoLiturgico(codigo) {
             return sNorm === slugNorm;
         });
         if (coincide) {
-            const horaSol = mSolemnidad[2] ? mSolemnidad[2].toLowerCase() : 'laudes';
+            const horaSol = mSolemnidad[2] ? (mapaL[mSolemnidad[2].toLowerCase()] || 'laudes') : (mSolemnidad[3] ? mSolemnidad[3].toLowerCase() : 'laudes');
             return {
                 tiempo: 'santos',
                 semana: 3,
