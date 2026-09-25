@@ -1361,7 +1361,11 @@ export const AntifonasDB = {
     filtrar: (tiempo, semana, dia, libro, tipo) => {
         return CATALOGO_ANTIFONAS_SEED.filter(a => {
             if (tiempo && a.tiempo !== tiempo) return false;
-            if (semana !== undefined && semana !== null && semana !== '' && a.semana != semana) return false;
+            if (semana !== undefined && semana !== null && semana !== '') {
+                const sBusq = parseInt(String(semana).replace(/[^0-9]/g, ''), 10);
+                const sAnt = parseInt(String(a.semana).replace(/[^0-9]/g, ''), 10);
+                if (!isNaN(sBusq) && !isNaN(sAnt) && sAnt !== sBusq) return false;
+            }
             if (dia && a.dia !== dia) return false;
             if (libro && libro !== 'general' && a.libro !== libro && a.libro !== 'general') return false;
             if (tipo && a.tipo !== tipo) return false;

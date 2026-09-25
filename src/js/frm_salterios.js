@@ -52,35 +52,35 @@ export const CODIGOS_TIEMPO = {
 };
 
 export const SEMANAS_POR_TIEMPO = {
-    ordinario: Array.from({ length: 34 }, (_, i) => ({ valor: `s${i + 1}`, texto: `Semana ${i + 1}` })),
-    adviento:  Array.from({ length: 4 }, (_, i) => ({ valor: `s${i + 1}`, texto: `Semana ${i + 1}` })),
+    ordinario: Array.from({ length: 34 }, (_, i) => ({ valor: `s${String(i + 1).padStart(2, '0')}`, texto: `Semana ${i + 1}` })),
+    adviento:  Array.from({ length: 4 }, (_, i) => ({ valor: `s${String(i + 1).padStart(2, '0')}`, texto: `Semana ${i + 1}` })),
     navidad:   [
-        { valor: 's1', texto: 'Semana 1 (Octava de Navidad)' },
-        { valor: 's2', texto: 'Semana 2 (Tiempo de Epifanía)' }
+        { valor: 's01', texto: 'Semana 1 (Octava de Navidad)' },
+        { valor: 's02', texto: 'Semana 2 (Tiempo de Epifanía)' }
     ],
     cuaresma:  [
-        { valor: 's1', texto: 'Semana 1' },
-        { valor: 's2', texto: 'Semana 2' },
-        { valor: 's3', texto: 'Semana 3' },
-        { valor: 's4', texto: 'Semana 4' },
-        { valor: 's5', texto: 'Semana 5' },
-        { valor: 's6', texto: 'Semana 6 (Semana Santa)' },
-        { valor: 's7', texto: 'Triduo Pascual' }
+        { valor: 's01', texto: 'Semana 1' },
+        { valor: 's02', texto: 'Semana 2' },
+        { valor: 's03', texto: 'Semana 3' },
+        { valor: 's04', texto: 'Semana 4' },
+        { valor: 's05', texto: 'Semana 5' },
+        { valor: 's06', texto: 'Semana 6 (Semana Santa)' },
+        { valor: 's07', texto: 'Triduo Pascual' }
     ],
     pascua:    [
-        { valor: 's1', texto: 'Semana 1 (Octava de Pascua)' },
-        { valor: 's2', texto: 'Semana 2' },
-        { valor: 's3', texto: 'Semana 3' },
-        { valor: 's4', texto: 'Semana 4' },
-        { valor: 's5', texto: 'Semana 5' },
-        { valor: 's6', texto: 'Semana 6' },
-        { valor: 's7', texto: 'Semana 7 (Ascensión / Pentecostés)' }
+        { valor: 's01', texto: 'Semana 1 (Octava de Pascua)' },
+        { valor: 's02', texto: 'Semana 2' },
+        { valor: 's03', texto: 'Semana 3' },
+        { valor: 's04', texto: 'Semana 4' },
+        { valor: 's05', texto: 'Semana 5' },
+        { valor: 's06', texto: 'Semana 6' },
+        { valor: 's07', texto: 'Semana 7 (Ascensión / Pentecostés)' }
     ],
     santos:    [
-        { valor: 's1', texto: 'Común de Santos' },
-        { valor: 's2', texto: 'Propio de los Santos' },
-        { valor: 's3', texto: 'Solemnidades' },
-        { valor: 's4', texto: 'Fiestas y Memorias' }
+        { valor: 's01', texto: 'Común de Santos' },
+        { valor: 's02', texto: 'Propio de los Santos' },
+        { valor: 's03', texto: 'Solemnidades' },
+        { valor: 's04', texto: 'Fiestas y Memorias' }
     ]
 };
 
@@ -1538,7 +1538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Renderizar y sincronizar la vista previa del Invitatorio según la Imagen 2 (SIN RECUADRO)
     function actualizarInvitatorioPreview(forzarRecomendado = false) {
         const tiempoVal = selTiempo.value;
-        const semanaVal = selSemana.value || 's1';
+        const semanaVal = selSemana.value || 's01';
         const diaVal    = selDia.value;
         const libroVal  = selLibro.value;
         const esOficio  = (libroVal === 'oficio');
@@ -3030,19 +3030,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Calcular y renderizar el código combinado (ej: tos1dola, tos24sala, tos25dola)
+    // Calcular y renderizar el código combinado (ej: tos01dola, tos01doof, tos24sala)
     function actualizarCodigoCombinado(esCambioParametro = false) {
         const tiempoVal = selTiempo.value;
-        const semanaVal = selSemana.value; // ej: s1, s24 o s25
+        const semanaVal = selSemana.value; // ej: s01, s24 o s25
         const diaVal    = selDia.value;
         const libroVal  = selLibro.value;
 
         const infoTiempo = CODIGOS_TIEMPO[tiempoVal] || { codigo: 'to', nombre: 'Tiempo Ordinario' };
-        const codSemana  = semanaVal || 's1';
+        let codSemana  = semanaVal || 's01';
+        const mSem = codSemana.match(/^s?(\d+)$/i);
+        if (mSem) {
+            codSemana = `s${mSem[1].padStart(2, '0')}`;
+        }
         const infoDia    = CODIGOS_DIA[diaVal] || { codigo: 'do', nombre: 'Domingo' };
         const infoLibro  = CODIGOS_LIBRO[libroVal] || { codigo: 'la', nombre: 'Laudes' };
 
-        // Combinación del código
+        // Combinación del código canónico: [tiempo][semana 2 dígitos][día][hora al final] (ej: tos01doof, tos01dola)
         const codigoFinal = `${infoTiempo.codigo}${codSemana}${infoDia.codigo}${infoLibro.codigo}`.toLowerCase();
 
         if (inputCodigo) {
@@ -3132,7 +3136,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnGuardar.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">hourglass_top</span> <span>Guardando...</span>`;
 
         const tiempoVal = selTiempo.value;
-        const semanaVal = selSemana.value || 's1';
+        let semanaVal = selSemana.value || 's01';
+        const mSemG = semanaVal.match(/^s?(\d+)$/i);
+        if (mSemG) {
+            semanaVal = `s${mSemG[1].padStart(2, '0')}`;
+        }
         const diaVal    = selDia.value;
         const libroVal  = selLibro.value;
 

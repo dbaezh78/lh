@@ -358,7 +358,7 @@ export class CintaLiturgica {
         const horaBtnsHtml = horas.map(h => {
             const activo = (libro.toLowerCase() === h.id.toLowerCase()) ? 'activo' : '';
             const hCode = mapH[h.id] || 'la';
-            const docId = (h.id === 'oficio') ? `${tCode}s${semPad}of${dCode}` : `${tCode}s${semPad}${dCode}${hCode}`;
+            const docId = `${tCode}s${semPad}${dCode}${hCode}`;
             const href = `?tiempo=${tiempoSlug}&semana=${semana}&dia=${diaSlug}&libro=${h.id}&hora=${h.id}&id=${docId}`;
             return `<a href="${href}" class="cinta-btn-hora ${activo}" data-libro="${h.id}">${h.label}</a>`;
         }).join('');

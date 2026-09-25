@@ -223,13 +223,13 @@ export class LecturasDB {
 
     static obtenerLectura1(tiempo = 'ordinario', semana = '1', dia = 'domingo', anioPar = true) {
         const catalogo = this.getCatalogo();
-        const semStr = String(semana);
+        const semNum = parseInt(String(semana).replace(/[^0-9]/g, ''), 10) || 1;
         const tipoBuscado = anioPar ? 'lectura1_par' : 'lectura1_impar';
 
         // 1. Coincidencia exacta de tiempo, semana, día y tipo par/impar
         let encontrada = catalogo.find(x => 
             x.tiempo === tiempo &&
-            String(x.semana) === semStr &&
+            (parseInt(String(x.semana).replace(/[^0-9]/g, ''), 10) || 1) === semNum &&
             x.dia === dia &&
             (x.tipo === tipoBuscado || x.tipo === 'lectura1')
         );
@@ -239,7 +239,7 @@ export class LecturasDB {
         // 2. Si no encuentra con par/impar, buscar cualquier lectura1 para ese día
         encontrada = catalogo.find(x => 
             x.tiempo === tiempo &&
-            String(x.semana) === semStr &&
+            (parseInt(String(x.semana).replace(/[^0-9]/g, ''), 10) || 1) === semNum &&
             x.dia === dia &&
             (x.tipo?.startsWith('lectura1'))
         );
@@ -252,11 +252,11 @@ export class LecturasDB {
 
     static obtenerLectura2(tiempo = 'ordinario', semana = '1', dia = 'domingo') {
         const catalogo = this.getCatalogo();
-        const semStr = String(semana);
+        const semNum = parseInt(String(semana).replace(/[^0-9]/g, ''), 10) || 1;
 
         let encontrada = catalogo.find(x => 
             x.tiempo === tiempo &&
-            String(x.semana) === semStr &&
+            (parseInt(String(x.semana).replace(/[^0-9]/g, ''), 10) || 1) === semNum &&
             x.dia === dia &&
             x.tipo === 'lectura2'
         );

@@ -779,7 +779,11 @@ export const HimnosDB = {
     filtrar: (tiempo, semana, dia, libro) => {
         return CATALOGO_HIMNOS_SEED.filter(h => {
             if (tiempo && h.tiempo !== tiempo) return false;
-            if (semana !== undefined && semana !== null && semana !== '' && h.semana != semana) return false;
+            if (semana !== undefined && semana !== null && semana !== '') {
+                const sBusq = parseInt(String(semana).replace(/[^0-9]/g, ''), 10);
+                const sHim = parseInt(String(h.semana).replace(/[^0-9]/g, ''), 10);
+                if (!isNaN(sBusq) && !isNaN(sHim) && sHim !== sBusq) return false;
+            }
             if (dia && h.dia !== dia) return false;
             if (libro && h.libro !== libro) return false;
             return true;

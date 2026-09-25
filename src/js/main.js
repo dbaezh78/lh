@@ -529,13 +529,13 @@ function vincularEventos() {
                         const tCode = mapT[t] || 'to';
 
                         const horasConfig = [
-                            { id: 'oficio', label: 'Oficio de Lectura', icon: 'menu_book', docId: `${tCode}s${semPad}of${dCod}` },
-                            { id: 'laudes', label: 'Laudes', icon: 'wb_twilight', docId: `${tCode}s${semPad}la${dCod}` },
-                            { id: 'tercia', label: 'Tercia', icon: 'schedule', docId: `${tCode}s${semPad}te${dCod}` },
-                            { id: 'sexta', label: 'Sexta', icon: 'light_mode', docId: `${tCode}s${semPad}se${dCod}` },
-                            { id: 'nona', label: 'Nona', icon: 'wb_sunny', docId: `${tCode}s${semPad}no${dCod}` },
-                            { id: 'visperas', label: 'Vísperas', icon: 'wb_twilight', docId: `${tCode}s${semPad}vi${dCod}` },
-                            { id: 'completas', label: 'Completas', icon: 'bedtime', docId: `${tCode}s${semPad}co${dCod}` }
+                            { id: 'oficio', label: 'Oficio de Lectura', icon: 'menu_book', docId: `${tCode}s${semPad}${dCod}of` },
+                            { id: 'laudes', label: 'Laudes', icon: 'wb_twilight', docId: `${tCode}s${semPad}${dCod}la` },
+                            { id: 'tercia', label: 'Tercia', icon: 'schedule', docId: `${tCode}s${semPad}${dCod}te` },
+                            { id: 'sexta', label: 'Sexta', icon: 'light_mode', docId: `${tCode}s${semPad}${dCod}se` },
+                            { id: 'nona', label: 'Nona', icon: 'wb_sunny', docId: `${tCode}s${semPad}${dCod}no` },
+                            { id: 'visperas', label: 'Vísperas', icon: 'wb_twilight', docId: `${tCode}s${semPad}${dCod}vi` },
+                            { id: 'completas', label: 'Completas', icon: 'bedtime', docId: `${tCode}s${semPad}${dCod}co` }
                         ];
 
                         return horasConfig.map(h => {

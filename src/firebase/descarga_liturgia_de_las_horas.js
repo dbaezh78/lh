@@ -226,7 +226,7 @@ export function obtenerIdsEquivalentes(codigo) {
     if (!codigo) return [];
     const clean = codigo.trim().toLowerCase();
     const dec = decodificarCodigoLiturgico(clean);
-    const resultado = new Set([clean]);
+    const resultado = new Set();
 
     if (dec) {
         const codT = REVERSO_TIEMPOS[dec.tiempo] || 'to';
@@ -235,19 +235,24 @@ export function obtenerIdsEquivalentes(codigo) {
         const codD = REVERSO_DIAS[dec.dia] || 'sa';
         const codH = REVERSO_HORAS[dec.libro] || 'la';
 
-        // Formato nuevo estándar: ej. tos24sala, tos1doof, tos01doof
-        resultado.add(`${codT}${codS}${codD}${codH}`);
+        // 1. Formato canónico oficial prioritario (semana 2 dígitos + día + hora al final): ej. tos01doof, tos01dola, tos24sala
         resultado.add(`${codT}${codSPadded}${codD}${codH}`);
+        // 2. ID exacto solicitado
+        resultado.add(clean);
+        // 3. Formato nuevo con 1 dígito (compatibilidad): ej. tos1doof, tos1dola
+        resultado.add(`${codT}${codS}${codD}${codH}`);
 
-        // Formato histórico: ej. tos24lasa, tos1ofdo, tos01ofdo
-        resultado.add(`${codT}${codS}${codH}${codD}`);
+        // 4. Formato histórico compatible (hora antes del día): ej. tos01ofdo, tos1ofdo, tos24lasa
         resultado.add(`${codT}${codSPadded}${codH}${codD}`);
+        resultado.add(`${codT}${codS}${codH}${codD}`);
 
-        // Formato verboso
+        // 5. Formato verboso
         resultado.add(`${dec.tiempo}_semana_${dec.semana}_${dec.dia}_${dec.libro}`);
         resultado.add(`${dec.tiempo}_semana_${String(dec.semana).padStart(2, '0')}_${dec.dia}_${dec.libro}`);
         resultado.add(`${dec.tiempo}_s${dec.semana}_${dec.dia}_${dec.libro}`);
         resultado.add(`${dec.tiempo}_s${String(dec.semana).padStart(2, '0')}_${dec.dia}_${dec.libro}`);
+    } else {
+        resultado.add(clean);
     }
 
     return Array.from(resultado);

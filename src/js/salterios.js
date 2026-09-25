@@ -169,7 +169,7 @@ function obtenerParametrosUrl() {
     const d = p.get('dia') || 'sabado';
     const lib = (horaParam || 'laudes').toLowerCase();
 
-    // Auto-generar el código canónico id (ej: tos01ofdo o tos24lasa)
+    // Auto-generar el código canónico id (ej: tos01doof o tos24sala)
     const mapT = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'san' };
     const mapD = { domingo: 'do', lunes: 'lu', martes: 'ma', miercoles: 'mi', jueves: 'ju', viernes: 'vi', sabado: 'sa' };
     const mapH = { oficio: 'of', laudes: 'la', tercia: 'te', sexta: 'se', nona: 'no', visperas: 'vi', completas: 'co' };
@@ -177,7 +177,7 @@ function obtenerParametrosUrl() {
     const dCode = mapD[d] || 'do';
     const hCode = mapH[lib] || 'la';
     const semPad = String(s).padStart(2, '0');
-    const codigoGenerado = (lib === 'oficio') ? `${tCode}s${semPad}of${dCode}` : `${tCode}s${semPad}${dCode}${hCode}`;
+    const codigoGenerado = `${tCode}s${semPad}${dCode}${hCode}`;
 
     return {
         tiempo: t,
@@ -1025,9 +1025,9 @@ function inicializarConstructor() {
         if (!horaActualDatos) return;
         try {
             const p = obtenerParametrosUrl();
-            const docId = p.tiempo === 'santos'
+            const docId = p.codigoCompleto || (p.tiempo === 'santos'
                 ? `santo_${(p.fecha || '01_01').replace('/', '_')}_${p.libro}`
-                : `${p.tiempo}_semana_${p.semana}_${p.dia}_${p.libro}`;
+                : `${p.tiempo}_semana_${p.semana}_${p.dia}_${p.libro}`);
 
             if (window.firebaseAPI && window.firebaseAPI.guardarSalterioFirestore) {
                 await window.firebaseAPI.guardarSalterioFirestore(docId, horaActualDatos);

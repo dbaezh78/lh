@@ -181,10 +181,14 @@ function buscarLecturaExistente(idBuscado, tipo, tiempo, semana, dia) {
     let m = listaLecturas.find(x => x.id === idBuscado || norm(x.id) === idNorm);
     if (m) return m;
 
-    // 2. Equivalencia con IDs de semilla canónica (ej: tos1OFdo_lec1_par vs tos01ofdo_lect1par)
+    // 2. Equivalencia con IDs de semilla canónica (ej: tos1OFdo_lec1_par vs tos01doof_lect1par / tos01ofdo_lect1par)
     const semNum = parseInt(semana, 10);
-    const idLegacy = `${norm(tiempo)}${semNum}of${norm(dia)}_${norm(tipo)}`.replace('lectura', 'lec');
-    m = listaLecturas.find(x => norm(x.id) === norm(idLegacy));
+    const idLegacy1 = `${norm(tiempo)}${semNum}of${norm(dia)}_${norm(tipo)}`.replace('lectura', 'lec');
+    const idLegacy2 = `${norm(tiempo)}${semNum}${norm(dia)}of_${norm(tipo)}`.replace('lectura', 'lec');
+    m = listaLecturas.find(x => {
+        const nx = norm(x.id);
+        return nx === norm(idLegacy1) || nx === norm(idLegacy2);
+    });
     if (m) return m;
 
     // 3. Por combinación exacta de atributos
@@ -238,8 +242,8 @@ function manejarCambioParametros() {
         audioArchivo = 'lecturas.mp3';
     }
 
-    // ID generado según especificación exacta del usuario: ej: tos01ofdo_lect1par
-    const idGenerado = `${tiempoCod}${semanaPadded}of${diaCod}${tipoSuffix}`;
+    // ID generado según especificación exacta del usuario: ej: tos01doof_lect1par
+    const idGenerado = `${tiempoCod}${semanaPadded}${diaCod}of${tipoSuffix}`;
 
     // URL de Audio generada según la combinación litúrgica
     const subdominio = tiempoCod === 'san' ? 'to' : tiempoCod;
