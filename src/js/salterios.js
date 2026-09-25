@@ -9,7 +9,14 @@ import { PrecesDB } from '../data/db-preces.js';
 import { ResponsoriosDB } from '../data/db-responsorios.js';
 import { LecturasDB } from '../data/db-lecturas.js';
 import { construirRutaOficioLectura } from './oficiodelectura.js';
-import { obtenerLiturgiaHora } from '../firebase/descarga_liturgia_de_las_horas.js';
+import { 
+    obtenerLiturgiaHora, 
+    obtenerHoraLocalSincrona, 
+    guardarHoraEnLocalStorage, 
+    consultarHoraEnFirebase,
+    precargarHorasCanonicasLocal,
+    normalizarObjetoLiturgico
+} from '../firebase/descarga_liturgia_de_las_horas.js';
 
 let horaActualDatos = null;
 let cintaInstancia = null;
@@ -71,6 +78,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     await cargarYRenderizarHora(params);
     inicializarConstructor();
     inicializarEventosInteractivos();
+
+    // Precargar horas canónicas de la semana en background si no estuvieran en local
+    const precargar = () => {
+        try {
+            precargarHorasCanonicasLocal([params.semana || 1], ensamblarHoraPorDefecto);
+        } catch (_) {}
+    };
+    if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(precargar);
+    } else {
+        setTimeout(precargar, 1200);
+    }
 });
 
 // Decodificador del código litúrgico estándar (ej: tos24sala, tos01dola, tos1LAdo, tos1lami)
@@ -207,19 +226,11 @@ function aplicarTemaConfigurado() {
 // CARGA Y ENSAMBLAJE DE LA HORA LITÚRGICA
 // =========================================================================
 
-async function cargarYRenderizarHora(params) {
-    const { tiempo, semana, dia, libro, fecha, santo, codigoCompleto } = params;
-    const docId = codigoCompleto || (tiempo === 'santos' 
-        ? `santo_${(fecha || '01_01').replace('/', '_')}_${libro}`
-        : `${tiempo}_semana_${semana}_${dia}_${libro}`);
-
-    // LOCAL FIRST -> FIREBASE -> FALLBACK ENSAMBLADO
-    let datos = await obtenerLiturgiaHora(docId, params, ensamblarHoraPorDefecto);
-    if (!datos) {
-        datos = ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo);
-    }
-
+function montarOActualizarVista(params, datos) {
+    if (!datos) return;
     horaActualDatos = datos;
+
+    const { tiempo, semana, dia, libro, fecha, santo } = params;
 
     // Montar o actualizar la cinta superior
     const labelTiempo = tiempo === 'santos' ? (santo || 'Santos') : `Tiempo ${capitalizar(tiempo)}`;
@@ -239,8 +250,8 @@ async function cargarYRenderizarHora(params) {
     }
 
     // Cargar los 4 audios en la cinta litúrgica
-    const currentYear = new Date().getFullYear();
-    const esPar = (currentYear % 2 === 0);
+    const anioActual = new Date().getFullYear();
+    const esPar = (anioActual % 2 === 0);
 
     const rutasOficio = construirRutaOficioLectura({
         tiempo: tiempo,
@@ -270,6 +281,57 @@ async function cargarYRenderizarHora(params) {
     // Reaplicar tamaño de fuente preferido por el usuario
     if (cintaInstancia) {
         cintaInstancia.aplicarTamanoTexto(cintaInstancia.fontZoom);
+    }
+}
+
+async function cargarYRenderizarHora(params) {
+    const { tiempo, semana, dia, libro, fecha, santo, codigoCompleto } = params;
+    const docId = codigoCompleto || (tiempo === 'santos' 
+        ? `santo_${(fecha || '01_01').replace('/', '_')}_${libro}`
+        : `${tiempo}_semana_${semana}_${dia}_${libro}`);
+
+    // =====================================================================
+    // FASE 1: RENDERIZADO INSTANTÁNEO LOCAL (0 ms)
+    // Busca primero en memoria local (LocalStorage) bajo todos los IDs equivalentes.
+    // Si no existe, ensambla de inmediato canónicamente y persiste en LocalStorage.
+    // =====================================================================
+    let datosLocales = obtenerHoraLocalSincrona(docId);
+
+    if (datosLocales && (datosLocales.salmodia?.salmo1Texto || datosLocales.lecturasOficio || datosLocales.himno?.texto)) {
+        montarOActualizarVista(params, datosLocales);
+        console.log(`⚡ [Local First 0ms] Hora '${docId}' cargada desde LocalStorage.`);
+    } else {
+        // Ensamblar inmediatamente en memoria usando la base canónica
+        const datosDefecto = ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo);
+        guardarHoraEnLocalStorage(docId, datosDefecto);
+        montarOActualizarVista(params, datosDefecto);
+        console.log(`⚡ [Local First 0ms] Hora '${docId}' ensamblada y persistida de inmediato en LocalStorage.`);
+    }
+
+    // =====================================================================
+    // FASE 2: SINCRONIZACIÓN ASÍNCRONA CON FIREBASE (EN SEGUNDO PLANO)
+    // Si la copia local no proviene de Firebase, consultar Firestore en segundo plano
+    // sin bloquear la interfaz. Si existe una versión personalizada en la nube, se
+    // sincroniza con LocalStorage y se actualiza la vista.
+    // =====================================================================
+    if (!datosLocales || datosLocales.origenCarga !== 'firebase') {
+        (async () => {
+            try {
+                const fbData = await consultarHoraEnFirebase(docId, params);
+                if (fbData) {
+                    const normalizado = normalizarObjetoLiturgico(fbData, docId, params, ensamblarHoraPorDefecto);
+                    normalizado.origenCarga = 'firebase';
+                    guardarHoraEnLocalStorage(docId, normalizado);
+                    // Actualizar vista si el usuario sigue en la misma hora
+                    if (horaActualDatos && (horaActualDatos.id === docId || horaActualDatos.codigo === docId)) {
+                        montarOActualizarVista(params, normalizado);
+                        console.log(`☁️ [Firebase Sync] Documento '${docId}' sincronizado desde Firebase y actualizado en vista.`);
+                    }
+                }
+            } catch (errSync) {
+                console.warn(`[Firebase Sync] Aviso sincronizando '${docId}':`, errSync);
+            }
+        })();
     }
 }
 
@@ -1029,11 +1091,14 @@ function inicializarConstructor() {
                 ? `santo_${(p.fecha || '01_01').replace('/', '_')}_${p.libro}`
                 : `${p.tiempo}_semana_${p.semana}_${p.dia}_${p.libro}`);
 
+            horaActualDatos.origenCarga = 'firebase';
+            guardarHoraEnLocalStorage(docId, horaActualDatos);
+
             if (window.firebaseAPI && window.firebaseAPI.guardarSalterioFirestore) {
                 await window.firebaseAPI.guardarSalterioFirestore(docId, horaActualDatos);
-                alert(`✅ Hora litúrgica '${docId}' guardada con éxito en Firestore.`);
+                alert(`✅ Hora litúrgica '${docId}' guardada con éxito en Firestore y LocalStorage.`);
             } else {
-                alert('Firebase API no está disponible en este momento.');
+                alert('Firebase API no está disponible en este momento. Se guardó localmente en su dispositivo.');
             }
         } catch (e) {
             alert('Error al guardar en Firebase: ' + e.message);

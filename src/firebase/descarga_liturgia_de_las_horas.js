@@ -674,6 +674,50 @@ Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`
             salmo3Titulo: 'SALMO 149 - ALEGRÍA DE LOS SANTOS',
             salmo3Texto: TEXTO_SALMO_149_CANONICO
         },
+        versiculo: {
+            v: 'Éste es mi Hijo amado.',
+            r: 'Escuchadlo.'
+        },
+        lecturasOficio: {
+            primera: {
+                etiqueta: '1ra Lectura',
+                titulo: 'PRIMERA LECTURA',
+                epigrafeTipo: 'PRIMERA LECTURA',
+                cita: 'Del libro del profeta Isaías 42, 1-9; 49, 1-9',
+                subtitulo: 'EL SIERVO HUMILDE DEL SEÑOR ES LA LUZ DE LAS NACIONES',
+                descripcion: 'EL SIERVO HUMILDE DEL SEÑOR ES LA LUZ DE LAS NACIONES',
+                texto: `Mirad a mi siervo, a quien sostengo; mi elegido, a quien prefiero. Sobre él he puesto mi espíritu, para que traiga el derecho a las naciones. No gritará, no clamará, no voceará por las calles. La caña cascada no la quebrará, el pabilo vacilante no lo apagará. Promoverá fielmente el derecho, no vacilará ni se quebrará, hasta implantar el derecho en la tierra, y sus leyes que esperan las islas. Así dice el Señor Dios, creador del cielo y sus extensiones, el que extendió la tierra y sus brotes, el que da el aliento al pueblo que la habita y el espíritu a los que caminan por ella: «Yo, el Señor, te he llamado con justicia, te he tomado de la mano, te he formado y te he hecho alianza de un pueblo, luz de las naciones, para abrir los ojos de los ciegos, para sacar a los cautivos de la prisión y de la mazmorra a los que habitan en tinieblas.»`,
+                respCita: 'Cf. Mt 3, 16. 17; Lc 3, 22',
+                respR1: 'Hoy se abrieron los cielos cuando fue bautizado el Señor en el Jordán... * «Éste es mi Hijo amado, en quien tengo mis complacencias.»',
+                respV: 'El Espíritu Santo descendió sobre él en forma visible de paloma, y resonó una voz del cielo:',
+                respR2: '«Éste es mi Hijo amado, en quien tengo mis complacencias.»',
+                responsorio: {
+                    ref: 'Cf. Mt 3, 16. 17; Lc 3, 22',
+                    r1: 'Hoy se abrieron los cielos cuando fue bautizado el Señor en el Jordán... * «Éste es mi Hijo amado, en quien tengo mis complacencias.»',
+                    v: 'El Espíritu Santo descendió sobre él en forma visible de paloma, y resonó una voz del cielo:',
+                    r2: '«Éste es mi Hijo amado, en quien tengo mis complacencias.»'
+                }
+            },
+            segunda: {
+                etiqueta: '2da Lectura',
+                titulo: 'SEGUNDA LECTURA',
+                epigrafeTipo: 'SEGUNDA LECTURA',
+                cita: 'De los Sermones de san Máximo de Turín, obispo',
+                subtitulo: 'CRISTO ES BAUTIZADO PARA SANTIFICAR LAS AGUAS',
+                descripcion: 'CRISTO ES BAUTIZADO PARA SANTIFICAR LAS AGUAS',
+                texto: `Nos enseña el relato evangélico que el Señor fue al Jordán para ser bautizado...`,
+                respCita: 'Cf. Sal 28, 3. 4; Lc 3, 22',
+                respR1: 'La voz del Señor sobre las aguas, el Dios de la gloria hace oír su trueno: * La voz del Señor es potente, la voz del Señor es magnífica.',
+                respV: 'Y se oyó una voz que venía del cielo: «Tú eres mi Hijo amado, en ti me complazco.»',
+                respR2: 'La voz del Señor es potente, la voz del Señor es magnífica.',
+                responsorio: {
+                    ref: 'Cf. Sal 28, 3. 4; Lc 3, 22',
+                    r1: 'La voz del Señor sobre las aguas, el Dios de la gloria hace oír su trueno: * La voz del Señor es potente, la voz del Señor es magnífica.',
+                    v: 'Y se oyó una voz que venía del cielo: «Tú eres mi Hijo amado, en ti me complazco.»',
+                    r2: 'La voz del Señor es potente, la voz del Señor es magnífica.'
+                }
+            }
+        },
         lecturaBreve: {
             cita: 'Rm 8, 1-2',
             texto: 'No hay ya condenación alguna para los que están en Cristo Jesús.',
@@ -759,58 +803,18 @@ export function obtenerHoraLocalSincrona(idCodigo) {
 }
 
 /**
- * Obtiene una hora litúrgica aplicando la estrategia completa:
- * 1. LOCAL FIRST (Búsqueda en LocalStorage con todos los IDs equivalentes)
- * 2. FIREBASE FIRESTORE (Si no existe en local o requiere sincronización)
- * 3. ENSAMBLADOR CANÓNICO (Garantía contra pantallas rotas o errores de "no existe")
+ * Almacena una hora litúrgica en LocalStorage bajo su ID principal y todos sus equivalentes
+ * para asegurar acceso instantáneo (0ms) en cualquier formato de URL.
  */
-export async function obtenerLiturgiaHora(idCodigo, params = {}, fallbackEnsamblador = null) {
-    const idPrincipal = (idCodigo || params.codigoCompleto || `${params.tiempo || 'ordinario'}_s${params.semana || 24}_${params.dia || 'sabado'}_${params.libro || 'laudes'}`).toLowerCase();
-    
-    // 1. PASO 1: LOCAL FIRST (Retorno inmediato si proviene de Firebase y tiene datos completos)
-    const localDirecto = obtenerHoraLocalSincrona(idPrincipal);
-    if (localDirecto && localDirecto.origenCarga === 'firebase' && localDirecto.salmodia?.salmo1Texto && localDirecto.himno?.texto) {
-        console.log(`⚡ [Local First] Hora '${idPrincipal}' cargada localmente sin esperas.`);
-        return localDirecto;
-    }
-
-    let datos = localDirecto || null;
-    let origen = localDirecto ? (localDirecto.origenCarga || 'local') : 'desconocido';
-
-    // 2. PASO 2: FIREBASE FIRESTORE (si no está verificado de Firebase o le faltaban textos)
-    if (!datos || datos.origenCarga !== 'firebase' || !datos.salmodia?.salmo1Texto) {
-        const idsABuscar = obtenerIdsEquivalentes(idPrincipal);
-        for (const candId of idsABuscar) {
-            try {
-                console.log(`☁️ [Firebase] Buscando '${candId}' en Firestore...`);
-                const docRef = doc(db, COLECCION_SALTERIOS, candId);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const fbData = docSnap.data();
-                    origen = 'firebase';
-                    console.log(`✅ [Firebase] Documento '${candId}' descargado con éxito.`);
-                    datos = datos ? { ...datos, ...fbData } : fbData;
-                    datos.origenCarga = 'firebase';
-                    break;
-                }
-            } catch (errFb) {
-                console.warn(`⚠️ [Firebase] Consulta Firestore para '${candId}':`, errFb.message);
-            }
-        }
-    }
-
-    // 3. PASO 3: NORMALIZACIÓN DUAL Y SALVAGUARDA CANÓNICA
-    const resultadoNormalizado = normalizarObjetoLiturgico(datos, idPrincipal, params, fallbackEnsamblador);
-    resultadoNormalizado.origenCarga = origen === 'firebase' ? 'firebase' : (datos ? 'local' : 'canonico');
-
-    // 4. PASO 4: ALMACENAR DE INMEDIATO EN LOCAL PARA FUTURAS CONSULTAS (EN TODOS LOS EQUIVALENTES)
+export function guardarHoraEnLocalStorage(idCodigo, datos) {
+    if (!idCodigo || !datos) return;
     try {
-        localStorage.setItem(`${PREFIJO_LOCAL}${idPrincipal}`, JSON.stringify(resultadoNormalizado));
+        const idPrincipal = idCodigo.toLowerCase();
+        localStorage.setItem(`${PREFIJO_LOCAL}${idPrincipal}`, JSON.stringify(datos));
         const equivs = obtenerIdsEquivalentes(idPrincipal);
         equivs.forEach(eq => {
             try {
-                localStorage.setItem(`${PREFIJO_LOCAL}${eq}`, JSON.stringify(resultadoNormalizado));
+                localStorage.setItem(`${PREFIJO_LOCAL}${eq}`, JSON.stringify(datos));
             } catch (_) {}
         });
         
@@ -823,6 +827,77 @@ export async function obtenerLiturgiaHora(idCodigo, params = {}, fallbackEnsambl
     } catch (eGuardar) {
         console.warn("Aviso guardando en LocalStorage:", eGuardar);
     }
+}
+
+/**
+ * Consulta Firebase Firestore buscando candidatos equivalentes de forma optimizada
+ */
+export async function consultarHoraEnFirebase(idCodigo, params = {}) {
+    const idPrincipal = (idCodigo || params.codigoCompleto || '').toLowerCase();
+    if (!idPrincipal) return null;
+
+    const idsABuscar = obtenerIdsEquivalentes(idPrincipal);
+    // Tomar hasta 6 candidatos prioritarios únicos y consultar en paralelo
+    const candidatos = idsABuscar.filter((v, i, a) => a.indexOf(v) === i).slice(0, 6);
+    try {
+        const promesas = candidatos.map(async (candId) => {
+            try {
+                const docRef = doc(db, COLECCION_SALTERIOS, candId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    console.log(`✅ [Firebase] Documento '${candId}' encontrado en Firestore.`);
+                    return { candId, data: docSnap.data() };
+                }
+            } catch (err) {
+                console.warn(`⚠️ [Firebase] Consulta '${candId}':`, err.message);
+            }
+            return null;
+        });
+
+        const resultados = await Promise.all(promesas);
+        const match = resultados.find(r => r !== null);
+        return match ? match.data : null;
+    } catch (e) {
+        console.warn("Aviso consultando Firebase:", e);
+        return null;
+    }
+}
+
+/**
+ * Obtiene una hora litúrgica aplicando la estrategia completa:
+ * 1. LOCAL FIRST INMEDIATO (0ms): Búsqueda en LocalStorage con todos los IDs equivalentes
+ * 2. FIREBASE FIRESTORE: Consulta en paralelo si no existe en local o para sincronización
+ * 3. ENSAMBLADOR CANÓNICO: Garantía de contenido litúrgico completo
+ * 4. PERSISTENCIA TOTAL EN LOCAL: Almacena de inmediato para que figure SIEMPRE en local
+ */
+export async function obtenerLiturgiaHora(idCodigo, params = {}, fallbackEnsamblador = null) {
+    const idPrincipal = (idCodigo || params.codigoCompleto || `${params.tiempo || 'ordinario'}_s${String(params.semana || 24).padStart(2, '0')}_${params.dia || 'sabado'}_${params.libro || 'laudes'}`).toLowerCase();
+    
+    // 1. PASO 1: LOCAL FIRST INMEDIATO (0 ms)
+    // Si ya existe en LocalStorage con datos válidos, retornar de inmediato
+    const localDirecto = obtenerHoraLocalSincrona(idPrincipal);
+    if (localDirecto && (localDirecto.salmodia?.salmo1Texto || localDirecto.lecturasOficio || localDirecto.himno?.texto)) {
+        console.log(`⚡ [Local First] Hora '${idPrincipal}' cargada localmente sin esperas.`);
+        return localDirecto;
+    }
+
+    let datos = localDirecto || null;
+    let origen = localDirecto ? (localDirecto.origenCarga || 'local') : 'desconocido';
+
+    // 2. PASO 2: FIREBASE FIRESTORE (si no estaba en local o faltaban textos)
+    const fbData = await consultarHoraEnFirebase(idPrincipal, params);
+    if (fbData) {
+        origen = 'firebase';
+        datos = datos ? { ...datos, ...fbData } : fbData;
+        datos.origenCarga = 'firebase';
+    }
+
+    // 3. PASO 3: NORMALIZACIÓN DUAL Y SALVAGUARDA CANÓNICA
+    const resultadoNormalizado = normalizarObjetoLiturgico(datos, idPrincipal, params, fallbackEnsamblador);
+    resultadoNormalizado.origenCarga = origen === 'firebase' ? 'firebase' : (datos ? 'local' : 'canonico');
+
+    // 4. PASO 4: ALMACENAR DE INMEDIATO EN LOCAL PARA QUE SIEMPRE FIGURE EN LOCAL
+    guardarHoraEnLocalStorage(idPrincipal, resultadoNormalizado);
 
     return resultadoNormalizado;
 }
@@ -891,7 +966,7 @@ export async function descargarTodasLasHorasFirebase(onProgress = null) {
  * Precarga en LocalStorage horas litúrgicas canónicas completas
  * para que el sistema funcione 100% offline de inmediato.
  */
-export function precargarHorasCanonicasLocal(semanas = [1, 2, 3, 4]) {
+export function precargarHorasCanonicasLocal(semanas = [1, 2, 3, 4], fallbackEnsamblador = null) {
     const tiempos = ['ordinario'];
     const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
     const horas = ['oficio', 'laudes', 'tercia', 'sexta', 'nona', 'visperas', 'completas'];
@@ -900,26 +975,24 @@ export function precargarHorasCanonicasLocal(semanas = [1, 2, 3, 4]) {
     tiempos.forEach(t => {
         const codT = REVERSO_TIEMPOS[t] || 'to';
         semanas.forEach(s => {
-            const codS = `s${s}`;
+            const semPad = String(s).padStart(2, '0');
             dias.forEach(d => {
                 const codD = REVERSO_DIAS[d] || 'do';
                 horas.forEach(h => {
                     const codH = REVERSO_HORAS[h] || 'la';
-                    const idNuevo = `${codT}${codS}${codD}${codH}`;
-                    const idAntiguo = `${codT}${codS}${codH}${codD}`;
-
-                    const obj = normalizarObjetoLiturgico(null, idNuevo, { tiempo: t, semana: s, dia: d, libro: h });
-                    try {
-                        localStorage.setItem(`${PREFIJO_LOCAL}${idNuevo}`, JSON.stringify(obj));
-                        localStorage.setItem(`${PREFIJO_LOCAL}${idAntiguo}`, JSON.stringify(obj));
+                    const idCanonica = `${codT}s${semPad}${codD}${codH}`;
+                    const yaExiste = localStorage.getItem(`${PREFIJO_LOCAL}${idCanonica}`);
+                    if (!yaExiste) {
+                        const obj = normalizarObjetoLiturgico(null, idCanonica, { tiempo: t, semana: s, dia: d, libro: h }, fallbackEnsamblador);
+                        guardarHoraEnLocalStorage(idCanonica, obj);
                         precargadas++;
-                    } catch (_) {}
+                    }
                 });
             });
         });
     });
 
-    console.log(`📦 Se precargaron ${precargadas} claves de horas litúrgicas canónicas en LocalStorage.`);
+    console.log(`📦 Se precargaron ${precargadas} horas litúrgicas canónicas en LocalStorage.`);
     return precargadas;
 }
 
@@ -940,6 +1013,8 @@ if (typeof window !== 'undefined') {
     window.DescargaLiturgiaHoras = {
         obtenerLiturgiaHora,
         obtenerHoraLocalSincrona,
+        guardarHoraEnLocalStorage,
+        consultarHoraEnFirebase,
         normalizarObjetoLiturgico,
         descargarTodasLasHorasFirebase,
         precargarHorasCanonicasLocal,

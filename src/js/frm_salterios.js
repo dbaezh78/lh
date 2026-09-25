@@ -18,6 +18,7 @@
 import { 
     normalizarObjetoLiturgico,
     obtenerIdsEquivalentes,
+    guardarHoraEnLocalStorage,
     TEXTO_SALMO_62_CANONICO,
     TEXTO_CANTICO_DANIEL_CANONICO,
     TEXTO_SALMO_149_CANONICO 
@@ -3398,9 +3399,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Enriquecer el objeto litúrgico completo para garantizar consistencia sistémica
         const payload = normalizarObjetoLiturgico(payloadBase, idCodigo);
 
-        // 1. Guardado local inmediato en LocalStorage
+        // 1. Guardado local inmediato en LocalStorage bajo ID y todos sus equivalentes
         try {
-            localStorage.setItem(`lh_salterio_${idCodigo}`, JSON.stringify(payload));
+            payload.origenCarga = 'firebase';
+            guardarHoraEnLocalStorage(idCodigo, payload);
         } catch (e) {
             console.warn("Aviso al guardar copia local:", e);
         }
