@@ -320,20 +320,6 @@ export class CintaLiturgica {
         this.vincularEventos();
     }
 
-    actualizarLiturgiaInfo(tiempo, semana, dia, libro, tiempoSlug, diaSlug) {
-        this.opciones = {
-            ...this.opciones,
-            tiempo: tiempo || this.opciones.tiempo,
-            semana: semana !== undefined ? semana : this.opciones.semana,
-            dia: dia || this.opciones.dia,
-            libro: libro || this.opciones.libro,
-            tiempoSlug: tiempoSlug || this.opciones.tiempoSlug,
-            diaSlug: diaSlug || this.opciones.diaSlug
-        };
-        this.render();
-        this.vincularEventos();
-    }
-
     formatearTextoMetadatos(semana, dia) {
         if (!semana) return dia || '';
         const numSemana = String(semana).replace(/^semana\s*/i, '').replace(/^sem\s*/i, '').trim();
@@ -1464,7 +1450,17 @@ export class CintaLiturgica {
     }
 
     // Actualización de Información Litúrgica y Botones Activos
-    actualizarLiturgiaInfo(tiempo, semana, dia, libro, tiempoSlug = '') {
+    actualizarLiturgiaInfo(tiempo, semana, dia, libro, tiempoSlug = '', diaSlug = '') {
+        this.opciones = {
+            ...this.opciones,
+            tiempo: tiempo || this.opciones.tiempo,
+            semana: semana !== undefined ? semana : this.opciones.semana,
+            dia: dia || this.opciones.dia,
+            libro: libro || this.opciones.libro,
+            tiempoSlug: tiempoSlug || this.opciones.tiempoSlug,
+            diaSlug: diaSlug || this.opciones.diaSlug
+        };
+
         const btnTiempo = document.getElementById('btn-toggle-tiempo');
         const txtMetadatos = document.getElementById('cinta-texto-metadatos');
 
