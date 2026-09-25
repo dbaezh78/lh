@@ -263,6 +263,54 @@ export function decodificarCodigoLiturgico(codigo) {
         };
     }
 
+    // 5. Formato Santos: saDDMMslug (ej: sa2906santospedroypablo, sa0101santamaria)
+    const mSanto = clean.match(/^sa(\d{2})(\d{2})([a-z0-9ñ]+)(?:_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
+    if (mSanto) {
+        const horaSanto = mSanto[4] ? mSanto[4].toLowerCase() : 'laudes';
+        const baseId = `sa${mSanto[1]}${mSanto[2]}${mSanto[3]}`.toLowerCase();
+        return {
+            tiempo: 'santos',
+            semana: 1,
+            dia: baseId,
+            santo: mSanto[3],
+            diaMes: `${mSanto[1]}/${mSanto[2]}`,
+            libro: horaSanto,
+            codigoCompleto: clean,
+            formato: 'santo'
+        };
+    }
+
+    // 6. Formato Solemnidades litúrgicas / fiestas con slug de nombre (ej: laepifaniadelSeñor, elbautismodelSeñor)
+    const SOLEMNIDADES_CONOCIDAS = [
+        'laepifaniadelseñor', 'elbautismodelseñor', 'sagradafamilia', 'santamariamadrededios',
+        'miercolesdeceniza', 'domingoderamos', 'juevessanto', 'viernessanto', 'sabadosanto',
+        'domingoderesurreccion', 'laascensiondelseñor', 'pentecostes', 'santisimatrinidad',
+        'santisimocuerpoyasangredecristo', 'sagradocorazondejesus', 'jesucristoreydeluniverso',
+        'anunciaciondelseñor', 'asunciondelavirgenmaria', 'natividaddelseñor', 'todoslossantos',
+        'inmaculadaconcepcion'
+    ];
+    const mSolemnidad = clean.match(/^([a-z0-9ñ]+)(?:_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
+    if (mSolemnidad) {
+        const slugNorm = mSolemnidad[1].toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const coincide = SOLEMNIDADES_CONOCIDAS.some(s => {
+            const sNorm = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return sNorm === slugNorm;
+        });
+        if (coincide) {
+            const horaSol = mSolemnidad[2] ? mSolemnidad[2].toLowerCase() : 'laudes';
+            return {
+                tiempo: 'santos',
+                semana: 3,
+                dia: mSolemnidad[1],
+                solemnidad: mSolemnidad[1],
+                libro: horaSol,
+                codigoCompleto: clean,
+                formato: 'solemnidad'
+            };
+        }
+    }
+
     return null;
 }
 
@@ -276,6 +324,17 @@ export function obtenerIdsEquivalentes(codigo) {
     const resultado = new Set();
 
     if (dec) {
+        if (dec.formato === 'santo' || dec.formato === 'solemnidad') {
+            const base = (dec.dia || clean).replace(/_(oficio|laudes|tercia|sexta|nona|visperas|completas)$/i, '');
+            resultado.add(clean);
+            resultado.add(base);
+            resultado.add(`${base}_${dec.libro}`);
+            ['laudes', 'oficio', 'visperas', 'tercia', 'sexta', 'nona', 'completas'].forEach(h => {
+                resultado.add(`${base}_${h}`);
+            });
+            return Array.from(resultado);
+        }
+
         const codT = REVERSO_TIEMPOS[dec.tiempo] || 'to';
         const codS = `s${dec.semana}`;
         const codSPadded = `s${String(dec.semana).padStart(2, '0')}`;
@@ -300,6 +359,13 @@ export function obtenerIdsEquivalentes(codigo) {
         resultado.add(`${dec.tiempo}_s${String(dec.semana).padStart(2, '0')}_${dec.dia}_${dec.libro}`);
     } else {
         resultado.add(clean);
+        if (clean.startsWith('sa')) {
+            const base = clean.replace(/_(oficio|laudes|tercia|sexta|nona|visperas|completas)$/i, '');
+            resultado.add(base);
+            ['laudes', 'oficio', 'visperas', 'tercia', 'sexta', 'nona', 'completas'].forEach(h => {
+                resultado.add(`${base}_${h}`);
+            });
+        }
     }
 
     return Array.from(resultado);
@@ -840,7 +906,7 @@ Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`
  * Consulta de forma SÍNCRONA en memoria local (LocalStorage / Catálogo en memoria)
  * Garantiza respuesta inmediata (0ms) sin pausas de red.
  */
-export function obtenerHoraLocalSincrona(idCodigo) {
+export function obtenerHoraLocalSincrona(idCodigo, libroTarget = null) {
     if (!idCodigo) return null;
     const equivalentes = obtenerIdsEquivalentes(idCodigo);
 
@@ -848,8 +914,11 @@ export function obtenerHoraLocalSincrona(idCodigo) {
         try {
             const raw = localStorage.getItem(`${PREFIJO_LOCAL}${candId}`);
             if (raw) {
-                const parsed = JSON.parse(raw);
+                let parsed = JSON.parse(raw);
                 if (parsed) {
+                    if (libroTarget && parsed.horas && parsed.horas[libroTarget]) {
+                        parsed = { ...parsed, ...parsed.horas[libroTarget] };
+                    }
                     console.log(`📦 [Local Síncrono] Hora litúrgica '${candId}' recuperada de LocalStorage.`);
                     return normalizarObjetoLiturgico(parsed, idCodigo);
                 }
@@ -868,6 +937,9 @@ export function obtenerIdCanonico(idCodigo) {
     const clean = idCodigo.trim().toLowerCase();
     const dec = decodificarCodigoLiturgico(clean);
     if (dec) {
+        if (dec.formato === 'santo' || dec.formato === 'solemnidad') {
+            return clean;
+        }
         const codT = REVERSO_TIEMPOS[dec.tiempo] || 'to';
         const codSPadded = `s${String(dec.semana).padStart(2, '0')}`;
         const codD = REVERSO_DIAS[dec.dia] || 'do';
@@ -973,13 +1045,18 @@ export async function consultarHoraEnFirebase(idCodigo, params = {}) {
     // Tomar hasta 6 candidatos prioritarios únicos y consultar en paralelo
     const candidatos = idsABuscar.filter((v, i, a) => a.indexOf(v) === i).slice(0, 6);
     try {
+        const libroTarget = (params.libro || params.hora || '').toLowerCase();
         const promesas = candidatos.map(async (candId) => {
             try {
                 const docRef = doc(db, COLECCION_SALTERIOS, candId);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     console.log(`✅ [Firebase] Documento '${candId}' encontrado en Firestore.`);
-                    return { candId, data: docSnap.data() };
+                    const rawData = docSnap.data();
+                    if (libroTarget && rawData.horas && rawData.horas[libroTarget]) {
+                        return { candId, data: { ...rawData, ...rawData.horas[libroTarget] } };
+                    }
+                    return { candId, data: rawData };
                 }
             } catch (err) {
                 console.warn(`⚠️ [Firebase] Consulta '${candId}':`, err.message);

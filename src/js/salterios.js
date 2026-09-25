@@ -162,6 +162,54 @@ export function decodificarCodigoLiturgico(codigo) {
         };
     }
 
+    // 5. Formato Santos: saDDMMslug (ej: sa2906santospedroypablo, sa0101santamaria)
+    const mSanto = clean.match(/^sa(\d{2})(\d{2})([a-z0-9ñ]+)(?:_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
+    if (mSanto) {
+        const horaSanto = mSanto[4] ? mSanto[4].toLowerCase() : 'laudes';
+        const baseId = `sa${mSanto[1]}${mSanto[2]}${mSanto[3]}`.toLowerCase();
+        return {
+            tiempo: 'santos',
+            semana: 1,
+            dia: baseId,
+            santo: mSanto[3],
+            diaMes: `${mSanto[1]}/${mSanto[2]}`,
+            libro: horaSanto,
+            codigoCompleto: clean,
+            formato: 'santo'
+        };
+    }
+
+    // 6. Formato Solemnidades litúrgicas / fiestas con slug de nombre (ej: laepifaniadelSeñor, elbautismodelSeñor)
+    const SOLEMNIDADES_CONOCIDAS = [
+        'laepifaniadelseñor', 'elbautismodelseñor', 'sagradafamilia', 'santamariamadrededios',
+        'miercolesdeceniza', 'domingoderamos', 'juevessanto', 'viernessanto', 'sabadosanto',
+        'domingoderesurreccion', 'laascensiondelseñor', 'pentecostes', 'santisimatrinidad',
+        'santisimocuerpoyasangredecristo', 'sagradocorazondejesus', 'jesucristoreydeluniverso',
+        'anunciaciondelseñor', 'asunciondelavirgenmaria', 'natividaddelseñor', 'todoslossantos',
+        'inmaculadaconcepcion'
+    ];
+    const mSolemnidad = clean.match(/^([a-z0-9ñ]+)(?:_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
+    if (mSolemnidad) {
+        const slugNorm = mSolemnidad[1].toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const coincide = SOLEMNIDADES_CONOCIDAS.some(s => {
+            const sNorm = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return sNorm === slugNorm;
+        });
+        if (coincide) {
+            const horaSol = mSolemnidad[2] ? mSolemnidad[2].toLowerCase() : 'laudes';
+            return {
+                tiempo: 'santos',
+                semana: 3,
+                dia: mSolemnidad[1],
+                solemnidad: mSolemnidad[1],
+                libro: horaSol,
+                codigoCompleto: clean,
+                formato: 'solemnidad'
+            };
+        }
+    }
+
     return null;
 }
 
@@ -178,6 +226,15 @@ function obtenerParametrosUrl() {
         if (dec) {
             if (horaParam) dec.libro = horaParam.toLowerCase();
             return dec;
+        }
+        if (posibleCodigo.toLowerCase().startsWith('sa') || p.get('tiempo') === 'santos') {
+            return {
+                tiempo: 'santos',
+                semana: 1,
+                dia: posibleCodigo,
+                libro: (horaParam || 'laudes').toLowerCase(),
+                codigoCompleto: posibleCodigo
+            };
         }
     }
 
@@ -307,7 +364,7 @@ async function cargarYRenderizarHora(params) {
     // Busca primero en memoria local (LocalStorage) bajo todos los IDs equivalentes.
     // Si no existe, ensambla de inmediato canónicamente y persiste en LocalStorage.
     // =====================================================================
-    let datosLocales = obtenerHoraLocalSincrona(docId);
+    let datosLocales = obtenerHoraLocalSincrona(docId, libro);
 
     if (datosLocales && (datosLocales.salmodia?.salmo1Texto || datosLocales.lecturasOficio || datosLocales.himno?.texto)) {
         montarOActualizarVista(params, datosLocales);

@@ -41,6 +41,8 @@ import {
 } from '../data/db-cantico-evangelico.js';
 import { CATALOGO_RESPONSORIOS_SEED, ResponsoriosDB } from '../data/db-responsorios.js';
 import { CATALOGO_LECTURAS_SEED as CATALOGO_LECTURAS_OFICIO_SEED, LecturasDB } from '../data/db-lecturas.js';
+import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+import { generarHitosLiturgicos } from './form_etiempo.js';
 
 export const TEXTO_TEDUEM_CANONICO = `A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
 A ti, eterno Padre, te venera toda la creación.
@@ -96,7 +98,7 @@ export const CODIGOS_TIEMPO = {
     navidad:   { codigo: 'tn', nombre: 'Navidad' },
     cuaresma:  { codigo: 'tc', nombre: 'Cuaresma' },
     pascua:    { codigo: 'tp', nombre: 'Pascua' },
-    santos:    { codigo: 'san', nombre: 'Santos / Solemnidades' }
+    santos:    { codigo: 'san', nombre: 'Fiestas' }
 };
 
 export const SEMANAS_POR_TIEMPO = {
@@ -151,6 +153,116 @@ export const CODIGOS_LIBRO = {
     vispera:   { codigo: 'vi', nombre: 'Víspera' },
     completas: { codigo: 'co', nombre: 'Completas' }
 };
+
+/**
+ * Recupera el catálogo completo de santos desde localStorage o fallback en memoria.
+ */
+export function obtenerCatalogoSantos() {
+    try {
+        const raw = localStorage.getItem('lh_catalogo_nombres_santos');
+        if (raw) {
+            const list = JSON.parse(raw);
+            if (Array.isArray(list) && list.length > 0) return list;
+        }
+    } catch (_) {}
+    return (typeof catalogoSantosAnual !== 'undefined' && Array.isArray(catalogoSantosAnual)) ? catalogoSantosAnual : [];
+}
+
+/**
+ * Extrae día y mes (2 dígitos) a partir del campo celebración o festividad del santo.
+ */
+export function extraerDiaMesCelebracion(santo) {
+    if (!santo) return { dia: '01', mes: '01', texto: '01/01' };
+    const raw = (santo.celebracion || santo.fechaFestividad || '').trim();
+    const mIso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (mIso) {
+        const dia = String(mIso[3]).padStart(2, '0');
+        const mes = String(mIso[2]).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    const mSlash = raw.match(/^(\d{1,2})\/(\d{1,2})/);
+    if (mSlash) {
+        const dia = String(mSlash[1]).padStart(2, '0');
+        const mes = String(mSlash[2]).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    if (santo.dia && santo.mes) {
+        const dia = String(santo.dia).padStart(2, '0');
+        const mes = String(santo.mes).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    return { dia: '01', mes: '01', texto: raw || '—' };
+}
+
+/**
+ * Genera el slug normalizado del nombre de un santo (minúsculas, sin espacios ni acentos ni signos).
+ * Ej: "Santos Pedro y Pablo" -> "santospedroypablo"
+ * Ej: "Santa María" -> "santamaria"
+ */
+export function generarSlugSanto(nombre) {
+    if (!nombre) return '';
+    return nombre
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Genera el ID canónico para un santo según la especificación:
+ * "sa de santo, el dia01, y el mes 01, y el nombre del santo santamaria, entonces quedaria: sa0101santamaria"
+ * Ej: San Pedro y San Pablo (29/06) -> "sa2906santospedroypablo"
+ */
+export function generarIdSanto(santo) {
+    if (!santo) return 'sa0101santamaria';
+    const { dia, mes } = extraerDiaMesCelebracion(santo);
+    const slug = generarSlugSanto(santo.nombre);
+    return `sa${dia}${mes}${slug}`;
+}
+
+const MAPA_SOLEMNIDADES_EXACTAS = {
+    'la epifania del senor': 'laepifaniadelSeñor',
+    'la epifania del señor': 'laepifaniadelSeñor',
+    'el bautismo del senor': 'elbautismodelSeñor',
+    'el bautismo del señor': 'elbautismodelSeñor',
+    'miercoles de ceniza': 'miercolesdeceniza',
+    'domingo de ramos': 'domingoderamos',
+    'jueves santo': 'juevessanto',
+    'viernes santo': 'viernessanto',
+    'sabado santo': 'sabadosanto',
+    'domingo de resurreccion': 'domingoderesurreccion',
+    'domingo de pentecostes': 'domingodepentecostes',
+    'la santisima trinidad': 'lasantisimatrinidad',
+    'jesucristo, rey del universo': 'jesucristoreydeluniverso',
+    'jesucristo rey del universo': 'jesucristoreydeluniverso',
+    'la natividad del senor': 'lanatividaddelSeñor',
+    'la natividad del señor': 'lanatividaddelSeñor'
+};
+
+/**
+ * Genera la nomenclatura para una solemnidad litúrgica de form_etiempo:
+ * "laepifaniadelSeñor, elbautismodelSeñor, miercolesdeceniza"
+ */
+export function generarNomenclaturaSolemnidad(nombre) {
+    if (!nombre) return '';
+    const limpio = nombre.replace(/\s*\([^)]*\)/g, '').trim();
+    const claveMin = limpio
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+
+    if (MAPA_SOLEMNIDADES_EXACTAS[claveMin]) {
+        return MAPA_SOLEMNIDADES_EXACTAS[claveMin];
+    }
+
+    const slug = limpio
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9ñÑ]/g, '');
+    return slug.charAt(0).toLowerCase() + slug.slice(1);
+}
 
 // Variables globales en memoria para las fuentes compartidas con antifonas.html, salmos.html e himno.html
 let cacheAntifonasInvitatorias = [];
@@ -1322,13 +1434,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Actualizar vista previa del himno post-2ª lectura y sección opcional de los domingos
+    // Actualizar vista previa del himno post-2ª lectura y sección opcional (domingos y fiestas/santos)
     function actualizarHimnoPostLecturasPreview() {
         const libroVal = selLibro ? selLibro.value : 'laudes';
         const diaVal = selDia ? selDia.value : 'domingo';
+        const tiempoVal = selTiempo ? selTiempo.value : 'ordinario';
         const esOficio = (libroVal === 'oficio');
-        const esDomingo = (diaVal === 'domingo');
-        const mostrar = esOficio && esDomingo;
+        const esDomingoOFiesta = (diaVal === 'domingo' || tiempoVal === 'santos');
+        const mostrar = esOficio && esDomingoOFiesta;
 
         if (ctrlBoxTeDeumOficio) ctrlBoxTeDeumOficio.style.display = mostrar ? 'block' : 'none';
         if (ctrlBoxOpcionalOficio) ctrlBoxOpcionalOficio.style.display = mostrar ? 'block' : 'none';
@@ -1668,6 +1781,130 @@ document.addEventListener('DOMContentLoaded', async () => {
             selSemana.value = valorAnterior;
         } else {
             selSemana.selectedIndex = 0;
+        }
+        poblarSelectorDiasOSantos();
+    }
+
+    // Poblar Selector 3 (Días / Santos / Solemnidades) según el Tiempo Litúrgico y la Semana
+    function poblarSelectorDiasOSantos(valorSeleccionadoPrevio = null) {
+        if (!selDia) return;
+        const tiempoVal = selTiempo ? selTiempo.value : 'ordinario';
+        const semanaVal = selSemana ? selSemana.value : 's01';
+        const lblSelectDia = document.getElementById('lblSelectDia');
+        const icoSelectDia = document.getElementById('icoSelectDia');
+        const txtSelectDia = document.getElementById('txtSelectDia');
+
+        if (tiempoVal !== 'santos') {
+            // Restaurar modo días estándar (Domingo a Sábado)
+            if (lblSelectDia) lblSelectDia.title = 'Seleccionar día de la semana';
+            if (icoSelectDia) icoSelectDia.textContent = 'today';
+            if (txtSelectDia) txtSelectDia.textContent = 'Días';
+
+            const opcionesActuales = Array.from(selDia.options).map(o => o.value);
+            const esListaDias = opcionesActuales.includes('domingo') && opcionesActuales.includes('sabado');
+            if (!esListaDias) {
+                selDia.innerHTML = `
+                    <option value="domingo">Domingo</option>
+                    <option value="lunes">Lunes</option>
+                    <option value="martes">Martes</option>
+                    <option value="miercoles">Miércoles</option>
+                    <option value="jueves">Jueves</option>
+                    <option value="viernes">Viernes</option>
+                    <option value="sabado">Sábado</option>
+                `;
+                if (valorSeleccionadoPrevio && CODIGOS_DIA[valorSeleccionadoPrevio]) {
+                    selDia.value = valorSeleccionadoPrevio;
+                } else {
+                    selDia.value = 'domingo';
+                }
+            }
+            return;
+        }
+
+        // Modo Fiestas (Santos / Solemnidades)
+        selDia.innerHTML = '';
+
+        if (semanaVal === 's03') {
+            // Solemnidades
+            if (lblSelectDia) lblSelectDia.title = 'Seleccionar solemnidad litúrgica o santo';
+            if (icoSelectDia) icoSelectDia.textContent = 'auto_awesome';
+            if (txtSelectDia) txtSelectDia.textContent = 'Solemnidad / Santos';
+
+            // 1. Grupo Solemnidades de form_etiempo
+            const anioActual = new Date().getFullYear();
+            let hitos = [];
+            try {
+                hitos = (typeof generarHitosLiturgicos === 'function') ? generarHitosLiturgicos(anioActual) : [];
+            } catch (_) {}
+
+            const grpHitos = document.createElement('optgroup');
+            grpHitos.label = 'Solemnidades Litúrgicas';
+
+            hitos.forEach(h => {
+                const nombreLimpio = (h.nombre || '').replace(/\s*\([^)]*\)/g, '').trim();
+                const idSolemnidad = generarNomenclaturaSolemnidad(h.nombre);
+                let fechaCorta = '';
+                if (h.fecha) {
+                    const parts = h.fecha.split('-');
+                    if (parts.length === 3) fechaCorta = ` (${parts[2]}/${parts[1]})`;
+                }
+                const opt = document.createElement('option');
+                opt.value = idSolemnidad;
+                opt.textContent = `${nombreLimpio}${fechaCorta}`;
+                opt.setAttribute('data-tipo', 'solemnidad');
+                opt.setAttribute('data-nombre', nombreLimpio);
+                grpHitos.appendChild(opt);
+            });
+            selDia.appendChild(grpHitos);
+
+            // 2. Grupo Santos del Catálogo
+            const santos = obtenerCatalogoSantos();
+            const grpSantos = document.createElement('optgroup');
+            grpSantos.label = 'Santos del Catálogo';
+
+            const listaSantosOrdenada = [...santos].sort((a, b) => {
+                return (a.nombre || '').localeCompare(b.nombre || '', 'es', { sensitivity: 'base' });
+            });
+
+            listaSantosOrdenada.forEach(s => {
+                const idSanto = generarIdSanto(s);
+                const { texto: fechaTexto } = extraerDiaMesCelebracion(s);
+                const opt = document.createElement('option');
+                opt.value = idSanto;
+                opt.textContent = `${s.nombre} (${fechaTexto})`;
+                opt.setAttribute('data-tipo', 'santo');
+                opt.setAttribute('data-nombre', s.nombre);
+                grpSantos.appendChild(opt);
+            });
+            selDia.appendChild(grpSantos);
+
+        } else {
+            // Común de Santos (s01), Propio de los Santos (s02) y Fiestas y Memorias (s04)
+            if (lblSelectDia) lblSelectDia.title = 'Seleccionar santo a trabajar';
+            if (icoSelectDia) icoSelectDia.textContent = 'person';
+            if (txtSelectDia) txtSelectDia.textContent = 'Santos';
+
+            const santos = obtenerCatalogoSantos();
+            const listaSantosOrdenada = [...santos].sort((a, b) => {
+                return (a.nombre || '').localeCompare(b.nombre || '', 'es', { sensitivity: 'base' });
+            });
+
+            listaSantosOrdenada.forEach(s => {
+                const idSanto = generarIdSanto(s);
+                const { texto: fechaTexto } = extraerDiaMesCelebracion(s);
+                const opt = document.createElement('option');
+                opt.value = idSanto;
+                opt.textContent = `${s.nombre} (${fechaTexto})`;
+                opt.setAttribute('data-tipo', 'santo');
+                opt.setAttribute('data-nombre', s.nombre);
+                selDia.appendChild(opt);
+            });
+        }
+
+        if (valorSeleccionadoPrevio && Array.from(selDia.options).some(o => o.value === valorSeleccionadoPrevio)) {
+            selDia.value = valorSeleccionadoPrevio;
+        } else if (selDia.options.length > 0) {
+            selDia.selectedIndex = 0;
         }
     }
 
@@ -2549,6 +2786,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Restaurar estado visual y selectores a partir de datos guardados
     function restaurarDesdeDatos(datos) {
         if (!datos) return;
+        const libroSolicitado = selLibro ? selLibro.value : 'laudes';
+        if (datos.horas && datos.horas[libroSolicitado]) {
+            datos = { ...datos, ...datos.horas[libroSolicitado] };
+        }
         actualizarBadgeEstado(true);
 
         // Limpiar cualquier filtro de texto activo para que todas las opciones estén disponibles
@@ -3144,20 +3385,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (previewLec2RespR2) previewLec2RespR2.textContent = r2_2;
             }
 
-            // Himno post-2ª lectura y sección opcional (solo domingos)
+            // Himno post-2ª lectura y sección opcional (domingos y fiestas/santos)
             const diaVal = selDia ? selDia.value : 'domingo';
-            const esDomingo = (diaVal === 'domingo');
+            const tiempoVal = selTiempo ? selTiempo.value : 'ordinario';
+            const esDomingoOFiesta = (diaVal === 'domingo' || tiempoVal === 'santos');
 
             if (selTeDeumOficio) {
-                const himnoIdGuardado = datos.himnoTeDeum ? (datos.himnoTeDeum.id || datos.himnoTeDeum) : (esDomingo ? 'tedeum_canonico' : 'ninguno');
+                const himnoIdGuardado = datos.himnoTeDeum ? (datos.himnoTeDeum.id || datos.himnoTeDeum) : (esDomingoOFiesta ? 'tedeum_canonico' : 'ninguno');
                 cargarYPoblarSelectHimnoPostLecturas(himnoIdGuardado);
             }
 
             if (inputOpcionalOficio) {
-                const txtOpc = (typeof datos.seccionOpcional === 'object') ? datos.seccionOpcional.texto : datos.seccionOpcional;
+                const txtOpc = (typeof datos.seccionOpcional === 'object') ? (datos.seccionOpcional ? datos.seccionOpcional.texto : '') : datos.seccionOpcional;
                 inputOpcionalOficio.value = (txtOpc !== undefined && txtOpc !== null && txtOpc !== '')
                     ? txtOpc
-                    : (esDomingo ? TEXTO_OPCIONAL_TEDUM_DOMINGO : '');
+                    : (esDomingoOFiesta ? TEXTO_OPCIONAL_TEDUM_DOMINGO : '');
             }
 
             actualizarHimnoPostLecturasPreview();
@@ -3174,15 +3416,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Verificar si el ID actual ya ha sido guardado (asíncrono para Firebase de respaldo)
     async function verificarEstadoId(idCodigo) {
         const candidatos = (typeof obtenerIdsEquivalentes === 'function') ? obtenerIdsEquivalentes(idCodigo) : [idCodigo];
+        const tiempoVal = selTiempo ? selTiempo.value : 'ordinario';
+        const libroVal = selLibro ? selLibro.value : 'laudes';
+
+        if (tiempoVal === 'santos') {
+            candidatos.unshift(`${idCodigo}_${libroVal}`);
+        }
 
         // Primero revisar si ya existe localmente bajo el ID o cualquier equivalente
         for (const candId of candidatos) {
             const guardadoLocal = localStorage.getItem(`lh_salterio_${candId}`);
             if (guardadoLocal) {
                 try {
-                    const datos = JSON.parse(guardadoLocal);
-                    restaurarDesdeDatos(datos);
-                    return;
+                    let datos = JSON.parse(guardadoLocal);
+                    if (datos && datos.horas && datos.horas[libroVal]) {
+                        datos = { ...datos, ...datos.horas[libroVal] };
+                        restaurarDesdeDatos(datos);
+                        return;
+                    } else if (datos && (!datos.libro || datos.libro === libroVal)) {
+                        restaurarDesdeDatos(datos);
+                        return;
+                    }
                 } catch (e) {}
             }
         }
@@ -3195,10 +3449,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 for (const candId of candidatos) {
                     const snap = await getDoc(doc(window.firebaseAPI.db, "salterios", candId));
                     if (snap && snap.exists()) {
-                        datosCargados = snap.data();
-                        // Guardar en local con el ID canónico actual para futuras cargas instantáneas
-                        localStorage.setItem(`lh_salterio_${idCodigo}`, JSON.stringify(datosCargados));
-                        break;
+                        const raw = snap.data();
+                        if (raw.horas && raw.horas[libroVal]) {
+                            datosCargados = { ...raw, ...raw.horas[libroVal] };
+                        } else if (!raw.libro || raw.libro === libroVal) {
+                            datosCargados = raw;
+                        }
+                        if (datosCargados) {
+                            localStorage.setItem(`lh_salterio_${idCodigo}`, JSON.stringify(raw));
+                            if (tiempoVal === 'santos') {
+                                localStorage.setItem(`lh_salterio_${idCodigo}_${libroVal}`, JSON.stringify(datosCargados));
+                            }
+                            break;
+                        }
                     }
                 }
             } catch (e) {}
@@ -3229,27 +3492,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         const infoDia    = CODIGOS_DIA[diaVal] || { codigo: 'do', nombre: 'Domingo' };
         const infoLibro  = CODIGOS_LIBRO[libroVal] || { codigo: 'la', nombre: 'Laudes' };
 
-        // Combinación del código canónico: [tiempo][semana 2 dígitos][día][hora al final] (ej: tos01doof, tos01dola)
-        const codigoFinal = `${infoTiempo.codigo}${codSemana}${infoDia.codigo}${infoLibro.codigo}`.toLowerCase();
+        let codigoFinal = '';
 
-        if (inputCodigo) {
-            inputCodigo.value = codigoFinal;
-        }
+        if (tiempoVal === 'santos') {
+            const optDiaSel = selDia.selectedOptions[0];
+            const nombreCelebracion = optDiaSel ? (optDiaSel.getAttribute('data-nombre') || optDiaSel.textContent) : 'Santos';
+            const catNombre = (SEMANAS_POR_TIEMPO.santos.find(s => s.valor === semanaVal) || {}).texto || 'Común de Santos';
+            const idCelebracion = selDia.value || 'sa0101santamaria';
 
-        // Actualizar badges explicativos
-        const badgeTiempo = document.getElementById('badgeTiempo');
-        const badgeSemana = document.getElementById('badgeSemana');
-        const badgeDia    = document.getElementById('badgeDia');
-        const badgeLibro  = document.getElementById('badgeLibro');
-        const textoDesc   = document.getElementById('textoDescriptivo');
+            codigoFinal = idCelebracion;
 
-        if (badgeTiempo) badgeTiempo.innerHTML = `Tiempo: <strong>${infoTiempo.codigo}</strong> (${infoTiempo.nombre})`;
-        if (badgeSemana) badgeSemana.innerHTML = `Semana: <strong>${codSemana}</strong>`;
-        if (badgeDia)    badgeDia.innerHTML    = `Día: <strong>${infoDia.codigo}</strong> (${infoDia.nombre})`;
-        if (badgeLibro)  badgeLibro.innerHTML  = `Hora: <strong>${infoLibro.codigo}</strong> (${infoLibro.nombre})`;
+            if (inputCodigo) {
+                inputCodigo.value = codigoFinal;
+            }
 
-        if (textoDesc) {
-            textoDesc.textContent = `${infoTiempo.nombre} • ${codSemana.toUpperCase()} • ${infoDia.nombre} • ${infoLibro.nombre}`;
+            // Actualizar badges explicativos
+            const badgeTiempo = document.getElementById('badgeTiempo');
+            const badgeSemana = document.getElementById('badgeSemana');
+            const badgeDia    = document.getElementById('badgeDia');
+            const badgeLibro  = document.getElementById('badgeLibro');
+            const textoDesc   = document.getElementById('textoDescriptivo');
+
+            if (badgeTiempo) badgeTiempo.innerHTML = `Tiempo: <strong>san</strong> (${infoTiempo.nombre})`;
+            if (badgeSemana) badgeSemana.innerHTML = `Categoría: <strong>${catNombre}</strong>`;
+            if (badgeDia)    badgeDia.innerHTML    = `Celebración: <strong>${codigoFinal}</strong>`;
+            if (badgeLibro)  badgeLibro.innerHTML  = `Hora: <strong>${infoLibro.codigo}</strong> (${infoLibro.nombre})`;
+
+            if (textoDesc) {
+                textoDesc.textContent = `${infoTiempo.nombre} • ${catNombre} • ${nombreCelebracion} • ${infoLibro.nombre}`;
+            }
+        } else {
+            // Combinación del código canónico: [tiempo][semana 2 dígitos][día][hora al final] (ej: tos01doof, tos01dola)
+            codigoFinal = `${infoTiempo.codigo}${codSemana}${infoDia.codigo}${infoLibro.codigo}`.toLowerCase();
+
+            if (inputCodigo) {
+                inputCodigo.value = codigoFinal;
+            }
+
+            // Actualizar badges explicativos
+            const badgeTiempo = document.getElementById('badgeTiempo');
+            const badgeSemana = document.getElementById('badgeSemana');
+            const badgeDia    = document.getElementById('badgeDia');
+            const badgeLibro  = document.getElementById('badgeLibro');
+            const textoDesc   = document.getElementById('textoDescriptivo');
+
+            if (badgeTiempo) badgeTiempo.innerHTML = `Tiempo: <strong>${infoTiempo.codigo}</strong> (${infoTiempo.nombre})`;
+            if (badgeSemana) badgeSemana.innerHTML = `Semana: <strong>${codSemana}</strong>`;
+            if (badgeDia)    badgeDia.innerHTML    = `Día: <strong>${infoDia.codigo}</strong> (${infoDia.nombre})`;
+            if (badgeLibro)  badgeLibro.innerHTML  = `Hora: <strong>${infoLibro.codigo}</strong> (${infoLibro.nombre})`;
+
+            if (textoDesc) {
+                textoDesc.textContent = `${infoTiempo.nombre} • ${codSemana.toUpperCase()} • ${infoDia.nombre} • ${infoLibro.nombre}`;
+            }
         }
 
         // Sincronizar título y subtítulo de la hora siempre
@@ -3288,13 +3582,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Comprobación sincrónica inmediata de LocalStorage para evitar parpadeos o sobrescrituras
         const candidatos = (typeof obtenerIdsEquivalentes === 'function') ? obtenerIdsEquivalentes(codigoFinal) : [codigoFinal];
+        if (tiempoVal === 'santos') {
+            candidatos.unshift(`${codigoFinal}_${libroVal}`);
+        }
         for (const candId of candidatos) {
             const localDataRaw = localStorage.getItem(`lh_salterio_${candId}`);
             if (localDataRaw) {
                 try {
-                    const datos = JSON.parse(localDataRaw);
-                    restaurarDesdeDatos(datos);
-                    return;
+                    let datos = JSON.parse(localDataRaw);
+                    if (datos && datos.horas && datos.horas[libroVal]) {
+                        datos = { ...datos, ...datos.horas[libroVal] };
+                        restaurarDesdeDatos(datos);
+                        return;
+                    } else if (datos && (!datos.libro || datos.libro === libroVal)) {
+                        restaurarDesdeDatos(datos);
+                        return;
+                    }
                 } catch (e) {}
             }
         }
@@ -3337,8 +3640,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const esOficio  = (libroVal === 'oficio');
 
         const infoTiempo = CODIGOS_TIEMPO[tiempoVal] || { codigo: 'to', nombre: 'Tiempo Ordinario' };
-        const infoDia    = CODIGOS_DIA[diaVal] || { codigo: 'do', nombre: 'Domingo' };
+        let infoDia    = CODIGOS_DIA[diaVal] || { codigo: 'do', nombre: 'Domingo' };
         const infoLibro  = CODIGOS_LIBRO[libroVal] || { codigo: 'la', nombre: 'Laudes' };
+
+        if (tiempoVal === 'santos') {
+            const optDiaSel = selDia ? selDia.selectedOptions[0] : null;
+            const nombreCelebracion = optDiaSel ? (optDiaSel.getAttribute('data-nombre') || optDiaSel.textContent) : diaVal;
+            infoDia = {
+                codigo: diaVal,
+                nombre: nombreCelebracion
+            };
+        }
 
         const antifonaTexto = (txtAntifona ? txtAntifona.textContent.trim() : '');
         const antifonaId = (selAntifona ? selAntifona.value : '');
@@ -3465,7 +3777,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         let himnoTeDeum = null;
-        if (esOficio && diaVal === 'domingo') {
+        if (esOficio && (diaVal === 'domingo' || tiempoVal === 'santos')) {
             if (selTeDeumOficio && selTeDeumOficio.value === 'ninguno') {
                 himnoTeDeum = { id: 'ninguno' };
             } else if (selTeDeumOficio && selTeDeumOficio.value) {
@@ -3477,7 +3789,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        const seccionOpcional = (esOficio && diaVal === 'domingo') ? {
+        const seccionOpcional = (esOficio && (diaVal === 'domingo' || tiempoVal === 'santos')) ? {
             rubrica: 'La parte que sigue puede omitirse, si se cree oportuno.',
             texto: (inputOpcionalOficio ? inputOpcionalOficio.value.trim() : '')
         } : null;
@@ -3601,6 +3913,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             payload.origenCarga = 'firebase';
             guardarHoraEnLocalStorage(idCodigo, payload);
+            if (tiempoVal === 'santos') {
+                localStorage.setItem(`lh_salterio_${idCodigo}_${libroVal}`, JSON.stringify(payload));
+                try {
+                    let consolidado = {};
+                    try {
+                        consolidado = JSON.parse(localStorage.getItem(`lh_salterio_${idCodigo}`)) || {};
+                    } catch (_) {}
+                    if (!consolidado.horas) consolidado.horas = {};
+                    consolidado.horas[libroVal] = payload;
+                    consolidado = { ...consolidado, ...payload };
+                    localStorage.setItem(`lh_salterio_${idCodigo}`, JSON.stringify(consolidado));
+                } catch (_) {}
+            }
         } catch (e) {
             console.warn("Aviso al guardar copia local:", e);
         }
@@ -3611,7 +3936,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (window.firebaseAPI && window.firebaseAPI.db) {
                 const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
                 const docRef = doc(window.firebaseAPI.db, "salterios", idCodigo);
-                await setDoc(docRef, payload, { merge: true });
+                if (tiempoVal === 'santos') {
+                    await setDoc(docRef, {
+                        ...payload,
+                        horas: {
+                            [libroVal]: payload
+                        }
+                    }, { merge: true });
+                } else {
+                    await setDoc(docRef, payload, { merge: true });
+                }
                 exitoFirebase = true;
             }
         } catch (fbErr) {
@@ -3838,7 +4172,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         actualizarCodigoCombinado(true);
     });
 
-    selSemana.addEventListener('change', () => actualizarCodigoCombinado(true));
+    selSemana.addEventListener('change', () => {
+        if (selTiempo.value === 'santos') {
+            poblarSelectorDiasOSantos();
+        }
+        actualizarCodigoCombinado(true);
+    });
     selDia.addEventListener('change', () => actualizarCodigoCombinado(true));
     selLibro.addEventListener('change', () => actualizarCodigoCombinado(true));
 
