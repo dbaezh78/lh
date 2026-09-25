@@ -921,7 +921,7 @@ window.cambioEnExpandir = false;
                                     label: 'Color de Antífonas y Rúbricas',
                                     tipo: 'color',
                                     storageKey: 'pref-salterio-rubrica',
-                                    default: '#d01212',
+                                    default: '#ff0000',
                                     accion: (val) => {
                                         document.documentElement.style.setProperty('--salterio-rubrica', val);
                                         const tema = JSON.parse(localStorage.getItem('lh_salterio_tema') || '{}');

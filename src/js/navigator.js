@@ -469,7 +469,7 @@
             <div class="settings-modal-content" style="max-width: 480px; width: 92%; padding: 20px; border-radius: 20px; background: #242526; color: #e4e6eb; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
                 <div class="settings-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px; background: transparent;">
                     <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1.15rem; color: #fff;">
-                        <span class="material-symbols-outlined" style="color: var(--SangreDeCristo, #d01212);">info</span> Info de la App
+                        <span class="material-symbols-outlined" style="color: var(--SangreDeCristo, #ff0000);">info</span> Info de la App
                     </h3>
                     <button class="modal-close-btn" id="close-app-info-modal" style="background: transparent; border: none; font-size: 1.4rem; cursor: pointer; color: #b0b3b8;">&times;</button>
                 </div>
@@ -477,7 +477,7 @@
                     <div style="text-align: center; margin-bottom: 20px;">
                         <img src="/src/img/icono.png" alt="Liturgia" style="width: 68px; height: 68px; border-radius: 16px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
                         <h2 style="margin: 4px 0 2px 0; font-size: 1.35rem; color: #fff;">Liturgia de las Horas</h2>
-                        <span style="background: var(--SangreDeCristo, #d01212); color: #fff; padding: 3px 12px; border-radius: 12px; font-size: 0.78rem; font-weight: 600; display: inline-block; margin-top: 4px;">Versión v${appVersion}</span>
+                        <span style="background: var(--SangreDeCristo, #ff0000); color: #fff; padding: 3px 12px; border-radius: 12px; font-size: 0.78rem; font-weight: 600; display: inline-block; margin-top: 4px;">Versión v${appVersion}</span>
                     </div>
 
                     <h4 style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 12px; font-size: 0.95rem; color: #fff;">Historial y Detalles</h4>
@@ -898,7 +898,7 @@
                     `;
                     el.innerHTML = `
                         <div style="max-width: 480px; background: #242526; padding: 32px 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 12px 32px rgba(0,0,0,0.6);">
-                            <span class="material-symbols-outlined" style="font-size: 4rem; color: #d01212; margin-bottom: 12px;">lock</span>
+                            <span class="material-symbols-outlined" style="font-size: 4rem; color: #ff0000; margin-bottom: 12px;">lock</span>
                             <h2 style="margin: 0 0 8px 0; font-size: 1.4rem; color: #fff;">Acceso Restringido</h2>
                             <p style="color: #b0b3b8; font-size: 0.95rem; margin-bottom: 16px;">
                                 No dispones de los permisos necesarios para visualizar la sección <b>${pageTitle}</b>.
@@ -907,7 +907,7 @@
                                 Si crees que esto es un error, solicita los permisos correspondientes al Administrador del sistema.
                             </p>
                             <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                                <a href="/" style="background: #d01212; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 600;">Ir al Inicio</a>
+                                <a href="/" style="background: #ff0000; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 600;">Ir al Inicio</a>
                                 <a href="/src/html/aCtrl.html" style="background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 12px; font-size: 0.9rem;">Ver Mi Cuenta</a>
                             </div>
                         </div>

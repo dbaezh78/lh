@@ -319,7 +319,7 @@ body.pagina-salterios {
     height: 54px;
     border-radius: 50%;
     background: #1e2430;
-    border: 2px solid #d01212;
+    border: 2px solid #ff0000;
     color: #fff;
     display: flex;
     align-items: center;
@@ -331,7 +331,7 @@ body.pagina-salterios {
 
 .btn-fab-admin:hover {
     transform: scale(1.08);
-    background: #d01212;
+    background: #ff0000;
 }
 
 /* Panel Modal / Drawer del Constructor */
@@ -431,7 +431,7 @@ body.pagina-salterios {
 .form-constructor-campo select:focus,
 .form-constructor-campo input[type="text"]:focus,
 .form-constructor-campo textarea:focus {
-    border-color: #d01212;
+    border-color: #ff0000;
 }
 
 .constructor-btn-group {
@@ -462,7 +462,7 @@ body.pagina-salterios {
 }
 
 .btn-c-accion.guardar {
-    background: #d01212;
+    background: #ff0000;
     border-color: #b00f0f;
 }
 
