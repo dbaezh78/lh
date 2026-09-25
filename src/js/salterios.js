@@ -683,7 +683,7 @@ function renderizarCuerpoLiturgico(d) {
                     <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.15rem; margin-bottom: 4px;">${l1.epigrafeTipo || l1.titulo || 'PRIMERA LECTURA'}</div>
                     <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000;">${l1.cita || ''}</div>
                     <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l1.descripcion || l1.subtitulo || ''}</div>
-                    <div class="texto-lectura-justificado">${l1.texto || ''}</div>
+                    <div class="texto-lectura-justificado" style="white-space: pre-line;">${l1.texto || ''}</div>
                     ${r1Txt ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
                             <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.05rem; margin-bottom: 8px;">
@@ -713,7 +713,7 @@ function renderizarCuerpoLiturgico(d) {
                     <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.15rem; margin-bottom: 4px;">${l2.epigrafeTipo || l2.titulo || 'SEGUNDA LECTURA'}</div>
                     <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000;">${l2.cita || ''}</div>
                     <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l2.descripcion || l2.subtitulo || ''}</div>
-                    <div class="texto-lectura-justificado">${l2.texto || ''}</div>
+                    <div class="texto-lectura-justificado" style="white-space: pre-line;">${l2.texto || ''}</div>
                     ${r1Txt2 ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
                             <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.05rem; margin-bottom: 8px;">
@@ -766,7 +766,7 @@ Haz que seamos contados entre tus santos en la gloria eterna.`;
         html += `
             <div class="seccion-opcional-oficio" style="margin: 26px 0;">
                 <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">La parte que sigue puede omitirse, si se cree oportuno.</div>
-                ${d.seccionOpcional?.texto ? `<div class="texto-lectura-justificado">${d.seccionOpcional.texto}</div>` : ''}
+                ${d.seccionOpcional?.texto ? `<div class="texto-lectura-justificado" style="white-space: pre-line;">${d.seccionOpcional.texto}</div>` : ''}
             </div>
         `;
     }
@@ -776,7 +776,7 @@ Haz que seamos contados entre tus santos en la gloria eterna.`;
         html += `
             <div style="margin: 24px 0;">
                 <div class="salterio-seccion-header">LECTURA BREVE <span style="font-weight: normal; font-size: 0.95rem;">${d.lecturaBreve.cita}</span></div>
-                <div class="texto-lectura-justificado">${d.lecturaBreve.texto}</div>
+                <div class="texto-lectura-justificado" style="white-space: pre-line;">${d.lecturaBreve.texto}</div>
             </div>
         `;
 
@@ -880,7 +880,7 @@ Haz que seamos contados entre tus santos en la gloria eterna.`;
         const textoOracion = typeof d.oracion === 'string' ? d.oracion : (d.oracion.textoCompleto || d.oracion.texto || '');
         html += `
             <div class="salterio-seccion-header">ORACIÓN</div>
-            <div style="margin-bottom: 20px; line-height: 1.6; text-align: justify;">${textoOracion}</div>
+            <div style="margin-bottom: 20px; line-height: 1.6; text-align: justify; white-space: pre-line;">${textoOracion}</div>
         `;
     }
 
