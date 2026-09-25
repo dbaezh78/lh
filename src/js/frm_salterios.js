@@ -395,13 +395,21 @@ export function obtenerTodasLasLecturasOficioDesdeCatalogo() {
         }
     }
 
-    if (!Array.isArray(lecturas) || lecturas.length === 0) {
-        if (Array.isArray(CATALOGO_LECTURAS_OFICIO_SEED) && CATALOGO_LECTURAS_OFICIO_SEED.length > 0) {
-            lecturas = [...CATALOGO_LECTURAS_OFICIO_SEED];
-        }
+    const mapa = new Map();
+    // 1. Semillas canónicas base
+    if (Array.isArray(CATALOGO_LECTURAS_OFICIO_SEED)) {
+        CATALOGO_LECTURAS_OFICIO_SEED.forEach(s => {
+            if (s && (s.id || s.varName)) mapa.set(s.id || s.varName, s);
+        });
+    }
+    // 2. Elementos en caché local (añadir o actualizar)
+    if (Array.isArray(lecturas)) {
+        lecturas.forEach(l => {
+            if (l && (l.id || l.varName)) mapa.set(l.id || l.varName, l);
+        });
     }
 
-    return lecturas;
+    return Array.from(mapa.values());
 }
 
 export function formatAsterisco(texto, textoR2 = '') {
@@ -1666,17 +1674,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         const anioActual = new Date().getFullYear();
         const esPar = (anioActual % 2 === 0);
 
+        const esPatristica = (l) => l && (
+            l.tipo === 'lectura2' || 
+            l.tipo === 'patristica' || 
+            l.tipo === 'segunda' || 
+            (l.epigrafeTipo && l.epigrafeTipo.toUpperCase().includes('SEGUNDA')) || 
+            (l.id && (l.id.includes('lec2') || l.id.includes('lect2')))
+        );
+
+        const esBiblica = (l) => l && (
+            l.tipo === 'lectura1' || 
+            l.tipo === 'lectura1_par' || 
+            l.tipo === 'lectura1_impar' || 
+            l.tipo === 'biblica' || 
+            (l.epigrafeTipo && l.epigrafeTipo.toUpperCase().includes('PRIMERA')) || 
+            (l.id && (l.id.includes('lec1') || l.id.includes('lect1')))
+        );
+
         if (selLectura1Oficio) {
             selLectura1Oficio.innerHTML = '';
-            const biblicas = cacheTodasLasLecturasOficio.filter(l => l.tipo !== 'patristica');
+            // Todas las lecturas bíblicas (1ª lectura) de todo el catálogo abierto
+            const biblicas = cacheTodasLasLecturasOficio.filter(l => !esPatristica(l));
             const lista1 = biblicas.length > 0 ? biblicas : cacheTodasLasLecturasOficio;
             lista1.forEach(item => {
                 const opt = document.createElement('option');
                 opt.value = item.id || item.varName;
                 opt.setAttribute('data-cita', item.cita || '');
                 opt.setAttribute('data-desc', item.descripcion || item.subtitulo || '');
-                const anioTxt = item.esPar ? '[Año Par]' : (item.esImpar ? '[Año Impar]' : '');
-                opt.textContent = `${anioTxt} ${item.cita || item.id} - ${item.descripcion ? item.descripcion.slice(0, 45) : ''}...`;
+                opt.setAttribute('data-texto', (item.texto || '').slice(0, 300));
+                opt.setAttribute('data-titulo', item.titulo || '');
+                const anioTxt = item.esPar || item.tipo === 'lectura1_par' ? '[Año Par]' : ((item.esImpar || item.tipo === 'lectura1_impar') ? '[Año Impar]' : '');
+                const citaCorta = (item.cita || item.id).replace(/\n/g, ' ');
+                const descCorta = item.descripcion ? ` - ${item.descripcion.slice(0, 45)}...` : '';
+                opt.textContent = `${anioTxt} ${citaCorta}${descCorta}`.trim();
                 selLectura1Oficio.appendChild(opt);
             });
 
@@ -1691,14 +1721,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (selLectura2Oficio) {
             selLectura2Oficio.innerHTML = '';
-            const patristicas = cacheTodasLasLecturasOficio.filter(l => l.tipo === 'patristica');
+            // Todas las lecturas patrísticas (2ª lectura) de todo el catálogo abierto
+            const patristicas = cacheTodasLasLecturasOficio.filter(l => esPatristica(l));
             const lista2 = patristicas.length > 0 ? patristicas : cacheTodasLasLecturasOficio;
             lista2.forEach(item => {
                 const opt = document.createElement('option');
                 opt.value = item.id || item.varName;
                 opt.setAttribute('data-cita', item.cita || '');
                 opt.setAttribute('data-desc', item.descripcion || item.subtitulo || '');
-                opt.textContent = `[Patrística] ${item.cita || item.id} - ${item.descripcion ? item.descripcion.slice(0, 45) : ''}...`;
+                opt.setAttribute('data-texto', (item.texto || '').slice(0, 300));
+                opt.setAttribute('data-titulo', item.titulo || '');
+                const citaCorta = (item.cita || item.id).split('\n')[0];
+                const descCorta = item.descripcion ? ` - ${item.descripcion.slice(0, 45)}...` : '';
+                opt.textContent = `[Patrística] ${citaCorta}${descCorta}`;
                 selLectura2Oficio.appendChild(opt);
             });
 
@@ -1761,7 +1796,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             cargarYPoblarSelectOracion(valorOracionActual);
             actualizarInvitatorioPreview(false);
         }
+        if (e.key === 'lh_lecturas_cache') {
+            const val1 = selLectura1Oficio ? selLectura1Oficio.value : null;
+            const val2 = selLectura2Oficio ? selLectura2Oficio.value : null;
+            cargarYPoblarSelectLecturasOficio(val1, val2);
+            manejarCambioParametros(false);
+        }
     });
+
+    // Sincronizar lecturas del Oficio desde Firestore al arrancar
+    async function sincronizarLecturasDesdeFirestore() {
+        try {
+            if (window.firebaseAPI && window.firebaseAPI.db) {
+                const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+                const snap = await getDocs(collection(window.firebaseAPI.db, "lecturas_oficio"));
+                if (!snap.empty) {
+                    const desdeFb = [];
+                    snap.forEach(d => desdeFb.push({ id: d.id, ...d.data() }));
+                    if (desdeFb.length > 0) {
+                        const todas = obtenerTodasLasLecturasOficioDesdeCatalogo();
+                        const mapa = new Map();
+                        todas.forEach(x => { if (x && (x.id || x.varName)) mapa.set(x.id || x.varName, x); });
+                        desdeFb.forEach(x => { if (x && (x.id || x.varName)) mapa.set(x.id || x.varName, x); });
+                        const combinadas = Array.from(mapa.values());
+                        localStorage.setItem('lh_lecturas_cache', JSON.stringify(combinadas));
+                        const val1 = selLectura1Oficio ? selLectura1Oficio.value : null;
+                        const val2 = selLectura2Oficio ? selLectura2Oficio.value : null;
+                        cargarYPoblarSelectLecturasOficio(val1, val2);
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("Fallo sincronización Firestore lecturas:", e);
+        }
+    }
 
     // Cargar semanas según el tiempo litúrgico seleccionado
     function actualizarOpcionesSemanas(mantenerSeleccion = false) {
@@ -4224,4 +4292,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     configurarTodosLosCustomSelects();
     actualizarCodigoCombinado(true);
+    sincronizarLecturasDesdeFirestore();
 });

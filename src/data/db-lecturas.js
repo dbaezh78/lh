@@ -89,6 +89,38 @@ Cuando Cristo es sumergido, desciende el Espíritu Santo en figura de paloma, y 
         respR2: "La voz del Señor es potente, la voz del Señor es magnífica.",
         audioUrl: ""
     },
+    {
+        id: "tos1OFdo_lec2_nacianzo",
+        varName: "tos1OFdo_lec2_nacianzo",
+        tipo: "lectura2",
+        tiempo: "ordinario",
+        semana: "1",
+        dia: "domingo",
+        celebracion: "elbautismodelSeñor",
+        libro: "oficio",
+        titulo: "2ª Lectura Patrística - San Gregorio de Nacianzo (El Bautismo del Señor / Domingo 1 T.O.)",
+        epigrafeTipo: "SEGUNDA LECTURA",
+        cita: "De las Disertaciones de san Gregorio de Nacianzo, obispo\n(Disertación 39, En las santas Luminarias, 14-16. 20: PG 36, 350-351. 354. 358-359)",
+        descripcion: "EL BAUTISMO DE CRISTO",
+        texto: `Cristo es hoy iluminado, dejemos que esta luz divina nos penetre también a nosotros; Cristo es bautizado, bajemos con él al agua, para luego subir también con él.
+
+Juan está bautizando, y Jesús acude a él; posiblemente para santificar al mismo que lo bautiza; con toda seguridad para sepultar en el agua a todo el viejo Adán; antes de nosotros y por nosotros, el que era espíritu y carne santifica el Jordán, para así iniciarnos por el Espíritu y el agua en los sagrados misterios.
+
+El Bautista se resiste, Jesús insiste. «Soy yo quien debo ser bautizado por ti», le dice la lámpara al Sol, la voz a la Palabra, el amigo al Esposo, el más grande entre los nacidos de mujer al Primogénito de toda creatura, el que había saltado de gozo ya en el seno materno al que había sido adorado también en el seno de su madre, el que lo había precedido y lo precederá al que se había manifestado y se manifestará. «Soy yo quien debo ser bautizado por ti»; podía haber añadido: «Y por causa de ti.» Él, en efecto, sabía con certeza que recibiría más tarde el bautismo del martirio y que, como a Pedro, le serían lavados no sólo los pies, sino todo su cuerpo.
+
+Pero, además, Jesús sube del agua; lo cual nos recuerda que hizo subir al mundo con él hacia lo alto, porque en aquel momento ve también cómo el cielo se rasga y se abre, aquel cielo que Adán había cerrado para sí y para su posteridad, como había hecho que se le cerrase la entrada al paraíso con una espada de fuego.
+
+El Espíritu atestigua la divinidad de Cristo, acudiendo a él como a su igual; y una voz bajó del cielo, ya que del cielo procedía aquel de quien testificaba esta voz; y el Espíritu se apareció en forma corporal de una paloma, para honrar así el cuerpo de Cristo, que es también divino por su excepcional unión con Dios. Muchos siglos atrás fue asimismo una paloma la que anunció el fin del diluvio.
+
+Honremos hoy, pues, el bautismo de Cristo y celebremos como es debido esta festividad.
+
+Procurad una limpieza de espíritu siempre en aumento. Nada agrada tanto a Dios como la conversión y salvación del hombre, ya que para él tienen lugar todas estas palabras y misterios; sed como lumbreras en medio del mundo, como una fuerza vital para los demás hombres; si así lo hacéis, llegaréis a ser luces perfectas en la presencia de aquella gran luz, impregnados de sus resplandores celestiales, iluminados de un modo más claro y puro por la Trinidad, de la cual habéis recibido ahora, con menos plenitud, un único rayo proveniente de la única Divinidad, en Cristo Jesús, nuestro Señor, a quien sea la gloria y el poder por los siglos de los siglos. Amén.`,
+        respCita: "",
+        respR1: "Hoy se han abierto los cielos y el mar se dulcificó, la tierra canta de alegría y los montes y colinas se llenan de júbilo: * porque Cristo fue bautizado por Juan en el Jordán.",
+        respV: "¿Qué te pasa, mar, por qué huyes? Y tú, Jordán, ¿por qué te echas atrás?",
+        respR2: "Porque Cristo fue bautizado por Juan en el Jordán.",
+        audioUrl: "/solemnidades/BautismodelSenor/lecturas.mp3"
+    },
 
     // =========================================================================
     // LUNES - TIEMPO ORDINARIO SEMANA 1
@@ -225,8 +257,18 @@ export class LecturasDB {
         const catalogo = this.getCatalogo();
         const semNum = parseInt(String(semana).replace(/[^0-9]/g, ''), 10) || 1;
         const tipoBuscado = anioPar ? 'lectura1_par' : 'lectura1_impar';
+        const diaNorm = String(dia || '').toLowerCase();
 
-        // 1. Coincidencia exacta de tiempo, semana, día y tipo par/impar
+        // 1. Coincidencia por celebración específica (ej. Bautismo del Señor)
+        if (diaNorm.includes('bautismo')) {
+            const espBautismo = catalogo.find(x => 
+                (x.celebracion === 'elbautismodelSeñor' || x.id.includes('tos1OFdo_lec1')) &&
+                (x.tipo === tipoBuscado || x.tipo === 'lectura1')
+            );
+            if (espBautismo) return espBautismo;
+        }
+
+        // 2. Coincidencia exacta de tiempo, semana, día y tipo par/impar
         let encontrada = catalogo.find(x => 
             x.tiempo === tiempo &&
             (parseInt(String(x.semana).replace(/[^0-9]/g, ''), 10) || 1) === semNum &&
@@ -236,34 +278,49 @@ export class LecturasDB {
 
         if (encontrada) return encontrada;
 
-        // 2. Si no encuentra con par/impar, buscar cualquier lectura1 para ese día
+        // 3. Si no encuentra con par/impar, buscar cualquier lectura1 para ese día
         encontrada = catalogo.find(x => 
             x.tiempo === tiempo &&
             (parseInt(String(x.semana).replace(/[^0-9]/g, ''), 10) || 1) === semNum &&
             x.dia === dia &&
-            (x.tipo?.startsWith('lectura1'))
+            (x.tipo?.startsWith('lectura1') || x.tipo === 'biblica')
         );
 
         if (encontrada) return encontrada;
 
-        // 3. Fallback al primer elemento lectura1 disponible
-        return catalogo.find(x => x.tipo?.startsWith('lectura1')) || CATALOGO_LECTURAS_SEED[0];
+        // 4. Fallback al primer elemento lectura1 disponible
+        return catalogo.find(x => x.tipo?.startsWith('lectura1') || x.tipo === 'biblica') || CATALOGO_LECTURAS_SEED[0];
     }
 
     static obtenerLectura2(tiempo = 'ordinario', semana = '1', dia = 'domingo') {
         const catalogo = this.getCatalogo();
         const semNum = parseInt(String(semana).replace(/[^0-9]/g, ''), 10) || 1;
+        const diaNorm = String(dia || '').toLowerCase();
 
+        // 1. Coincidencia por celebración específica (ej. Bautismo del Señor, santos)
         let encontrada = catalogo.find(x => 
+            (x.celebracion && diaNorm.includes(x.celebracion.toLowerCase())) ||
+            (diaNorm.includes('bautismo') && (x.id.includes('bautismo') || x.id.includes('nacianzo') || x.celebracion === 'elbautismodelSeñor'))
+        );
+        if (encontrada) return encontrada;
+
+        // 2. Coincidencia de tiempo, semana y día
+        encontrada = catalogo.find(x => 
             x.tiempo === tiempo &&
             (parseInt(String(x.semana).replace(/[^0-9]/g, ''), 10) || 1) === semNum &&
             x.dia === dia &&
-            x.tipo === 'lectura2'
+            (x.tipo === 'lectura2' || x.tipo === 'patristica')
         );
 
         if (encontrada) return encontrada;
 
-        return catalogo.find(x => x.tipo === 'lectura2') || CATALOGO_LECTURAS_SEED.find(x => x.tipo === 'lectura2');
+        // 3. Si es Bautismo del Señor o semana 1 domingo, devolver San Gregorio de Nacianzo si existe
+        if (diaNorm.includes('bautismo') || (tiempo === 'ordinario' && semNum === 1 && dia === 'domingo')) {
+            const nacianzo = catalogo.find(x => x.id === 'tos1OFdo_lec2_nacianzo' || x.id.includes('nacianzo'));
+            if (nacianzo) return nacianzo;
+        }
+
+        return catalogo.find(x => x.tipo === 'lectura2' || x.tipo === 'patristica') || CATALOGO_LECTURAS_SEED.find(x => x.tipo === 'lectura2');
     }
 
     static obtenerTodos() {
