@@ -3307,6 +3307,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const diaVal    = selDia.value;
         const libroVal  = selLibro.value;
+        const esOficio  = (libroVal === 'oficio');
 
         const infoTiempo = CODIGOS_TIEMPO[tiempoVal] || { codigo: 'to', nombre: 'Tiempo Ordinario' };
         const infoDia    = CODIGOS_DIA[diaVal] || { codigo: 'do', nombre: 'Domingo' };
@@ -3436,15 +3437,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        const himnoTeDeum = (esOficio && diaVal === 'domingo' && selTeDeumOficio && selTeDeumOficio.value !== 'ninguno') ? {
-            id: selTeDeumOficio.value,
-            titulo: (previewTituloTeDeum ? previewTituloTeDeum.textContent.trim() : 'HIMNO: A TI, OH DIOS (TE DEUM)'),
-            texto: (previewTextoTeDeum ? previewTextoTeDeum.textContent.trim() : '')
-        } : null;
+        let himnoTeDeum = null;
+        if (esOficio && diaVal === 'domingo') {
+            if (selTeDeumOficio && selTeDeumOficio.value === 'ninguno') {
+                himnoTeDeum = { id: 'ninguno' };
+            } else if (selTeDeumOficio && selTeDeumOficio.value) {
+                himnoTeDeum = {
+                    id: selTeDeumOficio.value,
+                    titulo: (previewTituloTeDeum ? previewTituloTeDeum.textContent.trim() : 'HIMNO: A TI, OH DIOS (TE DEUM)'),
+                    texto: (previewTextoTeDeum ? previewTextoTeDeum.textContent.trim() : '')
+                };
+            }
+        }
 
-        const seccionOpcional = (esOficio && diaVal === 'domingo' && inputOpcionalOficio && inputOpcionalOficio.value.trim()) ? {
+        const seccionOpcional = (esOficio && diaVal === 'domingo') ? {
             rubrica: 'La parte que sigue puede omitirse, si se cree oportuno.',
-            texto: inputOpcionalOficio.value.trim()
+            texto: (inputOpcionalOficio ? inputOpcionalOficio.value.trim() : '')
         } : null;
 
         const payloadBase = {
