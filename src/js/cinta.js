@@ -263,15 +263,58 @@ export class CintaLiturgica {
         };
 
         // Control de Zoom con fórmula: font-size: calc(var(--size) * var(--font-zoom));
-        // Base: --size: 16px, --font-zoom: 1 (rango de 10px a 30px => fontZoom entre 0.625 y 1.875)
+        // Base: --size: 16px, --font-zoom: 1 (rango de 10px a 50px => fontZoom entre 0.625 y 3.125)
         const guardadoZoom = parseFloat(localStorage.getItem('lh_font_zoom'));
-        if (!isNaN(guardadoZoom) && guardadoZoom >= 0.625 && guardadoZoom <= 1.875) {
+        if (!isNaN(guardadoZoom) && guardadoZoom >= 0.625 && guardadoZoom <= 3.125) {
             this.fontZoom = guardadoZoom;
         } else {
             const guardadoSize = parseInt(localStorage.getItem('lh_font_size'), 10);
-            this.fontZoom = (!isNaN(guardadoSize) && guardadoSize >= 10 && guardadoSize <= 30) ? (guardadoSize / 16) : 1.0;
+            this.fontZoom = (!isNaN(guardadoSize) && guardadoSize >= 10 && guardadoSize <= 50) ? (guardadoSize / 16) : 1.0;
         }
         this.aplicarTamanoTexto(this.fontZoom);
+
+        // Sincronizar tamaño desde Firebase al inicializar o autenticar
+        const sincronizarZoomDesdeFirebase = async () => {
+            if (window.firebaseAPI && window.firebaseAPI.cargarAjustesFirestore) {
+                try {
+                    const datos = await window.firebaseAPI.cargarAjustesFirestore('cinta_zoom');
+                    if (datos && (datos.fontZoom !== undefined || datos.fontSize !== undefined)) {
+                        let zoomRemoto = datos.fontZoom !== undefined ? parseFloat(datos.fontZoom) : (parseFloat(datos.fontSize) / 16);
+                        if (!isNaN(zoomRemoto) && zoomRemoto >= 0.625 && zoomRemoto <= 3.125) {
+                            this.fontZoom = zoomRemoto;
+                            localStorage.setItem('lh_font_zoom', this.fontZoom.toFixed(4));
+                            localStorage.setItem('lh_font_size', String(Math.round(this.fontZoom * 16)));
+                            this.aplicarTamanoTexto(this.fontZoom);
+                            console.log(`☁️ [Cinta] Tamaño de texto sincronizado desde Firebase: ${Math.round(this.fontZoom * 16)}px`);
+                        }
+                    }
+                } catch (err) {
+                    console.warn("⚠️ Aviso al sincronizar tamaño de texto desde Firebase:", err);
+                }
+            }
+        };
+
+        if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
+            window.firebaseAPI.onAuthReady(sincronizarZoomDesdeFirebase);
+        } else {
+            const checkAuth = setInterval(() => {
+                if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
+                    window.firebaseAPI.onAuthReady(sincronizarZoomDesdeFirebase);
+                    clearInterval(checkAuth);
+                }
+            }, 500);
+            setTimeout(() => clearInterval(checkAuth), 8000);
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'lh_font_zoom' || e.key === 'lh_font_size') {
+                const z = parseFloat(localStorage.getItem('lh_font_zoom'));
+                if (!isNaN(z) && z >= 0.625 && z <= 3.125 && z !== this.fontZoom) {
+                    this.fontZoom = z;
+                    this.aplicarTamanoTexto(this.fontZoom);
+                }
+            }
+        });
 
         this.render();
         this.vincularEventos();
@@ -289,6 +332,12 @@ export class CintaLiturgica {
         };
         this.render();
         this.vincularEventos();
+    }
+
+    formatearTextoMetadatos(semana, dia) {
+        if (!semana) return dia || '';
+        const numSemana = String(semana).replace(/^semana\s*/i, '').replace(/^sem\s*/i, '').trim();
+        return `<span class="lbl-semana-larga">Semana</span><span class="lbl-semana-corta">SEM</span> ${numSemana} • ${dia}`;
     }
 
     render() {
@@ -338,11 +387,11 @@ export class CintaLiturgica {
                         <button type="button" class="cinta-badge-tiempo tiempo-${slugTiempo}" id="btn-toggle-tiempo" title="Toca para ocultar o mostrar el reproductor y las horas">
                             ${tiempo.toUpperCase()}
                         </button>
-                        <span class="cinta-texto-metadatos" id="cinta-texto-metadatos">Semana ${semana} • ${dia}</span>
+                        <span class="cinta-texto-metadatos" id="cinta-texto-metadatos">${this.formatearTextoMetadatos(semana, dia)}</span>
                         <div class="cinta-zoom-controles">
                             <button type="button" class="cinta-btn-zoom" id="btn-zoom-menos" title="Disminuir tamaño de letra">−</button>
                             <button type="button" class="cinta-btn-zoom" id="btn-zoom-mas" title="Aumentar tamaño de letra">+</button>
-                            <span class="cinta-zoom-valor" id="cinta-zoom-valor">${Math.round(this.fontZoom * 16)}px</span>
+                            <span class="cinta-zoom-valor" id="cinta-zoom-valor" title="Doble clic para restablecer tamaño (16px)">${Math.round(this.fontZoom * 16)}px</span>
                         </div>
                     </div>
 
@@ -425,6 +474,36 @@ export class CintaLiturgica {
         document.getElementById('btn-zoom-menos')?.addEventListener('click', () => {
             this.cambiarTamanoTexto(-1);
         });
+
+        // Doble clic o doble toque para restablecer a 16px (1.0)
+        const spanZoom = document.getElementById('cinta-zoom-valor');
+        if (spanZoom) {
+            let ultimoClic = 0;
+            const manejarDobleAccion = (e) => {
+                const ahora = Date.now();
+                const diferencia = ahora - ultimoClic;
+                if (diferencia < 350 && diferencia > 0) {
+                    if (e && e.preventDefault) e.preventDefault();
+                    this.resetearTamanoTexto();
+                    ultimoClic = 0;
+                } else {
+                    ultimoClic = ahora;
+                }
+            };
+
+            spanZoom.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+                this.resetearTamanoTexto();
+            });
+
+            spanZoom.addEventListener('click', (e) => {
+                manejarDobleAccion(e);
+            });
+
+            spanZoom.addEventListener('touchend', (e) => {
+                manejarDobleAccion(e);
+            });
+        }
 
         // 3. Menú Desplegable de la Iglesia
         const btnIglesia = document.getElementById('btn-iglesia-selector');
@@ -1332,7 +1411,7 @@ export class CintaLiturgica {
         const paso = 1 / 16; // 0.0625
         let nuevoZoom = this.fontZoom + (delta * paso);
         const minZoom = 10 / 16; // 0.625 (10px)
-        const maxZoom = 30 / 16; // 1.875 (30px)
+        const maxZoom = 50 / 16; // 3.125 (50px)
 
         if (nuevoZoom < minZoom) nuevoZoom = minZoom;
         if (nuevoZoom > maxZoom) nuevoZoom = maxZoom;
@@ -1341,6 +1420,36 @@ export class CintaLiturgica {
         localStorage.setItem('lh_font_zoom', this.fontZoom.toFixed(4));
         localStorage.setItem('lh_font_size', String(Math.round(this.fontZoom * 16)));
         this.aplicarTamanoTexto(this.fontZoom);
+        this.guardarTamanoEnFirebase(this.fontZoom);
+    }
+
+    resetearTamanoTexto() {
+        this.fontZoom = 1.0;
+        localStorage.setItem('lh_font_zoom', '1.0000');
+        localStorage.setItem('lh_font_size', '16');
+        this.aplicarTamanoTexto(1.0);
+        this.guardarTamanoEnFirebase(1.0);
+        console.log("🔄 [Cinta] Tamaño de texto restablecido a 16px (1.0)");
+    }
+
+    guardarTamanoEnFirebase(zoom) {
+        if (this._debounceFirebaseZoom) {
+            clearTimeout(this._debounceFirebaseZoom);
+        }
+        this._debounceFirebaseZoom = setTimeout(async () => {
+            if (window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+                try {
+                    await window.firebaseAPI.guardarAjustesFirestore('cinta_zoom', {
+                        fontZoom: parseFloat(zoom.toFixed(4)),
+                        fontSize: Math.round(zoom * 16),
+                        actualizado: new Date().toISOString()
+                    });
+                    console.log(`☁️ [Cinta] Tamaño de texto guardado en Firebase: ${Math.round(zoom * 16)}px (${zoom.toFixed(4)})`);
+                } catch (err) {
+                    console.warn("⚠️ Error guardando tamaño en Firebase:", err);
+                }
+            }
+        }, 400);
     }
 
     aplicarTamanoTexto(zoom) {
@@ -1364,7 +1473,9 @@ export class CintaLiturgica {
             const slug = (tiempoSlug || this.opciones.tiempoSlug || 'ordinario').toLowerCase();
             btnTiempo.className = `cinta-badge-tiempo tiempo-${slug}`;
         }
-        if (txtMetadatos) txtMetadatos.textContent = semana ? `Semana ${semana} • ${dia}` : (dia || '');
+        if (txtMetadatos) {
+            txtMetadatos.innerHTML = this.formatearTextoMetadatos(semana, dia);
+        }
 
         // Actualizar hora activa
         document.querySelectorAll('.cinta-btn-hora').forEach(btn => {

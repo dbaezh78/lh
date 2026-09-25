@@ -925,13 +925,90 @@ function inicializarEventosInteractivos() {
 // PANEL CONSTRUCTOR Y SINCRONIZACIÓN FIREBASE (ADMIN)
 // =========================================================================
 
+function esAdminAutorizado() {
+    if (typeof window.esUsuarioAdminAutorizado === 'function') {
+        return window.esUsuarioAdminAutorizado();
+    }
+    const ADMIN_EMAIL = 'dbaezh78@gmail.com';
+    const currentUser = (window.firebaseAPI && window.firebaseAPI.getCurrentUser) 
+        ? window.firebaseAPI.getCurrentUser() 
+        : (window.firebaseAPI?.auth?.currentUser || window.currentUser);
+    const email = (currentUser?.email || localStorage.getItem('lh_auth_email') || localStorage.getItem('user_email') || '').toLowerCase().trim();
+    const cachedIsAdmin = localStorage.getItem('lh_auth_is_admin') === 'true';
+    if (email === ADMIN_EMAIL.toLowerCase()) return true;
+    if (cachedIsAdmin && (!email || email === ADMIN_EMAIL.toLowerCase())) return true;
+    if (window.firebaseAPI && typeof window.firebaseAPI.isAdmin === 'function' && window.firebaseAPI.isAdmin()) return true;
+    return false;
+}
+
+function actualizarVisibilidadConstructor() {
+    const toolbar = document.querySelector('.admin-toolbar-salterios');
+    const drawer = document.getElementById('constructor-drawer');
+    const activadoPref = localStorage.getItem('pref-activar-constructor-salterio') === 'true';
+    const esAdmin = esAdminAutorizado();
+    const visible = activadoPref && esAdmin;
+
+    if (toolbar) {
+        toolbar.style.display = visible ? 'flex' : 'none';
+    }
+    if (!visible && drawer) {
+        drawer.classList.remove('abierto');
+    }
+}
+
 function inicializarConstructor() {
     const fab = document.getElementById('btn-abrir-constructor');
     const drawer = document.getElementById('constructor-drawer');
     const btnCerrar = document.getElementById('btn-cerrar-drawer');
 
+    // Inicializar visibilidad del botón y drawer
+    actualizarVisibilidadConstructor();
+
+    // Sincronizar preferencia si existe en Firebase
+    if (window.firebaseAPI && window.firebaseAPI.cargarAjustesFirestore) {
+        window.firebaseAPI.cargarAjustesFirestore('constructor_salterio').then(res => {
+            if (res && typeof res.activado === 'boolean') {
+                if (esAdminAutorizado()) {
+                    localStorage.setItem('pref-activar-constructor-salterio', res.activado ? 'true' : 'false');
+                    actualizarVisibilidadConstructor();
+                }
+            }
+        }).catch(e => console.warn(e));
+    }
+
+    // Escuchar cambios de estado en settings
+    window.addEventListener('lh-constructor-salterio-toggle', () => {
+        actualizarVisibilidadConstructor();
+    });
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'pref-activar-constructor-salterio' || e.key === 'lh_auth_email' || e.key === 'lh_auth_is_admin') {
+            actualizarVisibilidadConstructor();
+        }
+    });
+
+    if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
+        window.firebaseAPI.onAuthReady(() => {
+            actualizarVisibilidadConstructor();
+        });
+    } else {
+        const checkAuth = setInterval(() => {
+            if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
+                window.firebaseAPI.onAuthReady(() => {
+                    actualizarVisibilidadConstructor();
+                });
+                clearInterval(checkAuth);
+            }
+        }, 500);
+        setTimeout(() => clearInterval(checkAuth), 8000);
+    }
+
     if (fab && drawer) {
         fab.addEventListener('click', () => {
+            if (!esAdminAutorizado()) {
+                alert("Acceso denegado: Solo el administrador (dbaezh78@gmail.com) puede abrir el constructor.");
+                return;
+            }
             drawer.classList.add('abierto');
             poblarFormularioConstructor();
         });

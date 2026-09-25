@@ -13,6 +13,22 @@ window.cambioEnExpandir = false;
         console.log("🛡️ [Sistema] Bloqueo inicial activado preventivamente.");
     }
 
+    // ================================================
+    // VERIFICACIÓN DE ADMINISTRADOR GENERAL (dbaezh78@gmail.com)
+    // ================================================
+    window.esUsuarioAdminAutorizado = function() {
+        const ADMIN_EMAIL = 'dbaezh78@gmail.com';
+        const currentUser = (window.firebaseAPI && window.firebaseAPI.getCurrentUser) 
+            ? window.firebaseAPI.getCurrentUser() 
+            : (window.firebaseAPI?.auth?.currentUser || window.currentUser);
+        const email = (currentUser?.email || localStorage.getItem('lh_auth_email') || localStorage.getItem('user_email') || '').toLowerCase().trim();
+        const cachedIsAdmin = localStorage.getItem('lh_auth_is_admin') === 'true';
+        if (email === ADMIN_EMAIL.toLowerCase()) return true;
+        if (cachedIsAdmin && (!email || email === ADMIN_EMAIL.toLowerCase())) return true;
+        if (window.firebaseAPI && typeof window.firebaseAPI.isAdmin === 'function' && window.firebaseAPI.isAdmin()) return true;
+        return false;
+    };
+
     {
     const urlParams = new URLSearchParams(window.location.search);
     const currentCantoId = urlParams.get('canto') || 'global';
@@ -738,6 +754,42 @@ window.cambioEnExpandir = false;
 
                                     console.log("✅ Limpieza completada. Recargando...");
                                     window.location.reload();
+                                }
+                            }
+                        },
+
+                        // SWITCH CONSTRUCTOR DE SALTERIO (DESACTIVADO POR DEFECTO, SOLO ADMIN DBAEZH78@GMAIL.COM)
+                        {
+                            id: 'global-set-constructor-salterio',
+                            label: 'Constructor de Salterio',
+                            tipo: 'switch',
+                            storageKey: 'pref-activar-constructor-salterio',
+                            default: false,
+                            isDisabled: () => !window.esUsuarioAdminAutorizado(),
+                            accion: (val, isUserInteraction = true) => {
+                                if (val && !window.esUsuarioAdminAutorizado()) {
+                                    if (isUserInteraction) {
+                                        alert("⛔ Acceso denegado: Solo el administrador general (dbaezh78@gmail.com) tiene permiso para activar el Constructor de Salterio.");
+                                    }
+                                    localStorage.setItem('pref-activar-constructor-salterio', 'false');
+                                    const sw = document.querySelector('#modal-global-settings input[type="checkbox"][onchange*="global-set-constructor-salterio"]');
+                                    if (sw) sw.checked = false;
+                                    window.dispatchEvent(new CustomEvent('lh-constructor-salterio-toggle', {
+                                        detail: { activado: false }
+                                    }));
+                                    return;
+                                }
+                                const estado = val === true || val === 'true';
+                                localStorage.setItem('pref-activar-constructor-salterio', estado ? 'true' : 'false');
+                                window.dispatchEvent(new CustomEvent('lh-constructor-salterio-toggle', {
+                                    detail: { activado: estado }
+                                }));
+
+                                if (isUserInteraction && window.firebaseAPI && window.firebaseAPI.guardarAjustesFirestore) {
+                                    window.firebaseAPI.guardarAjustesFirestore('constructor_salterio', {
+                                        activado: estado,
+                                        actualizado: new Date().toISOString()
+                                    }).catch(e => console.warn("Error guardando ajuste de constructor en Firebase:", e));
                                 }
                             }
                         }
@@ -1750,15 +1802,37 @@ window.cambioEnExpandir = false;
             }
         };
 
+        const sincronizarConstructorDesdeFirebase = async () => {
+            if (window.firebaseAPI && window.firebaseAPI.cargarAjustesFirestore) {
+                try {
+                    const datos = await window.firebaseAPI.cargarAjustesFirestore('constructor_salterio');
+                    if (datos && typeof datos.activado === 'boolean') {
+                        if (window.esUsuarioAdminAutorizado()) {
+                            localStorage.setItem('pref-activar-constructor-salterio', datos.activado ? 'true' : 'false');
+                            window.dispatchEvent(new CustomEvent('lh-constructor-salterio-toggle', { detail: { activado: datos.activado } }));
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Aviso cargando ajuste constructor de Firebase:", err);
+                }
+            }
+        };
+
+        const ejecutarSincronizacionesFirebase = () => {
+            sincronizarColumnasDesdeFirebase();
+            sincronizarConstructorDesdeFirebase();
+        };
+
         if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
-            window.firebaseAPI.onAuthReady(sincronizarColumnasDesdeFirebase);
+            window.firebaseAPI.onAuthReady(ejecutarSincronizacionesFirebase);
         } else {
             const checkFBC = setInterval(() => {
                 if (window.firebaseAPI && window.firebaseAPI.onAuthReady) {
-                    window.firebaseAPI.onAuthReady(sincronizarColumnasDesdeFirebase);
+                    window.firebaseAPI.onAuthReady(ejecutarSincronizacionesFirebase);
                     clearInterval(checkFBC);
                 }
             }, 600);
+            setTimeout(() => clearInterval(checkFBC), 10000);
         }
     }
 

@@ -115,6 +115,14 @@
     letter-spacing: 0.2px;
 }
 
+.lbl-semana-larga {
+    display: inline;
+}
+
+.lbl-semana-corta {
+    display: none;
+}
+
 /* Controles de Zoom (+ y -) */
 .cinta-zoom-controles {
     display: inline-flex;
@@ -152,10 +160,21 @@
     color: #cbd5e1;
     margin-left: 3px;
     user-select: none;
+    -webkit-user-select: none;
     min-width: 26px;
     text-align: left;
     font-family: inherit;
     line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.cinta-zoom-valor:hover {
+    color: #ffffff;
+}
+
+.cinta-zoom-valor:active {
+    transform: scale(0.92);
 }
 
 /* Lado Derecho: Icono de Iglesia y Menú de Selección */
@@ -642,5 +661,109 @@ color: red !important;
     .cinta-btn-play {
         width: 32px;
         height: 32px;
+    }
+}
+
+/* Celulares menores a 384px y 411px (fidelidad con media_1790294914991.png) */
+@media (max-width: 414px) {
+    .cinta-top-bar {
+        padding: 0px 2px;
+    }
+
+    .cinta-fila-sup {
+        gap: 0 !important;
+    }
+
+    .cinta-sup-izq {
+        gap: 0 !important;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .cinta-sup-der {
+        flex-shrink: 0;
+    }
+
+    .cinta-btn-iglesia {
+        padding: 0 1px;
+        flex-shrink: 0;
+    }
+
+    .cinta-btn-iglesia .material-symbols-outlined {
+        font-size: 32px;
+    }
+
+    .cinta-badge-tiempo {
+        font-size: 0.70rem;
+        padding: 2px 5px;
+        flex-shrink: 0;
+    }
+
+    .cinta-texto-metadatos {
+        font-size: 0.82rem;
+        margin: 0 3px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* En celulares muestra SEM en vez de Semana para que quepa todo y se pueda ver el icono de la iglesia */
+    .lbl-semana-larga {
+        display: none !important;
+    }
+
+    .lbl-semana-corta {
+        display: inline !important;
+    }
+
+    .cinta-zoom-controles {
+        gap: 0 !important;
+        margin-left: 1px;
+        flex-shrink: 0;
+    }
+
+    .cinta-btn-zoom {
+        padding: 0 10px;
+        font-size: 1.5rem;
+    }
+
+    .cinta-zoom-valor {
+        font-size: 10px;
+        margin-left: 1px;
+        min-width: 22px;
+    }
+}
+
+/* Celulares ultra-compactos (<= 384px) */
+@media (max-width: 384px) {
+    .cinta-top-bar {
+        padding: 0px 1px;
+    }
+
+    .cinta-fila-sup {
+        gap: 0 !important;
+    }
+
+    .cinta-sup-izq {
+        gap: 0 !important;
+    }
+
+    .cinta-zoom-controles {
+        gap: 0 !important;
+        margin-left: 0;
+    }
+
+    .cinta-badge-tiempo {
+        font-size: 0.68rem;
+        padding: 2px 4px;
+        letter-spacing: 0;
+    }
+
+    .cinta-texto-metadatos {
+        font-size: 0.78rem;
+        margin: 0 2px;
+    }
+
+    .cinta-btn-iglesia .material-symbols-outlined {
+        font-size: 30px;
     }
 }

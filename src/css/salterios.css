@@ -288,7 +288,7 @@ body.pagina-salterios {
     position: fixed;
     bottom: 24px;
     right: 24px;
-    display: flex;
+    display: none; /* Desactivado por defecto. Solo visible si el admin lo activa en General -> Ajustes */
     flex-direction: column;
     align-items: flex-end;
     gap: 10px;
