@@ -1997,7 +1997,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (esOficio) {
                 previewSubtituloHora.style.display = 'none';
                 previewSubtituloHora.textContent = '';
-                if (previewTituloHora) previewTituloHora.style.marginBottom = '24px';
+                if (previewTituloHora) previewTituloHora.style.marginBottom = '';
             } else {
                 previewSubtituloHora.style.display = 'block';
                 previewSubtituloHora.textContent = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
@@ -2811,7 +2811,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (esOficio) {
                 previewSubtituloHora.style.display = 'none';
                 previewSubtituloHora.textContent = '';
-                if (previewTituloHora) previewTituloHora.style.marginBottom = '24px';
+                if (previewTituloHora) previewTituloHora.style.marginBottom = '';
             } else {
                 previewSubtituloHora.style.display = 'block';
                 if (previewTituloHora) previewTituloHora.style.marginBottom = '';
@@ -3580,7 +3580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (libroVal === 'oficio') {
                 previewSubtituloHora.style.display = 'none';
                 previewSubtituloHora.textContent = '';
-                if (previewTituloHora) previewTituloHora.style.marginBottom = '24px';
+                if (previewTituloHora) previewTituloHora.style.marginBottom = '';
             } else {
                 previewSubtituloHora.style.display = 'block';
                 previewSubtituloHora.textContent = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
