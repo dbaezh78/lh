@@ -310,7 +310,7 @@ export function obtenerIdsEquivalentes(codigo) {
 // =========================================================================
 
 const CONFIG_LIBROS_DEFECTO = {
-    oficio:    { nombre: 'OFICIO DE LECTURA', subtitulo: '(Oración de lectura y vigilia)' },
+    oficio:    { nombre: 'OFICIO DE LECTURA', subtitulo: '' },
     laudes:    { nombre: 'LAUDES',            subtitulo: '(Oración de la mañana)' },
     tercia:    { nombre: 'TERCIA',            subtitulo: '(Antes del mediodía)' },
     sexta:     { nombre: 'SEXTA',             subtitulo: '(Al mediodía)' },

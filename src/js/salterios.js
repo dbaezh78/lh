@@ -47,7 +47,7 @@ export function formatearResponsorioR1(r1, r2) {
 const LIBROS_CONFIG = {
     oficio: {
         nombre: 'OFICIO DE LECTURA',
-        subtitulo: '(Oración de lectura y vigilia)',
+        subtitulo: '',
         orden: 1,
         icono: 'menu_book'
     },
@@ -654,10 +654,16 @@ function renderizarCuerpoLiturgico(d) {
     let html = '';
 
     // 1. TÍTULO Y SUBTÍTULO DEL LIBRO
-    html += `
-        <h1 class="salterio-libro-titulo">${tituloLibro}</h1>
-        <div class="salterio-libro-subtitulo">${subtituloLibro}</div>
-    `;
+    if (libroKey === 'oficio') {
+        html += `
+            <h1 class="salterio-libro-titulo" style="margin-bottom: 24px;">${tituloLibro}</h1>
+        `;
+    } else {
+        html += `
+            <h1 class="salterio-libro-titulo">${tituloLibro}</h1>
+            ${subtituloLibro ? `<div class="salterio-libro-subtitulo">${subtituloLibro}</div>` : ''}
+        `;
+    }
 
     // 2. INVITATORIO E INVOCACIÓN INICIAL (Fiel a Imagen 2 para Oficio)
     if (libroKey === 'oficio') {
@@ -667,11 +673,10 @@ function renderizarCuerpoLiturgico(d) {
             ? `${textoInvocacionR.replace(/\.?$/, '')}. Aleluya.`
             : textoInvocacionR;
         html += `
-            <div class="salterio-seccion-header">INVITATORIO</div>
-            <div class="rubrica-nota">Si ésta es la primera oración del día:</div>
+            <div style="color: var(--salterio-text, #1a1a1a); margin: 0 0 14px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Si el Oficio de Lectura es la primera oración del día:</div>
             <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">Señor abre mis labios</span></div>
             <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">Y mi boca proclamará tu alabanza</span></div>
-            <div class="rubrica-nota" style="margin-top: 8px;">Se añade el Salmo del Invitatorio con la siguiente antífona:</div>
+            <div style="color: var(--salterio-text, #1a1a1a); margin: 16px 0 14px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Se añade el Salmo del Invitatorio con la siguiente antífona:</div>
             <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${antInv}</div>
             <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
             <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">Si antes se ha rezado ya alguna otra Hora:</div>

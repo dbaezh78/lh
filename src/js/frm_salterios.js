@@ -1749,7 +1749,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 2. SUBTÍTULO (ROJO, CURSIVA, SIN NEGRITA)
         const mapaSubtitulos = {
             laudes:    '(Oración de la mañana)',
-            oficio:    '(Oficio de lectura y contemplación)',
+            oficio:    '',
             vispera:   '(Oración de la tarde)',
             tercia:    '(Antes del mediodía)',
             sexta:     '(Al mediodía)',
@@ -1757,7 +1757,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             completas: '(Oración antes del descanso nocturno)'
         };
         if (previewSubtituloHora) {
-            previewSubtituloHora.textContent = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
+            if (esOficio) {
+                previewSubtituloHora.style.display = 'none';
+                previewSubtituloHora.textContent = '';
+                if (previewTituloHora) previewTituloHora.style.marginBottom = '24px';
+            } else {
+                previewSubtituloHora.style.display = 'block';
+                previewSubtituloHora.textContent = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
+                if (previewTituloHora) previewTituloHora.style.marginBottom = '';
+            }
         }
 
         // 3. ANTÍFONA DEL INVITATORIO (EN LÍNEA NATURAL, SIN RECUADRO)
@@ -2558,6 +2566,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const libroActual = datos.libro || selLibro.value;
         const esOficio = (libroActual === 'oficio');
 
+        if (previewSubtituloHora) {
+            if (esOficio) {
+                previewSubtituloHora.style.display = 'none';
+                previewSubtituloHora.textContent = '';
+                if (previewTituloHora) previewTituloHora.style.marginBottom = '24px';
+            } else {
+                previewSubtituloHora.style.display = 'block';
+                if (previewTituloHora) previewTituloHora.style.marginBottom = '';
+            }
+        }
+
         if (ctrlBoxResponsorioOficio) ctrlBoxResponsorioOficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxLectura1Oficio) ctrlBoxLectura1Oficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxLectura2Oficio) ctrlBoxLectura2Oficio.style.display = esOficio ? 'block' : 'none';
@@ -3248,7 +3267,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const mapaSubtitulos = {
             laudes:    '(Oración de la mañana)',
-            oficio:    '(Oficio de lectura y contemplación)',
+            oficio:    '',
             vispera:   '(Oración de la tarde)',
             tercia:    '(Antes del mediodía)',
             sexta:     '(Al mediodía)',
@@ -3256,7 +3275,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             completas: '(Oración antes del descanso nocturno)'
         };
         if (previewSubtituloHora) {
-            previewSubtituloHora.textContent = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
+            if (libroVal === 'oficio') {
+                previewSubtituloHora.style.display = 'none';
+                previewSubtituloHora.textContent = '';
+                if (previewTituloHora) previewTituloHora.style.marginBottom = '24px';
+            } else {
+                previewSubtituloHora.style.display = 'block';
+                previewSubtituloHora.textContent = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
+                if (previewTituloHora) previewTituloHora.style.marginBottom = '';
+            }
         }
 
         // Comprobación sincrónica inmediata de LocalStorage para evitar parpadeos o sobrescrituras
@@ -3460,7 +3487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             codigo: idCodigo,
             codigoDia: (typeof codigoDia !== 'undefined' ? codigoDia : idCodigo.slice(0, -2)),
             titulo: (previewTituloHora ? previewTituloHora.textContent : infoLibro.nombre.toUpperCase()),
-            subtitulo: (previewSubtituloHora ? previewSubtituloHora.textContent : (libroVal === 'oficio' ? '(Oficio de lectura y contemplación)' : '(Oración de la mañana)')),
+            subtitulo: (esOficio ? '' : (previewSubtituloHora ? previewSubtituloHora.textContent : (libroVal === 'oficio' ? '' : '(Oración de la mañana)'))),
             tiempo: tiempoVal,
             tiempoCodigo: infoTiempo.codigo,
             tiempoNombre: infoTiempo.nombre,
