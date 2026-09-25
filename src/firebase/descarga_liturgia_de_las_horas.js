@@ -538,7 +538,7 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
         invitatorio: invitatorioNorm,
         invocacionInicial: base.invocacionInicial || {
             v: 'Dios mío, ven en mi auxilio',
-            r: 'Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo...'
+            r: 'Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén. Aleluya.'
         },
         himno: himnoNorm,
         salmodia: salmodiaNorm,

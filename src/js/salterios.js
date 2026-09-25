@@ -434,7 +434,7 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
         },
         invocacionInicial: {
             v: 'Dios mío, ven en mi auxilio',
-            r: `Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo.\nComo era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${tiempo === 'pascua' ? ' Aleluya.' : ''}`
+            r: `Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo.\nComo era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${tiempo === 'cuaresma' ? '' : ' Aleluya.'}`
         },
         himno: himnoFinal,
         salmodia: {
@@ -662,6 +662,10 @@ function renderizarCuerpoLiturgico(d) {
     // 2. INVITATORIO E INVOCACIÓN INICIAL (Fiel a Imagen 2 para Oficio)
     if (libroKey === 'oficio') {
         const antInv = d.invitatorio?.antifonaTexto || d.invitatorio?.antifona || 'Venid, adoremos a Cristo, el Hijo amado, en quien el Padre tiene sus complacencias.';
+        const textoInvocacionR = (d.invocacionInicial?.r || `Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${d.tiempo === 'cuaresma' ? '' : ' Aleluya.'}`).replace(/\n/g, ' ');
+        const finalInvocacionR = (d.tiempo !== 'cuaresma' && !textoInvocacionR.includes('Aleluya'))
+            ? `${textoInvocacionR.replace(/\.?$/, '')}. Aleluya.`
+            : textoInvocacionR;
         html += `
             <div class="salterio-seccion-header">INVITATORIO</div>
             <div class="rubrica-nota">Si ésta es la primera oración del día:</div>
@@ -671,8 +675,8 @@ function renderizarCuerpoLiturgico(d) {
             <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${antInv}</div>
             <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
             <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">Si antes se ha rezado ya alguna otra Hora:</div>
-            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">Dios mío, ven en mi auxilio</span></div>
-            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${d.tiempo === 'pascua' ? ' Aleluya.' : ''}</span></div>
+            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invocacionInicial?.v || 'Dios mío, ven en mi auxilio'}</span></div>
+            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${finalInvocacionR}</span></div>
             <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
         `;
     } else {
@@ -688,10 +692,14 @@ function renderizarCuerpoLiturgico(d) {
                 <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>
             `;
         } else if (d.invocacionInicial) {
+            let rInvocacion = d.invocacionInicial.r || '';
+            if (d.tiempo !== 'cuaresma' && !rInvocacion.includes('Aleluya')) {
+                rInvocacion = `${rInvocacion.replace(/\.?$/, '')}. Aleluya.`;
+            }
             html += `
                 <div class="salterio-seccion-header">INVOCACIÓN INICIAL</div>
                 <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invocacionInicial.v}</span></div>
-                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${d.invocacionInicial.r}</span></div>
+                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rInvocacion}</span></div>
             `;
         }
     }
