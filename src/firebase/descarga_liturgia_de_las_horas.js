@@ -803,29 +803,104 @@ export function obtenerHoraLocalSincrona(idCodigo) {
 }
 
 /**
- * Almacena una hora litúrgica en LocalStorage bajo su ID principal y todos sus equivalentes
- * para asegurar acceso instantáneo (0ms) en cualquier formato de URL.
+ * Obtiene el identificador canónico único de una hora litúrgica (ej. tos01doof).
+ */
+export function obtenerIdCanonico(idCodigo) {
+    if (!idCodigo) return '';
+    const clean = idCodigo.trim().toLowerCase();
+    const dec = decodificarCodigoLiturgico(clean);
+    if (dec) {
+        const codT = REVERSO_TIEMPOS[dec.tiempo] || 'to';
+        const codSPadded = `s${String(dec.semana).padStart(2, '0')}`;
+        const codD = REVERSO_DIAS[dec.dia] || 'do';
+        const codH = REVERSO_HORAS[dec.libro] || 'la';
+        return `${codT}${codSPadded}${codD}${codH}`;
+    }
+    return clean;
+}
+
+/**
+ * Limpia claves duplicadas no canónicas y libera espacio en LocalStorage si se acerca a la cuota.
+ */
+export function purgarLocalStorageSalterios(idPreservar = null, maxEntradas = 25) {
+    if (typeof localStorage === 'undefined') return 0;
+    let eliminadas = 0;
+    const prefijo = PREFIJO_LOCAL;
+    const clavesSalterio = [];
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(prefijo)) {
+            clavesSalterio.push(key);
+        }
+    }
+
+    // 1. Eliminar duplicados no canónicos (claves redundantes generadas previamente)
+    const canonicas = [];
+    for (const key of clavesSalterio) {
+        const idSinPrefijo = key.replace(prefijo, '');
+        const canonico = obtenerIdCanonico(idSinPrefijo);
+        if (idSinPrefijo !== canonico && (!idPreservar || idSinPrefijo !== idPreservar)) {
+            try {
+                localStorage.removeItem(key);
+                eliminadas++;
+            } catch (_) {}
+        } else {
+            canonicas.push(key);
+        }
+    }
+
+    // 2. Si todavía hay demasiadas entradas canónicas que exceden maxEntradas, purgar las más antiguas
+    if (canonicas.length > maxEntradas) {
+        const aEliminar = canonicas.slice(0, canonicas.length - maxEntradas);
+        for (const key of aEliminar) {
+            const idSinPrefijo = key.replace(prefijo, '');
+            if (!idPreservar || idSinPrefijo !== idPreservar) {
+                try {
+                    localStorage.removeItem(key);
+                    eliminadas++;
+                } catch (_) {}
+            }
+        }
+    }
+
+    if (eliminadas > 0) {
+        console.log(`🧹 [LocalStorage] Se purgaron ${eliminadas} entradas de salterios para optimizar cuota.`);
+    }
+
+    return eliminadas;
+}
+
+/**
+ * Almacena una hora litúrgica en LocalStorage bajo su ID canónico único (0 duplicación)
+ * con manejo inteligente de cuota y purga automática si ocurre QuotaExceededError.
  */
 export function guardarHoraEnLocalStorage(idCodigo, datos) {
     if (!idCodigo || !datos) return;
-    try {
-        const idPrincipal = idCodigo.toLowerCase();
-        localStorage.setItem(`${PREFIJO_LOCAL}${idPrincipal}`, JSON.stringify(datos));
-        const equivs = obtenerIdsEquivalentes(idPrincipal);
-        equivs.forEach(eq => {
-            try {
-                localStorage.setItem(`${PREFIJO_LOCAL}${eq}`, JSON.stringify(datos));
-            } catch (_) {}
-        });
-        
+    const idCanonico = obtenerIdCanonico(idCodigo);
+
+    const ejecutarGuardado = () => {
+        localStorage.setItem(`${PREFIJO_LOCAL}${idCanonico}`, JSON.stringify(datos));
+
         // Registrar en el catálogo de IDs descargados
         const catalogo = JSON.parse(localStorage.getItem('lh_catalogo_ids_descargados') || '[]');
-        if (!catalogo.includes(idPrincipal)) {
-            catalogo.push(idPrincipal);
+        if (!catalogo.includes(idCanonico)) {
+            catalogo.push(idCanonico);
             localStorage.setItem('lh_catalogo_ids_descargados', JSON.stringify(catalogo));
         }
+    };
+
+    try {
+        ejecutarGuardado();
     } catch (eGuardar) {
-        console.warn("Aviso guardando en LocalStorage:", eGuardar);
+        console.warn("⚠️ Quota excedida en LocalStorage. Purgando almacenamiento y reintentando...", eGuardar.message);
+        purgarLocalStorageSalterios(idCanonico, 15);
+        try {
+            ejecutarGuardado();
+            console.log(`✅ Hora '${idCanonico}' guardada con éxito tras purgar LocalStorage.`);
+        } catch (eReintento) {
+            console.warn("Aviso no se pudo guardar en LocalStorage tras purga:", eReintento.message);
+        }
     }
 }
 
@@ -1010,11 +1085,18 @@ export async function exportarRespaldoJSON() {
 
 // Exposición global en window
 if (typeof window !== 'undefined') {
+    // Purga preventiva al inicializar para liberar cuota de versiones anteriores
+    try {
+        purgarLocalStorageSalterios();
+    } catch (_) {}
+
     window.DescargaLiturgiaHoras = {
         obtenerLiturgiaHora,
         obtenerHoraLocalSincrona,
         guardarHoraEnLocalStorage,
         consultarHoraEnFirebase,
+        purgarLocalStorageSalterios,
+        obtenerIdCanonico,
         normalizarObjetoLiturgico,
         descargarTodasLasHorasFirebase,
         precargarHorasCanonicasLocal,

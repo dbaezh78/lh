@@ -14,7 +14,7 @@ import {
     obtenerHoraLocalSincrona, 
     guardarHoraEnLocalStorage, 
     consultarHoraEnFirebase,
-    precargarHorasCanonicasLocal,
+    purgarLocalStorageSalterios,
     normalizarObjetoLiturgico
 } from '../firebase/descarga_liturgia_de_las_horas.js';
 
@@ -75,21 +75,12 @@ const LIBROS_CONFIG = {
 document.addEventListener('DOMContentLoaded', async () => {
     aplicarTemaConfigurado();
     const params = obtenerParametrosUrl();
+    try {
+        purgarLocalStorageSalterios(params.codigoCompleto || 'tos01doof');
+    } catch (_) {}
     await cargarYRenderizarHora(params);
     inicializarConstructor();
     inicializarEventosInteractivos();
-
-    // Precargar horas canónicas de la semana en background si no estuvieran en local
-    const precargar = () => {
-        try {
-            precargarHorasCanonicasLocal([params.semana || 1], ensamblarHoraPorDefecto);
-        } catch (_) {}
-    };
-    if (typeof requestIdleCallback === 'function') {
-        requestIdleCallback(precargar);
-    } else {
-        setTimeout(precargar, 1200);
-    }
 });
 
 // Decodificador del código litúrgico estándar (ej: tos24sala, tos01dola, tos1LAdo, tos1lami)
