@@ -673,13 +673,13 @@ function renderizarCuerpoLiturgico(d) {
             ? `${textoInvocacionR.replace(/\.?$/, '')}. Aleluya.`
             : textoInvocacionR;
         html += `
-            <div style="color: var(--salterio-text, #1a1a1a); margin: 0 0 14px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Si el Oficio de Lectura es la primera oración del día:</div>
+            <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin: 0 0 10px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Si el Oficio de Lectura es la primera oración del día:</div>
             <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">Señor abre mis labios</span></div>
             <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">Y mi boca proclamará tu alabanza</span></div>
-            <div style="color: var(--salterio-text, #1a1a1a); margin: 16px 0 14px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Se añade el Salmo del Invitatorio con la siguiente antífona:</div>
+            <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin: 16px 0 8px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Se añade el Salmo del Invitatorio con la siguiente antífona:</div>
             <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${antInv}</div>
             <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
-            <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">Si antes se ha rezado ya alguna otra Hora:</div>
+            <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Si antes se ha rezado ya alguna otra Hora:</div>
             <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invocacionInicial?.v || 'Dios mío, ven en mi auxilio'}</span></div>
             <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${finalInvocacionR}</span></div>
             <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
