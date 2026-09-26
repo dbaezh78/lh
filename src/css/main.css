@@ -15,8 +15,9 @@
     --color-ordinario: green;
     --color-cuaresma: #6a0dad; /* Morado fuerte */
     --color-pascua: #008fcc;  /* Azul */
-    --color-santos: #007bff;   /* Azul estándar */
-    --color-solemnidades: #0069d9;
+    --color-santos: #B71C1C;   /* Rojo */
+    --color-solemnidades: #0288D1; /* Azul */
+    --color-fiestas: #D97706;  /* Ámbar / Oro litúrgico */
     
     --fuente-portada: 'Caveat', cursive;
 }
@@ -406,20 +407,119 @@ body.portada-body {
 .btn-sub-mes {
     padding: 7px 12px;
     background: #ffffff;
-    border: 1px solid rgba(21, 101, 192, 0.3);
+    border: 1px solid rgba(183, 28, 28, 0.35);
     border-radius: 16px;
-    color: #1565c0;
+    color: #b71c1c;
     font-size: 0.95rem;
     font-weight: 600;
     text-decoration: none;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
     transition: all 0.15s ease;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
 }
 
 .btn-sub-mes:hover {
-    background: #1565c0;
+    background: #b71c1c;
     color: #ffffff;
+    border-color: #b71c1c;
     transform: translateY(-2px);
+}
+
+.btn-sub-mes.activo {
+    background: #ffffff !important;
+    border: 2px solid #111827 !important;
+    color: #b71c1c !important;
+    font-weight: 800 !important;
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.22) !important;
+}
+
+.santos-mes-contenedor {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+    animation: fadeInSlide 0.25s ease-out;
+}
+
+.santos-dias-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    padding: 6px 2px;
+}
+
+.btn-santo-dia-activo {
+    background: #ffffff !important;
+    border: 1.5px solid #b71c1c !important;
+    color: #b71c1c !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.btn-santo-dia-activo:hover {
+    background: #ffebee !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 2px 6px rgba(183, 28, 28, 0.25) !important;
+}
+
+.btn-santo-dia-activo.activo {
+    background: #b71c1c !important;
+    color: #ffffff !important;
+    border-color: #b71c1c !important;
+    box-shadow: 0 3px 10px rgba(183, 28, 28, 0.45) !important;
+    transform: scale(1.08) !important;
+}
+
+.btn-santo-dia-inactivo {
+    background: rgba(245, 245, 245, 0.6) !important;
+    border: 1px solid #e0e0e0 !important;
+    color: #b0bec5 !important;
+    opacity: 0.45 !important;
+    cursor: default !important;
+    pointer-events: none !important;
+}
+
+/* Panel de Horas Litúrgicas de Santos con fondo blanco y rojo de Santos */
+.semana-horas-panel.panel-santos-rojo {
+    --color-tiempo: #b71c1c !important;
+    background: #ffffff !important;
+    border: 2px solid #b71c1c !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 16px rgba(183, 28, 28, 0.22), 0 2px 8px rgba(0,0,0,0.12) !important;
+    margin: 6px 0 12px 0 !important;
+    padding: 12px 10px !important;
+    animation: fadeInSlide 0.25s ease-out;
+}
+
+.semana-horas-panel.panel-santos-rojo .semana-horas-panel-header {
+    color: #b71c1c !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 8px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+}
+
+.semana-horas-panel.panel-santos-rojo .btn-semana-hora {
+    background: #ffffff !important;
+    border: 1px solid #dcdcdc !important;
+    border-radius: 10px !important;
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    padding: 9px 12px !important;
+}
+
+.semana-horas-panel.panel-santos-rojo .btn-semana-hora:hover,
+.semana-horas-panel.panel-santos-rojo .btn-semana-hora:active {
+    background: #b71c1c !important;
+    color: #ffffff !important;
+    border-color: #b71c1c !important;
+    transform: translateY(-1px);
 }
 
 /* 3. Vertical para Solemnidades */
@@ -433,11 +533,16 @@ body.portada-body {
 .btn-sub-solem {
     display: flex;
     align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
     padding: 10px 16px;
     background: #ffffff;
-    border: 1px solid rgba(183, 28, 28, 0.25);
+    border: 1px solid rgba(2, 136, 209, 0.3);
     border-radius: 10px;
-    color: #b71c1c;
+    color: #0288D1;
     font-size: 1.05rem;
     font-weight: 600;
     text-decoration: none;
@@ -445,16 +550,163 @@ body.portada-body {
     transition: all 0.15s ease;
 }
 
+.btn-sub-solem .material-symbols-outlined {
+    margin-right: 10px;
+    font-size: 1.25rem;
+    color: #0288D1;
+    transition: color 0.15s ease;
+}
+
 .btn-sub-solem:hover {
-    background: #b71c1c;
+    background: #0288D1;
     color: #ffffff;
     transform: translateX(4px);
 }
 
-.btn-sub-solem .material-symbols-outlined {
+.btn-sub-solem:hover .material-symbols-outlined {
+    color: #ffffff;
+}
+
+.btn-sub-solem.activo {
+    background: #0288D1 !important;
+    color: #ffffff !important;
+    border-color: #0288D1 !important;
+    box-shadow: 0 3px 10px rgba(2, 136, 209, 0.4) !important;
+    transform: translateX(4px);
+}
+
+.btn-sub-solem.activo .material-symbols-outlined {
+    color: #ffffff !important;
+}
+
+/* Panel de Horas Litúrgicas de Solemnidades con fondo blanco y azul de Pascua (fiel a Imagen 2) */
+.semana-horas-panel.panel-solemnidad-pascua {
+    --color-tiempo: #0288D1 !important;
+    background: #ffffff !important;
+    border: 2px solid #0288D1 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 16px rgba(2, 136, 209, 0.22), 0 2px 8px rgba(0,0,0,0.12) !important;
+    margin: 6px 0 12px 0 !important;
+    padding: 12px 10px !important;
+    animation: fadeInSlide 0.25s ease-out;
+}
+
+.semana-horas-panel.panel-solemnidad-pascua .semana-horas-panel-header {
+    color: #0288D1 !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 8px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+}
+
+.semana-horas-panel.panel-solemnidad-pascua .btn-semana-hora {
+    background: #ffffff !important;
+    border: 1px solid #dcdcdc !important;
+    border-radius: 10px !important;
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    padding: 9px 12px !important;
+}
+
+.semana-horas-panel.panel-solemnidad-pascua .btn-semana-hora:hover,
+.semana-horas-panel.panel-solemnidad-pascua .btn-semana-hora:active {
+    background: #0288D1 !important;
+    color: #ffffff !important;
+    border-color: #0288D1 !important;
+    transform: translateY(-1px);
+}
+
+/* 4. Vertical para Fiestas */
+.btn-sub-fiesta {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    padding: 10px 16px;
+    background: #ffffff;
+    border: 1px solid rgba(217, 119, 6, 0.3);
+    border-radius: 10px;
+    color: #D97706;
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: all 0.15s ease;
+}
+
+.btn-sub-fiesta .material-symbols-outlined {
     margin-right: 10px;
     font-size: 1.25rem;
+    color: #D97706;
+    transition: color 0.15s ease;
 }
+
+.btn-sub-fiesta:hover {
+    background: #D97706;
+    color: #ffffff;
+    transform: translateX(4px);
+}
+
+.btn-sub-fiesta:hover .material-symbols-outlined {
+    color: #ffffff;
+}
+
+.btn-sub-fiesta.activo {
+    background: #D97706 !important;
+    color: #ffffff !important;
+    border-color: #D97706 !important;
+    box-shadow: 0 3px 10px rgba(217, 119, 6, 0.4) !important;
+    transform: translateX(4px);
+}
+
+.btn-sub-fiesta.activo .material-symbols-outlined {
+    color: #ffffff !important;
+}
+
+/* Panel de Horas Litúrgicas de Fiestas con fondo blanco y ámbar litúrgico */
+.semana-horas-panel.panel-fiestas {
+    --color-tiempo: #D97706 !important;
+    background: #ffffff !important;
+    border: 2px solid #D97706 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 16px rgba(217, 119, 6, 0.22), 0 2px 8px rgba(0,0,0,0.12) !important;
+    margin: 6px 0 12px 0 !important;
+    padding: 12px 10px !important;
+    animation: fadeInSlide 0.25s ease-out;
+}
+
+.semana-horas-panel.panel-fiestas .semana-horas-panel-header {
+    color: #D97706 !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 8px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+}
+
+.semana-horas-panel.panel-fiestas .btn-semana-hora {
+    background: #ffffff !important;
+    border: 1px solid #dcdcdc !important;
+    border-radius: 10px !important;
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    padding: 9px 12px !important;
+}
+
+.semana-horas-panel.panel-fiestas .btn-semana-hora:hover,
+.semana-horas-panel.panel-fiestas .btn-semana-hora:active {
+    background: #D97706 !important;
+    color: #ffffff !important;
+    border-color: #D97706 !important;
+    transform: translateY(-1px);
+}
+
 .section-title {
     color: #ffcc00;
     font-size: 2em;
@@ -568,8 +820,9 @@ audio {
 .btn-tiempo[data-tiempo="ordinario"] { color: #008000; } /* Verde */
 .btn-tiempo[data-tiempo="cuaresma"] { color: #4B0082; }  /* Indigo/Morado */
 .btn-tiempo[data-tiempo="pascua"] { color: #00BFFF; }    /* Celeste/Azul */
-.btn-tiempo[data-tiempo="santos"] { color: #1E90FF; }    /* DodgerBlue */
-.btn-tiempo[data-tiempo="solemnidades"] { color: #0073e6; }
+.btn-tiempo[data-tiempo="santos"] { color: #B71C1C; }    /* Rojo */
+.btn-tiempo[data-tiempo="solemnidades"] { color: #0288D1; } /* Azul */
+.btn-tiempo[data-tiempo="fiestas"] { color: #D97706; }      /* Ámbar */
 
 
 .db-mboton {

@@ -8,6 +8,7 @@ import { HimnosDB } from '../data/db-himnos.js';
 import { PrecesDB } from '../data/db-preces.js';
 import { ResponsoriosDB } from '../data/db-responsorios.js';
 import { LecturasDB } from '../data/db-lecturas.js';
+import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 import { construirRutaOficioLectura } from './oficiodelectura.js';
 import { 
     obtenerLiturgiaHora, 
@@ -23,6 +24,236 @@ import {
 let horaActualDatos = null;
 let cintaInstancia = null;
 const currentYear = new Date().getFullYear();
+
+export const NOMBRES_MESES_ESP = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+const MAPA_SOLEMNIDADES_BASE = {
+    'santamariamadrededios': { prefijo: '1 de Enero', nombre: 'Santa María, Madre de Dios' },
+    'laepifaniadelseñor': { prefijo: '6 de Enero', nombre: 'Epifania del Señor' },
+    'epifaniadelseñor': { prefijo: '6 de Enero', nombre: 'Epifania del Señor' },
+    'epifania': { prefijo: '6 de Enero', nombre: 'Epifania del Señor' },
+    'elbautismodelseñor': { prefijo: 'Domingo', nombre: 'Bautismo del Señor' },
+    'bautismodelseñor': { prefijo: 'Domingo', nombre: 'Bautismo del Señor' },
+    'bautismo': { prefijo: 'Domingo', nombre: 'Bautismo del Señor' },
+    'bautismola': { prefijo: 'Domingo', nombre: 'Bautismo del Señor' },
+    'sanjose': { prefijo: '19 de Marzo', nombre: 'San José, Esposo de la Virgen María' },
+    'sanjoseesposodelavirgenmaria': { prefijo: '19 de Marzo', nombre: 'San José, Esposo de la Virgen María' },
+    'anunciaciondelseñor': { prefijo: '25 de Marzo', nombre: 'La Anunciación del Señor' },
+    'laanunciaciondelseñor': { prefijo: '25 de Marzo', nombre: 'La Anunciación del Señor' },
+    'anunciacion': { prefijo: '25 de Marzo', nombre: 'La Anunciación del Señor' },
+    'lunesoctavapascua': { prefijo: 'Lunes de Pascua', nombre: 'Lunes de la Octava de Pascua' },
+    'martesoctavapascua': { prefijo: 'Martes de Pascua', nombre: 'Martes de la Octava de Pascua' },
+    'miercolesoctavapascua': { prefijo: 'Miércoles de Pascua', nombre: 'Miércoles de la Octava de Pascua' },
+    'juevesoctavapascua': { prefijo: 'Jueves de Pascua', nombre: 'Jueves de la Octava de Pascua' },
+    'viernesoctavapascua': { prefijo: 'Viernes de Pascua', nombre: 'Viernes de la Octava de Pascua' },
+    'sabadooctavapascua': { prefijo: 'Sábado de Pascua', nombre: 'Sábado de la Octava de Pascua' },
+    'laascensiondelseñor': { prefijo: 'Domingo', nombre: 'La Ascensión del Señor' },
+    'ascensiondelseñor': { prefijo: 'Domingo', nombre: 'La Ascensión del Señor' },
+    'ascension': { prefijo: 'Domingo', nombre: 'La Ascensión del Señor' },
+    'domingodepentecostes': { prefijo: 'Domingo', nombre: 'Domingo de Pentecostés' },
+    'pentecostes': { prefijo: 'Domingo', nombre: 'Domingo de Pentecostés' },
+    'santisimatrinidad': { prefijo: 'Domingo', nombre: 'La Santísima Trinidad' },
+    'lasantisimatrinidad': { prefijo: 'Domingo', nombre: 'La Santísima Trinidad' },
+    'trinidad': { prefijo: 'Domingo', nombre: 'La Santísima Trinidad' },
+    'santisimocuerpoyasangredecristo': { prefijo: 'Domingo', nombre: 'El Santísimo Cuerpo y Sangre de Cristo' },
+    'corpus': { prefijo: 'Domingo', nombre: 'El Santísimo Cuerpo y Sangre de Cristo' },
+    'corpuschristi': { prefijo: 'Domingo', nombre: 'El Santísimo Cuerpo y Sangre de Cristo' },
+    'sagradocorazondejesus': { prefijo: 'Viernes', nombre: 'El Sagrado Corazón de Jesús' },
+    'sagradocorazon': { prefijo: 'Viernes', nombre: 'El Sagrado Corazón de Jesús' },
+    'natividaddesanjuanbautista': { prefijo: '24 de Junio', nombre: 'El Nacimiento de San Juan Bautista' },
+    'juanbautista': { prefijo: '24 de Junio', nombre: 'San Juan Bautista' },
+    'sanjuanbautista': { prefijo: '24 de Junio', nombre: 'San Juan Bautista' },
+    'santospedroypablo': { prefijo: '29 de Junio', nombre: 'Santos Pedro y Pablo, Apóstoles' },
+    'pedroypablo': { prefijo: '29 de Junio', nombre: 'Santos Pedro y Pablo' },
+    'asunciondelavirgenmaria': { prefijo: '15 de Agosto', nombre: 'La Asunción de la Virgen María' },
+    'laasunciondelavirgenmaria': { prefijo: '15 de Agosto', nombre: 'La Asunción de la Virgen María' },
+    'asuncion': { prefijo: '15 de Agosto', nombre: 'La Asunción de la Virgen María' },
+    'todoslossantos': { prefijo: '1 de Noviembre', nombre: 'Todos los Santos' },
+    'jesucristoreydeluniverso': { prefijo: 'Domingo', nombre: 'Nuestro Señor Jesucristo, Rey del Universo' },
+    'cristorey': { prefijo: 'Domingo', nombre: 'Nuestro Señor Jesucristo, Rey del Universo' },
+    'inmaculadaconcepcion': { prefijo: '8 de Diciembre', nombre: 'La Inmaculada Concepción' },
+    'lainmaculadaconcepcion': { prefijo: '8 de Diciembre', nombre: 'La Inmaculada Concepción' },
+    'inmaculada': { prefijo: '8 de Diciembre', nombre: 'La Inmaculada Concepción' },
+    'natividaddelseñor': { prefijo: '25 de Diciembre', nombre: 'La Natividad del Señor' },
+    'lanatividaddelseñor': { prefijo: '25 de Diciembre', nombre: 'La Natividad del Señor' },
+    'navidad': { prefijo: '25 de Diciembre', nombre: 'La Natividad del Señor' },
+    'miercolesdeceniza': { prefijo: 'Miércoles', nombre: 'Miércoles de Ceniza' },
+    'domingoderamos': { prefijo: 'Domingo', nombre: 'Domingo de Ramos' },
+    'juevessanto': { prefijo: 'Jueves', nombre: 'Jueves Santo' },
+    'viernessanto': { prefijo: 'Viernes', nombre: 'Viernes Santo' },
+    'sabadosanto': { prefijo: 'Sábado', nombre: 'Sábado Santo' },
+    'domingoderesurreccion': { prefijo: 'Domingo', nombre: 'Domingo de Resurrección' },
+    'fielesdifuntos': { prefijo: '2 de Noviembre', nombre: 'Conmemoración de todos los Fieles Difuntos' }
+};
+
+const MAPA_FIESTAS_BASE = {
+    'presentaciondelseñor': { prefijo: '2 de Febrero', nombre: 'La Presentación del Señor' },
+    'lapresentaciondelseñor': { prefijo: '2 de Febrero', nombre: 'La Presentación del Señor' },
+    'presentacion': { prefijo: '2 de Febrero', nombre: 'La Presentación del Señor' },
+    'sanmarcos': { prefijo: '25 de Abril', nombre: 'San Marcos, Evangelista' },
+    'sanmatias': { prefijo: '14 de Mayo', nombre: 'San Matías, Apóstol' },
+    'santotomas': { prefijo: '3 de Julio', nombre: 'Santo Tomás, Apóstol' },
+    'santamariamagdalena': { prefijo: '22 de Julio', nombre: 'Santa María Magdalena' },
+    'santiagoapostol': { prefijo: '25 de Julio', nombre: 'Santiago, Apóstol' },
+    'santiago': { prefijo: '25 de Julio', nombre: 'Santiago, Apóstol' },
+    'transfiguraciondelseñor': { prefijo: '6 de Agosto', nombre: 'La Transfiguración del Señor' },
+    'latransfiguraciondelseñor': { prefijo: '6 de Agosto', nombre: 'La Transfiguración del Señor' },
+    'transfiguracion': { prefijo: '6 de Agosto', nombre: 'La Transfiguración del Señor' },
+    'sanlorenzo': { prefijo: '10 de Agosto', nombre: 'San Lorenzo, Diácono y Mártir' },
+    'sanbartolome': { prefijo: '24 de Agosto', nombre: 'San Bartolomé, Apóstol' },
+    'natividaddelavirgenmaria': { prefijo: '8 de Septiembre', nombre: 'La Natividad de la Virgen María' },
+    'lanatividaddelavirgenmaria': { prefijo: '8 de Septiembre', nombre: 'La Natividad de la Virgen María' },
+    'exaltaciondelasantacruz': { prefijo: '14 de Septiembre', nombre: 'La Exaltación de la Santa Cruz' },
+    'sanmateo': { prefijo: '21 de Septiembre', nombre: 'San Mateo, Apóstol y Evangelista' },
+    'santosarcangeles': { prefijo: '29 de Septiembre', nombre: 'Santos Arcángeles Miguel, Gabriel y Rafael' },
+    'santossimonyjudas': { prefijo: '28 de Octubre', nombre: 'Santos Simón y Judas, Apóstoles' },
+    'simonyjudas': { prefijo: '28 de Octubre', nombre: 'Santos Simón y Judas, Apóstoles' },
+    'dedicacionbasilicaletran': { prefijo: '9 de Noviembre', nombre: 'La Dedicación de la Basílica de Letrán' },
+    'dedicaciondebasilicadeletran': { prefijo: '9 de Noviembre', nombre: 'La Dedicación de la Basílica de Letrán' },
+    'sanandres': { prefijo: '30 de Noviembre', nombre: 'San Andrés, Apóstol' },
+    'sanesteban': { prefijo: '26 de Diciembre', nombre: 'San Esteban, Protomártir' },
+    'sagradafamilia': { prefijo: 'Domingo', nombre: 'La Sagrada Familia' },
+    'lasagradafamilia': { prefijo: 'Domingo', nombre: 'La Sagrada Familia' },
+    'santosinocentes': { prefijo: '28 de Diciembre', nombre: 'Los Santos Inocentes, Mártires' },
+    'lossantosinocentes': { prefijo: '28 de Diciembre', nombre: 'Los Santos Inocentes, Mártires' }
+};
+
+export const SOLEMNIDADES_INFO = {};
+for (const [k, v] of Object.entries(MAPA_SOLEMNIDADES_BASE)) {
+    SOLEMNIDADES_INFO[k.toLowerCase()] = v;
+    const kNorm = k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    SOLEMNIDADES_INFO[kNorm] = v;
+}
+
+export const FIESTAS_INFO = {};
+for (const [k, v] of Object.entries(MAPA_FIESTAS_BASE)) {
+    FIESTAS_INFO[k.toLowerCase()] = v;
+    const kNorm = k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    FIESTAS_INFO[kNorm] = v;
+}
+
+export function extraerBaseCelebracion(codigo) {
+    if (!codigo || typeof codigo !== 'string') return '';
+    return codigo.trim()
+        .replace(/(of|la|te|se|no|vi|co)$/i, '')
+        .replace(/_(oficio|laudes|tercia|sexta|nona|visperas|completas)$/i, '');
+}
+
+export function resolverTextoCelebracion(params, datos) {
+    const rawCod = params?.codigoCompleto || params?.dia || '';
+    const cleanCod = rawCod.toLowerCase().trim();
+    const baseSlug = extraerBaseCelebracion(cleanCod)
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    // 1. Si los datos ya traen diaNombre o celebracion formateado con guión y no es un código crudo
+    if (datos?.diaNombre && datos.diaNombre.includes(' - ') && !datos.diaNombre.startsWith('sa')) {
+        return datos.diaNombre;
+    }
+    if (datos?.celebracion && datos.celebracion.includes(' - ')) {
+        return datos.celebracion;
+    }
+
+    // 2. Revisar si es una solemnidad o fiesta litúrgica conocida
+    if (SOLEMNIDADES_INFO[baseSlug]) {
+        const inf = SOLEMNIDADES_INFO[baseSlug];
+        if (inf.nombre.toLowerCase().startsWith(inf.prefijo.toLowerCase())) {
+            return inf.nombre;
+        }
+        return `${inf.prefijo} - ${inf.nombre}`;
+    }
+    if (FIESTAS_INFO[baseSlug]) {
+        const inf = FIESTAS_INFO[baseSlug];
+        if (inf.nombre.toLowerCase().startsWith(inf.prefijo.toLowerCase())) {
+            return inf.nombre;
+        }
+        return `${inf.prefijo} - ${inf.nombre}`;
+    }
+
+    // 3. Revisar si coincide con el formato canónico saDDMMslug (ej: sa2906santospedroypabloof)
+    const mSanto = cleanCod.match(/^sa(\d{2})(\d{2})([a-z0-9ñ]+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
+    if (mSanto) {
+        const dNum = parseInt(mSanto[1], 10);
+        const mNum = parseInt(mSanto[2], 10);
+        const mesTxt = (mNum >= 1 && mNum <= 12) ? NOMBRES_MESES_ESP[mNum - 1] : `Mes ${mNum}`;
+        const prefijoFecha = `${dNum} de ${mesTxt}`;
+        const slugSanto = mSanto[3];
+        const slugNorm = slugSanto.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        if (SOLEMNIDADES_INFO[slugNorm] || SOLEMNIDADES_INFO[slugSanto]) {
+            const inf = SOLEMNIDADES_INFO[slugNorm] || SOLEMNIDADES_INFO[slugSanto];
+            return `${prefijoFecha} - ${inf.nombre}`;
+        }
+        if (FIESTAS_INFO[slugNorm] || FIESTAS_INFO[slugSanto]) {
+            const inf = FIESTAS_INFO[slugNorm] || FIESTAS_INFO[slugSanto];
+            return `${prefijoFecha} - ${inf.nombre}`;
+        }
+
+        let listaSantos = [];
+        try {
+            const rawCat = localStorage.getItem('lh_catalogo_nombres_santos');
+            if (rawCat) listaSantos = JSON.parse(rawCat);
+        } catch (_) {}
+        if (!Array.isArray(listaSantos) || listaSantos.length === 0) {
+            listaSantos = (Array.isArray(catalogoSantosAnual) ? catalogoSantosAnual : []);
+        }
+
+        // Buscar coincidencia por fecha y slug
+        const santoEncontrado = listaSantos.find(s => {
+            const f = (s.fechaFestividad || s.celebracion || '').trim();
+            const partes = f.match(/(\d+)\/(\d+)/);
+            if (partes) {
+                const d = parseInt(partes[1], 10);
+                const m = parseInt(partes[2], 10);
+                if (d === dNum && m === mNum) {
+                    const sNorm = (s.nombre || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+                    return sNorm.includes(slugNorm) || slugNorm.includes(sNorm);
+                }
+            }
+            return false;
+        }) || listaSantos.find(s => {
+            const f = (s.fechaFestividad || s.celebracion || '').trim();
+            const partes = f.match(/(\d+)\/(\d+)/);
+            if (partes) {
+                return parseInt(partes[1], 10) === dNum && parseInt(partes[2], 10) === mNum;
+            }
+            return false;
+        });
+
+        if (santoEncontrado && santoEncontrado.nombre) {
+            return `${prefijoFecha} - ${santoEncontrado.nombre}`;
+        }
+
+        if (datos?.diaNombre && !datos.diaNombre.toLowerCase().startsWith('sa') && !datos.diaNombre.toLowerCase().startsWith('to')) {
+            const limpio = datos.diaNombre.replace(/\s*\([^)]*\)/g, '').trim();
+            return `${prefijoFecha} - ${limpio}`;
+        }
+        if (datos?.santo && !datos.santo.toLowerCase().startsWith('sa')) {
+            return `${prefijoFecha} - ${datos.santo}`;
+        }
+
+        const slugLimpio = slugSanto.charAt(0).toUpperCase() + slugSanto.slice(1);
+        return `${prefijoFecha} - ${slugLimpio}`;
+    }
+
+    // 4. Si viene fiesta o santo en parámetros
+    if (params?.fiesta) {
+        return params.fecha ? `${params.fecha} - ${params.fiesta}` : params.fiesta;
+    }
+    if (params?.fecha && params?.santo) {
+        return `${params.fecha} - ${params.santo}`;
+    }
+    if (params?.santo) {
+        return params.santo;
+    }
+    if (datos?.diaNombre && !datos.diaNombre.startsWith('sa')) {
+        return datos.diaNombre;
+    }
+
+    return 'Celebración';
+}
 
 /**
  * Formatea el primer verso (R1) del responsorio de lectura del Oficio:
@@ -173,6 +404,8 @@ export function decodificarCodigoLiturgico(codigo) {
             dia: baseId,
             santo: mSanto[3],
             diaMes: `${mSanto[1]}/${mSanto[2]}`,
+            diaNumero: parseInt(mSanto[1], 10),
+            mesNumero: parseInt(mSanto[2], 10),
             libro: horaSanto,
             codigoCompleto: clean,
             formato: 'santo'
@@ -181,33 +414,71 @@ export function decodificarCodigoLiturgico(codigo) {
 
     // 6. Formato Solemnidades litúrgicas / fiestas con slug de nombre (ej: elbautismodelSeñorof, elbautismodelSeñorla, laepifaniadelSeñor)
     const SOLEMNIDADES_CONOCIDAS = [
-        'laepifaniadelseñor', 'elbautismodelseñor', 'sagradafamilia', 'santamariamadrededios',
+        'laepifaniadelseñor', 'elbautismodelseñor', 'santamariamadrededios',
         'miercolesdeceniza', 'domingoderamos', 'juevessanto', 'viernessanto', 'sabadosanto',
         'domingoderesurreccion', 'laascensiondelseñor', 'pentecostes', 'santisimatrinidad',
         'santisimocuerpoyasangredecristo', 'sagradocorazondejesus', 'jesucristoreydeluniverso',
         'anunciaciondelseñor', 'asunciondelavirgenmaria', 'natividaddelseñor', 'todoslossantos',
-        'inmaculadaconcepcion'
+        'inmaculadaconcepcion', 'bautismo', 'bautismola', 'epifania', 'pedroypablo', 'sanjose',
+        'corpus', 'cristorey', 'sagradocorazon', 'juanbautista', 'navidad', 'inmaculada', 'asuncion', 'trinidad'
     ];
-    const mSolemnidad = clean.match(/^(.+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
-    if (mSolemnidad) {
-        const slugNorm = mSolemnidad[1].toLowerCase()
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const coincide = SOLEMNIDADES_CONOCIDAS.some(s => {
-            const sNorm = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return sNorm === slugNorm;
-        });
-        if (coincide) {
-            const horaSol = mSolemnidad[2] ? (mapaL[mSolemnidad[2].toLowerCase()] || 'laudes') : (mSolemnidad[3] ? mSolemnidad[3].toLowerCase() : 'laudes');
-            return {
-                tiempo: 'santos',
-                semana: 3,
-                dia: mSolemnidad[1],
-                solemnidad: mSolemnidad[1],
-                libro: horaSol,
-                codigoCompleto: clean,
-                formato: 'solemnidad'
-            };
+    const normSlug = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const cleanNorm = normSlug(clean);
+
+    let baseFiesta = null;
+    let horaFiesta = null;
+
+    if (FIESTAS_INFO[cleanNorm]) {
+        baseFiesta = clean;
+    } else {
+        const mFie = clean.match(/^(.+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))$/i);
+        if (mFie) {
+            const baseNorm = normSlug(mFie[1]);
+            if (FIESTAS_INFO[baseNorm]) {
+                baseFiesta = mFie[1];
+                horaFiesta = mFie[2] ? (mapaL[mFie[2].toLowerCase()] || 'laudes') : (mFie[3] ? mFie[3].toLowerCase() : 'laudes');
+            }
         }
+    }
+
+    if (baseFiesta) {
+        return {
+            tiempo: 'fiestas',
+            semana: 3,
+            dia: baseFiesta,
+            fiesta: baseFiesta,
+            libro: horaFiesta || 'laudes',
+            codigoCompleto: clean,
+            formato: 'fiesta'
+        };
+    }
+
+    let baseSolemnidad = null;
+    let horaSolemnidad = null;
+
+    if (SOLEMNIDADES_INFO[cleanNorm] || SOLEMNIDADES_CONOCIDAS.some(s => normSlug(s) === cleanNorm)) {
+        baseSolemnidad = clean;
+    } else {
+        const mSol = clean.match(/^(.+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))$/i);
+        if (mSol) {
+            const baseNorm = normSlug(mSol[1]);
+            if (SOLEMNIDADES_INFO[baseNorm] || SOLEMNIDADES_CONOCIDAS.some(s => normSlug(s) === baseNorm)) {
+                baseSolemnidad = mSol[1];
+                horaSolemnidad = mSol[2] ? (mapaL[mSol[2].toLowerCase()] || 'laudes') : (mSol[3] ? mSol[3].toLowerCase() : 'laudes');
+            }
+        }
+    }
+
+    if (baseSolemnidad) {
+        return {
+            tiempo: 'solemnidades',
+            semana: 3,
+            dia: baseSolemnidad,
+            solemnidad: baseSolemnidad,
+            libro: horaSolemnidad || 'laudes',
+            codigoCompleto: clean,
+            formato: 'solemnidad'
+        };
     }
 
     return null;
@@ -224,7 +495,17 @@ function obtenerParametrosUrl() {
     if (posibleCodigo) {
         const dec = decodificarCodigoLiturgico(posibleCodigo);
         if (dec) {
-            if (horaParam) dec.libro = horaParam.toLowerCase();
+            const tieneSufijoHora = /(of|la|te|se|no|vi|co)$/i.test(posibleCodigo.trim());
+            if (!tieneSufijoHora && horaParam) {
+                dec.libro = horaParam.toLowerCase();
+            }
+            if (p.get('santo')) dec.santo = p.get('santo');
+            if (p.get('fiesta')) dec.fiesta = p.get('fiesta');
+            if (p.get('fecha')) dec.fecha = p.get('fecha');
+            if (p.get('tiempo') === 'fiestas') {
+                dec.tiempo = 'fiestas';
+                dec.formato = 'fiesta';
+            }
             return dec;
         }
         if (posibleCodigo.toLowerCase().startsWith('sa') || p.get('tiempo') === 'santos') {
@@ -233,7 +514,9 @@ function obtenerParametrosUrl() {
                 semana: 1,
                 dia: posibleCodigo,
                 libro: (horaParam || 'laudes').toLowerCase(),
-                codigoCompleto: posibleCodigo
+                codigoCompleto: posibleCodigo,
+                santo: p.get('santo') || '',
+                fecha: p.get('fecha') || ''
             };
         }
     }
@@ -302,8 +585,18 @@ function montarOActualizarVista(params, datos) {
     const { tiempo, semana, dia, libro, fecha, santo } = params;
 
     // Montar o actualizar la cinta superior
-    const labelTiempo = tiempo === 'santos' ? (santo || 'Santos') : `Tiempo ${capitalizar(tiempo)}`;
-    const labelDia = tiempo === 'santos' ? fecha : capitalizar(dia);
+    const esSolemnidad = (tiempo === 'solemnidades' || params.formato === 'solemnidad');
+    const esFiesta = (tiempo === 'fiestas' || params.formato === 'fiesta');
+    const esSanto = (tiempo === 'santos' || params.formato === 'santo');
+    const esCelebracion = esSolemnidad || esFiesta || esSanto;
+    const textoCelebracion = esCelebracion ? resolverTextoCelebracion(params, datos) : null;
+    const baseIdCelebracion = esCelebracion ? extraerBaseCelebracion(params.codigoCompleto || dia) : '';
+
+    const labelTiempo = esSolemnidad ? 'Solemnidades' : (esFiesta ? 'Fiestas' : (esSanto ? 'Santos' : `Tiempo ${capitalizar(tiempo)}`));
+    const labelDia = textoCelebracion || (esCelebracion ? (fecha || dia) : capitalizar(dia));
+    const slugTiempoReal = esSolemnidad ? 'solemnidades' : (esFiesta ? 'fiestas' : (esSanto ? 'santos' : tiempo));
+
+    const celebracionNombre = params.santo || params.fiesta || params.solemnidad;
 
     if (!cintaInstancia) {
         cintaInstancia = new CintaLiturgica('cinta-container', {
@@ -311,11 +604,36 @@ function montarOActualizarVista(params, datos) {
             semana: semana,
             dia: labelDia,
             libro: libro,
-            tiempoSlug: tiempo,
-            diaSlug: dia
+            tiempoSlug: slugTiempoReal,
+            diaSlug: dia,
+            textoMetadatos: textoCelebracion,
+            baseCelebracionId: baseIdCelebracion,
+            santo: celebracionNombre,
+            fiesta: params.fiesta,
+            fecha: params.fecha
         });
     } else {
-        cintaInstancia.actualizarLiturgiaInfo(labelTiempo, semana, labelDia, libro, tiempo);
+        cintaInstancia.actualizarLiturgiaInfo(
+            labelTiempo,
+            semana,
+            labelDia,
+            libro,
+            slugTiempoReal,
+            dia,
+            {
+                textoMetadatos: textoCelebracion,
+                baseCelebracionId: baseIdCelebracion,
+                santo: celebracionNombre,
+                fiesta: params.fiesta,
+                fecha: params.fecha
+            }
+        );
+    }
+
+    if (esCelebracion && textoCelebracion) {
+        try {
+            document.title = `${textoCelebracion} — Liturgia de las Horas`;
+        } catch (_) {}
     }
 
     // Cargar los 4 audios en la cinta litúrgica

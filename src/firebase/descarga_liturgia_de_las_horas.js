@@ -280,35 +280,86 @@ export function decodificarCodigoLiturgico(codigo) {
         };
     }
 
-    // 6. Formato Solemnidades litúrgicas / fiestas con slug de nombre (ej: elbautismodelSeñorof, elbautismodelSeñorla, laepifaniadelSeñor)
-    const SOLEMNIDADES_CONOCIDAS = [
-        'laepifaniadelseñor', 'elbautismodelseñor', 'sagradafamilia', 'santamariamadrededios',
-        'miercolesdeceniza', 'domingoderamos', 'juevessanto', 'viernessanto', 'sabadosanto',
-        'domingoderesurreccion', 'laascensiondelseñor', 'pentecostes', 'santisimatrinidad',
-        'santisimocuerpoyasangredecristo', 'sagradocorazondejesus', 'jesucristoreydeluniverso',
-        'anunciaciondelseñor', 'asunciondelavirgenmaria', 'natividaddelseñor', 'todoslossantos',
-        'inmaculadaconcepcion'
+    // 6. Formato Fiestas litúrgicas
+    const FIESTAS_CONOCIDAS = [
+        'presentaciondelseñor', 'lapresentaciondelseñor', 'presentacion',
+        'sanmarcos', 'sanmatias', 'santotomas', 'santamariamagdalena',
+        'santiagoapostol', 'santiago', 'transfiguraciondelseñor', 'latransfiguraciondelseñor', 'transfiguracion',
+        'sanlorenzo', 'sanbartolome', 'natividaddelavirgenmaria', 'lanatividaddelavirgenmaria',
+        'exaltaciondelasantacruz', 'sanmateo', 'santosarcangeles', 'santossimonyjudas', 'simonyjudas',
+        'dedicacionbasilicaletran', 'dedicaciondebasilicadeletran', 'sanandres', 'sanesteban',
+        'sagradafamilia', 'lasagradafamilia', 'santosinocentes', 'lossantosinocentes'
     ];
-    const mSolemnidad = clean.match(/^(.+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))?$/i);
-    if (mSolemnidad) {
-        const slugNorm = mSolemnidad[1].toLowerCase()
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const coincide = SOLEMNIDADES_CONOCIDAS.some(s => {
-            const sNorm = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return sNorm === slugNorm;
-        });
-        if (coincide) {
-            const horaSol = mSolemnidad[2] ? (MAPA_HORAS[mSolemnidad[2].toLowerCase()] || 'laudes') : (mSolemnidad[3] ? mSolemnidad[3].toLowerCase() : 'laudes');
-            return {
-                tiempo: 'santos',
-                semana: 3,
-                dia: mSolemnidad[1],
-                solemnidad: mSolemnidad[1],
-                libro: horaSol,
-                codigoCompleto: clean,
-                formato: 'solemnidad'
-            };
+    const normSlug = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const cleanNorm = normSlug(clean);
+
+    let baseFiesta = null;
+    let horaFiesta = null;
+
+    if (FIESTAS_CONOCIDAS.some(s => normSlug(s) === cleanNorm)) {
+        baseFiesta = clean;
+    } else {
+        const mFie = clean.match(/^(.+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))$/i);
+        if (mFie) {
+            const baseNorm = normSlug(mFie[1]);
+            if (FIESTAS_CONOCIDAS.some(s => normSlug(s) === baseNorm)) {
+                baseFiesta = mFie[1];
+                horaFiesta = mFie[2] ? (MAPA_HORAS[mFie[2].toLowerCase()] || 'laudes') : (mFie[3] ? mFie[3].toLowerCase() : 'laudes');
+            }
         }
+    }
+
+    if (baseFiesta) {
+        return {
+            tiempo: 'fiestas',
+            semana: 3,
+            dia: baseFiesta,
+            fiesta: baseFiesta,
+            libro: horaFiesta || 'laudes',
+            codigoCompleto: clean,
+            formato: 'fiesta'
+        };
+    }
+
+    // 7. Formato Solemnidades litúrgicas con slug de nombre
+    const SOLEMNIDADES_CONOCIDAS = [
+        'laepifaniadelseñor', 'elbautismodelseñor', 'santamariamadrededios',
+        'miercolesdeceniza', 'domingoderamos', 'juevessanto', 'viernessanto', 'sabadosanto',
+        'domingoderesurreccion', 'laascensiondelseñor', 'pentecostes', 'domingodepentecostes',
+        'santisimatrinidad', 'santisimocuerpoyasangredecristo', 'sagradocorazondejesus', 'jesucristoreydeluniverso',
+        'anunciaciondelseñor', 'asunciondelavirgenmaria', 'natividaddelseñor', 'todoslossantos',
+        'inmaculadaconcepcion', 'bautismo', 'bautismola', 'epifania', 'pedroypablo', 'sanjose',
+        'sanjoseesposodelavirgenmaria', 'lunesoctavapascua', 'martesoctavapascua', 'miercolesoctavapascua',
+        'juevesoctavapascua', 'viernesoctavapascua', 'sabadooctavapascua',
+        'corpus', 'cristorey', 'sagradocorazon', 'juanbautista', 'navidad', 'inmaculada', 'asuncion', 'trinidad'
+    ];
+
+    let baseSolemnidad = null;
+    let horaSolemnidad = null;
+
+    if (SOLEMNIDADES_CONOCIDAS.some(s => normSlug(s) === cleanNorm)) {
+        baseSolemnidad = clean;
+    } else {
+        const mSol = clean.match(/^(.+?)(?:(of|la|te|se|no|vi|co)|_(oficio|laudes|tercia|sexta|nona|visperas|completas))$/i);
+        if (mSol) {
+            const baseNorm = normSlug(mSol[1]);
+            if (SOLEMNIDADES_CONOCIDAS.some(s => normSlug(s) === baseNorm)) {
+                baseSolemnidad = mSol[1];
+                horaSolemnidad = mSol[2] ? (MAPA_HORAS[mSol[2].toLowerCase()] || 'laudes') : (mSol[3] ? mSol[3].toLowerCase() : 'laudes');
+            }
+        }
+    }
+
+    if (baseSolemnidad) {
+        return {
+            tiempo: 'solemnidades',
+            semana: 3,
+            dia: baseSolemnidad,
+            solemnidad: baseSolemnidad,
+            libro: horaSolemnidad || 'laudes',
+            codigoCompleto: clean,
+            formato: 'solemnidad'
+        };
     }
 
     return null;
@@ -324,7 +375,7 @@ export function obtenerIdsEquivalentes(codigo) {
     const resultado = new Set();
 
     if (dec) {
-        if (dec.formato === 'santo' || dec.formato === 'solemnidad') {
+        if (dec.formato === 'santo' || dec.formato === 'solemnidad' || dec.formato === 'fiesta') {
             const base = (dec.dia || clean).replace(/(?:of|la|te|se|no|vi|co)$/i, '').replace(/_(oficio|laudes|tercia|sexta|nona|visperas|completas)$/i, '');
             const horaCod = REVERSO_HORAS[dec.libro] || 'la';
             resultado.add(clean);

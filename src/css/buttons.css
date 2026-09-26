@@ -16,8 +16,9 @@
     --btn-ordinario:   #2E7D32;   /* Verde */
     --btn-cuaresma:    #4A0080;   /* Morado fuerte */
     --btn-pascua:      #0288D1;   /* Azul celeste */
-    --btn-santos:      #1565C0;   /* Azul */
-    --btn-solemnidades:#B71C1C;   /* Rojo intenso */
+    --btn-santos:      #B71C1C;   /* Rojo litúrgico */
+    --btn-solemnidades:#0288D1;   /* Azul litúrgico */
+    --btn-fiestas:     #D97706;   /* Ámbar / Oro litúrgico */
     --btn-text:        #555555;
     --btn-shadow:      rgba(0,0,0,0.18);
 }
@@ -83,6 +84,7 @@
 .btn-icono.btn-pascua       .btn-icon-box { background: var(--btn-pascua); }
 .btn-icono.btn-santos       .btn-icon-box { background: var(--btn-santos); }
 .btn-icono.btn-solemnidades .btn-icon-box { background: var(--btn-solemnidades); }
+.btn-icono.btn-fiestas      .btn-icon-box { background: var(--btn-fiestas); }
 .btn-icono.btn-rojo         .btn-icon-box { background: #e53935; }
 .btn-icono.btn-verde        .btn-icon-box { background: #43a047; }
 .btn-icono.btn-azul         .btn-icon-box { background: #1e88e5; }
@@ -150,8 +152,9 @@
 .btn-pill.btn-ordinario    { background: linear-gradient(135deg, #43a047, #1b5e20); }
 .btn-pill.btn-cuaresma     { background: linear-gradient(135deg, #4A0080, #2c004d); }
 .btn-pill.btn-pascua       { background: linear-gradient(135deg, #039be5, #01579b); }
-.btn-pill.btn-santos       { background: linear-gradient(135deg, #1565c0, #0d47a1); }
-.btn-pill.btn-solemnidades { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
+.btn-pill.btn-santos       { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
+.btn-pill.btn-solemnidades { background: linear-gradient(135deg, #0288d1, #01579b); }
+.btn-pill.btn-fiestas      { background: linear-gradient(135deg, #f59e0b, #b45309); }
 
 /* Botón Santo del Día (blanco con texto azul cielo oscuro) */
 .btn-pill.btn-santo {
@@ -363,8 +366,9 @@
 .btn-pill.btn-cuaresma:hover   .btn-pill-icon { background: #260042; }
 .btn-pill.btn-navidad:hover    .btn-pill-icon { background: #4d0000; }
 .btn-pill.btn-pascua:hover     .btn-pill-icon { background: #014377; }
-.btn-pill.btn-santos:hover     .btn-pill-icon { background: #082d64; }
-.btn-pill.btn-solemnidades:hover .btn-pill-icon { background: #7f0000; }
+.btn-pill.btn-santos:hover     .btn-pill-icon { background: #7f0000; }
+.btn-pill.btn-solemnidades:hover .btn-pill-icon { background: #004c8c; }
+.btn-pill.btn-fiestas:hover      .btn-pill-icon { background: #78350f; }
 .btn-pill.btn-rojo:hover       .btn-pill-icon { background: #8e0000; }
 
 /* ============================================================
@@ -430,8 +434,9 @@
 .btn-flat.btn-ordinario    { background: #2E7D32; }
 .btn-flat.btn-cuaresma     { background: #4A0080; }
 .btn-flat.btn-pascua       { background: #0288D1; }
-.btn-flat.btn-santos       { background: #1565C0; }
-.btn-flat.btn-solemnidades { background: #B71C1C; }
+.btn-flat.btn-santos       { background: #B71C1C; }
+.btn-flat.btn-solemnidades { background: #0288D1; }
+.btn-flat.btn-fiestas      { background: #D97706; }
 
 /* ============================================================
    ESTILO 4: CUADRADO (.btn-square)
@@ -461,6 +466,9 @@
 .btn-square.btn-morado       { background: #8e24aa; }
 .btn-square.btn-naranja      { background: #fb8c00; }
 .btn-square.btn-celeste      { background: #29b6f6; }
+.btn-square.btn-santos       { background: #B71C1C; }
+.btn-square.btn-solemnidades { background: #0288D1; }
+.btn-square.btn-fiestas      { background: #D97706; }
 
 /* ============================================================
    LAYOUT HELPERS

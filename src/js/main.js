@@ -39,6 +39,60 @@ const configuracionTiempos = {
         prefijoId: 'tps',
         titulo: 'Semanas de Pascua'
     },
+    solemnidades: {
+        tipo: 'solemnidades',
+        titulo: 'Solemnidades',
+        items: [
+            { nombre: 'Santa María, Madre de Dios', id: 'santamariamadrededios', titulo: '1 de Enero - Santa María, Madre de Dios' },
+            { nombre: 'La Epifanía del Señor', id: 'laepifaniadelSeñor', titulo: '6 de Enero - Epifania del Señor' },
+            { nombre: 'Bautismo del Señor', id: 'elbautismodelSeñor', titulo: 'Domingo - Bautismo del Señor' },
+            { nombre: 'San José, esposo de la Bienaventurada Virgen María', id: 'sanjose', titulo: '19 de Marzo - San José, Esposo de la Virgen María' },
+            { nombre: 'La Anunciación del Señor', id: 'anunciaciondelseñor', titulo: '25 de Marzo - La Anunciación del Señor' },
+            { nombre: 'Lunes de la Octava de Pascua', id: 'lunesoctavapascua', titulo: 'Lunes de la Octava de Pascua' },
+            { nombre: 'Martes de la Octava de Pascua', id: 'martesoctavapascua', titulo: 'Martes de la Octava de Pascua' },
+            { nombre: 'Miércoles de la Octava de Pascua', id: 'miercolesoctavapascua', titulo: 'Miércoles de la Octava de Pascua' },
+            { nombre: 'Jueves de la Octava de Pascua', id: 'juevesoctavapascua', titulo: 'Jueves de la Octava de Pascua' },
+            { nombre: 'Viernes de la Octava de Pascua', id: 'viernesoctavapascua', titulo: 'Viernes de la Octava de Pascua' },
+            { nombre: 'Sábado de la Octava de Pascua', id: 'sabadooctavapascua', titulo: 'Sábado de la Octava de Pascua' },
+            { nombre: 'La Ascensión del Señor', id: 'laascensiondelseñor', titulo: 'Domingo - La Ascensión del Señor' },
+            { nombre: 'Domingo de Pentecostés', id: 'domingodepentecostes', titulo: 'Domingo - Pentecostés' },
+            { nombre: 'La Santísima Trinidad', id: 'santisimatrinidad', titulo: 'Domingo - La Santísima Trinidad' },
+            { nombre: 'El Cuerpo y la Sangre Santísimos de Cristo', id: 'santisimocuerpoyasangredecristo', titulo: 'Domingo - El Santísimo Cuerpo y Sangre de Cristo' },
+            { nombre: 'El Sagrado Corazón de Jesús', id: 'sagradocorazondejesus', titulo: 'Viernes - Sagrado Corazón de Jesús' },
+            { nombre: 'El Nacimiento de San Juan Bautista', id: 'natividaddesanjuanbautista', titulo: '24 de Junio - El Nacimiento de San Juan Bautista' },
+            { nombre: 'Santos Pedro y Pablo, apóstoles', id: 'santospedroypablo', titulo: '29 de Junio - Santos Pedro y Pablo, Apóstoles' },
+            { nombre: 'La Asunción de la Santísima Virgen María', id: 'asunciondelavirgenmaria', titulo: '15 de Agosto - La Asunción de la Santísima Virgen María' },
+            { nombre: 'Todos los Santos', id: 'todoslossantos', titulo: '1 de Noviembre - Todos los Santos' },
+            { nombre: 'Nuestro Señor Jesucristo, Rey del Universo', id: 'jesucristoreydeluniverso', titulo: 'Domingo - Nuestro Señor Jesucristo, Rey del Universo' },
+            { nombre: 'La Inmaculada Concepción de la Bienaventurada Virgen María', id: 'inmaculadaconcepcion', titulo: '8 de Diciembre - La Inmaculada Concepción' },
+            { nombre: 'La Natividad del Señor', id: 'lanatividaddelseñor', titulo: '25 de Diciembre - La Natividad del Señor' }
+        ]
+    },
+    fiestas: {
+        tipo: 'fiestas',
+        titulo: 'Fiestas',
+        items: [
+            { nombre: 'La Presentación del Señor', id: 'presentaciondelseñor', titulo: '2 de Febrero - La Presentación del Señor' },
+            { nombre: 'San Marcos, evangelista', id: 'sanmarcos', titulo: '25 de Abril - San Marcos, Evangelista' },
+            { nombre: 'San Matías, apóstol', id: 'sanmatias', titulo: '14 de Mayo - San Matías, Apóstol' },
+            { nombre: 'Santo Tomás, apóstol', id: 'santotomas', titulo: '3 de Julio - Santo Tomás, Apóstol' },
+            { nombre: 'Santa María Magdalena', id: 'santamariamagdalena', titulo: '22 de Julio - Santa María Magdalena' },
+            { nombre: 'Santiago, apóstol', id: 'santiagoapostol', titulo: '25 de Julio - Santiago, Apóstol' },
+            { nombre: 'La Transfiguración del Señor', id: 'transfiguraciondelseñor', titulo: '6 de Agosto - La Transfiguración del Señor' },
+            { nombre: 'San Lorenzo, diácono y mártir', id: 'sanlorenzo', titulo: '10 de Agosto - San Lorenzo, Diácono y Mártir' },
+            { nombre: 'San Bartolomé, apóstol', id: 'sanbartolome', titulo: '24 de Agosto - San Bartolomé, Apóstol' },
+            { nombre: 'La Natividad de la Bienaventurada Virgen María', id: 'natividaddelavirgenmaria', titulo: '8 de Septiembre - La Natividad de la Virgen María' },
+            { nombre: 'La Exaltación de la Santa Cruz', id: 'exaltaciondelasantacruz', titulo: '14 de Septiembre - La Exaltación de la Santa Cruz' },
+            { nombre: 'San Mateo, apóstol y evangelista', id: 'sanmateo', titulo: '21 de Septiembre - San Mateo, Apóstol y Evangelista' },
+            { nombre: 'Santos Miguel, Gabriel y Rafael, arcángeles', id: 'santosarcangeles', titulo: '29 de Septiembre - Santos Arcángeles Miguel, Gabriel y Rafael' },
+            { nombre: 'Santos Simón y Judas, apóstoles', id: 'santossimonyjudas', titulo: '28 de Octubre - Santos Simón y Judas, Apóstoles' },
+            { nombre: 'La Dedicación de la Basílica de Letrán', id: 'dedicacionbasilicaletran', titulo: '9 de Noviembre - La Dedicación de la Basílica de Letrán' },
+            { nombre: 'San Andrés, apóstol', id: 'sanandres', titulo: '30 de Noviembre - San Andrés, Apóstol' },
+            { nombre: 'San Esteban, protomártir', id: 'sanesteban', titulo: '26 de Diciembre - San Esteban, Protomártir' },
+            { nombre: 'La Sagrada Familia de Jesús, María y José', id: 'sagradafamilia', titulo: 'Domingo - La Sagrada Familia' },
+            { nombre: 'Los Santos Inocentes, mártires', id: 'santosinocentes', titulo: '28 de Diciembre - Los Santos Inocentes, Mártires' }
+        ]
+    },
     santos: {
         tipo: 'meses',
         titulo: 'Fiestas de los Santos por Mes',
@@ -55,26 +109,6 @@ const configuracionTiempos = {
             { nombre: 'Octubre', slug: 'octubre' },
             { nombre: 'Noviembre', slug: 'noviembre' },
             { nombre: 'Diciembre', slug: 'diciembre' }
-        ]
-    },
-    solemnidades: {
-        tipo: 'solemnidades',
-        titulo: 'Solemnidades',
-        items: [
-            { nombre: 'La Epifanía del Señor', id: 'epifania' },
-            { nombre: 'Bautismo del Señor', id: 'bautismoLA' },
-            { nombre: 'San José, Esposo de la Virgen María', id: 'sanjose' },
-            { nombre: 'La Anunciación del Señor', id: 'anunciacion' },
-            { nombre: 'La Santísima Trinidad', id: 'trinidad' },
-            { nombre: 'El Santísimo Cuerpo y Sangre de Cristo (Corpus)', id: 'corpus' },
-            { nombre: 'El Sagrado Corazón de Jesús', id: 'sagradocorazon' },
-            { nombre: 'San Juan Bautista', id: 'juanbautista' },
-            { nombre: 'San Pedro y San Pablo, Apóstoles', id: 'pedroypablo' },
-            { nombre: 'La Asunción de la Virgen María', id: 'asuncion' },
-            { nombre: 'Todos los Santos', id: 'todoslossantos' },
-            { nombre: 'Jesucristo, Rey del Universo', id: 'cristorey' },
-            { nombre: 'La Inmaculada Concepción', id: 'inmaculada' },
-            { nombre: 'La Natividad del Señor', id: 'navidad' }
         ]
     }
 };
@@ -97,7 +131,8 @@ function cargarPortada() {
         'Tiempo Pascual': 'btn-pascua',
         'Tiempo de Pascua': 'btn-pascua',
         'Santos': 'btn-santos',
-        'Solemnidades': 'btn-solemnidades'
+        'Solemnidades': 'btn-solemnidades',
+        'Fiestas': 'btn-fiestas'
     };
 
     let claseColorHoy = 'btn-ordinario';
@@ -336,15 +371,6 @@ function cargarPortada() {
                     </button>
                     <div class="sub-acordeon" id="sub-tiempo-pascua"></div>
 
-                    <!-- Santos (horizontal: 12 meses) -->
-                    <button type="button" class="btn-icono btn-santos" data-tiempo="santos" style="margin-bottom: 8px;">
-                        <span class="btn-icon-box">
-                            <span class="material-symbols-outlined">workspace_premium</span>
-                        </span>
-                        <span class="btn-label">Santos</span>
-                    </button>
-                    <div class="sub-acordeon" id="sub-tiempo-santos"></div>
-
                     <!-- Solemnidades (vertical) -->
                     <button type="button" class="btn-icono btn-solemnidades" data-tiempo="solemnidades" style="margin-bottom: 8px;">
                         <span class="btn-icon-box">
@@ -353,6 +379,24 @@ function cargarPortada() {
                         <span class="btn-label">Solemnidades</span>
                     </button>
                     <div class="sub-acordeon" id="sub-tiempo-solemnidades"></div>
+
+                    <!-- Fiestas (vertical) -->
+                    <button type="button" class="btn-icono btn-fiestas" data-tiempo="fiestas" style="margin-bottom: 8px;">
+                        <span class="btn-icon-box">
+                            <span class="material-symbols-outlined">celebration</span>
+                        </span>
+                        <span class="btn-label">Fiestas</span>
+                    </button>
+                    <div class="sub-acordeon" id="sub-tiempo-fiestas"></div>
+
+                    <!-- Santos (horizontal: 12 meses) -->
+                    <button type="button" class="btn-icono btn-santos" data-tiempo="santos" style="margin-bottom: 8px;">
+                        <span class="btn-icon-box">
+                            <span class="material-symbols-outlined">workspace_premium</span>
+                        </span>
+                        <span class="btn-label">Santos</span>
+                    </button>
+                    <div class="sub-acordeon" id="sub-tiempo-santos"></div>
 
                 </div>
 
@@ -494,8 +538,9 @@ function vincularEventos() {
                     ordinario: '#2E7D32',
                     cuaresma: '#4A0080',
                     pascua: '#0288D1',
-                    santos: '#1565C0',
-                    solemnidades: '#B71C1C'
+                    santos: '#B71C1C',
+                    solemnidades: '#0288D1',
+                    fiestas: '#D97706'
                 };
                 const colorTiempo = coloresPorTiempo[tiempo] || '#2E7D32';
                 contenedor.style.setProperty('--color-tiempo', colorTiempo);
@@ -608,24 +653,367 @@ function vincularEventos() {
                         });
                     });
                 } else if (config.tipo === 'meses') {
-                    let htmlMeses = '<div class="sub-acordeon-h">';
-                    config.meses.forEach(m => {
-                        htmlMeses += `<a href="src/html/añoliturgico.html?mes=${m.slug}" class="btn-sub-mes">${m.nombre}</a>`;
+                    let htmlMeses = '<div class="sub-acordeon-h" id="meses-santos-lista">';
+                    config.meses.forEach((m, idx) => {
+                        htmlMeses += `<button type="button" class="btn-sub-mes" data-mes-num="${idx + 1}" data-mes-nombre="${m.nombre}">${m.nombre}</button>`;
                     });
                     htmlMeses += '</div>';
+                    htmlMeses += `
+                        <div class="santos-mes-contenedor" id="santos-mes-contenedor" style="display:none;">
+                            <div class="santos-dias-grid" id="grid-dias-santos"></div>
+                            <div class="semana-horas-panel panel-santos-rojo" id="panel-horas-santos" style="display:none;"></div>
+                        </div>
+                    `;
                     contenedor.innerHTML = htmlMeses;
+
+                    const botonesMeses = contenedor.querySelectorAll('.btn-sub-mes');
+                    const contenedorMes = contenedor.querySelector('#santos-mes-contenedor');
+                    const gridDias = contenedor.querySelector('#grid-dias-santos');
+                    const panelHorasSantos = contenedor.querySelector('#panel-horas-santos');
+
+                    // Función para generar slug del nombre de santo
+                    const generarSlugSanto = (nombre) => {
+                        if (!nombre) return '';
+                        return nombre.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+                    };
+
+                    // Función para obtener asignaciones anuales de santos
+                    const obtenerAsignacionesCompletas = () => {
+                        let asignaciones = {};
+                        try {
+                            asignaciones = JSON.parse(localStorage.getItem('lh_santos_calendario_anual')) || {};
+                        } catch (_) {}
+
+                        let catalogo = [];
+                        try {
+                            catalogo = JSON.parse(localStorage.getItem('lh_catalogo_nombres_santos')) || [];
+                        } catch (_) {}
+                        if (!Array.isArray(catalogo)) catalogo = [];
+
+                        const mapaCatalogo = new Map();
+                        if (Array.isArray(catalogoSantosAnual)) {
+                            catalogoSantosAnual.forEach(s => {
+                                if (s && s.nombre) mapaCatalogo.set(s.nombre.toLowerCase().trim(), s);
+                            });
+                        }
+                        catalogo.forEach(s => {
+                            if (s && s.nombre) {
+                                const clave = s.nombre.toLowerCase().trim();
+                                const prev = mapaCatalogo.get(clave);
+                                mapaCatalogo.set(clave, prev ? { ...prev, ...s } : s);
+                            }
+                        });
+
+                        const normalizarClaveFecha = (str) => {
+                            if (!str || typeof str !== 'string') return null;
+                            const match = str.trim().match(/^(\d{1,2})[\/\-](\d{1,2})/);
+                            if (match) {
+                                const dia = parseInt(match[1], 10);
+                                const mes = parseInt(match[2], 10);
+                                if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12) return `${dia}/${mes}`;
+                            }
+                            return null;
+                        };
+
+                        mapaCatalogo.forEach(s => {
+                            if (!s || !s.nombre) return;
+                            const claveFest = normalizarClaveFecha(s.fechaFestividad || s.celebracion);
+                            const claveMuerte = normalizarClaveFecha(s.muerte);
+                            const claveDestino = claveFest || claveMuerte;
+                            if (claveDestino && !asignaciones[claveDestino]) {
+                                asignaciones[claveDestino] = s.nombre;
+                            }
+                        });
+
+                        return asignaciones;
+                    };
+
+                    const generarGridHorasSanto = (d, mNum, sNombre, baseId) => {
+                        const horasConfig = [
+                            { id: 'oficio', label: 'Oficio de Lectura', icon: 'menu_book', cod: 'of' },
+                            { id: 'laudes', label: 'Laudes', icon: 'wb_twilight', cod: 'la' },
+                            { id: 'tercia', label: 'Tercia', icon: 'schedule', cod: 'te' },
+                            { id: 'sexta', label: 'Sexta', icon: 'light_mode', cod: 'se' },
+                            { id: 'nona', label: 'Nona', icon: 'wb_sunny', cod: 'no' },
+                            { id: 'visperas', label: 'Vísperas', icon: 'wb_twilight', cod: 'vi' },
+                            { id: 'completas', label: 'Completas', icon: 'bedtime', cod: 'co' }
+                        ];
+
+                        const mesesEsp = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                        const mesNombre = mesesEsp[mNum - 1] || '';
+                        const fechaTexto = `${d} de ${mesNombre}`;
+
+                        return horasConfig.map(h => {
+                            const url = `salterios.html?tiempo=santos&libro=${h.id}&id=${baseId}${h.cod}&santo=${encodeURIComponent(sNombre)}&fecha=${encodeURIComponent(fechaTexto)}`;
+                            return `
+                                <a href="${url}" class="btn-semana-hora">
+                                    <span class="material-symbols-outlined">${h.icon}</span>
+                                    <span>${h.label}</span>
+                                </a>
+                            `;
+                        }).join('');
+                    };
+
+                    botonesMeses.forEach(bMes => {
+                        bMes.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const mesNum = parseInt(bMes.getAttribute('data-mes-num'), 10);
+                            const mesNombre = bMes.getAttribute('data-mes-nombre');
+
+                            // Si ya está activo este mes, cerrarlo
+                            if (bMes.classList.contains('activo')) {
+                                bMes.classList.remove('activo');
+                                contenedorMes.style.display = 'none';
+                                gridDias.innerHTML = '';
+                                panelHorasSantos.style.display = 'none';
+                                panelHorasSantos.innerHTML = '';
+                                return;
+                            }
+
+                            // Desmarcar otros meses
+                            botonesMeses.forEach(b => b.classList.remove('activo'));
+                            bMes.classList.add('activo');
+
+                            // Mostrar contenedor de días
+                            contenedorMes.style.display = 'flex';
+                            panelHorasSantos.style.display = 'none';
+                            panelHorasSantos.innerHTML = '';
+
+                            const anio = new Date().getFullYear();
+                            const totalDias = new Date(anio, mesNum, 0).getDate();
+                            const asignaciones = obtenerAsignacionesCompletas();
+
+                            let htmlDias = '';
+                            for (let d = 1; d <= totalDias; d++) {
+                                const clave = `${d}/${mesNum}`;
+                                const santoAsignado = asignaciones[clave];
+                                const tieneSanto = santoAsignado && typeof santoAsignado === 'string' && santoAsignado.trim() && !santoAsignado.includes('-- Sin santo asignado --') && !santoAsignado.includes('— Sin santo asignado —');
+
+                                if (tieneSanto) {
+                                    const nombreLimpio = santoAsignado.trim();
+                                    htmlDias += `
+                                        <button type="button" 
+                                                class="btn-sub-semana btn-santo-dia-activo" 
+                                                data-dia="${d}" 
+                                                data-mes="${mesNum}" 
+                                                data-santo="${nombreLimpio.replace(/"/g, '&quot;')}" 
+                                                title="${d} de ${mesNombre}: ${nombreLimpio}">
+                                            ${d}
+                                        </button>
+                                    `;
+                                } else {
+                                    htmlDias += `
+                                        <button type="button" 
+                                                class="btn-sub-semana btn-santo-dia-inactivo" 
+                                                disabled 
+                                                data-dia="${d}" 
+                                                title="${d} de ${mesNombre}: Sin fiesta asignada">
+                                            ${d}
+                                        </button>
+                                    `;
+                                }
+                            }
+                            gridDias.innerHTML = htmlDias;
+
+                            const botonesDiasActivos = gridDias.querySelectorAll('.btn-santo-dia-activo');
+                            const todosLosBotones = gridDias.querySelectorAll('.btn-sub-semana');
+
+                            botonesDiasActivos.forEach(bDia => {
+                                bDia.addEventListener('click', (ev) => {
+                                    ev.preventDefault();
+                                    const d = parseInt(bDia.getAttribute('data-dia'), 10);
+                                    const sNombre = bDia.getAttribute('data-santo');
+
+                                    // Si ya está activo este día, ocultar panel
+                                    if (bDia.classList.contains('activo')) {
+                                        bDia.classList.remove('activo');
+                                        panelHorasSantos.style.display = 'none';
+                                        panelHorasSantos.innerHTML = '';
+                                        return;
+                                    }
+
+                                    // Desmarcar otros días
+                                    todosLosBotones.forEach(b => b.classList.remove('activo'));
+                                    bDia.classList.add('activo');
+
+                                    // Ubicar panel al final de la fila de 7 columnas
+                                    const indexTotal = Array.from(todosLosBotones).indexOf(bDia);
+                                    const columnas = 7;
+                                    const finFilaIndex = Math.min(Math.floor(indexTotal / columnas) * columnas + (columnas - 1), todosLosBotones.length - 1);
+                                    const botonFinFila = todosLosBotones[finFilaIndex];
+                                    botonFinFila.after(panelHorasSantos);
+
+                                    // Determinar baseId (solemnidad canónica, fiesta o saDDMMslug)
+                                    const normSlug = (str) => (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+                                    const solemItem = configuracionTiempos.solemnidades.items.find(item => normSlug(item.nombre) === normSlug(sNombre));
+                                    const fiestaItem = configuracionTiempos.fiestas.items.find(item => normSlug(item.nombre) === normSlug(sNombre));
+                                    
+                                    let baseId = '';
+                                    if (solemItem) {
+                                        baseId = solemItem.id;
+                                    } else if (fiestaItem) {
+                                        baseId = fiestaItem.id;
+                                    } else {
+                                        const diaPad = String(d).padStart(2, '0');
+                                        const mesPad = String(mesNum).padStart(2, '0');
+                                        baseId = `sa${diaPad}${mesPad}${generarSlugSanto(sNombre)}`;
+                                    }
+
+                                    // Renderizar panel de horas de santos con diseño en rojo
+                                    panelHorasSantos.innerHTML = `
+                                        <div class="semana-horas-panel-header">${sNombre}</div>
+                                        <div class="semana-horas-grid">
+                                            ${generarGridHorasSanto(d, mesNum, sNombre, baseId)}
+                                        </div>
+                                    `;
+                                    panelHorasSantos.style.display = 'flex';
+                                    panelHorasSantos.style.flexDirection = 'column';
+                                });
+                            });
+                        });
+                    });
                 } else if (config.tipo === 'solemnidades') {
                     let htmlSolem = '<div class="sub-acordeon-v">';
                     config.items.forEach(s => {
                         htmlSolem += `
-                            <a href="salterios.html?libro=laudes&id=${s.id}" class="btn-sub-solem">
+                            <button type="button" class="btn-sub-solem" data-solem-id="${s.id}" data-solem-titulo="${s.titulo || s.nombre}">
                                 <span class="material-symbols-outlined">auto_awesome</span>
                                 <span>${s.nombre}</span>
-                            </a>
+                            </button>
                         `;
                     });
+                    htmlSolem += '<div class="semana-horas-panel panel-solemnidad-pascua" id="panel-horas-solemnidades" style="display:none;"></div>';
                     htmlSolem += '</div>';
                     contenedor.innerHTML = htmlSolem;
+
+                    const panelHorasSolem = contenedor.querySelector('#panel-horas-solemnidades');
+                    const botonesSolem = contenedor.querySelectorAll('.btn-sub-solem');
+
+                    const generarGridHorasSolemnidad = (baseId) => {
+                        const horasConfig = [
+                            { id: 'oficio', label: 'Oficio de Lectura', icon: 'menu_book', cod: 'of' },
+                            { id: 'laudes', label: 'Laudes', icon: 'wb_twilight', cod: 'la' },
+                            { id: 'tercia', label: 'Tercia', icon: 'schedule', cod: 'te' },
+                            { id: 'sexta', label: 'Sexta', icon: 'light_mode', cod: 'se' },
+                            { id: 'nona', label: 'Nona', icon: 'wb_sunny', cod: 'no' },
+                            { id: 'visperas', label: 'Vísperas', icon: 'wb_twilight', cod: 'vi' },
+                            { id: 'completas', label: 'Completas', icon: 'bedtime', cod: 'co' }
+                        ];
+
+                        return horasConfig.map(h => {
+                            const url = `salterios.html?libro=${h.id}&id=${baseId}${h.cod}`;
+                            return `
+                                <a href="${url}" class="btn-semana-hora">
+                                    <span class="material-symbols-outlined">${h.icon}</span>
+                                    <span>${h.label}</span>
+                                </a>
+                            `;
+                        }).join('');
+                    };
+
+                    botonesSolem.forEach(bSolem => {
+                        bSolem.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const solemId = bSolem.getAttribute('data-solem-id');
+                            const solemTitulo = bSolem.getAttribute('data-solem-titulo');
+
+                            // Si ya está activo este mismo botón, ocultar panel y desmarcar
+                            if (bSolem.classList.contains('activo')) {
+                                bSolem.classList.remove('activo');
+                                panelHorasSolem.style.display = 'none';
+                                panelHorasSolem.innerHTML = '';
+                                return;
+                            }
+
+                            // Desmarcar otros botones de solemnidades
+                            botonesSolem.forEach(b => b.classList.remove('activo'));
+                            bSolem.classList.add('activo');
+
+                            // Ubicar el panel inmediatamente debajo del botón presionado
+                            bSolem.after(panelHorasSolem);
+
+                            // Renderizar el panel exactamente como la imagen 2 con fondo blanco y azul de pascua
+                            panelHorasSolem.innerHTML = `
+                                <div class="semana-horas-panel-header">${solemTitulo}</div>
+                                <div class="semana-horas-grid">
+                                    ${generarGridHorasSolemnidad(solemId)}
+                                </div>
+                            `;
+                            panelHorasSolem.style.display = 'flex';
+                            panelHorasSolem.style.flexDirection = 'column';
+                        });
+                    });
+                } else if (config.tipo === 'fiestas') {
+                    let htmlFiesta = '<div class="sub-acordeon-v">';
+                    config.items.forEach(f => {
+                        htmlFiesta += `
+                            <button type="button" class="btn-sub-fiesta" data-fiesta-id="${f.id}" data-fiesta-titulo="${f.titulo || f.nombre}">
+                                <span class="material-symbols-outlined">celebration</span>
+                                <span>${f.nombre}</span>
+                            </button>
+                        `;
+                    });
+                    htmlFiesta += '<div class="semana-horas-panel panel-fiestas" id="panel-horas-fiestas" style="display:none;"></div>';
+                    htmlFiesta += '</div>';
+                    contenedor.innerHTML = htmlFiesta;
+
+                    const panelHorasFiesta = contenedor.querySelector('#panel-horas-fiestas');
+                    const botonesFiesta = contenedor.querySelectorAll('.btn-sub-fiesta');
+
+                    const generarGridHorasFiesta = (baseId) => {
+                        const horasConfig = [
+                            { id: 'oficio', label: 'Oficio de Lectura', icon: 'menu_book', cod: 'of' },
+                            { id: 'laudes', label: 'Laudes', icon: 'wb_twilight', cod: 'la' },
+                            { id: 'tercia', label: 'Tercia', icon: 'schedule', cod: 'te' },
+                            { id: 'sexta', label: 'Sexta', icon: 'light_mode', cod: 'se' },
+                            { id: 'nona', label: 'Nona', icon: 'wb_sunny', cod: 'no' },
+                            { id: 'visperas', label: 'Vísperas', icon: 'wb_twilight', cod: 'vi' },
+                            { id: 'completas', label: 'Completas', icon: 'bedtime', cod: 'co' }
+                        ];
+
+                        return horasConfig.map(h => {
+                            const url = `salterios.html?tiempo=fiestas&libro=${h.id}&id=${baseId}${h.cod}`;
+                            return `
+                                <a href="${url}" class="btn-semana-hora">
+                                    <span class="material-symbols-outlined">${h.icon}</span>
+                                    <span>${h.label}</span>
+                                </a>
+                            `;
+                        }).join('');
+                    };
+
+                    botonesFiesta.forEach(bFiesta => {
+                        bFiesta.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const fiestaId = bFiesta.getAttribute('data-fiesta-id');
+                            const fiestaTitulo = bFiesta.getAttribute('data-fiesta-titulo');
+
+                            // Si ya está activo este mismo botón, ocultar panel y desmarcar
+                            if (bFiesta.classList.contains('activo')) {
+                                bFiesta.classList.remove('activo');
+                                panelHorasFiesta.style.display = 'none';
+                                panelHorasFiesta.innerHTML = '';
+                                return;
+                            }
+
+                            // Desmarcar otros botones de fiestas
+                            botonesFiesta.forEach(b => b.classList.remove('activo'));
+                            bFiesta.classList.add('activo');
+
+                            // Ubicar el panel inmediatamente debajo del botón presionado
+                            bFiesta.after(panelHorasFiesta);
+
+                            // Renderizar el panel con fondo blanco y ámbar litúrgico
+                            panelHorasFiesta.innerHTML = `
+                                <div class="semana-horas-panel-header">${fiestaTitulo}</div>
+                                <div class="semana-horas-grid">
+                                    ${generarGridHorasFiesta(fiestaId)}
+                                </div>
+                            `;
+                            panelHorasFiesta.style.display = 'flex';
+                            panelHorasFiesta.style.flexDirection = 'column';
+                        });
+                    });
                 }
             }
 

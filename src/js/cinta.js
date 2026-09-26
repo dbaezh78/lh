@@ -229,6 +229,8 @@ export class CintaLiturgica {
             libro: 'laudes',
             tiempoSlug: 'ordinario',
             diaSlug: 'lunes',
+            textoMetadatos: null,
+            baseCelebracionId: '',
             ...opciones
         };
 
@@ -321,6 +323,18 @@ export class CintaLiturgica {
     }
 
     formatearTextoMetadatos(semana, dia) {
+        if (this.opciones.textoMetadatos) {
+            return this.opciones.textoMetadatos;
+        }
+        const slugT = (this.opciones.tiempoSlug || '').toLowerCase();
+        const tiempoStr = (this.opciones.tiempo || '').toLowerCase();
+        const celebracionesSlugs = ['santos', 'solemnidades', 'fiestas'];
+        if (celebracionesSlugs.includes(slugT) || celebracionesSlugs.includes(tiempoStr)) {
+            if (dia) return dia;
+            if (slugT === 'solemnidades' || tiempoStr === 'solemnidades') return 'Solemnidades';
+            if (slugT === 'fiestas' || tiempoStr === 'fiestas') return 'Fiestas';
+            return 'Santos';
+        }
         if (!semana) return dia || '';
         const numSemana = String(semana).replace(/^semana\s*/i, '').replace(/^sem\s*/i, '').trim();
         return `<span class="lbl-semana-larga">Semana</span><span class="lbl-semana-corta">SEM</span> ${numSemana} • ${dia}`;
@@ -348,22 +362,30 @@ export class CintaLiturgica {
             { id: 'completas', label: 'Completas' }
         ];
 
-        const mapT = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'san' };
+        const slugTiempo = (tiempoSlug || 'ordinario').toLowerCase();
+        const mapT = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'san', solemnidades: 'sol', fiestas: 'fie' };
         const mapD = { domingo: 'do', lunes: 'lu', martes: 'ma', miercoles: 'mi', jueves: 'ju', viernes: 'vi', sabado: 'sa' };
         const mapH = { oficio: 'of', laudes: 'la', tercia: 'te', sexta: 'se', nona: 'no', visperas: 'vi', completas: 'co' };
-        const tCode = mapT[tiempoSlug] || 'to';
+        const tCode = mapT[slugTiempo] || 'to';
         const dCode = mapD[diaSlug] || 'do';
         const semPad = String(semana).padStart(2, '0');
 
         const horaBtnsHtml = horas.map(h => {
             const activo = (libro.toLowerCase() === h.id.toLowerCase()) ? 'activo' : '';
             const hCode = mapH[h.id] || 'la';
-            const docId = `${tCode}s${semPad}${dCode}${hCode}`;
-            const href = `?tiempo=${tiempoSlug}&semana=${semana}&dia=${diaSlug}&libro=${h.id}&hora=${h.id}&id=${docId}`;
+            let href = '';
+            if (slugTiempo === 'santos' || slugTiempo === 'solemnidades' || slugTiempo === 'fiestas') {
+                const baseId = this.opciones.baseCelebracionId || (diaSlug || '').replace(/(of|la|te|se|no|vi|co)$/i, '') || 'sa0101santamaria';
+                const sParam = this.opciones.santo ? `&santo=${encodeURIComponent(this.opciones.santo)}` : '';
+                const fParam = this.opciones.fecha ? `&fecha=${encodeURIComponent(this.opciones.fecha)}` : '';
+                const tParam = (slugTiempo === 'solemnidades' || slugTiempo === 'fiestas') ? `&tiempo=${slugTiempo}` : '';
+                href = `salterios.html?libro=${h.id}&id=${baseId}${hCode}${tParam}${sParam}${fParam}`;
+            } else {
+                const docId = `${tCode}s${semPad}${dCode}${hCode}`;
+                href = `?tiempo=${slugTiempo}&semana=${semana}&dia=${diaSlug}&libro=${h.id}&hora=${h.id}&id=${docId}`;
+            }
             return `<a href="${href}" class="cinta-btn-hora ${activo}" data-libro="${h.id}">${h.label}</a>`;
         }).join('');
-
-        const slugTiempo = (tiempoSlug || 'ordinario').toLowerCase();
 
         this.contenedor.innerHTML = `
             <div class="cinta-top-bar" id="cinta-top-bar">
@@ -1452,7 +1474,7 @@ export class CintaLiturgica {
     }
 
     // Actualización de Información Litúrgica y Botones Activos
-    actualizarLiturgiaInfo(tiempo, semana, dia, libro, tiempoSlug = '', diaSlug = '') {
+    actualizarLiturgiaInfo(tiempo, semana, dia, libro, tiempoSlug = '', diaSlug = '', extras = {}) {
         this.opciones = {
             ...this.opciones,
             tiempo: tiempo || this.opciones.tiempo,
@@ -1460,7 +1482,8 @@ export class CintaLiturgica {
             dia: dia || this.opciones.dia,
             libro: libro || this.opciones.libro,
             tiempoSlug: tiempoSlug || this.opciones.tiempoSlug,
-            diaSlug: diaSlug || this.opciones.diaSlug
+            diaSlug: diaSlug || this.opciones.diaSlug,
+            ...extras
         };
 
         const btnTiempo = document.getElementById('btn-toggle-tiempo');
@@ -1472,15 +1495,31 @@ export class CintaLiturgica {
             btnTiempo.className = `cinta-badge-tiempo tiempo-${slug}`;
         }
         if (txtMetadatos) {
-            txtMetadatos.innerHTML = this.formatearTextoMetadatos(semana, dia);
+            txtMetadatos.innerHTML = this.formatearTextoMetadatos(this.opciones.semana, this.opciones.dia);
         }
 
-        // Actualizar hora activa
+        // Actualizar hora activa y enlaces si aplica
+        const libroNorm = (libro || this.opciones.libro || 'laudes').toLowerCase();
+        const mapH = { oficio: 'of', laudes: 'la', tercia: 'te', sexta: 'se', nona: 'no', visperas: 'vi', completas: 'co' };
+        const esCelebracion = ['santos', 'solemnidades', 'fiestas'].includes((tiempoSlug || this.opciones.tiempoSlug || '').toLowerCase());
+
         document.querySelectorAll('.cinta-btn-hora').forEach(btn => {
-            if (btn.getAttribute('data-libro') === libro) {
+            const hId = btn.getAttribute('data-libro');
+            if (hId === libroNorm) {
                 btn.classList.add('activo');
             } else {
                 btn.classList.remove('activo');
+            }
+            if (esCelebracion) {
+                const baseId = this.opciones.baseCelebracionId || (diaSlug || this.opciones.diaSlug || '').replace(/(of|la|te|se|no|vi|co)$/i, '');
+                if (baseId) {
+                    const hCode = mapH[hId] || 'la';
+                    const sParam = this.opciones.santo ? `&santo=${encodeURIComponent(this.opciones.santo)}` : '';
+                    const fParam = this.opciones.fecha ? `&fecha=${encodeURIComponent(this.opciones.fecha)}` : '';
+                    const slugActual = (tiempoSlug || this.opciones.tiempoSlug || '').toLowerCase();
+                    const tParam = (slugActual === 'solemnidades' || slugActual === 'fiestas') ? `&tiempo=${slugActual}` : '';
+                    btn.setAttribute('href', `salterios.html?libro=${hId}&id=${baseId}${hCode}${tParam}${sParam}${fParam}`);
+                }
             }
         });
 
