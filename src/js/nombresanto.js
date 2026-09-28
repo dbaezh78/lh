@@ -132,10 +132,8 @@ export function parsearCSV(texto) {
         } else if (char === ',' && !dentroComillas) {
             filaActual.push(valorActual.trim());
             valorActual = '';
-        } else if ((char === '' || char === '
-') && !dentroComillas) {
-            if (char === '' && siguienteChar === '
-') i++;
+        } else if ((char === '\r' || char === '\n') && !dentroComillas) {
+            if (char === '\r' && siguienteChar === '\n') i++;
             filaActual.push(valorActual.trim());
             if (filaActual.some(c => c !== '')) filas.push(filaActual);
             filaActual = [];
@@ -176,8 +174,7 @@ export function exportarSantosACSV(santos) {
             escaparCampoCSV(s.tipo || 'Memoria')
         ].join(','));
     });
-    return lineas.join('
-');
+    return lineas.join('\r\n');
 }
 
 /**

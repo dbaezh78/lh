@@ -8,6 +8,7 @@
     <!-- Google Fonts & Material Symbols -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../css/preces.css">
+    <link rel="stylesheet" href="../css/searchable-santo.css">
     <link rel="stylesheet" href="../css/buttons.css">
 </head>
 <body>
@@ -99,7 +100,7 @@
                         </div>
                     </div>
 
-                    <div class="row-campos-4">
+                    <div class="row-campos-4" id="row-campos-tiempo">
                         <div class="campo-grupo">
                             <label for="form-tiempo">Tiempo:</label>
                             <select id="form-tiempo">
@@ -111,8 +112,8 @@
                                 <option value="santos">Santos</option>
                             </select>
                         </div>
-                        <div class="campo-grupo">
-                            <label for="form-semana">Semana:</label>
+                        <div class="campo-grupo" id="grupo-semana">
+                            <label for="form-semana" id="lbl-form-semana">Semana:</label>
                             <select id="form-semana">
                                 <option value="1" selected>Semana 1</option>
                                 <option value="2">Semana 2</option>
@@ -150,8 +151,8 @@
                                 <option value="34">Semana 34</option>
                             </select>
                         </div>
-                        <div class="campo-grupo">
-                            <label for="form-dia">Día:</label>
+                        <div class="campo-grupo" id="grupo-dia">
+                            <label for="form-dia" id="lbl-form-dia">Día:</label>
                             <select id="form-dia">
                                 <option value="domingo">Domingo</option>
                                 <option value="lunes" selected>Lunes</option>
@@ -161,12 +162,18 @@
                                 <option value="viernes">Viernes</option>
                                 <option value="sabado">Sábado</option>
                             </select>
+                            <input type="text" id="form-fecha-celebracion" placeholder="dd/mm ej: 29/06" style="display: none;" maxlength="5">
                         </div>
-                        <div class="campo-grupo">
+                        <div class="campo-grupo" id="grupo-libro">
                             <label for="form-libro">Hora / Libro:</label>
                             <select id="form-libro">
+                                <option value="oficio">Oficio de Lectura</option>
                                 <option value="laudes" selected>Laudes</option>
+                                <option value="tercia">Tercia</option>
+                                <option value="sexta">Sexta</option>
+                                <option value="nona">Nona</option>
                                 <option value="visperas">Vísperas</option>
+                                <option value="completas">Completas</option>
                             </select>
                         </div>
                     </div>
@@ -277,8 +284,13 @@ y enriquécelos con toda clase de bienes.</textarea>
                         </select>
                         <select id="filtro-libro" class="filtro-select">
                             <option value="todos">Todas las Horas</option>
+                            <option value="oficio">Oficio de Lectura</option>
                             <option value="laudes">Laudes</option>
+                            <option value="tercia">Tercia</option>
+                            <option value="sexta">Sexta</option>
+                            <option value="nona">Nona</option>
                             <option value="visperas">Vísperas</option>
+                            <option value="completas">Completas</option>
                         </select>
                     </div>
 
@@ -305,9 +317,9 @@ y enriquécelos con toda clase de bienes.</textarea>
     </div>
 
     <!-- Scripts de inicialización -->
-    <script src="../data/db-preces.js" type="module"></script>
-    <script src="../js/firebase-config.js" type="module"></script>
-    <script src="../js/preces-manager.js" type="module"></script>
-    <script src="../js/navigator.js"></script>
+    <script src="../data/db-preces.js?v=1790604000" type="module"></script>
+    <script src="../js/firebase-config.js?v=1790604000" type="module"></script>
+    <script src="../js/preces-manager.js?v=1790604000" type="module"></script>
+    <script src="../js/navigator.js?v=1790604000"></script>
 </body>
 </html>

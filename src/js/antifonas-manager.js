@@ -3,9 +3,101 @@
 // =========================================================================
 
 import { CATALOGO_ANTIFONAS_SEED } from '../data/db-antifonas.js';
+import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+import { inicializarSearchableSantoSelect } from './searchable-santo.js';
 
 let listaAntifonas = [];
 let editandoId = null;
+
+// Obtener catálogo completo de santos
+function obtenerCatalogoSantos() {
+    try {
+        const raw = localStorage.getItem('lh_catalogo_nombres_santos');
+        if (raw) {
+            const list = JSON.parse(raw);
+            if (Array.isArray(list) && list.length > 0) return list;
+        }
+    } catch (_) {}
+    return (typeof catalogoSantosAnual !== 'undefined' && Array.isArray(catalogoSantosAnual)) ? catalogoSantosAnual : [];
+}
+
+// Extrae día y mes de la fecha de celebración de un santo
+function extraerDiaMesCelebracion(santo) {
+    if (!santo) return { dia: '01', mes: '01', texto: '01/01' };
+    const raw = (santo.celebracion || santo.fechaFestividad || '').trim();
+    const mIso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (mIso) {
+        const dia = String(mIso[3]).padStart(2, '0');
+        const mes = String(mIso[2]).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    const mSlash = raw.match(/^(\d{1,2})\/(\d{1,2})/);
+    if (mSlash) {
+        const dia = String(mSlash[1]).padStart(2, '0');
+        const mes = String(mSlash[2]).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    if (santo.dia && santo.mes) {
+        const dia = String(santo.dia).padStart(2, '0');
+        const mes = String(santo.mes).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    return { dia: '01', mes: '01', texto: raw || '—' };
+}
+
+// Genera slug normalizado para ID de santo
+function generarSlugSanto(nombre) {
+    if (!nombre) return '';
+    return nombre
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+
+// Genera el ID canónico de santo
+function generarIdSanto(santo) {
+    if (!santo) return 'sa0101santamaria';
+    const { dia, mes } = extraerDiaMesCelebracion(santo);
+    const slug = generarSlugSanto(santo.nombre);
+    return `sa${dia}${mes}${slug}`;
+}
+
+// Actualiza fecha de celebración del santo en el catálogo (localStorage y Firestore)
+async function actualizarFechaCelebracionSanto(idOSlug, nuevoDiaMes) {
+    if (!nuevoDiaMes || !idOSlug) return;
+    try {
+        const raw = localStorage.getItem('lh_catalogo_nombres_santos');
+        let list = raw ? JSON.parse(raw) : (typeof catalogoSantosAnual !== 'undefined' ? [...catalogoSantosAnual] : []);
+        const idx = list.findIndex(s => generarIdSanto(s) === idOSlug || generarSlugSanto(s.nombre) === generarSlugSanto(idOSlug));
+        if (idx >= 0) {
+            list[idx].celebracion = nuevoDiaMes;
+            list[idx].fechaFestividad = nuevoDiaMes;
+            localStorage.setItem('lh_catalogo_nombres_santos', JSON.stringify(list));
+
+            // Guardar en IndexedDB si existe
+            try {
+                const req = indexedDB.open('LH_Santos_DB', 2);
+                req.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (db.objectStoreNames.contains('catalogo')) {
+                        const tx = db.transaction('catalogo', 'readwrite');
+                        tx.objectStore('catalogo').put(list, 'santos');
+                    }
+                };
+            } catch (_) {}
+
+            // Sincronizar en Firestore si está conectado
+            if (window.firebaseAPI && window.firebaseAPI.guardarUnSantoFirestore) {
+                window.firebaseAPI.guardarUnSantoFirestore(list[idx]).catch(() => {});
+            }
+            console.log(`📅 Fecha de celebración del santo actualizada a ${nuevoDiaMes}`);
+        }
+    } catch (e) {
+        console.warn('Error al actualizar fecha de celebracion del santo:', e);
+    }
+}
 
 // Tiempos litúrgicos y configuración de semanas
 const TIEMPOS_CONFIG = {
@@ -29,8 +121,63 @@ function inicializarSelectores() {
     const selTiempo = document.getElementById('form-tiempo');
     const selSemana = document.getElementById('form-semana');
     const selDia = document.getElementById('form-dia');
-    const boxFechaSanto = document.getElementById('box-fecha-santo');
-    const boxNombreSanto = document.getElementById('box-nombre-santo');
+    const boxSantoContainer = document.getElementById('box-santo-container');
+    const selSanto = document.getElementById('form-santo-select');
+    const inputFecha = document.getElementById('form-fecha');
+    const inputSantoHidden = document.getElementById('form-santo');
+
+    function poblarSelectSantos(santoSeleccionado = null) {
+        if (!selSanto) return;
+        const santos = obtenerCatalogoSantos();
+        const listaOrdenada = [...santos].sort((a, b) => {
+            return (a.nombre || '').localeCompare(b.nombre || '', 'es', { sensitivity: 'base' });
+        });
+
+        selSanto.innerHTML = '<option value="">-- Selecciona un Santo --</option>';
+        listaOrdenada.forEach(s => {
+            const idSanto = generarIdSanto(s);
+            const { texto: fechaTexto } = extraerDiaMesCelebracion(s);
+            const opt = document.createElement('option');
+            opt.value = idSanto;
+            opt.textContent = `${s.nombre} (${fechaTexto})`;
+            opt.setAttribute('data-nombre', s.nombre);
+            opt.setAttribute('data-fecha', fechaTexto);
+            selSanto.appendChild(opt);
+        });
+
+        if (santoSeleccionado) {
+            const match = Array.from(selSanto.options).find(o => 
+                o.value === santoSeleccionado || 
+                o.getAttribute('data-nombre') === santoSeleccionado
+            );
+            if (match) selSanto.value = match.value;
+        }
+
+        inicializarSearchableSantoSelect(selSanto, {
+            placeholder: 'Buscar santo...',
+            onChange: (val, opt) => {
+                if (opt && val) {
+                    if (inputFecha) inputFecha.value = opt.getAttribute('data-fecha') || '';
+                    if (inputSantoHidden) inputSantoHidden.value = opt.getAttribute('data-nombre') || '';
+                } else {
+                    if (inputSantoHidden) inputSantoHidden.value = '';
+                }
+            }
+        });
+        if (selSanto._customSantoContainer) {
+            selSanto._customSantoContainer.style.display = 'block';
+        }
+    }
+
+    selSanto?.addEventListener('change', () => {
+        const opt = selSanto.selectedOptions[0];
+        if (opt && opt.value) {
+            if (inputFecha) inputFecha.value = opt.getAttribute('data-fecha') || '';
+            if (inputSantoHidden) inputSantoHidden.value = opt.getAttribute('data-nombre') || '';
+        } else {
+            if (inputSantoHidden) inputSantoHidden.value = '';
+        }
+    });
 
     function actualizarOpcionesTiempo() {
         const tiempo = selTiempo.value;
@@ -56,12 +203,11 @@ function inicializarSelectores() {
 
         // Mostrar / ocultar campos específicos de Santos
         if (tiempo === 'santos') {
-            if (boxFechaSanto) boxFechaSanto.style.display = 'block';
-            if (boxNombreSanto) boxNombreSanto.style.display = 'block';
+            if (boxSantoContainer) boxSantoContainer.style.display = 'block';
+            poblarSelectSantos();
             selDia.disabled = true;
         } else {
-            if (boxFechaSanto) boxFechaSanto.style.display = 'none';
-            if (boxNombreSanto) boxNombreSanto.style.display = 'none';
+            if (boxSantoContainer) boxSantoContainer.style.display = 'none';
             selDia.disabled = false;
         }
     }
@@ -107,6 +253,65 @@ async function cargarDatos() {
     mostrarBannerEstado(`✨ Cargadas las 131 antífonas del catálogo base desde antifonas.js.`, 'exito');
 }
 
+// Buscar antífona existente en memoria/catálogo
+function buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo) {
+    if (!listaAntifonas || listaAntifonas.length === 0) return null;
+    const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+
+    if (tiempo === 'santos') {
+        const santoNorm = norm(santo);
+        const fechaNorm = (fecha || '').trim();
+        return listaAntifonas.find(a => {
+            if (a.tiempo !== 'santos') return false;
+            const libroMatch = (a.libro === libro) || (libro === 'general') || (a.libro === 'general');
+            const tipoMatch = a.tipo === tipo;
+            const santoMatch = santoNorm && (norm(a.santo).includes(santoNorm) || santoNorm.includes(norm(a.santo)) || norm(a.id).includes(santoNorm));
+            const fechaMatch = fechaNorm && (a.fecha === fechaNorm || (a.id && a.id.includes(fechaNorm.replace('/', '_'))));
+            return libroMatch && tipoMatch && (santoMatch || fechaMatch);
+        });
+    } else {
+        return listaAntifonas.find(a => {
+            if (a.tiempo !== tiempo) return false;
+            const semMatch = (!semana && !a.semana) || (Number(a.semana) === Number(semana));
+            const diaMatch = (!dia && !a.dia) || (norm(a.dia) === norm(dia));
+            const libroMatch = a.libro === libro;
+            const tipoMatch = a.tipo === tipo;
+            return semMatch && diaMatch && libroMatch && tipoMatch;
+        });
+    }
+}
+
+// Coordinar cambio de parámetros (Santo, Tiempo, Semana, Día, Libro, Tipo)
+function manejarCambioParametros() {
+    const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+    const semanaVal = document.getElementById('form-semana')?.value;
+    const semana = semanaVal ? parseInt(semanaVal, 10) : null;
+    const dia = document.getElementById('form-dia')?.value || null;
+    const fecha = document.getElementById('form-fecha')?.value?.trim() || null;
+    const selSanto = document.getElementById('form-santo-select');
+    const optSanto = selSanto?.selectedOptions[0];
+    const santo = (tiempo === 'santos' && optSanto && optSanto.value) 
+        ? optSanto.getAttribute('data-nombre') 
+        : (document.getElementById('form-santo')?.value?.trim() || null);
+    const libro = document.getElementById('form-libro')?.value || 'laudes';
+    const tipo = document.getElementById('form-tipo')?.value || 'invitatoria';
+
+    const antifonaExistente = buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo);
+    const txtArea = document.getElementById('form-texto');
+    const btnSubmit = document.querySelector('#form-antifona button[type="submit"]');
+
+    if (antifonaExistente) {
+        editandoId = antifonaExistente.id;
+        if (txtArea) txtArea.value = antifonaExistente.texto || '';
+        if (btnSubmit) btnSubmit.innerHTML = '<span class="material-symbols-outlined">update</span> Actualizar Antífona';
+        mostrarBannerEstado(`📖 Antífona existente cargada (${antifonaExistente.libro} • ${formatearTipo(antifonaExistente.tipo)}).`, 'info');
+    } else {
+        editandoId = null;
+        if (txtArea) txtArea.value = '';
+        if (btnSubmit) btnSubmit.innerHTML = '<span class="material-symbols-outlined">save</span> Guardar Antífona';
+    }
+}
+
 function configurarEventos() {
     // Formulario guardar
     const form = document.getElementById('form-antifona');
@@ -117,6 +322,17 @@ function configurarEventos() {
 
     // Botón Limpiar
     document.getElementById('btn-limpiar-form')?.addEventListener('click', limpiarFormulario);
+
+    // Cambio en parámetros del formulario para auto-cargar si existe o preparar nuevo
+    ['form-semana', 'form-dia', 'form-libro', 'form-tipo'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', () => {
+            manejarCambioParametros();
+        });
+    });
+
+    document.getElementById('form-fecha')?.addEventListener('input', () => {
+        manejarCambioParametros();
+    });
 
     // Botón "+ Aleluya."
     document.getElementById('btn-add-aleluya')?.addEventListener('click', () => {
@@ -209,7 +425,11 @@ async function guardarAntifona() {
     const semana = semanaVal ? parseInt(semanaVal, 10) : null;
     const dia = document.getElementById('form-dia').value || null;
     const fecha = document.getElementById('form-fecha')?.value.trim() || null;
-    const santo = document.getElementById('form-santo')?.value.trim() || null;
+    const selSanto = document.getElementById('form-santo-select');
+    const optSanto = selSanto?.selectedOptions[0];
+    const santo = (tiempo === 'santos' && optSanto && optSanto.value) 
+        ? optSanto.getAttribute('data-nombre') 
+        : (document.getElementById('form-santo')?.value.trim() || null);
     const libro = document.getElementById('form-libro').value;
     const tipo = document.getElementById('form-tipo').value;
     const texto = document.getElementById('form-texto').value.trim();
@@ -219,7 +439,13 @@ async function guardarAntifona() {
         return;
     }
 
-    const docId = editandoId || `${tiempo}_s${semana || '0'}_${dia || fecha || 'gen'}_${libro}_${tipo}_${Date.now()}`;
+    // Sincronizar fecha de celebración en catálogo de santos si es tiempo santos
+    if (tiempo === 'santos' && optSanto && optSanto.value && fecha && /^\d{1,2}\/\d{1,2}$/.test(fecha)) {
+        actualizarFechaCelebracionSanto(optSanto.value, fecha);
+    }
+
+    const diaFechaLimpia = (dia || fecha || 'gen').replace(/\//g, '_');
+    const docId = (editandoId || `${tiempo}_s${semana || '0'}_${diaFechaLimpia}_${libro}_${tipo}_${Date.now()}`).replace(/\//g, '_');
     const payload = {
         id: docId,
         tiempo,
@@ -260,8 +486,13 @@ async function guardarAntifona() {
 function limpiarFormulario() {
     editandoId = null;
     document.getElementById('form-texto').value = '';
-    document.getElementById('form-fecha').value = '';
-    document.getElementById('form-santo').value = '';
+    const inpFecha = document.getElementById('form-fecha');
+    if (inpFecha) inpFecha.value = '';
+    const inpSanto = document.getElementById('form-santo');
+    if (inpSanto) inpSanto.value = '';
+    const selSanto = document.getElementById('form-santo-select');
+    if (selSanto) selSanto.value = '';
+
     const btnSubmit = document.querySelector('#form-antifona button[type="submit"]');
     if (btnSubmit) btnSubmit.innerHTML = '<span class="material-symbols-outlined">save</span> Guardar Antífona';
 }
@@ -298,7 +529,7 @@ function renderizarLista() {
     contenedor.innerHTML = filtradas.map(item => {
         const semanaTxt = item.semana ? `Semana ${item.semana}` : '';
         const diaTxt = item.dia ? capitalizar(item.dia) : (item.fecha || '');
-        const santoTxt = item.santo ? `• ${item.santo}` : '';
+        const santoTxt = item.santo ? `• 😇 ${item.santo}` : '';
         
         return `
             <div class="antifona-card-item" data-id="${item.id}">
@@ -338,7 +569,17 @@ window.editarAntifona = (id) => {
     if (item.semana) document.getElementById('form-semana').value = item.semana;
     if (item.dia) document.getElementById('form-dia').value = item.dia;
     if (item.fecha) document.getElementById('form-fecha').value = item.fecha;
-    if (item.santo) document.getElementById('form-santo').value = item.santo;
+    if (item.santo) {
+        document.getElementById('form-santo').value = item.santo;
+        const selSanto = document.getElementById('form-santo-select');
+        if (selSanto) {
+            const opt = Array.from(selSanto.options).find(o => 
+                o.getAttribute('data-nombre') === item.santo || 
+                o.value === item.santo
+            );
+            if (opt) selSanto.value = opt.value;
+        }
+    }
     document.getElementById('form-libro').value = item.libro;
     document.getElementById('form-tipo').value = item.tipo;
     document.getElementById('form-texto').value = item.texto;

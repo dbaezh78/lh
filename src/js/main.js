@@ -114,6 +114,71 @@ const configuracionTiempos = {
 };
 
 // =========================================================
+// HELPERS LITÚRGICOS PARA SANTOS Y SOLEMNIDADES
+// =========================================================
+function generarSlugSantoGlobal(nombre) {
+    if (!nombre) return '';
+    return nombre.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+}
+
+function obtenerCatalogoCompletoSantosGlobal() {
+    let catalogo = [];
+    try {
+        catalogo = JSON.parse(localStorage.getItem('lh_catalogo_nombres_santos')) || [];
+    } catch (_) {}
+    if (!Array.isArray(catalogo)) catalogo = [];
+
+    const mapaCatalogo = new Map();
+    if (Array.isArray(catalogoSantosAnual)) {
+        catalogoSantosAnual.forEach(s => {
+            if (s && s.nombre) mapaCatalogo.set(s.nombre.toLowerCase().trim(), s);
+        });
+    }
+    catalogo.forEach(s => {
+        if (s && s.nombre) {
+            const clave = s.nombre.toLowerCase().trim();
+            const prev = mapaCatalogo.get(clave);
+            mapaCatalogo.set(clave, prev ? { ...prev, ...s, imagen: s.imagen || prev.imagen || '' } : s);
+        }
+    });
+    return mapaCatalogo;
+}
+
+function resolverCodigoHoraSantoEspecifico(dia, mes, nombreSanto, libro, sufijo) {
+    const slug = generarSlugSantoGlobal(nombreSanto);
+    const diaPad = String(dia).padStart(2, '0');
+    const mesPad = String(mes).padStart(2, '0');
+    const idSantoBase = `sa${diaPad}${mesPad}${slug}`;
+
+    const mapaCatalogo = obtenerCatalogoCompletoSantosGlobal();
+    const santoObj = mapaCatalogo.get((nombreSanto || '').toLowerCase().trim());
+
+    // 1. Revisar si el santo tiene codigosLiturgia explícitos asignados
+    let codigos = {};
+    if (santoObj && (santoObj.codigosLiturgia || santoObj.liturgias)) {
+        codigos = { ...(santoObj.codigosLiturgia || santoObj.liturgias) };
+    }
+
+    try {
+        const raw1 = localStorage.getItem(`lh_santo_codigos_${idSantoBase}`);
+        if (raw1) codigos = { ...JSON.parse(raw1), ...codigos };
+        const raw2 = localStorage.getItem(`lh_santo_codigos_${slug}`);
+        if (raw2) codigos = { ...JSON.parse(raw2), ...codigos };
+    } catch (_) {}
+
+    // Libro alternativo 'vispera' o 'visperas'
+    const libroKey = libro === 'visperas' ? 'vispera' : libro;
+    if (codigos[libro] && codigos[libro].codigo) {
+        return codigos[libro].codigo;
+    }
+    if (codigos[libroKey] && codigos[libroKey].codigo) {
+        return codigos[libroKey].codigo;
+    }
+
+    return `${idSantoBase}${sufijo}`;
+}
+
+// =========================================================
 // PORTADA PRINCIPAL — Liturgia de las Horas
 // =========================================================
 function cargarPortada() {
@@ -149,10 +214,10 @@ function cargarPortada() {
     // Obtener santo del día desde las asignaciones y catálogo
     let textoBotonSanto = "";
     let imagenBotonSanto = "";
+    const fechaActual = new Date();
+    const diaActual = fechaActual.getDate();
+    const mesActual = fechaActual.getMonth() + 1;
     try {
-        const fechaActual = new Date();
-        const diaActual = fechaActual.getDate();
-        const mesActual = fechaActual.getMonth() + 1;
         const claveDiaMes = `${diaActual}/${mesActual}`;
         const asignacionesSantos = JSON.parse(localStorage.getItem('lh_santos_calendario_anual')) || {};
         
@@ -234,6 +299,46 @@ function cargarPortada() {
         ? `<img src="${imagenBotonSanto}" alt="${textoBotonSanto}" class="img-santo-pill" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'material-symbols-outlined\\'>person</span>';">`
         : `<span class="material-symbols-outlined">person</span>`;
 
+    // Resolver códigos litúrgicos asignados al santo del día
+    const slugSantoHoy = (textoBotonSanto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+    let diaNumStr = String(diaActual).padStart(2, '0');
+    let mesNumStr = String(mesActual).padStart(2, '0');
+    if (window.santoDelDiaObjeto) {
+        const rawCeleb = (window.santoDelDiaObjeto.celebracion || window.santoDelDiaObjeto.fechaFestividad || '').trim();
+        const mSlash = rawCeleb.match(/^(\d{1,2})\/(\d{1,2})/);
+        if (mSlash) {
+            diaNumStr = String(mSlash[1]).padStart(2, '0');
+            mesNumStr = String(mSlash[2]).padStart(2, '0');
+        }
+    }
+    const idSantoBase = `sa${diaNumStr}${mesNumStr}${slugSantoHoy}`;
+
+    let codigosLiturgiaSanto = {};
+    if (window.santoDelDiaObjeto && window.santoDelDiaObjeto.codigosLiturgia) {
+        codigosLiturgiaSanto = { ...window.santoDelDiaObjeto.codigosLiturgia };
+    }
+    try {
+        const raw1 = localStorage.getItem(`lh_santo_codigos_${idSantoBase}`);
+        if (raw1) codigosLiturgiaSanto = { ...JSON.parse(raw1), ...codigosLiturgiaSanto };
+        const raw2 = localStorage.getItem(`lh_santo_codigos_${slugSantoHoy}`);
+        if (raw2) codigosLiturgiaSanto = { ...JSON.parse(raw2), ...codigosLiturgiaSanto };
+    } catch (_) {}
+
+    const obtenerIdHoraSanto = (libro, sufijo) => {
+        if (codigosLiturgiaSanto[libro] && codigosLiturgiaSanto[libro].codigo) {
+            return codigosLiturgiaSanto[libro].codigo;
+        }
+        return `${idSantoBase}${sufijo}`;
+    };
+
+    const codigoSantoOficio = obtenerIdHoraSanto('oficio', 'of');
+    const codigoSantoLaudes = obtenerIdHoraSanto('laudes', 'la');
+    const codigoSantoTercia = obtenerIdHoraSanto('tercia', 'te');
+    const codigoSantoSexta = obtenerIdHoraSanto('sexta', 'se');
+    const codigoSantoNona = obtenerIdHoraSanto('nona', 'no');
+    const codigoSantoVispera = obtenerIdHoraSanto('vispera', 'vi');
+    const codigoSantoCompletas = obtenerIdHoraSanto('completas', 'co');
+
     app.innerHTML = `
         <div class="background-overlay"></div>
         
@@ -266,11 +371,14 @@ function cargarPortada() {
                     </span>
                 </div>
 
-                <a href="src/html/santo.html" class="btn-pill btn-santo" id="btn-santo-dia" title="Ver calendario de Santos">
+                <div class="btn-pill btn-santo btn-pill-salmodia-wrapper" id="btn-santo-dia" style="cursor: pointer;" title="Desplegar Horas de ${textoBotonSanto}">
                     <span class="btn-pill-icon">
                         ${iconoBotonSantoHtml}
                     </span>
-                    <span class="btn-santo-texto">${textoBotonSanto}</span>
+                    <span class="btn-santo-texto" style="margin: 0 4px;">${textoBotonSanto}</span>
+                    <span class="btn-pill-icon" style="margin-left: 2px; margin-right: 2px; border: none; background: transparent;">
+                        <span class="material-symbols-outlined" id="icono-santo-toggle" style="font-size: 20px; color: #0288d1;">keyboard_arrow_down</span>
+                    </span>
                     <button type="button" class="btn-tts-portada" id="btn-tts-portada-santo" title="Escuchar lectura de ${textoBotonSanto}" onclick="event.preventDefault(); event.stopPropagation(); if(typeof window.toggleLeerSantoPortada==='function') window.toggleLeerSantoPortada();">
                         <svg class="tts-portada-circular-ring" viewBox="0 0 32 32">
                             <circle class="tts-portada-circular-bg" cx="16" cy="16" r="13.5"></circle>
@@ -278,7 +386,7 @@ function cargarPortada() {
                         </svg>
                         <span class="material-symbols-outlined" id="icono-tts-portada">play_arrow</span>
                     </button>
-                </a>
+                </div>
             </div>
 
             <!-- ===== SUB-BOTONES DESPLEGABLES (Horas Litúrgicas) ===== -->
@@ -308,6 +416,38 @@ function cargarPortada() {
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">wb_twilight</span></span>
                 </a>
                 <a href="salterios.html?libro=completas&id=${codigoHoyBase}co" class="btn-flat ${claseColorHoy}">
+                    <span class="btn-flat-label">Completas</span>
+                    <span class="btn-flat-icon"><span class="material-symbols-outlined">bedtime</span></span>
+                </a>
+            </div>
+
+            <!-- ===== SUB-BOTONES DESPLEGABLES (Horas Litúrgicas del Santo - En Blanco) ===== -->
+            <div class="sub-horas-container" id="sub-horas-santo-lista">
+                <a href="salterios.html?libro=oficio&id=${codigoSantoOficio}" class="btn-flat btn-blanco">
+                    <span class="btn-flat-label">Oficio de Lectura</span>
+                    <span class="btn-flat-icon"><span class="material-symbols-outlined">menu_book</span></span>
+                </a>
+                <a href="salterios.html?libro=laudes&id=${codigoSantoLaudes}" class="btn-flat btn-blanco">
+                    <span class="btn-flat-label">Laudes</span>
+                    <span class="btn-flat-icon"><span class="material-symbols-outlined">wb_twilight</span></span>
+                </a>
+                <a href="salterios.html?libro=tercia&id=${codigoSantoTercia}" class="btn-flat btn-blanco">
+                    <span class="btn-flat-label">Tercia</span>
+                    <span class="btn-flat-icon"><span class="material-symbols-outlined">schedule</span></span>
+                </a>
+                <a href="salterios.html?libro=sexta&id=${codigoSantoSexta}" class="btn-flat btn-blanco">
+                    <span class="btn-flat-label">Sexta</span>
+                    <span class="btn-flat-icon"><span class="material-symbols-outlined">light_mode</span></span>
+                </a>
+                <a href="salterios.html?libro=nona&id=${codigoSantoNona}" class="btn-flat btn-blanco">
+                    <span class="btn-flat-label">Nona</span>
+                    <span class="btn-flat-icon"><span class="material-symbols-outlined">wb_sunny</span></span>
+                </a>
+                <a href="salterios.html?libro=visperas&id=${codigoSantoVispera}" class="btn-flat btn-blanco">
+                    <span class="btn-flat-label">Víspera</span>
+                    <span class="btn-flat-icon"><span class="material-symbols-outlined">wb_twilight</span></span>
+                </a>
+                <a href="salterios.html?libro=completas&id=${codigoSantoCompletas}" class="btn-flat btn-blanco">
                     <span class="btn-flat-label">Completas</span>
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">bedtime</span></span>
                 </a>
@@ -484,6 +624,10 @@ function vincularEventos() {
     const subHoras = document.getElementById('sub-horas-lista');
     const iconoSalmodia = document.getElementById('icono-salmodia');
 
+    const btnSanto = document.getElementById('btn-santo-dia');
+    const subHorasSanto = document.getElementById('sub-horas-santo-lista');
+    const iconoSantoToggle = document.getElementById('icono-santo-toggle');
+
     if (btnSalmodia && subHoras) {
         btnSalmodia.addEventListener('click', (e) => {
             if (e.target.closest('#btn-reproductor-evangelio-dia')) {
@@ -493,6 +637,30 @@ function vincularEventos() {
             const estaDesplegado = subHoras.classList.toggle('desplegado');
             if (iconoSalmodia) {
                 iconoSalmodia.textContent = estaDesplegado ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
+            }
+            // Si abrimos la salmodia del día, cerramos las horas del santo
+            if (subHorasSanto && estaDesplegado) {
+                subHorasSanto.classList.remove('desplegado');
+                if (iconoSantoToggle) iconoSantoToggle.textContent = 'keyboard_arrow_down';
+            }
+        });
+    }
+
+    // 1.b Horas del Santo (desplegable de horas en blanco)
+    if (btnSanto && subHorasSanto) {
+        btnSanto.addEventListener('click', (e) => {
+            if (e.target.closest('#btn-tts-portada-santo')) {
+                return;
+            }
+            e.preventDefault();
+            const estaDesplegado = subHorasSanto.classList.toggle('desplegado');
+            if (iconoSantoToggle) {
+                iconoSantoToggle.textContent = estaDesplegado ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
+            }
+            // Si abrimos las horas del santo, cerramos la salmodia del día
+            if (subHoras && estaDesplegado) {
+                subHoras.classList.remove('desplegado');
+                if (iconoSalmodia) iconoSalmodia.textContent = 'keyboard_arrow_down';
             }
         });
     }
@@ -744,7 +912,8 @@ function vincularEventos() {
                         const fechaTexto = `${d} de ${mesNombre}`;
 
                         return horasConfig.map(h => {
-                            const url = `salterios.html?tiempo=santos&libro=${h.id}&id=${baseId}${h.cod}&santo=${encodeURIComponent(sNombre)}&fecha=${encodeURIComponent(fechaTexto)}`;
+                            const codLiturgia = resolverCodigoHoraSantoEspecifico(d, mNum, sNombre, h.id, h.cod);
+                            const url = `salterios.html?tiempo=santos&libro=${h.id}&id=${codLiturgia}&santo=${encodeURIComponent(sNombre)}&fecha=${encodeURIComponent(fechaTexto)}`;
                             return `
                                 <a href="${url}" class="btn-semana-hora">
                                     <span class="material-symbols-outlined">${h.icon}</span>
@@ -843,21 +1012,10 @@ function vincularEventos() {
                                     const botonFinFila = todosLosBotones[finFilaIndex];
                                     botonFinFila.after(panelHorasSantos);
 
-                                    // Determinar baseId (solemnidad canónica, fiesta o saDDMMslug)
-                                    const normSlug = (str) => (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
-                                    const solemItem = configuracionTiempos.solemnidades.items.find(item => normSlug(item.nombre) === normSlug(sNombre));
-                                    const fiestaItem = configuracionTiempos.fiestas.items.find(item => normSlug(item.nombre) === normSlug(sNombre));
-                                    
-                                    let baseId = '';
-                                    if (solemItem) {
-                                        baseId = solemItem.id;
-                                    } else if (fiestaItem) {
-                                        baseId = fiestaItem.id;
-                                    } else {
-                                        const diaPad = String(d).padStart(2, '0');
-                                        const mesPad = String(mesNum).padStart(2, '0');
-                                        baseId = `sa${diaPad}${mesPad}${generarSlugSanto(sNombre)}`;
-                                    }
+                                    // Determinar baseId canónico saDDMMslug
+                                    const diaPad = String(d).padStart(2, '0');
+                                    const mesPad = String(mesNum).padStart(2, '0');
+                                    const baseId = `sa${diaPad}${mesPad}${generarSlugSantoGlobal(sNombre)}`;
 
                                     // Renderizar panel de horas de santos con diseño en rojo
                                     panelHorasSantos.innerHTML = `
@@ -889,7 +1047,7 @@ function vincularEventos() {
                     const panelHorasSolem = contenedor.querySelector('#panel-horas-solemnidades');
                     const botonesSolem = contenedor.querySelectorAll('.btn-sub-solem');
 
-                    const generarGridHorasSolemnidad = (baseId) => {
+                    const generarGridHorasSolemnidad = (baseId, solemNombre, solemTitulo) => {
                         const horasConfig = [
                             { id: 'oficio', label: 'Oficio de Lectura', icon: 'menu_book', cod: 'of' },
                             { id: 'laudes', label: 'Laudes', icon: 'wb_twilight', cod: 'la' },
@@ -900,8 +1058,49 @@ function vincularEventos() {
                             { id: 'completas', label: 'Completas', icon: 'bedtime', cod: 'co' }
                         ];
 
+                        // Buscar si esta solemnidad corresponde a un santo registrado en el santoral
+                        const mapaCatalogo = obtenerCatalogoCompletoSantosGlobal();
+                        const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+                        const targetNorm = norm(solemNombre);
+
+                        let santoEncontrado = mapaCatalogo.get((solemNombre || '').toLowerCase().trim());
+                        if (!santoEncontrado) {
+                            for (const s of mapaCatalogo.values()) {
+                                if (s && s.nombre && norm(s.nombre) === targetNorm) {
+                                    santoEncontrado = s;
+                                    break;
+                                }
+                            }
+                        }
+
+                        let diaNum = 1;
+                        let mesNum = 1;
+                        if (santoEncontrado) {
+                            const raw = (santoEncontrado.celebracion || santoEncontrado.fechaFestividad || '').trim();
+                            const mSlash = raw.match(/^(\d{1,2})\/(\d{1,2})/);
+                            if (mSlash) {
+                                diaNum = parseInt(mSlash[1], 10);
+                                mesNum = parseInt(mSlash[2], 10);
+                            }
+                        } else {
+                            // Extraer día y mes del título (ej: "1 de Enero - Santa María...")
+                            const mTit = (solemTitulo || '').match(/^(\d{1,2})\s+de\s+([A-Za-z]+)/i);
+                            if (mTit) {
+                                diaNum = parseInt(mTit[1], 10);
+                                const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+                                const mIdx = meses.indexOf(mTit[2].toLowerCase());
+                                if (mIdx >= 0) mesNum = mIdx + 1;
+                            }
+                        }
+
                         return horasConfig.map(h => {
-                            const url = `salterios.html?libro=${h.id}&id=${baseId}${h.cod}`;
+                            let codFinal = '';
+                            if (santoEncontrado) {
+                                codFinal = resolverCodigoHoraSantoEspecifico(diaNum, mesNum, santoEncontrado.nombre, h.id, h.cod);
+                            } else {
+                                codFinal = `${baseId}${h.cod}`;
+                            }
+                            const url = `salterios.html?tiempo=santos&libro=${h.id}&id=${codFinal}&santo=${encodeURIComponent(solemNombre)}&fecha=${encodeURIComponent(solemTitulo || solemNombre)}`;
                             return `
                                 <a href="${url}" class="btn-semana-hora">
                                     <span class="material-symbols-outlined">${h.icon}</span>
@@ -916,6 +1115,8 @@ function vincularEventos() {
                             e.preventDefault();
                             const solemId = bSolem.getAttribute('data-solem-id');
                             const solemTitulo = bSolem.getAttribute('data-solem-titulo');
+                            const solemItem = config.items.find(it => it.id === solemId);
+                            const solemNombre = solemItem ? solemItem.nombre : solemTitulo;
 
                             // Si ya está activo este mismo botón, ocultar panel y desmarcar
                             if (bSolem.classList.contains('activo')) {
@@ -936,7 +1137,7 @@ function vincularEventos() {
                             panelHorasSolem.innerHTML = `
                                 <div class="semana-horas-panel-header">${solemTitulo}</div>
                                 <div class="semana-horas-grid">
-                                    ${generarGridHorasSolemnidad(solemId)}
+                                    ${generarGridHorasSolemnidad(solemId, solemNombre, solemTitulo)}
                                 </div>
                             `;
                             panelHorasSolem.style.display = 'flex';
@@ -960,7 +1161,7 @@ function vincularEventos() {
                     const panelHorasFiesta = contenedor.querySelector('#panel-horas-fiestas');
                     const botonesFiesta = contenedor.querySelectorAll('.btn-sub-fiesta');
 
-                    const generarGridHorasFiesta = (baseId) => {
+                    const generarGridHorasFiesta = (baseId, fiestaNombre, fiestaTitulo) => {
                         const horasConfig = [
                             { id: 'oficio', label: 'Oficio de Lectura', icon: 'menu_book', cod: 'of' },
                             { id: 'laudes', label: 'Laudes', icon: 'wb_twilight', cod: 'la' },
@@ -971,8 +1172,47 @@ function vincularEventos() {
                             { id: 'completas', label: 'Completas', icon: 'bedtime', cod: 'co' }
                         ];
 
+                        const mapaCatalogo = obtenerCatalogoCompletoSantosGlobal();
+                        const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+                        const targetNorm = norm(fiestaNombre);
+
+                        let santoEncontrado = mapaCatalogo.get((fiestaNombre || '').toLowerCase().trim());
+                        if (!santoEncontrado) {
+                            for (const s of mapaCatalogo.values()) {
+                                if (s && s.nombre && norm(s.nombre) === targetNorm) {
+                                    santoEncontrado = s;
+                                    break;
+                                }
+                            }
+                        }
+
+                        let diaNum = 1;
+                        let mesNum = 1;
+                        if (santoEncontrado) {
+                            const raw = (santoEncontrado.celebracion || santoEncontrado.fechaFestividad || '').trim();
+                            const mSlash = raw.match(/^(\d{1,2})\/(\d{1,2})/);
+                            if (mSlash) {
+                                diaNum = parseInt(mSlash[1], 10);
+                                mesNum = parseInt(mSlash[2], 10);
+                            }
+                        } else {
+                            const mTit = (fiestaTitulo || '').match(/^(\d{1,2})\s+de\s+([A-Za-z]+)/i);
+                            if (mTit) {
+                                diaNum = parseInt(mTit[1], 10);
+                                const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+                                const mIdx = meses.indexOf(mTit[2].toLowerCase());
+                                if (mIdx >= 0) mesNum = mIdx + 1;
+                            }
+                        }
+
                         return horasConfig.map(h => {
-                            const url = `salterios.html?tiempo=fiestas&libro=${h.id}&id=${baseId}${h.cod}`;
+                            let codFinal = '';
+                            if (santoEncontrado) {
+                                codFinal = resolverCodigoHoraSantoEspecifico(diaNum, mesNum, santoEncontrado.nombre, h.id, h.cod);
+                            } else {
+                                codFinal = `${baseId}${h.cod}`;
+                            }
+                            const url = `salterios.html?tiempo=santos&libro=${h.id}&id=${codFinal}&santo=${encodeURIComponent(fiestaNombre)}&fecha=${encodeURIComponent(fiestaTitulo || fiestaNombre)}`;
                             return `
                                 <a href="${url}" class="btn-semana-hora">
                                     <span class="material-symbols-outlined">${h.icon}</span>
@@ -987,6 +1227,8 @@ function vincularEventos() {
                             e.preventDefault();
                             const fiestaId = bFiesta.getAttribute('data-fiesta-id');
                             const fiestaTitulo = bFiesta.getAttribute('data-fiesta-titulo');
+                            const fiestaItem = config.items.find(it => it.id === fiestaId);
+                            const fiestaNombre = fiestaItem ? fiestaItem.nombre : fiestaTitulo;
 
                             // Si ya está activo este mismo botón, ocultar panel y desmarcar
                             if (bFiesta.classList.contains('activo')) {
@@ -1003,11 +1245,11 @@ function vincularEventos() {
                             // Ubicar el panel inmediatamente debajo del botón presionado
                             bFiesta.after(panelHorasFiesta);
 
-                            // Renderizar el panel con fondo blanco y ámbar litúrgico
+                            // Renderizar panel de fiestas en color ámbar/dorado
                             panelHorasFiesta.innerHTML = `
                                 <div class="semana-horas-panel-header">${fiestaTitulo}</div>
                                 <div class="semana-horas-grid">
-                                    ${generarGridHorasFiesta(fiestaId)}
+                                    ${generarGridHorasFiesta(fiestaId, fiestaNombre, fiestaTitulo)}
                                 </div>
                             `;
                             panelHorasFiesta.style.display = 'flex';

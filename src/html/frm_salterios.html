@@ -8,6 +8,7 @@
     <!-- Google Fonts & Material Symbols -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../css/frm_salterios.css">
+    <link rel="stylesheet" href="../css/searchable-santo.css">
 </head>
 <body>
 
@@ -172,10 +173,17 @@
                 <div class="grid-controles-invitatorio">
                     <!-- Selector de Antífona del Invitatorio -->
                     <div class="control-box">
-                        <label for="selectAntifonaInvitatorio">
-                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
-                            Antífona del Invitatorio
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirAntifonaInvitatorio" class="chk-omitir-elemento" data-target="antifonaInvitatorio" title="Marcar para no incluir en el oficio">
+                            <label for="selectAntifonaInvitatorio">
+                                <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                                ANT. DEL INVITATORIO
+                            </label>
+                            <div class="ant-es-group">
+                                <label class="lbl-chk-es" title="Omitir Antífona de Entrada">E <input type="checkbox" id="chkOmitirAntInv_E" class="chk-omitir-es" data-target="antifonaInvitatorio_E"></label>
+                                <label class="lbl-chk-es" title="Omitir Antífona de Salida">S <input type="checkbox" id="chkOmitirAntInv_S" class="chk-omitir-es" data-target="antifonaInvitatorio_S"></label>
+                            </div>
+                        </div>
                         <select id="selectAntifonaInvitatorio" class="select-liturgico">
                             <!-- Rellenado dinámicamente con las antífonas invitatorias -->
                         </select>
@@ -183,10 +191,13 @@
 
                     <!-- Selector de Salmo Invitatorio -->
                     <div class="control-box">
-                        <label for="selectSalmoInvitatorio">
-                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
-                            Salmo Invitatorio
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirSalmoInvitatorio" class="chk-omitir-elemento" data-target="salmoInvitatorio" title="Marcar para no incluir en el oficio">
+                            <label for="selectSalmoInvitatorio">
+                                <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                                Salmo Invitatorio
+                            </label>
+                        </div>
                         <select id="selectSalmoInvitatorio" class="select-liturgico">
                             <option value="salmo94" selected>Salmo 94 - INVITACIÓN A LA ALABANZA DIVINA</option>
                             <option value="salmo99">Salmo 99 - ALEGRÍA DE LOS QUE ENTRAN EN EL TEMPLO</option>
@@ -197,10 +208,13 @@
 
                     <!-- Selector de Himno -->
                     <div class="control-box">
-                        <label for="selectHimno">
-                            <span class="material-symbols-outlined" style="font-size:16px;">music_note</span>
-                            Himno
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirHimno" class="chk-omitir-elemento" data-target="himno" title="Marcar para no incluir en el oficio">
+                            <label for="selectHimno">
+                                <span class="material-symbols-outlined" style="font-size:16px;">music_note</span>
+                                Himno
+                            </label>
+                        </div>
                         <select id="selectHimno" class="select-liturgico">
                             <!-- Rellenado dinámicamente desde himnos.js / himno.html -->
                         </select>
@@ -208,10 +222,17 @@
 
                     <!-- Selector de Antífona 1 -->
                     <div class="control-box">
-                        <label for="selectAntifona1">
-                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
-                            Antífona 1
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirAntifona1" class="chk-omitir-elemento" data-target="antifona1" title="Marcar para no incluir en el oficio">
+                            <label for="selectAntifona1">
+                                <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                                ANT. 1
+                            </label>
+                            <div class="ant-es-group">
+                                <label class="lbl-chk-es" title="Omitir Antífona de Entrada">E <input type="checkbox" id="chkOmitirAnt1_E" class="chk-omitir-es" data-target="antifona1_E"></label>
+                                <label class="lbl-chk-es" title="Omitir Antífona de Salida">S <input type="checkbox" id="chkOmitirAnt1_S" class="chk-omitir-es" data-target="antifona1_S"></label>
+                            </div>
+                        </div>
                         <select id="selectAntifona1" class="select-liturgico">
                             <!-- Rellenado dinámicamente con las antífonas de Salmodia 1 -->
                         </select>
@@ -219,10 +240,13 @@
 
                     <!-- Selector de Salmo 1 -->
                     <div class="control-box">
-                        <label for="selectSalmo1">
-                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
-                            Salmo 1
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirSalmo1" class="chk-omitir-elemento" data-target="salmo1" title="Marcar para no incluir en el oficio">
+                            <label for="selectSalmo1">
+                                <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                                Salmo 1
+                            </label>
+                        </div>
                         <select id="selectSalmo1" class="select-liturgico">
                             <option value="salmo62_2_9" selected>SALMO 62, 2-9 - EL ALMA SEDIENTA DE DIOS</option>
                         </select>
@@ -230,10 +254,17 @@
 
                     <!-- Selector de Antífona 2 -->
                     <div class="control-box">
-                        <label for="selectAntifona2">
-                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
-                            Antífona 2
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirAntifona2" class="chk-omitir-elemento" data-target="antifona2" title="Marcar para no incluir en el oficio">
+                            <label for="selectAntifona2">
+                                <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                                ANT. 2
+                            </label>
+                            <div class="ant-es-group">
+                                <label class="lbl-chk-es" title="Omitir Antífona de Entrada">E <input type="checkbox" id="chkOmitirAnt2_E" class="chk-omitir-es" data-target="ant2_E"></label>
+                                <label class="lbl-chk-es" title="Omitir Antífona de Salida">S <input type="checkbox" id="chkOmitirAnt2_S" class="chk-omitir-es" data-target="ant2_S"></label>
+                            </div>
+                        </div>
                         <select id="selectAntifona2" class="select-liturgico">
                             <!-- Rellenado dinámicamente con las antífonas de Salmodia 2 -->
                         </select>
@@ -241,10 +272,13 @@
 
                     <!-- Selector de Salmo 2 -->
                     <div class="control-box">
-                        <label for="selectSalmo2">
-                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
-                            Salmo 2 (Cántico)
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirSalmo2" class="chk-omitir-elemento" data-target="salmo2" title="Marcar para no incluir en el oficio">
+                            <label for="selectSalmo2">
+                                <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                                Salmo 2 (Cántico)
+                            </label>
+                        </div>
                         <select id="selectSalmo2" class="select-liturgico">
                             <option value="dn_3_57_88_56" selected>Cántico: TODA LA CREACIÓN ALABE AL SEÑOR - Dn 3, 57-88. 56</option>
                         </select>
@@ -252,10 +286,17 @@
 
                     <!-- Selector de Antífona 3 -->
                     <div class="control-box">
-                        <label for="selectAntifona3">
-                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
-                            Antífona 3
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirAntifona3" class="chk-omitir-elemento" data-target="antifona3" title="Marcar para no incluir en el oficio">
+                            <label for="selectAntifona3">
+                                <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                                ANT. 3
+                            </label>
+                            <div class="ant-es-group">
+                                <label class="lbl-chk-es" title="Omitir Antífona de Entrada">E <input type="checkbox" id="chkOmitirAnt3_E" class="chk-omitir-es" data-target="ant3_E"></label>
+                                <label class="lbl-chk-es" title="Omitir Antífona de Salida">S <input type="checkbox" id="chkOmitirAnt3_S" class="chk-omitir-es" data-target="ant3_S"></label>
+                            </div>
+                        </div>
                         <select id="selectAntifona3" class="select-liturgico">
                             <!-- Rellenado dinámicamente con las antífonas de Salmodia 3 -->
                         </select>
@@ -263,10 +304,13 @@
 
                     <!-- Selector de Salmo 3 -->
                     <div class="control-box">
-                        <label for="selectSalmo3">
-                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
-                            Salmo 3
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirSalmo3" class="chk-omitir-elemento" data-target="salmo3" title="Marcar para no incluir en el oficio">
+                            <label for="selectSalmo3">
+                                <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                                Salmo 3
+                            </label>
+                        </div>
                         <select id="selectSalmo3" class="select-liturgico">
                             <option value="salmo149" selected>Salmo 149 - ALEGRÍA DE LOS SANTOS</option>
                         </select>
@@ -274,10 +318,13 @@
 
                     <!-- Selector de Lectura Breve -->
                     <div class="control-box" id="ctrlBoxLecturaBreve">
-                        <label for="selectLecturaBreve">
-                            <span class="material-symbols-outlined" style="font-size:16px;">auto_stories</span>
-                            Lectura Breve
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirLecturaBreve" class="chk-omitir-elemento" data-target="lecturaBreve" title="Marcar para no incluir en el oficio">
+                            <label for="selectLecturaBreve">
+                                <span class="material-symbols-outlined" style="font-size:16px;">auto_stories</span>
+                                Lectura Breve
+                            </label>
+                        </div>
                         <select id="selectLecturaBreve" class="select-liturgico">
                             <!-- Rellenado dinámicamente desde db-lecturabreve.js / lh_lecturabreve_cache -->
                         </select>
@@ -285,10 +332,17 @@
 
                     <!-- Selector de Antífona Cántico Evangélico -->
                     <div class="control-box" id="ctrlBoxAntifonaCantico">
-                        <label for="selectAntifonaCantico">
-                            <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
-                            Antífona Cántico Evangélico
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirAntifonaCantico" class="chk-omitir-elemento" data-target="antifonaCantico" title="Marcar para no incluir en el oficio">
+                            <label for="selectAntifonaCantico">
+                                <span class="material-symbols-outlined" style="font-size:16px;">library_books</span>
+                                ANT. CÁNTICO EVANGÉLICO
+                            </label>
+                            <div class="ant-es-group">
+                                <label class="lbl-chk-es" title="Omitir Antífona de Entrada">E <input type="checkbox" id="chkOmitirAntCant_E" class="chk-omitir-es" data-target="antifonaCantico_E"></label>
+                                <label class="lbl-chk-es" title="Omitir Antífona de Salida">S <input type="checkbox" id="chkOmitirAntCant_S" class="chk-omitir-es" data-target="antifonaCantico_S"></label>
+                            </div>
+                        </div>
                         <select id="selectAntifonaCantico" class="select-liturgico">
                             <!-- Rellenado dinámicamente desde db-cantico-evangelico.js -->
                         </select>
@@ -296,10 +350,13 @@
 
                     <!-- Selector de Cántico Evangélico -->
                     <div class="control-box" id="ctrlBoxCantico">
-                        <label for="selectCantico">
-                            <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
-                            Cántico Evangélico
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirCantico" class="chk-omitir-elemento" data-target="cantico" title="Marcar para no incluir en el oficio">
+                            <label for="selectCantico">
+                                <span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>
+                                Cántico Evangélico
+                            </label>
+                        </div>
                         <select id="selectCantico" class="select-liturgico">
                             <option value="cantico_zacarias" selected>CÁNTICO DE ZACARÍAS. EL MESÍAS Y SU PRECURSOR - Lc 1, 68-79</option>
                             <option value="magnificat">CÁNTICO DE LA SANTÍSIMA VIRGEN MARÍA (MAGNÍFICAT) - Lc 1, 46-55</option>
@@ -309,10 +366,13 @@
 
                     <!-- Selector de Preces -->
                     <div class="control-box" id="ctrlBoxPreces">
-                        <label for="selectPreces">
-                            <span class="material-symbols-outlined" style="font-size:16px;">volunteer_activism</span>
-                            Preces
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirPreces" class="chk-omitir-elemento" data-target="preces" title="Marcar para no incluir en el oficio">
+                            <label for="selectPreces">
+                                <span class="material-symbols-outlined" style="font-size:16px;">volunteer_activism</span>
+                                Preces
+                            </label>
+                        </div>
                         <select id="selectPreces" class="select-liturgico">
                             <!-- Rellenado dinámicamente desde db-preces.js / lh_preces_cache -->
                         </select>
@@ -320,40 +380,52 @@
 
                     <!-- CONTROLES ESPECÍFICOS DE OFICIO DE LECTURA -->
                     <div class="control-box" id="ctrlBoxResponsorioOficio" style="display: none;">
-                        <label for="selectResponsorioOficio">
-                            <span class="material-symbols-outlined" style="font-size:16px;">church</span>
-                            Responsorio Salmodia (Post-Salmo 3)
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirResponsorioOficio" class="chk-omitir-elemento" data-target="responsorioOficio" title="Marcar para no incluir en el oficio">
+                            <label for="selectResponsorioOficio">
+                                <span class="material-symbols-outlined" style="font-size:16px;">church</span>
+                                Responsorio Salmodia (Post-Salmo 3)
+                            </label>
+                        </div>
                         <select id="selectResponsorioOficio" class="select-liturgico">
                             <!-- Rellenado dinámicamente desde db-responsorios.js -->
                         </select>
                     </div>
 
                     <div class="control-box" id="ctrlBoxLectura1Oficio" style="display: none;">
-                        <label for="selectLectura1Oficio">
-                            <span class="material-symbols-outlined" style="font-size:16px;">auto_stories</span>
-                            1ª Lectura Bíblica (Oficio)
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirLectura1Oficio" class="chk-omitir-elemento" data-target="lectura1Oficio" title="Marcar para no incluir en el oficio">
+                            <label for="selectLectura1Oficio">
+                                <span class="material-symbols-outlined" style="font-size:16px;">auto_stories</span>
+                                1ª Lectura Bíblica (Oficio)
+                            </label>
+                        </div>
                         <select id="selectLectura1Oficio" class="select-liturgico">
                             <!-- Rellenado dinámicamente desde db-lecturas.js -->
                         </select>
                     </div>
 
                     <div class="control-box" id="ctrlBoxLectura2Oficio" style="display: none;">
-                        <label for="selectLectura2Oficio">
-                            <span class="material-symbols-outlined" style="font-size:16px;">import_contacts</span>
-                            2ª Lectura Patrística (Oficio)
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirLectura2Oficio" class="chk-omitir-elemento" data-target="lectura2Oficio" title="Marcar para no incluir en el oficio">
+                            <label for="selectLectura2Oficio">
+                                <span class="material-symbols-outlined" style="font-size:16px;">import_contacts</span>
+                                2ª Lectura Patrística (Oficio)
+                            </label>
+                        </div>
                         <select id="selectLectura2Oficio" class="select-liturgico">
                             <!-- Rellenado dinámicamente desde db-lecturas.js -->
                         </select>
                     </div>
 
                     <div class="control-box" id="ctrlBoxTeDeumOficio" style="display: none;">
-                        <label for="selectTeDeumOficio">
-                            <span class="material-symbols-outlined" style="font-size:16px;">music_note</span>
-                            Himno Post-2ª Lectura (Solo Domingos)
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirTeDeumOficio" class="chk-omitir-elemento" data-target="teDeumOficio" title="Marcar para no incluir en el oficio">
+                            <label for="selectTeDeumOficio">
+                                <span class="material-symbols-outlined" style="font-size:16px;">music_note</span>
+                                Himno Post-2ª Lectura (Solo Domingos)
+                            </label>
+                        </div>
                         <select id="selectTeDeumOficio" class="select-liturgico">
                             <option value="tedeum_canonico" selected>A ti, oh Dios (Te Deum) [Recomendado]</option>
                             <option value="ninguno">Ninguno (Omitir himno)</option>
@@ -361,19 +433,25 @@
                     </div>
 
                     <div class="control-box" id="ctrlBoxOpcionalOficio" style="display: none;">
-                        <label for="inputOpcionalOficio">
-                            <span class="material-symbols-outlined" style="font-size:16px;">edit_note</span>
-                            Parte Opcional Post-Himno (Solo Domingos)
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirOpcionalOficio" class="chk-omitir-elemento" data-target="opcionalOficio" title="Marcar para no incluir en el oficio">
+                            <label for="inputOpcionalOficio">
+                                <span class="material-symbols-outlined" style="font-size:16px;">edit_note</span>
+                                Parte Opcional Post-Himno (Solo Domingos)
+                            </label>
+                        </div>
                         <textarea id="inputOpcionalOficio" class="select-liturgico" rows="5" style="height: auto; font-family: inherit; font-size: 0.9rem; resize: vertical; line-height: 1.4;"></textarea>
                     </div>
 
                     <!-- Selector de Oración -->
                     <div class="control-box" id="ctrlBoxOracion">
-                        <label for="selectOracion">
-                            <span class="material-symbols-outlined" style="font-size:16px;">church</span>
-                            Oración
-                        </label>
+                        <div class="control-header-row">
+                            <input type="checkbox" id="chkOmitirOracion" class="chk-omitir-elemento" data-target="oracion" title="Marcar para no incluir en el oficio">
+                            <label for="selectOracion">
+                                <span class="material-symbols-outlined" style="font-size:16px;">church</span>
+                                Oración
+                            </label>
+                        </div>
                         <select id="selectOracion" class="select-liturgico">
                             <!-- Rellenado dinámicamente desde db-oracion.js / lh_oracion_cache -->
                         </select>
@@ -415,6 +493,19 @@
                     <div class="liturgia-antifona-fila" id="recuadroAntifonaInvitatorioFin">
                         <span class="liturgia-letra-roja">Ant.</span>
                         <span class="liturgia-texto-antifona" id="txtAntifonaInvitatorioFin">Pueblo del Señor, rebaño que él guía, bendice a tu Dios. Aleluya.</span>
+                    </div>
+                </div>
+
+                <!-- 3A. SECCIÓN INVOCACIÓN INICIAL (HORAS MENORES O CUANDO SE OMITE INVITATORIO) -->
+                <div id="seccionInvocacionInicialPreview" style="display: none; margin-bottom: 16px;">
+                    <div class="liturgia-seccion-invitatorio">INVOCACIÓN INICIAL</div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">V.</span>
+                        <span class="liturgia-texto-verso">Dios mío, ven en mi auxilio</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja">R.</span>
+                        <span class="liturgia-texto-verso" id="previewInvocacionInicialR">Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén. Aleluya.</span>
                     </div>
                 </div>
 
@@ -475,7 +566,7 @@
 
                         <!-- Antífona 1 (Repetición tras el Salmo) -->
                         <div class="liturgia-antifona-fila" id="filaAntifona1Fin">
-                            <span class="liturgia-letra-roja">Ant 1.</span>
+                            <span class="liturgia-letra-roja">Ant.</span>
                             <span class="liturgia-texto-antifona" id="txtAntifona1Fin"></span>
                         </div>
                     </div>
@@ -496,7 +587,7 @@
 
                         <!-- Antífona 2 (Repetición tras el Salmo) -->
                         <div class="liturgia-antifona-fila" id="filaAntifona2Fin">
-                            <span class="liturgia-letra-roja">Ant 2.</span>
+                            <span class="liturgia-letra-roja">Ant.</span>
                             <span class="liturgia-texto-antifona" id="txtAntifona2Fin"></span>
                         </div>
                     </div>
@@ -517,7 +608,7 @@
 
                         <!-- Antífona 3 (Repetición tras el Salmo) -->
                         <div class="liturgia-antifona-fila" id="filaAntifona3Fin">
-                            <span class="liturgia-letra-roja">Ant 3.</span>
+                            <span class="liturgia-letra-roja">Ant.</span>
                             <span class="liturgia-texto-antifona" id="txtAntifona3Fin"></span>
                         </div>
                     </div>

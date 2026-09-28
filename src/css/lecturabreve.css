@@ -240,6 +240,18 @@ body {
     gap: 10px;
 }
 
+.row-campos-4.modo-santos {
+    grid-template-columns: 1fr 1.5fr 1fr 1fr;
+}
+
+.badge.santos,
+.badge-tag.santos,
+.badge-dia.santos {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
 @media (max-width: 600px) {
     .row-campos,
     .row-campos-4 {

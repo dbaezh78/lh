@@ -43,6 +43,7 @@ import { CATALOGO_RESPONSORIOS_SEED, ResponsoriosDB } from '../data/db-responsor
 import { CATALOGO_LECTURAS_SEED as CATALOGO_LECTURAS_OFICIO_SEED, LecturasDB } from '../data/db-lecturas.js';
 import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 import { generarHitosLiturgicos } from './form_etiempo.js';
+import { inicializarSearchableSantoSelect } from './searchable-santo.js';
 
 export const TEXTO_TEDUEM_CANONICO = `A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
 A ti, eterno Padre, te venera toda la creación.
@@ -609,6 +610,55 @@ export function obtenerAntifonasSalmodia3DesdeCatalogo() {
 }
 
 /**
+ * Obtener las antífonas de Cántico Evangélico fusionando:
+ * 1. db-cantico-evangelico.js (semillas y 'lh_antifonas_cantico_cache')
+ * 2. antifonas.html ('lh_antifonas_cache' y db-antifonas.js con tipo evangelico/cantico_evangelico)
+ */
+export function obtenerAntifonasCanticoDesdeCatalogo() {
+    const mapa = new Map();
+
+    // 1. Antífonas de cántico evangélico del módulo base
+    const base = obtenerTodasLasAntifonasCantico();
+    if (Array.isArray(base)) {
+        base.forEach(a => {
+            const txt = (a.texto || '').trim();
+            if (txt) mapa.set(txt, { ...a, texto: txt });
+        });
+    }
+
+    // 2. Antífonas registradas en antifonas.html (localStorage 'lh_antifonas_cache' / CATALOGO_ANTIFONAS_SEED)
+    let listaAnt = [];
+    try {
+        const raw = localStorage.getItem('lh_antifonas_cache');
+        if (raw) listaAnt = JSON.parse(raw);
+    } catch (_) {}
+    if (!Array.isArray(listaAnt) || listaAnt.length === 0) {
+        listaAnt = Array.isArray(CATALOGO_ANTIFONAS_SEED) ? [...CATALOGO_ANTIFONAS_SEED] : [];
+    }
+
+    if (Array.isArray(listaAnt)) {
+        listaAnt.forEach(a => {
+            if (a && (a.tipo === 'evangelico' || a.tipo === 'cantico_evangelico' || (a.id && a.id.includes('evangelico')))) {
+                const txt = (a.texto || '').trim();
+                if (txt) {
+                    mapa.set(txt, {
+                        id: a.id || a.varName || txt,
+                        varName: a.varName || a.id,
+                        texto: txt,
+                        tiempo: a.tiempo,
+                        semana: a.semana,
+                        dia: a.dia,
+                        santo: a.santo
+                    });
+                }
+            }
+        });
+    }
+
+    return Array.from(mapa.values());
+}
+
+/**
  * Garantiza que el texto del salmo se entregue íntegro y completo sin truncamiento (...).
  */
 export function asegurarTextoCompletoSalmo(salmoId, textoExistente, fallbackCanonico = '') {
@@ -1017,6 +1067,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 li.addEventListener('click', (e) => {
                     e.stopPropagation();
                     selectElement.value = opt.value;
+                    const optIdx = Array.from(selectElement.options).findIndex(o => o.value === opt.value);
+                    if (optIdx !== -1) {
+                        selectElement.selectedIndex = optIdx;
+                    }
                     label.textContent = opt.textContent;
 
                     ul.querySelectorAll('.custom-select-opcion').forEach(el => el.classList.remove('seleccionado'));
@@ -1519,10 +1573,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (selLectura._reaplicarFiltro) selLectura._reaplicarFiltro();
     }
 
-    // Cargar y poblar el selector de Antífonas de Cántico Evangélico desde db-cantico-evangelico.js
+    // Cargar y poblar el selector de Antífonas de Cántico Evangélico desde catálogo unificado
     function cargarYPoblarSelectAntifonasCantico(valorSeleccionadoPrevio = null) {
         if (!selAntifonaCantico) return;
-        cacheAntifonasCantico = obtenerTodasLasAntifonasCantico();
+        cacheAntifonasCantico = obtenerAntifonasCanticoDesdeCatalogo();
 
         selAntifonaCantico.innerHTML = '';
         if (cacheAntifonasCantico.length === 0) {
@@ -1758,6 +1812,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             cargarYPoblarSelectAntifonas2(valorAnt2Actual);
             const valorAnt3Actual = selAntifona3 ? selAntifona3.value : null;
             cargarYPoblarSelectAntifonas3(valorAnt3Actual);
+            const valorAntCEActual = selAntifonaCantico ? selAntifonaCantico.value : null;
+            cargarYPoblarSelectAntifonasCantico(valorAntCEActual);
             actualizarInvitatorioPreview(false);
         }
         if (e.key === 'lh_antifonas_cantico_cache') {
@@ -1886,6 +1942,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     selDia.value = 'domingo';
                 }
             }
+            if (selDia._customSantoContainer) {
+                selDia._customSantoContainer.style.display = 'none';
+            }
+            selDia.style.display = 'block';
             return;
         }
 
@@ -1973,6 +2033,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             selDia.value = valorSeleccionadoPrevio;
         } else if (selDia.options.length > 0) {
             selDia.selectedIndex = 0;
+        }
+
+        // Activar buscador interactivo tipo santo.html en selector de santos de frm_salterios
+        inicializarSearchableSantoSelect(selDia, {
+            placeholder: 'Buscar santo...',
+            onChange: () => {
+                actualizarCodigoCombinado(true);
+            }
+        });
+        if (selDia._customSantoContainer) {
+            selDia._customSantoContainer.style.display = 'block';
         }
     }
 
@@ -2122,21 +2193,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 4. SALMO INVITATORIO: TÍTULO EN ROJO Y TEXTO COMPLETO EN TEXTO PLANO NEGRO
         if (selSalmo) {
-            const opt = selSalmo.selectedOptions[0];
-            const salmoId = opt ? opt.value : 'salmo94';
-            const salmoObj = cacheTodosLosSalmos.find(s => s.id === salmoId) || 
-                             (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salmoId) : null);
+            const salmoId = selSalmo.value || (selSalmo.selectedOptions[0] ? selSalmo.selectedOptions[0].value : 'salmo94');
+            const opt = Array.from(selSalmo.options).find(o => o.value === salmoId) || selSalmo.selectedOptions[0];
+            const salmoObj = (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salmoId) : null) ||
+                             cacheTodosLosSalmos.find(s => s.id === salmoId);
 
-            let tituloSalmo = opt ? (opt.getAttribute('data-titulo') || opt.textContent) : 'SALMO 94 - INVITACIÓN A LA ALABANZA DIVINA';
+            let tituloSalmo = opt ? (opt.getAttribute('data-titulo') || opt.textContent) : (salmoObj ? salmoObj.titulo : 'SALMO 94 - INVITACIÓN A LA ALABANZA DIVINA');
             let textoSalmo = salmoObj ? salmoObj.texto : '';
 
             // Fallback si es salmo94
-            if (!textoSalmo && salmoId === 'salmo94') {
+            if (!textoSalmo && (salmoId === 'salmo94' || salmoId === 'invitatorio1')) {
                 textoSalmo = TEXTO_SALMO_94_CANONICO;
             }
 
             if (previewTituloSalmo) {
-                previewTituloSalmo.textContent = tituloSalmo.toUpperCase();
+                previewTituloSalmo.textContent = (tituloSalmo || 'SALMO 94 - INVITACIÓN A LA ALABANZA DIVINA').toUpperCase();
             }
             if (previewTextoSalmo) {
                 previewTextoSalmo.textContent = textoSalmo || '';
@@ -2266,14 +2337,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            const optSalmo1 = selSalmo1.selectedOptions[0];
-            const salmo1Id = optSalmo1 ? optSalmo1.value : (selSalmo1.value || 'salmo62_2_9');
-            const salmo1Obj = cacheTodosLosSalmos.find(s => s.id === salmo1Id) ||
-                              (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salmo1Id) : null);
+            const salmo1Id = selSalmo1.value || (selSalmo1.selectedOptions[0] ? selSalmo1.selectedOptions[0].value : 'salmo62_2_9');
+            const optSalmo1 = Array.from(selSalmo1.options).find(o => o.value === salmo1Id) || selSalmo1.selectedOptions[0];
+            const salmo1Obj = (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salmo1Id) : null) ||
+                              cacheTodosLosSalmos.find(s => s.id === salmo1Id);
 
             let tituloSalmo1 = optSalmo1 ? (optSalmo1.getAttribute('data-titulo') || optSalmo1.textContent) : (salmo1Obj ? salmo1Obj.titulo : 'SALMO 62, 2-9 - EL ALMA SEDIENTA DE DIOS');
             let textoSalmo1 = salmo1Obj ? salmo1Obj.texto : '';
-            textoSalmo1 = asegurarTextoCompletoSalmo(salmo1Id, textoSalmo1, TEXTO_SALMO_62_CANONICO);
+            textoSalmo1 = asegurarTextoCompletoSalmo(salmo1Id, textoSalmo1, salmo1Id === 'salmo62_2_9' ? TEXTO_SALMO_62_CANONICO : '');
 
             if (previewTituloSalmo1) {
                 previewTituloSalmo1.textContent = (tituloSalmo1 || 'SALMO 62, 2-9 - EL ALMA SEDIENTA DE DIOS').toUpperCase();
@@ -2348,14 +2419,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            const optSalmo2 = selSalmo2.selectedOptions[0];
-            const salmo2Id = optSalmo2 ? optSalmo2.value : (selSalmo2.value || 'dn_3_57_88_56');
-            const salmo2Obj = cacheTodosLosSalmos.find(s => s.id === salmo2Id) ||
-                              (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salmo2Id) : null);
+            const salmo2Id = selSalmo2.value || (selSalmo2.selectedOptions[0] ? selSalmo2.selectedOptions[0].value : 'dn_3_57_88_56');
+            const optSalmo2 = Array.from(selSalmo2.options).find(o => o.value === salmo2Id) || selSalmo2.selectedOptions[0];
+            const salmo2Obj = (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salmo2Id) : null) ||
+                              cacheTodosLosSalmos.find(s => s.id === salmo2Id);
 
             let tituloSalmo2 = optSalmo2 ? (optSalmo2.getAttribute('data-titulo') || optSalmo2.textContent) : (salmo2Obj ? salmo2Obj.titulo : 'CÁNTICO: TODA LA CREACIÓN ALABE AL SEÑOR - DN 3, 57-88. 56');
             let textoSalmo2 = salmo2Obj ? salmo2Obj.texto : '';
-            textoSalmo2 = asegurarTextoCompletoSalmo(salmo2Id, textoSalmo2, TEXTO_CANTICO_DANIEL_CANONICO);
+            textoSalmo2 = asegurarTextoCompletoSalmo(salmo2Id, textoSalmo2, salmo2Id === 'dn_3_57_88_56' ? TEXTO_CANTICO_DANIEL_CANONICO : '');
 
             if (previewTituloSalmo2) {
                 previewTituloSalmo2.textContent = (tituloSalmo2 || 'CÁNTICO: TODA LA CREACIÓN ALABE AL SEÑOR - DN 3, 57-88. 56').toUpperCase();
@@ -2430,14 +2501,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            const optSalmo3 = selSalmo3.selectedOptions[0];
-            const salmo3Id = optSalmo3 ? optSalmo3.value : (selSalmo3.value || 'salmo149');
-            const salmo3Obj = cacheTodosLosSalmos.find(s => s.id === salmo3Id) ||
-                              (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salmo3Id) : null);
+            const salmo3Id = selSalmo3.value || (selSalmo3.selectedOptions[0] ? selSalmo3.selectedOptions[0].value : 'salmo149');
+            const optSalmo3 = Array.from(selSalmo3.options).find(o => o.value === salmo3Id) || selSalmo3.selectedOptions[0];
+            const salmo3Obj = (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salmo3Id) : null) ||
+                              cacheTodosLosSalmos.find(s => s.id === salmo3Id);
 
             let tituloSalmo3 = optSalmo3 ? (optSalmo3.getAttribute('data-titulo') || optSalmo3.textContent) : (salmo3Obj ? salmo3Obj.titulo : 'SALMO 149 - ALEGRÍA DE LOS SANTOS');
             let textoSalmo3 = salmo3Obj ? salmo3Obj.texto : '';
-            textoSalmo3 = asegurarTextoCompletoSalmo(salmo3Id, textoSalmo3, TEXTO_SALMO_149_CANONICO);
+            textoSalmo3 = asegurarTextoCompletoSalmo(salmo3Id, textoSalmo3, salmo3Id === 'salmo149' ? TEXTO_SALMO_149_CANONICO : '');
 
             if (previewTituloSalmo3) {
                 previewTituloSalmo3.textContent = (tituloSalmo3 || 'SALMO 149 - ALEGRÍA DE LOS SANTOS').toUpperCase();
@@ -2769,12 +2840,189 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 13. CONCLUSIÓN
         if (previewTituloConclusion) previewTituloConclusion.textContent = 'CONCLUSIÓN';
-        if (esOficio) {
+        const esHoraMenorUOficio = (esOficio || libroVal === 'tercia' || libroVal === 'sexta' || libroVal === 'nona');
+        if (esHoraMenorUOficio) {
             if (previewConclusionV) previewConclusionV.textContent = 'Bendigamos al Señor.';
             if (previewConclusionR) previewConclusionR.textContent = 'Demos gracias a Dios.';
         } else {
             if (previewConclusionV) previewConclusionV.textContent = 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.';
             if (previewConclusionR) previewConclusionR.textContent = 'Amén.';
+        }
+
+        // Aplicar inmediatamente las reglas de visibilidad por omisión
+        actualizarVisibilidadPorOmisiones();
+    }
+
+    // Gestionar la visibilidad de elementos litúrgicos según checkboxes de omisión
+    function actualizarVisibilidadPorOmisiones() {
+        const libroVal = selLibro ? selLibro.value : 'laudes';
+        const esOficio = (libroVal === 'oficio');
+
+        const chkAntInv = document.getElementById('chkOmitirAntifonaInvitatorio');
+        const chkSalmoInv = document.getElementById('chkOmitirSalmoInvitatorio');
+        const chkHimno = document.getElementById('chkOmitirHimno');
+        const chkAnt1 = document.getElementById('chkOmitirAntifona1');
+        const chkSalmo1 = document.getElementById('chkOmitirSalmo1');
+        const chkAnt2 = document.getElementById('chkOmitirAntifona2');
+        const chkSalmo2 = document.getElementById('chkOmitirSalmo2');
+        const chkAnt3 = document.getElementById('chkOmitirAntifona3');
+        const chkSalmo3 = document.getElementById('chkOmitirSalmo3');
+        const chkLB = document.getElementById('chkOmitirLecturaBreve');
+        const chkAntC = document.getElementById('chkOmitirAntifonaCantico');
+        const chkCant = document.getElementById('chkOmitirCantico');
+        const chkPreces = document.getElementById('chkOmitirPreces');
+        const chkRespOf = document.getElementById('chkOmitirResponsorioOficio');
+        const chkLec1Of = document.getElementById('chkOmitirLectura1Oficio');
+        const chkLec2Of = document.getElementById('chkOmitirLectura2Oficio');
+        const chkTeDeumOf = document.getElementById('chkOmitirTeDeumOficio');
+        const chkOpcOf = document.getElementById('chkOmitirOpcionalOficio');
+        const chkOracion = document.getElementById('chkOmitirOracion');
+
+        // Sincronizar clases visuales en cada control-box
+        document.querySelectorAll('.chk-omitir-elemento').forEach(chk => {
+            const cBox = chk.closest('.control-box');
+            if (cBox) {
+                if (chk.checked) {
+                    cBox.classList.add('control-box-deshabilitado');
+                } else {
+                    cBox.classList.remove('control-box-deshabilitado');
+                }
+            }
+        });
+
+        // 1. INVITATORIO vs INVOCACIÓN INICIAL
+        const chkAntInv_E = document.getElementById('chkOmitirAntInv_E');
+        const chkAntInv_S = document.getElementById('chkOmitirAntInv_S');
+        const chkAnt1_E = document.getElementById('chkOmitirAnt1_E');
+        const chkAnt1_S = document.getElementById('chkOmitirAnt1_S');
+        const chkAnt2_E = document.getElementById('chkOmitirAnt2_E');
+        const chkAnt2_S = document.getElementById('chkOmitirAnt2_S');
+        const chkAnt3_E = document.getElementById('chkOmitirAnt3_E');
+        const chkAnt3_S = document.getElementById('chkOmitirAnt3_S');
+        const chkAntCant_E = document.getElementById('chkOmitirAntCant_E');
+        const chkAntCant_S = document.getElementById('chkOmitirAntCant_S');
+
+        const omitirAntInv = Boolean(chkAntInv && chkAntInv.checked);
+        const omitirSalmoInv = Boolean(chkSalmoInv && chkSalmoInv.checked);
+        // El usuario tiene control manual total para omitir invitatorio marcando las casillas
+        const omitirInvitatorioTotal = (omitirAntInv && omitirSalmoInv);
+
+        const recuadroAnt1Inv = document.getElementById('recuadroAntifonaInvitatorio');
+        const recuadroAntFinInv = document.getElementById('recuadroAntifonaInvitatorioFin');
+        const seccionInvocacionInicial = document.getElementById('seccionInvocacionInicialPreview');
+
+        if (esOficio) {
+            if (seccionInvitatorioLaudesPreview) seccionInvitatorioLaudesPreview.style.display = 'none';
+            if (seccionInvocacionInicial) seccionInvocacionInicial.style.display = 'none';
+            if (seccionInvitatorioOficioPreview) {
+                seccionInvitatorioOficioPreview.style.display = omitirInvitatorioTotal ? 'none' : 'block';
+            }
+        } else {
+            if (seccionInvitatorioOficioPreview) seccionInvitatorioOficioPreview.style.display = 'none';
+            if (omitirInvitatorioTotal) {
+                if (seccionInvitatorioLaudesPreview) seccionInvitatorioLaudesPreview.style.display = 'none';
+                if (seccionInvocacionInicial) seccionInvocacionInicial.style.display = 'block';
+            } else {
+                if (seccionInvitatorioLaudesPreview) seccionInvitatorioLaudesPreview.style.display = 'block';
+                if (seccionInvocacionInicial) seccionInvocacionInicial.style.display = 'none';
+
+                const omitirInv_E = omitirAntInv || Boolean(chkAntInv_E && chkAntInv_E.checked);
+                const omitirInv_S = omitirAntInv || Boolean(chkAntInv_S && chkAntInv_S.checked);
+                if (recuadroAnt1Inv) recuadroAnt1Inv.style.display = omitirInv_E ? 'none' : 'flex';
+                if (recuadroAntFinInv) recuadroAntFinInv.style.display = omitirInv_S ? 'none' : 'flex';
+                if (previewTituloSalmo) previewTituloSalmo.style.display = omitirSalmoInv ? 'none' : 'block';
+                if (previewTextoSalmo) previewTextoSalmo.style.display = omitirSalmoInv ? 'none' : 'block';
+            }
+        }
+
+        // 2. HIMNO
+        const omitirHimno = Boolean(chkHimno && chkHimno.checked);
+        if (seccionHimnoPreview) {
+            seccionHimnoPreview.style.display = omitirHimno ? 'none' : 'block';
+        }
+
+        // 3. SALMODIA
+        const filaAnt1 = document.getElementById('filaAntifona1');
+        const filaAnt1Fin = document.getElementById('filaAntifona1Fin');
+        const bloqueSalm1 = document.getElementById('bloqueSalmodia1');
+        const omitirAnt1_E = Boolean((chkAnt1 && chkAnt1.checked) || (chkAnt1_E && chkAnt1_E.checked));
+        const omitirAnt1_S = Boolean((chkAnt1 && chkAnt1.checked) || (chkAnt1_S && chkAnt1_S.checked));
+        if (filaAnt1) filaAnt1.style.display = omitirAnt1_E ? 'none' : 'flex';
+        if (filaAnt1Fin) filaAnt1Fin.style.display = omitirAnt1_S ? 'none' : 'flex';
+        if (chkSalmo1 && bloqueSalm1) {
+            bloqueSalm1.style.display = chkSalmo1.checked ? 'none' : 'block';
+        }
+
+        const filaAnt2 = document.getElementById('filaAntifona2');
+        const filaAnt2Fin = document.getElementById('filaAntifona2Fin');
+        const bloqueSalm2 = document.getElementById('bloqueSalmodia2');
+        const omitirAnt2_E = Boolean((chkAnt2 && chkAnt2.checked) || (chkAnt2_E && chkAnt2_E.checked));
+        const omitirAnt2_S = Boolean((chkAnt2 && chkAnt2.checked) || (chkAnt2_S && chkAnt2_S.checked));
+        if (filaAnt2) filaAnt2.style.display = omitirAnt2_E ? 'none' : 'flex';
+        if (filaAnt2Fin) filaAnt2Fin.style.display = omitirAnt2_S ? 'none' : 'flex';
+        if (chkSalmo2 && bloqueSalm2) {
+            bloqueSalm2.style.display = chkSalmo2.checked ? 'none' : 'block';
+        }
+
+        const filaAnt3 = document.getElementById('filaAntifona3');
+        const filaAnt3Fin = document.getElementById('filaAntifona3Fin');
+        const bloqueSalm3 = document.getElementById('bloqueSalmodia3');
+        const omitirAnt3_E = Boolean((chkAnt3 && chkAnt3.checked) || (chkAnt3_E && chkAnt3_E.checked));
+        const omitirAnt3_S = Boolean((chkAnt3 && chkAnt3.checked) || (chkAnt3_S && chkAnt3_S.checked));
+        if (filaAnt3) filaAnt3.style.display = omitirAnt3_E ? 'none' : 'flex';
+        if (filaAnt3Fin) filaAnt3Fin.style.display = omitirAnt3_S ? 'none' : 'flex';
+        if (chkSalmo3 && bloqueSalm3) {
+            bloqueSalm3.style.display = chkSalmo3.checked ? 'none' : 'block';
+        }
+
+        const todoSalmodiaOmitida = Boolean(chkSalmo1?.checked && chkSalmo2?.checked && chkSalmo3?.checked);
+        if (seccionSalmodiaPreview) {
+            seccionSalmodiaPreview.style.display = todoSalmodiaOmitida ? 'none' : 'block';
+        }
+
+        // 4. LECTURAS Y RESPONSORIOS OFICIO
+        if (esOficio) {
+            if (seccionResponsorioOficioPreview) {
+                seccionResponsorioOficioPreview.style.display = (chkRespOf && chkRespOf.checked) ? 'none' : 'block';
+            }
+            if (seccionLectura1OficioPreview) {
+                seccionLectura1OficioPreview.style.display = (chkLec1Of && chkLec1Of.checked) ? 'none' : 'block';
+            }
+            if (seccionLectura2OficioPreview) {
+                seccionLectura2OficioPreview.style.display = (chkLec2Of && chkLec2Of.checked) ? 'none' : 'block';
+            }
+            if (seccionTeDeumPreview && chkTeDeumOf && chkTeDeumOf.checked) {
+                seccionTeDeumPreview.style.display = 'none';
+            }
+            if (seccionOpcionalOficioPreview && chkOpcOf && chkOpcOf.checked) {
+                seccionOpcionalOficioPreview.style.display = 'none';
+            }
+        }
+
+        // 5. LECTURA BREVE
+        if (!esOficio && seccionLecturaBrevePreview) {
+            seccionLecturaBrevePreview.style.display = (chkLB && chkLB.checked) ? 'none' : 'block';
+        }
+
+        // 6. CÁNTICO EVANGÉLICO
+        const filaAntCant = document.getElementById('filaAntifonaCantico');
+        const filaAntCantFin = document.getElementById('filaAntifonaCanticoFin');
+        const omitirAntCant_E = Boolean((chkAntC && chkAntC.checked) || (chkAntCant_E && chkAntCant_E.checked));
+        const omitirAntCant_S = Boolean((chkAntC && chkAntC.checked) || (chkAntCant_S && chkAntCant_S.checked));
+        if (filaAntCant) filaAntCant.style.display = omitirAntCant_E ? 'none' : 'flex';
+        if (filaAntCantFin) filaAntCantFin.style.display = omitirAntCant_S ? 'none' : 'flex';
+        if (!esOficio && seccionCanticoEvangelicoPreview) {
+            seccionCanticoEvangelicoPreview.style.display = (chkCant && chkCant.checked) ? 'none' : 'block';
+        }
+
+        // 7. PRECES
+        if (!esOficio && seccionPrecesPreview) {
+            seccionPrecesPreview.style.display = (chkPreces && chkPreces.checked) ? 'none' : 'block';
+        }
+
+        // 8. ORACIÓN
+        if (seccionOracionPreview) {
+            seccionOracionPreview.style.display = (chkOracion && chkOracion.checked) ? 'none' : 'block';
         }
     }
 
@@ -3048,7 +3296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             previewTituloSalmo1.textContent = salmo1Titulo.toUpperCase();
         }
 
-        salmo1Texto = asegurarTextoCompletoSalmo(salmo1Id, salmo1Texto, TEXTO_SALMO_62_CANONICO);
+        salmo1Texto = asegurarTextoCompletoSalmo(salmo1Id, salmo1Texto, salmo1Id === 'salmo62_2_9' ? TEXTO_SALMO_62_CANONICO : '');
 
         if (previewTextoSalmo1) {
             previewTextoSalmo1.textContent = salmo1Texto || '';
@@ -3095,7 +3343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             previewTituloSalmo2.textContent = salmo2Titulo.toUpperCase();
         }
 
-        salmo2Texto = asegurarTextoCompletoSalmo(salmo2Id, salmo2Texto, TEXTO_CANTICO_DANIEL_CANONICO);
+        salmo2Texto = asegurarTextoCompletoSalmo(salmo2Id, salmo2Texto, salmo2Id === 'dn_3_57_88_56' ? TEXTO_CANTICO_DANIEL_CANONICO : '');
 
         if (previewTextoSalmo2) {
             previewTextoSalmo2.textContent = salmo2Texto || '';
@@ -3142,7 +3390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             previewTituloSalmo3.textContent = salmo3Titulo.toUpperCase();
         }
 
-        salmo3Texto = asegurarTextoCompletoSalmo(salmo3Id, salmo3Texto, TEXTO_SALMO_149_CANONICO);
+        salmo3Texto = asegurarTextoCompletoSalmo(salmo3Id, salmo3Texto, salmo3Id === 'salmo149' ? TEXTO_SALMO_149_CANONICO : '');
 
         if (previewTextoSalmo3) {
             previewTextoSalmo3.textContent = salmo3Texto || '';
@@ -3472,6 +3720,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             actualizarHimnoPostLecturasPreview();
         }
+
+        // Restaurar estado de los checkboxes de omisión
+        const omisionesGuardadas = datos.omisiones || {};
+        document.querySelectorAll('.chk-omitir-elemento, .chk-omitir-es').forEach(chk => {
+            const target = chk.getAttribute('data-target');
+            if (target) {
+                chk.checked = Boolean(omisionesGuardadas[target]);
+            }
+        });
+        actualizarVisibilidadPorOmisiones();
 
         // Sincronizar todos los selectores personalizados compactos con los datos restaurados
         document.querySelectorAll('.select-liturgico').forEach(sel => {
@@ -3877,6 +4135,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             texto: (inputOpcionalOficio ? inputOpcionalOficio.value.trim() : '')
         } : null;
 
+        // Recolectar mapa de omisiones activas
+        const omisiones = {};
+        document.querySelectorAll('.chk-omitir-elemento, .chk-omitir-es').forEach(chk => {
+            const target = chk.getAttribute('data-target');
+            if (target && chk.checked) {
+                omisiones[target] = true;
+            }
+        });
+
         const payloadBase = {
             id: idCodigo,
             codigo: idCodigo,
@@ -3897,7 +4164,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             lecturasOficio: lecturasOficio,
             himnoTeDeum: himnoTeDeum,
             seccionOpcional: seccionOpcional,
+            omisiones: omisiones,
             invitatorio: {
+                activo: !omisiones.antifonaInvitatorio || !omisiones.salmoInvitatorio,
                 antifonaId: antifonaId,
                 antifonaTexto: antifonaTexto,
                 salmoId: salmoId,
@@ -4012,41 +4281,114 @@ document.addEventListener('DOMContentLoaded', async () => {
                         localStorage.setItem(`lh_salterio_${idCelebracion}`, JSON.stringify(consolidado));
                     } catch (_) {}
                 }
+
+                // Asignar el código trabajado al objeto del santo correspondiente en el catálogo
+                try {
+                    let catalogoSantos = [];
+                    const rawCat = localStorage.getItem('lh_catalogo_nombres_santos');
+                    if (rawCat) catalogoSantos = JSON.parse(rawCat);
+                    if (!Array.isArray(catalogoSantos) || catalogoSantos.length === 0) {
+                        catalogoSantos = obtenerCatalogoSantos();
+                    }
+                    const optDiaSel = selDia ? selDia.selectedOptions[0] : null;
+                    const nombreSantoSel = optDiaSel ? (optDiaSel.getAttribute('data-nombre') || optDiaSel.textContent) : '';
+                    const normBusqueda = normalizarTextoBusqueda(nombreSantoSel);
+
+                    let santoEncontrado = null;
+                    if (Array.isArray(catalogoSantos)) {
+                        santoEncontrado = catalogoSantos.find(s => {
+                            if (!s) return false;
+                            if (generarIdSanto(s) === idCelebracion) return true;
+                            if (nombreSantoSel && normalizarTextoBusqueda(s.nombre) === normBusqueda) return true;
+                            return false;
+                        });
+                    }
+
+                    if (santoEncontrado) {
+                        if (!santoEncontrado.codigosLiturgia) santoEncontrado.codigosLiturgia = {};
+                        santoEncontrado.codigosLiturgia[libroVal] = {
+                            libro: libroVal,
+                            nombreLibro: infoLibro.nombre,
+                            codigo: idCodigo,
+                            actualizadoEn: new Date().toISOString()
+                        };
+                        localStorage.setItem('lh_catalogo_nombres_santos', JSON.stringify(catalogoSantos));
+
+                        // Guardar índice directo por idCelebracion y por slug del nombre
+                        localStorage.setItem(`lh_santo_codigos_${idCelebracion}`, JSON.stringify(santoEncontrado.codigosLiturgia));
+                        if (santoEncontrado.nombre) {
+                            localStorage.setItem(`lh_santo_codigos_${generarSlugSanto(santoEncontrado.nombre)}`, JSON.stringify(santoEncontrado.codigosLiturgia));
+                        }
+
+                        // Guardar en IndexedDB
+                        if (window.NombreSantoAPI && typeof window.NombreSantoAPI.guardarEnIndexedDB === 'function') {
+                            window.NombreSantoAPI.guardarEnIndexedDB(catalogoSantos);
+                        }
+
+                        // Sincronizar en Firestore bajo la colección santos
+                        if (window.firebaseAPI && window.firebaseAPI.db) {
+                            import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js").then(({ doc, setDoc }) => {
+                                const docSantoRef = doc(window.firebaseAPI.db, "santos", santoEncontrado.nombre);
+                                setDoc(docSantoRef, {
+                                    codigosLiturgia: santoEncontrado.codigosLiturgia,
+                                    actualizadoEn: new Date().toISOString()
+                                }, { merge: true }).catch(err => console.warn("Firestore update santo err:", err));
+                            }).catch(() => {});
+                        }
+                    }
+                } catch (eSanto) {
+                    console.warn("Aviso al vincular código con el santo:", eSanto);
+                }
             }
         } catch (e) {
             console.warn("Aviso al guardar copia local:", e);
         }
 
-        // 2. Guardado en Firestore
+        // 2. Guardado en Firestore inmediato
         let exitoFirebase = false;
         try {
-            if (window.firebaseAPI && window.firebaseAPI.db) {
-                const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-                const docRef = doc(window.firebaseAPI.db, "salterios", idCodigo);
-                await setDoc(docRef, payload, { merge: true });
-                const idCelebracion = selDia ? selDia.value : '';
-                if (tiempoVal === 'santos' && idCelebracion && idCelebracion !== idCodigo) {
-                    const docBaseRef = doc(window.firebaseAPI.db, "salterios", idCelebracion);
-                    await setDoc(docBaseRef, {
-                        ...payload,
-                        horas: {
-                            [libroVal]: payload
-                        }
-                    }, { merge: true });
+            if (window.firebaseAPI) {
+                if (typeof window.firebaseAPI.asegurarSesionAutenticada === 'function') {
+                    await window.firebaseAPI.asegurarSesionAutenticada();
                 }
-                exitoFirebase = true;
+
+                if (window.firebaseAPI.db) {
+                    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+                    const docRef = doc(window.firebaseAPI.db, "salterios", idCodigo);
+                    await setDoc(docRef, payload, { merge: true });
+
+                    const idCelebracion = selDia ? selDia.value : '';
+                    if (tiempoVal === 'santos' && idCelebracion && idCelebracion !== idCodigo) {
+                        const docBaseRef = doc(window.firebaseAPI.db, "salterios", idCelebracion);
+                        await setDoc(docBaseRef, {
+                            ...payload,
+                            horas: {
+                                [libroVal]: payload
+                            }
+                        }, { merge: true });
+                    }
+                    exitoFirebase = true;
+                    console.log(`☁️ [Firebase] ¡Subido exitosamente a la nube en Firestore! Doc: ${idCodigo}`);
+                }
             }
         } catch (fbErr) {
-            console.warn("Error al guardar en Firebase:", fbErr);
+            console.error("❌ [Firebase] Error al subir a Firebase Firestore:", fbErr);
+            alert("Aviso: Se guardó en la memoria local del navegador, pero ocurrió un detalle al subir a Firebase: " + (fbErr.message || fbErr));
         }
 
         btnGuardar.disabled = false;
-        btnGuardar.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">cloud_upload</span> <span>¡Guardado exitosamente!</span> <span class="material-symbols-outlined" style="font-size:18px;">save</span>`;
+        if (exitoFirebase) {
+            btnGuardar.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">cloud_done</span> <span>¡Subido a Firebase!</span> <span class="material-symbols-outlined" style="font-size:18px;">check</span>`;
+            btnGuardar.style.background = 'linear-gradient(135deg, #00c853 0%, #009624 100%)';
+        } else {
+            btnGuardar.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">save</span> <span>Guardado local</span>`;
+        }
         actualizarBadgeEstado(true);
 
         setTimeout(() => {
             btnGuardar.innerHTML = txtOriginal;
-        }, 2200);
+            btnGuardar.style.background = '';
+        }, 2500);
     }
 
     // Copiar código al portapapeles
@@ -4078,6 +4420,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnGuardar) {
         btnGuardar.addEventListener('click', guardarEnFirebase);
     }
+
+    // Eventos de los checkboxes de omisión de elementos litúrgicos
+    document.querySelectorAll('.chk-omitir-elemento, .chk-omitir-es').forEach(chk => {
+        chk.addEventListener('change', () => {
+            actualizarVisibilidadPorOmisiones();
+            actualizarBadgeEstado(false);
+        });
+    });
 
     // Eventos interactivos en los selectores del Invitatorio
     if (selAntifona) {

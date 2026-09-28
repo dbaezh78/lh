@@ -671,6 +671,7 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
         lecturasOficio: d.lecturasOficio || base.lecturasOficio || null,
         himnoTeDeum: d.himnoTeDeum || base.himnoTeDeum || null,
         seccionOpcional: d.seccionOpcional || base.seccionOpcional || null,
+        omisiones: d.omisiones || raw?.omisiones || {},
         lecturaBreve: lecturaBreveNorm,
         canticoEvangelico: canticoEvangelicoNorm,
         preces: precesNorm,

@@ -1,5 +1,17 @@
 export const catalogoSantosAnual = [
     {
+        "fechaFestividad": "1/1",
+        "nombre": "Santa María, Madre de Dios",
+        "nacimiento": "—",
+        "muerte": "—",
+        "pais": "Tierra Santa",
+        "ciudad": "Nazaret / Jerusalén",
+        "realidad": "Solemnidad Mariana / Maternidad Divina de la Santísima Virgen",
+        "historia": "Celebración de la Santísima Virgen María bajo el título dogmático de 'Theotokos' (Madre de Dios), proclamado solemnemente en el Concilio Ecuménico de Éfeso en el año 431.",
+        "detalle": "Octava de la Natividad del Señor y Jornada Mundial de la Paz.",
+        "hijos": []
+    },
+    {
         "fechaFestividad": "11/1",
         "nombre": "El Bautismo del Señor",
         "nacimiento": "—",

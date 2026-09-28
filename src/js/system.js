@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const textareaCodigo = document.getElementById("textarea-codigo-orden");
     const toastEl = document.getElementById("toast-notificacion");
 
-    const appVer = window.APP_VERSION || "1.0.03";
+    const appVer = window.APP_VERSION || "1.0.04";
     if (statVersion) statVersion.textContent = `v${appVer}`;
 
     let listaArchivos = [];

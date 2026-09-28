@@ -206,6 +206,10 @@ body {
     align-items: end;
 }
 
+.form-grid-3.modo-santos {
+    grid-template-columns: 1fr 1fr;
+}
+
 .form-grupo {
     margin-bottom: 14px;
 }
@@ -382,6 +386,7 @@ body {
     margin-bottom: 4px;
     color: #000000;
     font-family: Verdana, Arial, sans-serif;
+    white-space: pre-line;
 }
 
 .preview-desc-lectura {

@@ -8,14 +8,281 @@
  */
 
 import { CATALOGO_ORACION_SEED, OracionDB } from '../data/db-oracion.js';
+import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+import { inicializarSearchableSantoSelect } from './searchable-santo.js';
 
 let listaOraciones = [];
 let editandoId = null;
 
+// Obtener catálogo completo de santos
+function obtenerCatalogoSantos() {
+    try {
+        const raw = localStorage.getItem('lh_catalogo_nombres_santos');
+        if (raw) {
+            const list = JSON.parse(raw);
+            if (Array.isArray(list) && list.length > 0) return list;
+        }
+    } catch (_) {}
+    return (typeof catalogoSantosAnual !== 'undefined' && Array.isArray(catalogoSantosAnual)) ? catalogoSantosAnual : [];
+}
+
+// Extrae día y mes de la fecha de celebración de un santo
+function extraerDiaMesCelebracion(santo) {
+    if (!santo) return { dia: '01', mes: '01', texto: '01/01' };
+    const raw = (santo.celebracion || santo.fechaFestividad || '').trim();
+    const mIso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (mIso) {
+        const dia = String(mIso[3]).padStart(2, '0');
+        const mes = String(mIso[2]).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    const mSlash = raw.match(/^(\d{1,2})\/(\d{1,2})/);
+    if (mSlash) {
+        const dia = String(mSlash[1]).padStart(2, '0');
+        const mes = String(mSlash[2]).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    if (santo.dia && santo.mes) {
+        const dia = String(santo.dia).padStart(2, '0');
+        const mes = String(santo.mes).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    return { dia: '01', mes: '01', texto: raw || '—' };
+}
+
+// Genera slug normalizado para ID de santo
+function generarSlugSanto(nombre) {
+    if (!nombre) return '';
+    return nombre
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+
+// Genera el ID canónico de santo
+function generarIdSanto(santo) {
+    if (!santo) return 'sa0101santamaria';
+    const { dia, mes } = extraerDiaMesCelebracion(santo);
+    const slug = generarSlugSanto(santo.nombre);
+    return `sa${dia}${mes}${slug}`;
+}
+
+// Actualiza fecha de celebración del santo en el catálogo (localStorage y Firestore)
+async function actualizarFechaCelebracionSanto(idOSlug, nuevoDiaMes) {
+    if (!nuevoDiaMes || !idOSlug) return;
+    try {
+        const raw = localStorage.getItem('lh_catalogo_nombres_santos');
+        let list = raw ? JSON.parse(raw) : (typeof catalogoSantosAnual !== 'undefined' ? [...catalogoSantosAnual] : []);
+        const idx = list.findIndex(s => generarIdSanto(s) === idOSlug || generarSlugSanto(s.nombre) === generarSlugSanto(idOSlug));
+        if (idx >= 0) {
+            list[idx].celebracion = nuevoDiaMes;
+            list[idx].fechaFestividad = nuevoDiaMes;
+            localStorage.setItem('lh_catalogo_nombres_santos', JSON.stringify(list));
+
+            // Guardar también en IndexedDB si existe
+            try {
+                const req = indexedDB.open('LH_Santos_DB', 2);
+                req.onsuccess = (e) => {
+                    const db = e.target.result;
+                    if (db.objectStoreNames.contains('catalogo')) {
+                        const tx = db.transaction('catalogo', 'readwrite');
+                        tx.objectStore('catalogo').put(list, 'santos');
+                    }
+                };
+            } catch (_) {}
+
+            // Sincronizar en Firestore si está conectado
+            if (window.firebaseAPI && window.firebaseAPI.guardarUnSantoFirestore) {
+                window.firebaseAPI.guardarUnSantoFirestore(list[idx]).catch(() => {});
+            }
+            console.log(`📅 Fecha de celebración del santo actualizada a ${nuevoDiaMes}`);
+        }
+    } catch (e) {
+        console.warn('Error al actualizar fecha de celebracion del santo:', e);
+    }
+}
+
+// Actualiza las opciones del selector de Semanas / Santos y Día / Celebración
+function actualizarModoTiempo(valorPrevioSemana = null) {
+    const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+    const selSemana = document.getElementById('form-semana');
+    const lblSemana = document.getElementById('lbl-form-semana');
+    const selDia = document.getElementById('form-dia');
+    const inputFechaCeleb = document.getElementById('form-fecha-celebracion');
+    const lblDia = document.getElementById('lbl-form-dia');
+
+    if (!selSemana) return;
+
+    if (tiempo === 'santos') {
+        if (lblSemana) lblSemana.textContent = 'Santo / Celebración:';
+        if (lblDia) lblDia.textContent = 'Fecha Celebración (dd/mm):';
+        if (selDia) selDia.style.display = 'none';
+        if (inputFechaCeleb) inputFechaCeleb.style.display = 'block';
+
+        const santos = obtenerCatalogoSantos();
+        const listaOrdenada = [...santos].sort((a, b) => {
+            return (a.nombre || '').localeCompare(b.nombre || '', 'es', { sensitivity: 'base' });
+        });
+
+        selSemana.innerHTML = '';
+        listaOrdenada.forEach(s => {
+            const idSanto = generarIdSanto(s);
+            const { texto: fechaTexto } = extraerDiaMesCelebracion(s);
+            const opt = document.createElement('option');
+            opt.value = idSanto;
+            opt.textContent = `${s.nombre} (${fechaTexto})`;
+            opt.setAttribute('data-nombre', s.nombre);
+            opt.setAttribute('data-fecha', fechaTexto);
+            selSemana.appendChild(opt);
+        });
+
+        if (valorPrevioSemana && Array.from(selSemana.options).some(o => o.value === valorPrevioSemana)) {
+            selSemana.value = valorPrevioSemana;
+        } else if (selSemana.options.length > 0) {
+            selSemana.selectedIndex = 0;
+        }
+
+        // Cargar fecha en el input de fecha de celebración
+        const optSel = selSemana.selectedOptions[0];
+        if (optSel && inputFechaCeleb) {
+            inputFechaCeleb.value = optSel.getAttribute('data-fecha') || '';
+        }
+
+        // Activar buscador interactivo tipo santo.html
+        inicializarSearchableSantoSelect(selSemana, {
+            placeholder: 'Buscar santo...',
+            onChange: (val, opt) => {
+                if (inputFechaCeleb && opt) {
+                    inputFechaCeleb.value = opt.getAttribute('data-fecha') || '';
+                }
+                manejarCambioParametros();
+            }
+        });
+        if (selSemana._customSantoContainer) {
+            selSemana._customSantoContainer.style.display = 'block';
+        }
+    } else {
+        if (lblSemana) lblSemana.textContent = 'Semana:';
+        if (lblDia) lblDia.textContent = 'Día de la Semana:';
+        if (selDia) selDia.style.display = 'block';
+        if (inputFechaCeleb) inputFechaCeleb.style.display = 'none';
+
+        if (selSemana._customSantoContainer) {
+            selSemana._customSantoContainer.style.display = 'none';
+        }
+        selSemana.style.display = 'block';
+
+        let maxSemanas = 34;
+        if (tiempo === 'adviento') maxSemanas = 4;
+        else if (tiempo === 'navidad') maxSemanas = 2;
+        else if (tiempo === 'cuaresma') maxSemanas = 7;
+        else if (tiempo === 'pascua') maxSemanas = 7;
+
+        selSemana.innerHTML = '';
+        for (let i = 1; i <= maxSemanas; i++) {
+            const opt = document.createElement('option');
+            opt.value = String(i);
+            opt.textContent = `Semana ${i}`;
+            selSemana.appendChild(opt);
+        }
+
+        if (valorPrevioSemana && Array.from(selSemana.options).some(o => o.value === String(valorPrevioSemana))) {
+            selSemana.value = String(valorPrevioSemana);
+        } else {
+            selSemana.selectedIndex = 0;
+        }
+    }
+}
+
+// Buscar oración existente en memoria/catálogo
+function buscarOracionExistente(autoId, tiempo, semana, dia, libro) {
+    if (!listaOraciones || listaOraciones.length === 0) return null;
+    const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+
+    // 1. Coincidencia exacta por ID generado
+    if (autoId) {
+        const porId = listaOraciones.find(o => o.id === autoId);
+        if (porId) return porId;
+    }
+
+    if (tiempo === 'santos') {
+        const idSantoNorm = norm(semana);
+        return listaOraciones.find(o => {
+            if (o.tiempo !== 'santos' && !(o.id && o.id.startsWith('sa'))) return false;
+            const libroMatch = (o.libro === libro) || (libro === 'laudes' && !o.libro);
+            const oIdNorm = norm(o.id);
+            const oSemNorm = norm(o.semana);
+            const oNomNorm = norm(o.santoNombre);
+            const santoMatch = idSantoNorm && (
+                oIdNorm.includes(idSantoNorm) || idSantoNorm.includes(oIdNorm) ||
+                oSemNorm.includes(idSantoNorm) || idSantoNorm.includes(oSemNorm) ||
+                (oNomNorm && (oNomNorm.includes(idSantoNorm) || idSantoNorm.includes(oNomNorm)))
+            );
+            return libroMatch && santoMatch;
+        });
+    } else {
+        return listaOraciones.find(o => {
+            if (o.tiempo !== tiempo) return false;
+            const semMatch = String(o.semana) === String(semana);
+            const diaMatch = norm(o.dia) === norm(dia);
+            const libroMatch = o.libro === libro;
+            return semMatch && diaMatch && libroMatch;
+        });
+    }
+}
+
+// Coordinar cambio de parámetros (Santo, Tiempo, Semana, Día, Libro)
+function manejarCambioParametros() {
+    const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+    const selSemana = document.getElementById('form-semana');
+    const semana = selSemana?.value || '1';
+    const dia = document.getElementById('form-dia')?.value || 'lunes';
+    const libro = document.getElementById('form-libro')?.value || 'laudes';
+
+    const autoId = generarIdAutomatico();
+    const oracionExistente = buscarOracionExistente(autoId, tiempo, semana, dia, libro);
+
+    const txtId = document.getElementById('form-id');
+    const txtTitulo = document.getElementById('form-titulo');
+    const txtOremos = document.getElementById('form-oremos');
+    const txtTexto = document.getElementById('form-texto');
+    const txtConcl = document.getElementById('form-conclusion');
+    const btnGuardar = document.getElementById('btn-guardar-texto');
+    const tituloForm = document.getElementById('titulo-formulario');
+
+    if (oracionExistente) {
+        editandoId = oracionExistente.id;
+        if (txtId) txtId.value = oracionExistente.id || autoId;
+        if (txtTitulo) txtTitulo.value = oracionExistente.titulo || '';
+        if (txtOremos) txtOremos.value = oracionExistente.oremos || '';
+        if (txtTexto) txtTexto.value = oracionExistente.texto || '';
+        if (txtConcl) txtConcl.value = oracionExistente.conclusion || '';
+
+        if (btnGuardar) btnGuardar.textContent = 'Actualizar Oración';
+        if (tituloForm) tituloForm.innerHTML = `<span class="material-symbols-outlined">edit_note</span> Editando: ${oracionExistente.id}`;
+        mostrarBannerEstado(`📖 Oración existente cargada (${oracionExistente.libro || libro}).`, 'info');
+    } else {
+        editandoId = null;
+        if (txtId) txtId.value = autoId;
+        actualizarTituloSugerido();
+        if (txtOremos) txtOremos.value = '';
+        if (txtTexto) txtTexto.value = '';
+        if (txtConcl) txtConcl.value = '';
+
+        if (btnGuardar) btnGuardar.textContent = 'Guardar Oración';
+        if (tituloForm) tituloForm.innerHTML = `<span class="material-symbols-outlined">add_circle</span> Nueva Oración`;
+    }
+    actualizarLivePreview();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    actualizarModoTiempo();
     configurarEventos();
     await cargarDatos();
     renderizarLista();
+    manejarCambioParametros();
     actualizarLivePreview();
 });
 
@@ -83,6 +350,61 @@ async function cargarDatos() {
     mostrarBannerEstado('No hay oraciones registradas. Agrega una nueva con el formulario.', 'alerta');
 }
 
+// Generar ID automático de oración
+function generarIdAutomatico() {
+    const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+    const selSemana = document.getElementById('form-semana');
+    const semana = selSemana?.value || '1';
+    const selDia = document.getElementById('form-dia');
+    const dia = selDia?.value || 'lunes';
+    const libro = document.getElementById('form-libro')?.value || 'laudes';
+    const inputFechaCeleb = document.getElementById('form-fecha-celebracion');
+    const mapaHoras = {
+        oficio: 'OF',
+        laudes: 'LA',
+        tercia: 'TE',
+        sexta: 'SE',
+        nona: 'NO',
+        visperas: 'VI',
+        completas: 'CO'
+    };
+    const horaSufijo = mapaHoras[libro] || 'LA';
+
+    if (tiempo === 'santos') {
+        const idSanto = semana; // en modo santos, el value de semana contiene idSanto (ej: sa2801santotomasdeaquino)
+        // Extraer fecha del input si fue editada
+        const fechaVal = inputFechaCeleb?.value?.trim() || '';
+        let canonico = idSanto;
+        if (/^\d{1,2}\/\d{1,2}$/.test(fechaVal)) {
+            const [d, m] = fechaVal.split('/');
+            const dd = d.padStart(2, '0');
+            const mm = m.padStart(2, '0');
+            // Reemplazar la fecha de idSanto sa{dd}{mm}{slug}
+            canonico = idSanto.replace(/^sa\d{4}/, `sa${dd}${mm}`);
+        }
+        return `${canonico}${horaSufijo.toLowerCase()}_oracion`;
+    }
+
+    const mapaDias = {
+        domingo: 'do',
+        lunes: 'lu',
+        martes: 'ma',
+        miercoles: 'mi',
+        jueves: 'ju',
+        viernes: 'vi',
+        sabado: 'sa'
+    };
+    const diaAbrev = mapaDias[dia] || 'lu';
+
+    let prefix = 'to';
+    if (tiempo === 'adviento') prefix = 'adv';
+    else if (tiempo === 'navidad') prefix = 'nav';
+    else if (tiempo === 'cuaresma') prefix = 'cua';
+    else if (tiempo === 'pascua') prefix = 'pas';
+
+    return `${prefix}s${semana}${horaSufijo.toLowerCase()}${diaAbrev}`;
+}
+
 // Configurar listeners de la interfaz
 function configurarEventos() {
     // Botón Restaurar Catálogo Base
@@ -110,6 +432,38 @@ function configurarEventos() {
                 input.addEventListener('input', actualizarLivePreview);
             }
         });
+
+        // Cambio en selector de tiempo litúrgico
+        document.getElementById('form-tiempo')?.addEventListener('change', () => {
+            actualizarModoTiempo();
+            manejarCambioParametros();
+        });
+
+        // Cambio en selector de semana / santo
+        document.getElementById('form-semana')?.addEventListener('change', () => {
+            const tiempo = document.getElementById('form-tiempo')?.value;
+            if (tiempo === 'santos') {
+                const sel = document.getElementById('form-semana');
+                const opt = sel?.selectedOptions[0];
+                const inputFecha = document.getElementById('form-fecha-celebracion');
+                if (opt && inputFecha) {
+                    inputFecha.value = opt.getAttribute('data-fecha') || '';
+                }
+            }
+            manejarCambioParametros();
+        });
+
+        // Cambio en fecha de celebración
+        document.getElementById('form-fecha-celebracion')?.addEventListener('input', () => {
+            manejarCambioParametros();
+        });
+
+        // Cambio en día y libro
+        ['form-dia', 'form-libro'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', () => {
+                manejarCambioParametros();
+            });
+        });
     }
 
     // Botón Limpiar Formulario
@@ -125,6 +479,28 @@ function configurarEventos() {
     ['filtro-busqueda', 'filtro-tiempo', 'filtro-dia', 'filtro-libro'].forEach(id => {
         document.getElementById(id)?.addEventListener('input', renderizarLista);
     });
+}
+
+function actualizarTituloSugerido() {
+    const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+    const selSemana = document.getElementById('form-semana');
+    const semana = selSemana?.value || '1';
+    const libro = document.getElementById('form-libro')?.value || 'laudes';
+    const libroCap = libro.charAt(0).toUpperCase() + libro.slice(1);
+    const inpTitulo = document.getElementById('form-titulo');
+    if (!inpTitulo) return;
+
+    if (tiempo === 'santos') {
+        const opt = selSemana?.selectedOptions[0];
+        const nombreSanto = opt?.getAttribute('data-nombre') || 'Santo';
+        const fecha = document.getElementById('form-fecha-celebracion')?.value || opt?.getAttribute('data-fecha') || '';
+        inpTitulo.value = `Oración - ${nombreSanto}${fecha ? ' (' + fecha + ')' : ''} (${libroCap})`;
+    } else {
+        const dia = document.getElementById('form-dia')?.value || 'lunes';
+        const diaCap = dia.charAt(0).toUpperCase() + dia.slice(1);
+        const tiempoCap = tiempo.charAt(0).toUpperCase() + tiempo.slice(1);
+        inpTitulo.value = `Oración - Tiempo ${tiempoCap} - Semana ${semana} - ${diaCap} (${libroCap})`;
+    }
 }
 
 // Actualizar la vista previa en el pergamino litúrgico
@@ -171,7 +547,8 @@ function renderizarLista() {
             const tit = (o.titulo || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const txt = (o.texto || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const oId = (o.id || '').toLowerCase();
-            return tit.includes(fTexto) || txt.includes(fTexto) || oId.includes(fTexto);
+            const sNom = (o.santoNombre || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return tit.includes(fTexto) || txt.includes(fTexto) || oId.includes(fTexto) || sNom.includes(fTexto);
         }
         return true;
     });
@@ -185,14 +562,24 @@ function renderizarLista() {
     }
 
     contenedor.innerHTML = filtradas.map(o => {
-        const diaCap = (o.dia || '').charAt(0).toUpperCase() + (o.dia || '').slice(1);
+        const esSanto = o.tiempo === 'santos' || (o.id && o.id.startsWith('sa'));
+        let celdaDia;
+        if (esSanto) {
+            const etiqueta = o.santoNombre || o.titulo || o.id;
+            const fechaTxt = o.fechaCelebracion ? ` (${o.fechaCelebracion})` : '';
+            celdaDia = `<span class="badge-tag santos">😇 ${etiqueta}${fechaTxt}</span>`;
+        } else {
+            const diaCap = (o.dia || '').charAt(0).toUpperCase() + (o.dia || '').slice(1);
+            celdaDia = `${diaCap} (Sem. ${o.semana || '1'})`;
+        }
+
         const snippet = (o.texto || '').replace(/\n/g, ' ').slice(0, 100) + '...';
         return `
             <tr>
                 <td class="td-id">${o.id}</td>
                 <td class="td-titulo">${o.titulo || o.id}</td>
                 <td><span class="badge-tag ${o.libro}">${o.libro || 'laudes'}</span></td>
-                <td>${diaCap} (Sem. ${o.semana || '1'})</td>
+                <td>${celdaDia}</td>
                 <td class="td-texto-snippet" title="${(o.texto || '').replace(/"/g, '&quot;')}">${snippet}</td>
                 <td>
                     <div class="acciones-celda">
@@ -228,8 +615,16 @@ function editarOracion(id) {
     document.getElementById('form-id').value = o.id || '';
     document.getElementById('form-titulo').value = o.titulo || '';
     document.getElementById('form-tiempo').value = o.tiempo || 'ordinario';
-    document.getElementById('form-semana').value = o.semana || '1';
-    document.getElementById('form-dia').value = o.dia || 'lunes';
+
+    actualizarModoTiempo(o.semana);
+
+    if (o.tiempo === 'santos') {
+        const inputFecha = document.getElementById('form-fecha-celebracion');
+        if (inputFecha) inputFecha.value = o.fechaCelebracion || '';
+    } else {
+        document.getElementById('form-dia').value = o.dia || 'lunes';
+    }
+
     document.getElementById('form-libro').value = o.libro || 'laudes';
     if (document.getElementById('form-oremos')) document.getElementById('form-oremos').value = o.oremos || '';
     document.getElementById('form-texto').value = o.texto || '';
@@ -257,10 +652,24 @@ async function guardarOracion(e) {
     const oremos = document.getElementById('form-oremos')?.value?.trim() || '';
     const texto = document.getElementById('form-texto').value.trim();
     const conclusion = document.getElementById('form-conclusion').value.trim();
+    const inputFechaCeleb = document.getElementById('form-fecha-celebracion');
+    const fechaCelebracion = inputFechaCeleb?.value?.trim() || '';
 
     if (!id || !texto) {
         alert('Por favor complete al menos el ID y el texto de la oración.');
         return;
+    }
+
+    let santoNombre = '';
+    if (tiempo === 'santos') {
+        const selSem = document.getElementById('form-semana');
+        const opt = selSem?.selectedOptions[0];
+        santoNombre = opt?.getAttribute('data-nombre') || '';
+
+        // Sincronizar fecha de celebración en el catálogo de santos
+        if (fechaCelebracion && /^\d{1,2}\/\d{1,2}$/.test(fechaCelebracion)) {
+            actualizarFechaCelebracionSanto(semana, fechaCelebracion);
+        }
     }
 
     const oracionObj = {
@@ -269,12 +678,13 @@ async function guardarOracion(e) {
         titulo: titulo || `Oración - ${tiempo} - Semana ${semana} - ${dia} (${libro})`,
         tiempo,
         semana,
-        dia,
+        dia: tiempo === 'santos' ? 'propio' : dia,
         libro,
         oremos,
         texto,
         conclusion,
-        textoCompleto: texto
+        textoCompleto: texto,
+        ...(tiempo === 'santos' ? { santoNombre, fechaCelebracion } : {})
     };
 
     const idx = listaOraciones.findIndex(item => item.id === id);

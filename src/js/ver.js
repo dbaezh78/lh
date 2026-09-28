@@ -263,7 +263,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     id: "v_1_0_03",
                     version: "1.0.03",
                     fecha: new Date().toISOString().split("T")[0],
-                    detalles: "• Actualización a versión 1.0.03.\n• Nuevo módulo de Oficio de Lectura (gestión de 1ª Lectura Impar/Par y 2ª Lectura Patrística en audio y catálogo litúrgico anual).\n• Corrección de preces litúrgicas: separación de intenciones en párrafos individuales, respuesta en negrita, rúbrica roja y resolución canónica.\n• Mejoras avanzadas en reproducción de voz (TTS) para la liturgia: velocidad por defecto 1.2x, indicador de búfer al 3% en barra de progreso, seguimiento en tiempo real del progreso y script litúrgico adaptado con pausa y aviso antes de las lecturas.",
+                    detalles: "• Actualización a versión 1.0.03.\n• Nuevo módulo de Oficio de Lectura (gestión de 1ª Lectura Impar/Par y 2ª Lectura Patrística en audio y catálogo litúrgico anual).\n• Integración de buscadores interactivos en selectores de Santos, Salmos, Himnos, Antífonas, Lecturas Breves y Preces.\n• Constructor de Salterios (frm_salterios.html): sincronización en vivo e inmediata de salmos (Salmo 1, 2 y 3) con títulos y textos canónicos completos.\n• Soporte dinámico para celebración de Santos y Fiestas con fecha y actualización automática del catálogo.\n• Corrección de preces litúrgicas: separación de intenciones en párrafos individuales, respuesta en negrita, rúbrica roja y resolución canónica.\n• Mejoras avanzadas en reproducción de voz (TTS) para la liturgia: velocidad por defecto 1.2x, indicador de búfer al 3% en barra de progreso, seguimiento en tiempo real del progreso y script litúrgico adaptado con pausa y aviso antes de las lecturas.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                const semillav4 = {
+                    id: "v_1_0_04",
+                    version: "1.0.04",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.04.\n• Gestor de Lectura Breve y Responsorio (lecturabreve.html): Búsqueda dinámica y autónoma por Hora / Libro (Oficio de Lectura, Laudes, Tercia, Sexta, Nona, Vísperas, Completas) y Santos.\n• Independencia de contenidos litúrgicos: cada Hora/Oficio mantiene su propia cita bíblica, texto y responsorio breve sin sobrescribir otras horas.\n• Limpieza de placeholders estáticos y precarga fluida desde caché local y Firebase Firestore.\n• Sincronización general del sistema y catálogo de archivos a la versión 1.0.04.",
                     autor: "dbaezh78@gmail.com",
                     ultimaModificacion: new Date().toISOString()
                 };
@@ -271,7 +279,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav1);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav2);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav3);
-                    actualizacionesMemoria = [semillav3, semillav2, semillav1];
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav4);
+                    actualizacionesMemoria = [semillav4, semillav3, semillav2, semillav1];
                     renderListaActualizaciones(actualizacionesMemoria);
                     return;
                 } catch (e) {
@@ -304,13 +313,30 @@ document.addEventListener("DOMContentLoaded", () => {
                     id: "v_1_0_03",
                     version: "1.0.03",
                     fecha: new Date().toISOString().split("T")[0],
-                    detalles: "• Actualización a versión 1.0.03.\n• Nuevo módulo de Oficio de Lectura (gestión de 1ª Lectura Impar/Par y 2ª Lectura Patrística en audio y catálogo litúrgico anual).\n• Corrección de preces litúrgicas: separación de intenciones en párrafos individuales, respuesta en negrita, rúbrica roja y resolución canónica.\n• Mejoras avanzadas en reproducción de voz (TTS) para la liturgia: velocidad por defecto 1.2x, indicador de búfer al 3% en barra de progreso, seguimiento en tiempo real del progreso y script litúrgico adaptado con pausa y aviso antes de las lecturas.",
+                    detalles: "• Actualización a versión 1.0.03.\n• Nuevo módulo de Oficio de Lectura (gestión de 1ª Lectura Impar/Par y 2ª Lectura Patrística en audio y catálogo litúrgico anual).\n• Integración de buscadores interactivos en selectores de Santos, Salmos, Himnos, Antífonas, Lecturas Breves y Preces.\n• Constructor de Salterios (frm_salterios.html): sincronización en vivo e inmediata de salmos (Salmo 1, 2 y 3) con títulos y textos canónicos completos.\n• Soporte dinámico para celebración de Santos y Fiestas con fecha y actualización automática del catálogo.\n• Corrección de preces litúrgicas: separación de intenciones en párrafos individuales, respuesta en negrita, rúbrica roja y resolución canónica.\n• Mejoras avanzadas en reproducción de voz (TTS) para la liturgia: velocidad por defecto 1.2x, indicador de búfer al 3% en barra de progreso, seguimiento en tiempo real del progreso y script litúrgico adaptado con pausa y aviso antes de las lecturas.",
                     autor: "dbaezh78@gmail.com",
                     ultimaModificacion: new Date().toISOString()
                 };
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(v3);
                     listaActualizada.unshift(v3);
+                } catch (e) {}
+            }
+
+            // Registrar automáticamente v1.0.04 si no existe
+            const tieneV4 = listaActualizada.some(d => d.version === "1.0.04" || d.id === "v_1_0_04");
+            if (!tieneV4 && window.firebaseAPI?.guardarActualizacionFirestore) {
+                const v4 = {
+                    id: "v_1_0_04",
+                    version: "1.0.04",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.04.\n• Gestor de Lectura Breve y Responsorio (lecturabreve.html): Búsqueda dinámica y autónoma por Hora / Libro (Oficio de Lectura, Laudes, Tercia, Sexta, Nona, Vísperas, Completas) y Santos.\n• Independencia de contenidos litúrgicos: cada Hora/Oficio mantiene su propia cita bíblica, texto y responsorio breve sin sobrescribir otras horas.\n• Limpieza de placeholders estáticos y precarga fluida desde caché local y Firebase Firestore.\n• Sincronización general del sistema y catálogo de archivos a la versión 1.0.04.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                try {
+                    await window.firebaseAPI.guardarActualizacionFirestore(v4);
+                    listaActualizada.unshift(v4);
                 } catch (e) {}
             }
 

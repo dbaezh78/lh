@@ -437,6 +437,32 @@
 .btn-flat.btn-santos       { background: #B71C1C; }
 .btn-flat.btn-solemnidades { background: #0288D1; }
 .btn-flat.btn-fiestas      { background: #D97706; }
+.btn-flat.btn-blanco,
+.btn-flat.btn-santo-hora   {
+    background: #ffffff;
+    color: #0277bd;
+    border: 1.5px solid #0288d1;
+    font-weight: 700;
+}
+.btn-flat.btn-blanco:hover,
+.btn-flat.btn-santo-hora:hover {
+    background: #f0f9ff;
+    border-color: #01579b;
+    color: #01579b;
+    filter: none;
+    transform: translateY(-1px);
+}
+.btn-flat.btn-blanco .btn-flat-icon,
+.btn-flat.btn-santo-hora .btn-flat-icon {
+    background: #e1f5fe;
+    color: #0288d1;
+    border-left: 1.5px solid #b3e5fc;
+}
+.btn-flat.btn-blanco:hover .btn-flat-icon,
+.btn-flat.btn-santo-hora:hover .btn-flat-icon {
+    background: #0288d1;
+    color: #ffffff;
+}
 
 /* ============================================================
    ESTILO 4: CUADRADO (.btn-square)

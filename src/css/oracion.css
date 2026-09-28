@@ -238,6 +238,17 @@ body {
     gap: 12px;
 }
 
+.form-grid-2.solo-un-campo {
+    grid-template-columns: 1fr;
+}
+
+.badge-tag.santos,
+.badge-tag.santo {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
 .form-grid-3 {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;

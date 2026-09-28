@@ -89,7 +89,7 @@ body.pagina-salterios {
     align-items: baseline;
     gap: 8px;
     font-size: calc(var(--size) * var(--font-zoom));
-    line-height: 1.55;
+    line-height: 1.2;
 }
 
 .linea-vr .texto-vr {
@@ -186,6 +186,7 @@ body.pagina-salterios {
     margin: 4px 0 6px 0;
     font-weight: 500;
     color: #000000 !important;
+    white-space: pre-line;
 }
 
 .lectura-subtitulo-rubrica {

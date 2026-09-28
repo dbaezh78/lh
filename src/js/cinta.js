@@ -375,11 +375,10 @@ export class CintaLiturgica {
             const hCode = mapH[h.id] || 'la';
             let href = '';
             if (slugTiempo === 'santos' || slugTiempo === 'solemnidades' || slugTiempo === 'fiestas') {
-                const baseId = this.opciones.baseCelebracionId || (diaSlug || '').replace(/(of|la|te|se|no|vi|co)$/i, '') || 'sa0101santamaria';
+                const baseId = this.opciones.baseCelebracionId || (diaSlug || '').replace(/(of|la|te|se|no|vi|co)$/i, '') || 'sa0101santamariamadrededios';
                 const sParam = this.opciones.santo ? `&santo=${encodeURIComponent(this.opciones.santo)}` : '';
                 const fParam = this.opciones.fecha ? `&fecha=${encodeURIComponent(this.opciones.fecha)}` : '';
-                const tParam = (slugTiempo === 'solemnidades' || slugTiempo === 'fiestas') ? `&tiempo=${slugTiempo}` : '';
-                href = `salterios.html?libro=${h.id}&id=${baseId}${hCode}${tParam}${sParam}${fParam}`;
+                href = `salterios.html?tiempo=santos&libro=${h.id}&id=${baseId}${hCode}${sParam}${fParam}`;
             } else {
                 const docId = `${tCode}s${semPad}${dCode}${hCode}`;
                 href = `?tiempo=${slugTiempo}&semana=${semana}&dia=${diaSlug}&libro=${h.id}&hora=${h.id}&id=${docId}`;
@@ -1516,9 +1515,7 @@ export class CintaLiturgica {
                     const hCode = mapH[hId] || 'la';
                     const sParam = this.opciones.santo ? `&santo=${encodeURIComponent(this.opciones.santo)}` : '';
                     const fParam = this.opciones.fecha ? `&fecha=${encodeURIComponent(this.opciones.fecha)}` : '';
-                    const slugActual = (tiempoSlug || this.opciones.tiempoSlug || '').toLowerCase();
-                    const tParam = (slugActual === 'solemnidades' || slugActual === 'fiestas') ? `&tiempo=${slugActual}` : '';
-                    btn.setAttribute('href', `salterios.html?libro=${hId}&id=${baseId}${hCode}${tParam}${sParam}${fParam}`);
+                    btn.setAttribute('href', `salterios.html?tiempo=santos&libro=${hId}&id=${baseId}${hCode}${sParam}${fParam}`);
                 }
             }
         });

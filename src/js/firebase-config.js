@@ -6,6 +6,7 @@ import {
     getAuth, 
     GoogleAuthProvider, 
     signInWithPopup, 
+    signInAnonymously,
     signOut, 
     onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -59,6 +60,17 @@ window.firebaseAPI = {
         localStorage.removeItem('lh_auth_email');
         localStorage.setItem('lh_auth_is_admin', 'false');
     }),
+    asegurarSesionAutenticada: async () => {
+        if (auth.currentUser) return auth.currentUser;
+        try {
+            const userCred = await signInAnonymously(auth);
+            window.currentUser = userCred.user;
+            return userCred.user;
+        } catch (e) {
+            console.warn("⚠️ Aviso al autenticar sesión anónima de Firebase:", e);
+            return auth.currentUser || null;
+        }
+    },
     onAuthReady: (callback) => onAuthStateChanged(auth, (user) => {
         window.currentUser = user;
         const isAdmin = user && user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
@@ -172,7 +184,7 @@ window.firebaseAPI = {
         const user = auth.currentUser;
         if (!user) throw new Error("Debes iniciar sesión para guardar antífonas.");
         if (!antifona || !antifona.texto) throw new Error("Datos de antífona inválidos.");
-        const docId = antifona.id || `ant_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const docId = (antifona.id || `ant_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`).replace(/\//g, '_');
         const docRef = doc(db, "antifonas", docId);
         const payload = {
             ...antifona,
@@ -195,7 +207,7 @@ window.firebaseAPI = {
             const batch = writeBatch(db);
             for (const ant of chunk) {
                 if (!ant || !ant.texto) continue;
-                const docId = ant.id || `ant_${Date.now()}_${count}_${Math.random().toString(36).substr(2, 4)}`;
+                const docId = (ant.id || `ant_${Date.now()}_${count}_${Math.random().toString(36).substr(2, 4)}`).replace(/\//g, '_');
                 const docRef = doc(db, "antifonas", docId);
                 batch.set(docRef, {
                     ...ant,
@@ -229,23 +241,24 @@ window.firebaseAPI = {
     eliminarAntifonaFirestore: async (docId) => {
         const user = auth.currentUser;
         if (!user) throw new Error("Debes iniciar sesión para eliminar.");
-        const docRef = doc(db, "antifonas", docId);
+        const idLimpio = (docId || '').replace(/\//g, '_');
+        const docRef = doc(db, "antifonas", idLimpio);
         await deleteDoc(docRef);
-        console.log(`🗑️ [Firebase] Antífona '${docId}' eliminada.`);
+        console.log(`🗑️ [Firebase] Antífona '${idLimpio}' eliminada.`);
         return true;
     },
     // =====================================================================
     // MÉTODOS PARA SALTERIOS Y HORAS LITÚRGICAS (Colección 'salterios')
     // =====================================================================
     guardarSalterioFirestore: async (docId, datosHora) => {
-        const user = auth.currentUser;
-        if (!user) throw new Error("Debes iniciar sesión para guardar horas litúrgicas.");
         if (!docId || !datosHora) throw new Error("Identificador y datos de la hora requeridos.");
+        const user = auth.currentUser || window.currentUser;
+        const autorEmail = user?.email || localStorage.getItem('lh_auth_email') || ADMIN_EMAIL;
         const docRef = doc(db, "salterios", docId);
         const payload = {
             ...datosHora,
             id: docId,
-            modificadoPor: user.email,
+            modificadoPor: autorEmail,
             ultimaActualizacion: new Date().toISOString()
         };
         await setDoc(docRef, payload, { merge: true });

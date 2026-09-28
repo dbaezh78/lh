@@ -8,11 +8,182 @@
  */
 
 import { CATALOGO_LECTURAS_SEED } from '../data/db-lecturas.js';
+import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+import { inicializarSearchableSantoSelect } from './searchable-santo.js';
 
 let listaLecturas = [];
 let editandoId = null;
 
+// Obtener catálogo completo de santos
+function obtenerCatalogoSantos() {
+    try {
+        const raw = localStorage.getItem('lh_catalogo_nombres_santos');
+        if (raw) {
+            const list = JSON.parse(raw);
+            if (Array.isArray(list) && list.length > 0) return list;
+        }
+    } catch (_) {}
+    return (typeof catalogoSantosAnual !== 'undefined' && Array.isArray(catalogoSantosAnual)) ? catalogoSantosAnual : [];
+}
+
+// Extrae día y mes de la fecha de celebración de un santo
+function extraerDiaMesCelebracion(santo) {
+    if (!santo) return { dia: '01', mes: '01', texto: '01/01' };
+    const raw = (santo.celebracion || santo.fechaFestividad || '').trim();
+    const mIso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (mIso) {
+        const dia = String(mIso[3]).padStart(2, '0');
+        const mes = String(mIso[2]).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    const mSlash = raw.match(/^(\d{1,2})\/(\d{1,2})/);
+    if (mSlash) {
+        const dia = String(mSlash[1]).padStart(2, '0');
+        const mes = String(mSlash[2]).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    if (santo.dia && santo.mes) {
+        const dia = String(santo.dia).padStart(2, '0');
+        const mes = String(santo.mes).padStart(2, '0');
+        return { dia, mes, texto: `${dia}/${mes}` };
+    }
+    return { dia: '01', mes: '01', texto: raw || '—' };
+}
+
+// Genera slug normalizado para ID de santo
+function generarSlugSanto(nombre) {
+    if (!nombre) return '';
+    return nombre
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+
+// Genera el ID canónico de santo
+function generarIdSanto(santo) {
+    if (!santo) return 'sa0101santamaria';
+    const { dia, mes } = extraerDiaMesCelebracion(santo);
+    const slug = generarSlugSanto(santo.nombre);
+    return `sa${dia}${mes}${slug}`;
+}
+
+// Actualiza las opciones de Tipo de Lectura, Semanas / Santos y visibilidad de Día de la Semana
+function actualizarModoTiempo(valorPrevioSemana = null, valorPrevioTipo = null) {
+    const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+    const selSemana = document.getElementById('form-semana');
+    const lblSemana = document.getElementById('lbl-form-semana');
+    const grupoDia = document.getElementById('grupo-dia');
+    const gridTiempo = document.getElementById('grid-tiempo-semana-dia');
+    const selTipo = document.getElementById('form-tipo');
+
+    if (!selSemana) return;
+
+    if (tiempo === 'santos') {
+        // En santos no se distingue año par o impar: sólo 1ª Lectura o 2ª Lectura
+        if (selTipo) {
+            const tipoDeseado = valorPrevioTipo || (selTipo.value.startsWith('lectura1') ? 'lectura1' : 'lectura2');
+            selTipo.innerHTML = `
+                <option value="lectura1">1ª Lectura Bíblica</option>
+                <option value="lectura2">2ª Lectura Patrística</option>
+            `;
+            if (tipoDeseado === 'lectura2') {
+                selTipo.value = 'lectura2';
+            } else {
+                selTipo.value = 'lectura1';
+            }
+        }
+
+        if (lblSemana) lblSemana.textContent = 'Santo / Celebración:';
+        if (grupoDia) grupoDia.style.display = 'none';
+        if (gridTiempo) gridTiempo.classList.add('modo-santos');
+
+        const santos = obtenerCatalogoSantos();
+        const listaOrdenada = [...santos].sort((a, b) => {
+            return (a.nombre || '').localeCompare(b.nombre || '', 'es', { sensitivity: 'base' });
+        });
+
+        selSemana.innerHTML = '';
+        listaOrdenada.forEach(s => {
+            const idSanto = generarIdSanto(s);
+            const { texto: fechaTexto } = extraerDiaMesCelebracion(s);
+            const opt = document.createElement('option');
+            opt.value = idSanto;
+            opt.textContent = `${s.nombre} (${fechaTexto})`;
+            opt.setAttribute('data-nombre', s.nombre);
+            opt.setAttribute('data-fecha', fechaTexto);
+            selSemana.appendChild(opt);
+        });
+
+        if (valorPrevioSemana && Array.from(selSemana.options).some(o => o.value === valorPrevioSemana)) {
+            selSemana.value = valorPrevioSemana;
+        } else if (selSemana.options.length > 0) {
+            selSemana.selectedIndex = 0;
+        }
+
+        // Activar buscador interactivo tipo santo.html
+        inicializarSearchableSantoSelect(selSemana, {
+            placeholder: 'Buscar santo...',
+            onChange: () => {
+                actualizarIdGenerado();
+                actualizarLivePreview();
+            }
+        });
+        if (selSemana._customSantoContainer) {
+            selSemana._customSantoContainer.style.display = 'block';
+        }
+    } else {
+        // Tiempos litúrgicos estándar: restaurar Año Par / Impar / Patrística
+        if (selTipo) {
+            const tipoDeseado = valorPrevioTipo || selTipo.value || 'lectura1_par';
+            selTipo.innerHTML = `
+                <option value="lectura1_par">1ª Lectura — Año Par</option>
+                <option value="lectura1_impar">1ª Lectura — Año Impar</option>
+                <option value="lectura2">2ª Lectura — Patrística</option>
+            `;
+            if (tipoDeseado === 'lectura2') {
+                selTipo.value = 'lectura2';
+            } else if (tipoDeseado === 'lectura1_impar') {
+                selTipo.value = 'lectura1_impar';
+            } else {
+                selTipo.value = 'lectura1_par';
+            }
+        }
+
+        if (lblSemana) lblSemana.textContent = 'Semana:';
+        if (grupoDia) grupoDia.style.display = '';
+        if (gridTiempo) gridTiempo.classList.remove('modo-santos');
+
+        if (selSemana._customSantoContainer) {
+            selSemana._customSantoContainer.style.display = 'none';
+        }
+        selSemana.style.display = 'block';
+
+        let maxSemanas = 34;
+        if (tiempo === 'adviento') maxSemanas = 4;
+        else if (tiempo === 'navidad') maxSemanas = 2;
+        else if (tiempo === 'cuaresma') maxSemanas = 7;
+        else if (tiempo === 'pascua') maxSemanas = 7;
+
+        selSemana.innerHTML = '';
+        for (let i = 1; i <= maxSemanas; i++) {
+            const opt = document.createElement('option');
+            opt.value = String(i);
+            opt.textContent = `Semana ${i}`;
+            selSemana.appendChild(opt);
+        }
+
+        if (valorPrevioSemana && Array.from(selSemana.options).some(o => o.value === String(valorPrevioSemana))) {
+            selSemana.value = String(valorPrevioSemana);
+        } else {
+            selSemana.selectedIndex = 0;
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    actualizarModoTiempo();
     configurarEventos();
     await cargarDatos();
     renderizarLista();
@@ -128,7 +299,6 @@ function configurarEventos() {
 
     inputR1?.addEventListener('input', (e) => {
         const val = e.target.value;
-        // Si el usuario pega o introduce texto con asterisco, separar automáticamente
         if (val.includes('*')) {
             const partes = val.split('*');
             const antes = partes[0].trim();
@@ -147,8 +317,14 @@ function configurarEventos() {
         actualizarLivePreview();
     });
 
+    // Cambio de tiempo litúrgico
+    document.getElementById('form-tiempo')?.addEventListener('change', () => {
+        actualizarModoTiempo();
+        manejarCambioParametros();
+    });
+
     // Auto-generación de ID, URL de audio y búsqueda de datos existentes al modificar selects
-    ['form-tipo', 'form-tiempo', 'form-semana', 'form-dia'].forEach(id => {
+    ['form-tipo', 'form-semana', 'form-dia'].forEach(id => {
         document.getElementById(id)?.addEventListener('change', () => {
             manejarCambioParametros();
         });
@@ -181,32 +357,41 @@ function buscarLecturaExistente(idBuscado, tipo, tiempo, semana, dia) {
     let m = listaLecturas.find(x => x.id === idBuscado || norm(x.id) === idNorm);
     if (m) return m;
 
-    // 2. Equivalencia con IDs de semilla canónica (ej: tos1OFdo_lec1_par vs tos01doof_lect1par / tos01ofdo_lect1par)
-    const semNum = parseInt(semana, 10);
-    const idLegacy1 = `${norm(tiempo)}${semNum}of${norm(dia)}_${norm(tipo)}`.replace('lectura', 'lec');
-    const idLegacy2 = `${norm(tiempo)}${semNum}${norm(dia)}of_${norm(tipo)}`.replace('lectura', 'lec');
-    m = listaLecturas.find(x => {
-        const nx = norm(x.id);
-        return nx === norm(idLegacy1) || nx === norm(idLegacy2);
-    });
-    if (m) return m;
+    if (tiempo === 'santos') {
+        m = listaLecturas.find(x => {
+            return x.tiempo === 'santos' &&
+                   (x.semana === semana || norm(x.id).includes(norm(semana))) &&
+                   (x.tipo === tipo || (tipo === 'lectura1' && x.tipo?.startsWith('lectura1')));
+        });
+        if (m) return m;
+    } else {
+        // 2. Equivalencia con IDs de semilla canónica
+        const semNum = parseInt(semana, 10);
+        const idLegacy1 = `${norm(tiempo)}${semNum}of${norm(dia)}_${norm(tipo)}`.replace('lectura', 'lec');
+        const idLegacy2 = `${norm(tiempo)}${semNum}${norm(dia)}of_${norm(tipo)}`.replace('lectura', 'lec');
+        m = listaLecturas.find(x => {
+            const nx = norm(x.id);
+            return nx === norm(idLegacy1) || nx === norm(idLegacy2);
+        });
+        if (m) return m;
 
-    // 3. Por combinación exacta de atributos
-    m = listaLecturas.find(x => {
-        const tItem = norm(x.tiempo);
-        const tSel = norm(tiempo);
-        const tipoMatch = x.tipo === tipo;
-        const semMatch = Number(x.semana) === Number(semana);
-        const diaMatch = norm(x.dia) === norm(dia);
-        const tiempoMatch = (tItem === tSel) ||
-                            (tSel === 'ordinario' && (tItem === 'to' || tItem === 'ordinario')) ||
-                            (tSel === 'adviento' && (tItem === 'ta' || tItem === 'adviento')) ||
-                            (tSel === 'navidad' && (tItem === 'tn' || tItem === 'navidad')) ||
-                            (tSel === 'cuaresma' && (tItem === 'tc' || tItem === 'cuaresma')) ||
-                            (tSel === 'pascua' && (tItem === 'tp' || tItem === 'pascua'));
-        return tipoMatch && semMatch && diaMatch && tiempoMatch;
-    });
-    if (m) return m;
+        // 3. Por combinación exacta de atributos
+        m = listaLecturas.find(x => {
+            const tItem = norm(x.tiempo);
+            const tSel = norm(tiempo);
+            const tipoMatch = x.tipo === tipo;
+            const semMatch = Number(x.semana) === Number(semana);
+            const diaMatch = norm(x.dia) === norm(dia);
+            const tiempoMatch = (tItem === tSel) ||
+                                (tSel === 'ordinario' && (tItem === 'to' || tItem === 'ordinario')) ||
+                                (tSel === 'adviento' && (tItem === 'ta' || tItem === 'adviento')) ||
+                                (tSel === 'navidad' && (tItem === 'tn' || tItem === 'navidad')) ||
+                                (tSel === 'cuaresma' && (tItem === 'tc' || tItem === 'cuaresma')) ||
+                                (tSel === 'pascua' && (tItem === 'tp' || tItem === 'pascua'));
+            return tipoMatch && semMatch && diaMatch && tiempoMatch;
+        });
+        if (m) return m;
+    }
 
     return null;
 }
@@ -215,42 +400,55 @@ function buscarLecturaExistente(idBuscado, tipo, tiempo, semana, dia) {
 function manejarCambioParametros() {
     const tipo = document.getElementById('form-tipo')?.value || 'lectura1_par';
     const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
-    const semana = document.getElementById('form-semana')?.value || '1';
-    const dia = document.getElementById('form-dia')?.value || 'domingo';
+    const semanaSel = document.getElementById('form-semana');
+    const semana = semanaSel?.value || '1';
+    const dia = (tiempo === 'santos') ? '' : (document.getElementById('form-dia')?.value || 'domingo');
 
-    const tMap = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'san' };
-    const dMap = { domingo: 'do', lunes: 'lu', martes: 'ma', miercoles: 'mi', jueves: 'ju', viernes: 'vi', sabado: 'sa' };
+    let idGenerado = '';
+    let tituloGenerado = '';
+    let epigrafe = (tipo === 'lectura2') ? 'SEGUNDA LECTURA' : 'PRIMERA LECTURA';
+    let audioUrlGenerada = '';
 
-    const tiempoCod = tMap[tiempo] || 'to';
-    const semanaPadded = `s${String(semana).padStart(2, '0')}`;
-    const diaCod = dMap[dia] || 'do';
+    if (tiempo === 'santos') {
+        const optSanto = semanaSel?.selectedOptions[0];
+        const nombreSanto = optSanto ? (optSanto.getAttribute('data-nombre') || optSanto.textContent) : 'Santo';
+        const fechaSanto = optSanto ? optSanto.getAttribute('data-fecha') : '';
+        const idSanto = semana || 'sa0101santo';
+        const sufLectura = (tipo === 'lectura2') ? 'of_lect2' : 'of_lect1';
 
-    let tipoSuffix = '_lect1par';
-    let tipoNombre = '1ª Lectura (Año Par)';
-    let epigrafe = 'PRIMERA LECTURA';
-    let audioArchivo = 'lectura2.mp3';
+        idGenerado = `${idSanto}${sufLectura}`;
+        const tipoLabel = (tipo === 'lectura2') ? '2ª Lectura Patrística' : '1ª Lectura Bíblica';
+        tituloGenerado = `${tipoLabel} - ${nombreSanto}${fechaSanto ? ' (' + fechaSanto + ')' : ''}`;
+        audioUrlGenerada = '';
+    } else {
+        const tMap = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp' };
+        const dMap = { domingo: 'do', lunes: 'lu', martes: 'ma', miercoles: 'mi', jueves: 'ju', viernes: 'vi', sabado: 'sa' };
 
-    if (tipo === 'lectura1_impar') {
-        tipoSuffix = '_lect1impar';
-        tipoNombre = '1ª Lectura (Año Impar)';
-        epigrafe = 'PRIMERA LECTURA';
-        audioArchivo = 'lectura1.mp3';
-    } else if (tipo === 'lectura2') {
-        tipoSuffix = '_lect2';
-        tipoNombre = '2ª Lectura Patrística';
-        epigrafe = 'SEGUNDA LECTURA';
-        audioArchivo = 'lecturas.mp3';
+        const tiempoCod = tMap[tiempo] || 'to';
+        const semanaPadded = `s${String(semana).padStart(2, '0')}`;
+        const diaCod = dMap[dia] || 'do';
+
+        let tipoSuffix = '_lect1par';
+        let tipoNombre = '1ª Lectura (Año Par)';
+        let audioArchivo = 'lectura2.mp3';
+
+        if (tipo === 'lectura1_impar') {
+            tipoSuffix = '_lect1impar';
+            tipoNombre = '1ª Lectura (Año Impar)';
+            audioArchivo = 'lectura1.mp3';
+        } else if (tipo === 'lectura2') {
+            tipoSuffix = '_lect2';
+            tipoNombre = '2ª Lectura Patrística';
+            audioArchivo = 'lecturas.mp3';
+        }
+
+        idGenerado = `${tiempoCod}${semanaPadded}${diaCod}of${tipoSuffix}`;
+        const subdominio = tiempoCod;
+        audioUrlGenerada = `https://${subdominio}.resucito.do/${semanaPadded}/${dia}/${audioArchivo}`;
+
+        const diaNombre = dia.charAt(0).toUpperCase() + dia.slice(1);
+        tituloGenerado = `${tipoNombre} - ${diaNombre} Semana ${semana}`;
     }
-
-    // ID generado según especificación exacta del usuario: ej: tos01doof_lect1par
-    const idGenerado = `${tiempoCod}${semanaPadded}${diaCod}of${tipoSuffix}`;
-
-    // URL de Audio generada según la combinación litúrgica
-    const subdominio = tiempoCod === 'san' ? 'to' : tiempoCod;
-    const audioUrlGenerada = `https://${subdominio}.resucito.do/${semanaPadded}/${dia}/${audioArchivo}`;
-
-    const diaNombre = dia.charAt(0).toUpperCase() + dia.slice(1);
-    const tituloGenerado = `${tipoNombre} - ${diaNombre} Semana ${semana}`;
 
     // Buscar si ya existe una lectura para esta combinación
     const lecturaExistente = buscarLecturaExistente(idGenerado, tipo, tiempo, semana, dia);
@@ -350,7 +548,7 @@ function actualizarLivePreview() {
     if (elEpigrafe) elEpigrafe.textContent = epigrafe;
 
     const elCita = document.getElementById('preview-cita');
-    if (elCita) elCita.innerHTML = cita.replace(/\n/g, '<br>');
+    if (elCita) elCita.innerHTML = cita.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
 
     const elDesc = document.getElementById('preview-desc');
     if (elDesc) elDesc.textContent = desc;
@@ -400,7 +598,7 @@ function renderizarLista() {
 
     const filtrados = listaLecturas.filter(item => {
         if (fTiempo !== 'todos' && item.tiempo !== fTiempo) return false;
-        if (fDia !== 'todos' && item.dia !== fDia) return false;
+        if (fDia !== 'todos' && item.tiempo !== 'santos' && item.dia !== fDia) return false;
         if (fTipo !== 'todos' && item.tipo !== fTipo) return false;
         if (!query) return true;
 
@@ -409,7 +607,8 @@ function renderizarLista() {
         const citaMatch = (item.cita || '').toLowerCase().includes(query);
         const descMatch = (item.descripcion || '').toLowerCase().includes(query);
         const txtMatch = (item.texto || '').toLowerCase().includes(query);
-        return idMatch || titMatch || citaMatch || descMatch || txtMatch;
+        const santoMatch = (item.santoNombre || item.nombreSanto || '').toLowerCase().includes(query);
+        return idMatch || titMatch || citaMatch || descMatch || txtMatch || santoMatch;
     });
 
     if (contador) {
@@ -423,15 +622,23 @@ function renderizarLista() {
 
     cuerpo.innerHTML = filtrados.map(item => {
         const esActivo = editandoId === item.id ? 'class="fila-activa"' : '';
-        const diaNombre = (item.dia || '').charAt(0).toUpperCase() + (item.dia || '').slice(1);
-        const tipoLabel = item.tipo === 'lectura2' ? '2ª Patrística' : item.tipo === 'lectura1_impar' ? '1ª Impar' : '1ª Par';
+        let colDiaSem = '';
+        if (item.tiempo === 'santos') {
+            const labelSanto = item.santoNombre || item.nombreSanto || item.semana || 'Santo / Fiesta';
+            colDiaSem = `<span style="display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 0.76rem; background: #e0f2fe; color: #0369a1; font-weight: 600;">😇 ${labelSanto}</span>`;
+        } else {
+            const diaNombre = (item.dia || '').charAt(0).toUpperCase() + (item.dia || '').slice(1);
+            colDiaSem = `${diaNombre} (Sem. ${item.semana || '1'})`;
+        }
+
+        const tipoLabel = item.tipo === 'lectura2' ? '2ª Patrística' : item.tipo === 'lectura1_impar' ? '1ª Impar' : item.tipo === 'lectura1' ? '1ª Bíblica' : '1ª Par';
 
         return `
             <tr ${esActivo}>
                 <td><code class="badge-id">${item.id}</code></td>
                 <td><span style="font-size: 0.78rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.08);">${tipoLabel}</span></td>
                 <td><strong>${item.titulo || item.id}</strong></td>
-                <td>${diaNombre} (Sem. ${item.semana || '1'})</td>
+                <td>${colDiaSem}</td>
                 <td><div style="max-height: 44px; overflow: hidden; font-size: 0.82rem; line-height: 1.3;"><em>${item.cita || ''}</em> — ${item.descripcion || ''}</div></td>
                 <td>
                     <div class="celda-acciones">
@@ -465,8 +672,9 @@ async function guardarLectura(e) {
     const titulo = document.getElementById('form-titulo')?.value.trim();
     const tipo = document.getElementById('form-tipo')?.value || 'lectura1_par';
     const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
-    const semana = document.getElementById('form-semana')?.value || '1';
-    const dia = document.getElementById('form-dia')?.value || 'domingo';
+    const selSemana = document.getElementById('form-semana');
+    const semana = selSemana?.value || '1';
+    const dia = (tiempo === 'santos') ? '' : (document.getElementById('form-dia')?.value || 'domingo');
     const libro = 'oficio';
     const epigrafeTipo = document.getElementById('form-epigrafe')?.value.trim() || (tipo === 'lectura2' ? 'SEGUNDA LECTURA' : 'PRIMERA LECTURA');
     const cita = document.getElementById('form-cita')?.value.trim();
@@ -481,6 +689,12 @@ async function guardarLectura(e) {
     if (!id || !cita || !descripcion || !texto || !respR1Inicial || !respV || !respR2) {
         alert('Por favor completa todos los campos obligatorios de la lectura y su responsorio.');
         return;
+    }
+
+    let santoNombre = '';
+    if (tiempo === 'santos') {
+        const optSanto = selSemana?.selectedOptions[0];
+        santoNombre = optSanto ? (optSanto.getAttribute('data-nombre') || optSanto.textContent) : '';
     }
 
     // Componer respR1 canónico litúrgico con asterisco si no lo trae
@@ -510,6 +724,10 @@ async function guardarLectura(e) {
         audioUrl,
         actualizadoEn: new Date().toISOString()
     };
+
+    if (santoNombre) {
+        nuevoObj.santoNombre = santoNombre;
+    }
 
     const idx = listaLecturas.findIndex(x => x.id === id);
     if (idx >= 0) {
@@ -549,10 +767,16 @@ function editarLectura(id) {
 
     setVal('form-id', item.id);
     setVal('form-titulo', item.titulo || '');
-    setVal('form-tipo', item.tipo || 'lectura1_par');
     setVal('form-tiempo', item.tiempo || 'ordinario');
-    setVal('form-semana', item.semana || '1');
-    setVal('form-dia', item.dia || 'domingo');
+
+    // Actualizar UI del modo tiempo litúrgico (santos vs ordinario/otros)
+    actualizarModoTiempo(item.semana, item.tipo);
+
+    setVal('form-tipo', item.tipo || (item.tiempo === 'santos' ? 'lectura1' : 'lectura1_par'));
+    if (item.tiempo !== 'santos') {
+        setVal('form-dia', item.dia || 'domingo');
+    }
+
     setVal('form-epigrafe', item.epigrafeTipo || (item.tipo === 'lectura2' ? 'SEGUNDA LECTURA' : 'PRIMERA LECTURA'));
     setVal('form-cita', item.cita || '');
     setVal('form-desc', item.descripcion || '');
@@ -634,6 +858,7 @@ function limpiarFormulario() {
         btnGuardar.innerHTML = `<span class="material-symbols-outlined">save</span> Guardar Lectura`;
     }
 
+    actualizarModoTiempo();
     manejarCambioParametros();
 }
 

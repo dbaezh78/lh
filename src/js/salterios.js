@@ -1041,37 +1041,58 @@ function renderizarCuerpoLiturgico(d) {
         `;
     }
 
+    const om = d.omisiones || {};
+    const omitirInvitatorioCompleto = Boolean(om.antifonaInvitatorio && om.salmoInvitatorio);
+
     // 2. INVITATORIO E INVOCACIÓN INICIAL (Fiel a Imagen 2 para Oficio)
     if (libroKey === 'oficio') {
-        const antInv = d.invitatorio?.antifonaTexto || d.invitatorio?.antifona || 'Venid, adoremos a Cristo, el Hijo amado, en quien el Padre tiene sus complacencias.';
-        const textoInvocacionR = (d.invocacionInicial?.r || `Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${d.tiempo === 'cuaresma' ? '' : ' Aleluya.'}`).replace(/\n/g, ' ');
-        const finalInvocacionR = (d.tiempo !== 'cuaresma' && !textoInvocacionR.includes('Aleluya'))
-            ? `${textoInvocacionR.replace(/\.?$/, '')}. Aleluya.`
-            : textoInvocacionR;
-        html += `
-            <div class="salterio-seccion-header" style="color: #ff0000; margin: 10px 0 14px 0;">INVITATORIO</div>
-            <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin: 0 0 10px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Si ésta es la primera oración del día:</div>
-            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">Señor abre mis labios</span></div>
-            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">Y mi boca proclamará tu alabanza</span></div>
-            <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin: 16px 0 8px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Se añade el Salmo del Invitatorio con la siguiente antífona:</div>
-            <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${antInv}</div>
-            <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
-            <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Si antes se ha rezado ya alguna otra Hora:</div>
-            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invocacionInicial?.v || 'Dios mío, ven en mi auxilio'}</span></div>
-            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${finalInvocacionR}</span></div>
-            <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
-        `;
+        if (!omitirInvitatorioCompleto) {
+            const antInv = d.invitatorio?.antifonaTexto || d.invitatorio?.antifona || 'Venid, adoremos a Cristo, el Hijo amado, en quien el Padre tiene sus complacencias.';
+            const textoInvocacionR = (d.invocacionInicial?.r || `Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${d.tiempo === 'cuaresma' ? '' : ' Aleluya.'}`).replace(/\n/g, ' ');
+            const finalInvocacionR = (d.tiempo !== 'cuaresma' && !textoInvocacionR.includes('Aleluya'))
+                ? `${textoInvocacionR.replace(/\.?$/, '')}. Aleluya.`
+                : textoInvocacionR;
+            html += `
+                <div class="salterio-seccion-header" style="color: #ff0000; margin: 10px 0 14px 0;">INVITATORIO</div>
+                <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin: 0 0 10px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Si ésta es la primera oración del día:</div>
+                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">Señor abre mis labios</span></div>
+                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">Y mi boca proclamará tu alabanza</span></div>
+                ${!om.antifonaInvitatorio ? `
+                    <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin: 16px 0 8px 0; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Se añade el Salmo del Invitatorio con la siguiente antífona:</div>
+                    <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${antInv}</div>
+                ` : ''}
+                <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
+                <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px; font-size: calc(var(--size) * var(--font-zoom)); line-height: 1.55;">Si antes se ha rezado ya alguna otra Hora:</div>
+                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invocacionInicial?.v || 'Dios mío, ven en mi auxilio'}</span></div>
+                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${finalInvocacionR}</span></div>
+                <hr class="salterio-divider" style="margin: 18px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
+            `;
+        } else {
+            let rInvocacion = d.invocacionInicial?.r || 'Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.';
+            if (d.tiempo !== 'cuaresma' && !rInvocacion.includes('Aleluya')) {
+                rInvocacion = `${rInvocacion.replace(/\.?$/, '')}. Aleluya.`;
+            }
+            html += `
+                <div class="salterio-seccion-header">INVOCACIÓN INICIAL</div>
+                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invocacionInicial?.v || 'Dios mío, ven en mi auxilio'}</span></div>
+                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rInvocacion}</span></div>
+            `;
+        }
     } else {
-        if (d.invitatorio && d.invitatorio.activo) {
+        if (d.invitatorio && d.invitatorio.activo && !omitirInvitatorioCompleto) {
+            const omitirInv_E = Boolean(om.antifonaInvitatorio || om.antifonaInvitatorio_E);
+            const omitirInv_S = Boolean(om.antifonaInvitatorio || om.antifonaInvitatorio_S);
             html += `
                 <div class="salterio-seccion-header">INVITATORIO</div>
                 <div class="rubrica-nota">(Si esta no es la primera oración del día, se omite el Invitatorio y se inicia directamente con la Invocación inicial)</div>
                 <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invitatorio.v}</span></div>
                 <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${d.invitatorio.r}</span></div>
-                <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>
-                <div class="salmo-titulo-rubrica">${d.invitatorio.salmoTitulo}</div>
-                <div class="texto-estrofas-salmo">${d.invitatorio.salmoTexto}</div>
-                <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>
+                ${!omitirInv_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
+                ${!om.salmoInvitatorio ? `
+                    <div class="salmo-titulo-rubrica">${d.invitatorio.salmoTitulo}</div>
+                    <div class="texto-estrofas-salmo">${d.invitatorio.salmoTexto}</div>
+                ` : ''}
+                ${!omitirInv_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
             `;
         } else if (d.invocacionInicial) {
             let rInvocacion = d.invocacionInicial.r || '';
@@ -1087,7 +1108,7 @@ function renderizarCuerpoLiturgico(d) {
     }
 
     // 4. HIMNO
-    if (d.himno) {
+    if (d.himno && !om.himno) {
         html += `
             <div class="salterio-seccion-header">${d.himno.titulo}</div>
             <div class="texto-estrofas-salmo">${d.himno.texto}</div>
@@ -1095,42 +1116,52 @@ function renderizarCuerpoLiturgico(d) {
     }
 
     // 5. SALMODIA
-    if (d.salmodia) {
+    const mostrarSalmo1 = !om.salmo1 && d.salmodia?.salmo1Texto;
+    const mostrarSalmo2 = !om.salmo2 && d.salmodia?.salmo2Texto;
+    const mostrarSalmo3 = !om.salmo3 && d.salmodia?.salmo3Texto;
+
+    if (d.salmodia && (mostrarSalmo1 || mostrarSalmo2 || mostrarSalmo3)) {
         html += `<div class="salterio-seccion-header">SALMODIA</div>`;
 
         // Salmo 1
-        if (d.salmodia.salmo1Texto) {
+        if (mostrarSalmo1) {
+            const omitirAnt1_E = Boolean(om.antifona1 || om.ant1_E);
+            const omitirAnt1_S = Boolean(om.antifona1 || om.ant1_S);
             html += `
-                <div class="antifona-bloque"><span class="rubrica-ant">Ant 1.</span> ${d.salmodia.ant1}</div>
+                ${!omitirAnt1_E && d.salmodia.ant1 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 1.</span> ${d.salmodia.ant1}</div>` : ''}
                 <div class="salmo-titulo-rubrica">${d.salmodia.salmo1Titulo}</div>
                 <div class="texto-estrofas-salmo">${d.salmodia.salmo1Texto}</div>
-                <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant1}</div>
+                ${!omitirAnt1_S && d.salmodia.ant1 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant1}</div>` : ''}
             `;
         }
 
         // Salmo 2
-        if (d.salmodia.salmo2Texto) {
+        if (mostrarSalmo2) {
+            const omitirAnt2_E = Boolean(om.antifona2 || om.ant2_E);
+            const omitirAnt2_S = Boolean(om.antifona2 || om.ant2_S);
             html += `
-                <div class="antifona-bloque"><span class="rubrica-ant">Ant 2.</span> ${d.salmodia.ant2}</div>
+                ${!omitirAnt2_E && d.salmodia.ant2 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 2.</span> ${d.salmodia.ant2}</div>` : ''}
                 <div class="salmo-titulo-rubrica">${d.salmodia.salmo2Titulo}</div>
                 <div class="texto-estrofas-salmo">${d.salmodia.salmo2Texto}</div>
-                <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant2}</div>
+                ${!omitirAnt2_S && d.salmodia.ant2 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant2}</div>` : ''}
             `;
         }
 
         // Salmo 3
-        if (d.salmodia.salmo3Texto) {
+        if (mostrarSalmo3) {
+            const omitirAnt3_E = Boolean(om.antifona3 || om.ant3_E);
+            const omitirAnt3_S = Boolean(om.antifona3 || om.ant3_S);
             html += `
-                <div class="antifona-bloque"><span class="rubrica-ant">Ant 3.</span> ${d.salmodia.ant3}</div>
+                ${!omitirAnt3_E && d.salmodia.ant3 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 3.</span> ${d.salmodia.ant3}</div>` : ''}
                 <div class="salmo-titulo-rubrica">${d.salmodia.salmo3Titulo}</div>
                 <div class="texto-estrofas-salmo">${d.salmodia.salmo3Texto}</div>
-                <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant3}</div>
+                ${!omitirAnt3_S && d.salmodia.ant3 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant3}</div>` : ''}
             `;
         }
     }
 
     // 6. VERSÍCULO (Oficio y Horas menores - Fiel a Imagen 3)
-    if (d.versiculo && (libroKey === 'oficio' || libroKey === 'tercia' || libroKey === 'sexta' || libroKey === 'nona')) {
+    if (d.versiculo && !om.responsorioOficio && (libroKey === 'oficio' || libroKey === 'tercia' || libroKey === 'sexta' || libroKey === 'nona')) {
         html += `
             <div style="margin: 22px 0;">
                 <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.versiculo.v}</span></div>
@@ -1143,7 +1174,7 @@ function renderizarCuerpoLiturgico(d) {
     if (libroKey === 'oficio' && d.lecturasOficio) {
         // Primera Lectura
         const l1 = d.lecturasOficio.primera;
-        if (l1) {
+        if (l1 && !om.lectura1Oficio) {
             const resp1Obj = l1.responsorio || {};
             const r1Raw = l1.respR1 || resp1Obj.r1 || '';
             const v1Txt = l1.respV || resp1Obj.v || '';
@@ -1154,7 +1185,7 @@ function renderizarCuerpoLiturgico(d) {
             html += `
                 <div class="lectura-oficio-contenedor" style="margin-top: 26px;">
                     <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.15rem; margin-bottom: 4px;">${l1.epigrafeTipo || l1.titulo || 'PRIMERA LECTURA'}</div>
-                    <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000;">${l1.cita || ''}</div>
+                    <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000; white-space: pre-line;">${(l1.cita || '').replace(/\\n/g, '<br>')}</div>
                     <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l1.descripcion || l1.subtitulo || ''}</div>
                     <div class="texto-lectura-justificado" style="white-space: pre-line;">${l1.texto || ''}</div>
                     ${(r1Raw || r2Txt) ? `
@@ -1173,7 +1204,7 @@ function renderizarCuerpoLiturgico(d) {
 
         // Segunda Lectura (Patrística)
         const l2 = d.lecturasOficio.segunda;
-        if (l2) {
+        if (l2 && !om.lectura2Oficio) {
             const resp2Obj = l2.responsorio || {};
             const r1Raw2 = l2.respR1 || resp2Obj.r1 || '';
             const v2Txt = l2.respV || resp2Obj.v || '';
@@ -1184,7 +1215,7 @@ function renderizarCuerpoLiturgico(d) {
             html += `
                 <div class="lectura-oficio-contenedor" style="margin-top: 28px;">
                     <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.15rem; margin-bottom: 4px;">${l2.epigrafeTipo || l2.titulo || 'SEGUNDA LECTURA'}</div>
-                    <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000;">${l2.cita || ''}</div>
+                    <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000; white-space: pre-line;">${(l2.cita || '').replace(/\\n/g, '<br>')}</div>
                     <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l2.descripcion || l2.subtitulo || ''}</div>
                     <div class="texto-lectura-justificado" style="white-space: pre-line;">${l2.texto || ''}</div>
                     ${(r1Raw2 || r2Txt2) ? `
@@ -1203,7 +1234,7 @@ function renderizarCuerpoLiturgico(d) {
 
         // Himno post-2ª lectura y sección opcional (solo domingos o si se especificó himnoTeDeum)
         const esDomingoOficio = (d.dia === 'domingo');
-        const omitirHimnoPost = d.himnoTeDeum && d.himnoTeDeum.id === 'ninguno';
+        const omitirHimnoPost = (d.himnoTeDeum && d.himnoTeDeum.id === 'ninguno') || om.teDeumOficio;
         const mostrarHimnoPost = (esDomingoOficio || d.himnoTeDeum) && !omitirHimnoPost;
 
         if (mostrarHimnoPost) {
@@ -1222,7 +1253,7 @@ function renderizarCuerpoLiturgico(d) {
                 : (esDomingoOficio ? TEXTO_OPCIONAL_TEDUM_DOMINGO : '');
             const rubricaOpcional = (typeof d.seccionOpcional === 'object' ? d.seccionOpcional?.rubrica : null) || 'La parte que sigue puede omitirse, si se cree oportuno.';
 
-            if (textoOpcional && textoOpcional.trim()) {
+            if (textoOpcional && textoOpcional.trim() && !om.opcionalOficio) {
                 html += `
                     <div class="seccion-opcional-oficio" style="margin: 26px 0;">
                         <div class="rubrica-nota-roja" style="color: #ff0000; font-style: italic; margin-bottom: 8px;">${rubricaOpcional}</div>
@@ -1234,7 +1265,7 @@ function renderizarCuerpoLiturgico(d) {
     }
 
     // 8. LECTURA BREVE Y RESPONSORIO (Laudes, Horas menores, Vísperas, Completas)
-    if (d.libro !== 'oficio' && d.lecturaBreve) {
+    if (d.libro !== 'oficio' && d.lecturaBreve && !om.lecturaBreve) {
         html += `
             <div style="margin: 24px 0;">
                 <div class="salterio-seccion-header">LECTURA BREVE <span style="font-weight: normal; font-size: 0.95rem;">${d.lecturaBreve.cita}</span></div>
@@ -1259,18 +1290,20 @@ function renderizarCuerpoLiturgico(d) {
     }
 
     // 9. CÁNTICO EVANGÉLICO (Laudes, Vísperas, Completas)
-    if (d.canticoEvangelico && (d.libro === 'laudes' || d.libro === 'visperas' || d.libro === 'completas')) {
+    if (d.canticoEvangelico && !om.cantico && (d.libro === 'laudes' || d.libro === 'visperas' || d.libro === 'completas')) {
+        const omitirAntCant_E = Boolean(om.antifonaCantico || om.antifonaCantico_E || om.antCant_E);
+        const omitirAntCant_S = Boolean(om.antifonaCantico || om.antifonaCantico_S || om.antCant_S);
         html += `
             <div class="salterio-seccion-header">CÁNTICO EVANGÉLICO</div>
-            <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>
+            ${!omitirAntCant_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
             <div class="salmo-titulo-rubrica">${d.canticoEvangelico.titulo}</div>
             <div class="texto-estrofas-salmo">${d.canticoEvangelico.texto}</div>
-            <div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>
+            ${!omitirAntCant_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
         `;
     }
 
     // 10. PRECES
-    if (d.preces && (d.libro === 'laudes' || d.libro === 'visperas')) {
+    if (d.preces && !om.preces && (d.libro === 'laudes' || d.libro === 'visperas')) {
         let precesObj = d.preces;
         const canon = (PrecesDB && typeof PrecesDB.obtener === 'function') 
             ? PrecesDB.obtener(precesObj.id || d.codigo || d.id, d.tiempo, d.semana, d.dia, d.libro)
@@ -1324,8 +1357,8 @@ function renderizarCuerpoLiturgico(d) {
         window.__salterioDataActual = d;
     }
 
-    // 11. PADRE NUESTRO DESPLEGABLE EN TEXTO PLANO (Solo en Laudes y Vísperas)
-    if (libroKey !== 'oficio') {
+    // 11. PADRE NUESTRO DESPLEGABLE EN TEXTO PLANO (Solo en Laudes y Vísperas si hay preces)
+    if (libroKey !== 'oficio' && !om.preces && (libroKey === 'laudes' || libroKey === 'visperas')) {
         const padreNuestroTexto = window.SalmosDB ? window.SalmosDB.obtenerPadreNuestro() : `Padre nuestro, que estás en el cielo,\nsantificado sea tu Nombre;\nvenga a nosotros tu reino;\nhágase tu voluntad en la tierra como en el cielo.\nDanos hoy nuestro pan de cada día;\nperdona nuestras ofensas,\ncomo también nosotros perdonamos a los que nos ofenden;\nno nos dejes caer en la tentación,\ny líbranos del mal. \nAmen`;
 
         html += `
@@ -1338,7 +1371,7 @@ function renderizarCuerpoLiturgico(d) {
     }
 
     // 12. ORACIÓN
-    if (d.oracion) {
+    if (d.oracion && !om.oracion) {
         const textoOracion = typeof d.oracion === 'string' ? d.oracion : (d.oracion.textoCompleto || d.oracion.texto || '');
         html += `
             <div class="salterio-seccion-header">ORACIÓN</div>

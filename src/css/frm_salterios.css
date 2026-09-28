@@ -1127,4 +1127,75 @@ body {
     text-align: center;
 }
 
+/* Checkboxes para Omitir Partes Litúrgicas */
+.control-header-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.chk-omitir-elemento {
+    cursor: pointer;
+    width: 17px;
+    height: 17px;
+    accent-color: #c62828;
+    margin: 0;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+}
+
+.chk-omitir-elemento:hover {
+    transform: scale(1.15);
+}
+
+.control-box.control-box-deshabilitado > .custom-select-lh,
+.control-box.control-box-deshabilitado > select,
+.control-box.control-box-deshabilitado > textarea,
+.control-box.control-box-deshabilitado > input {
+    opacity: 0.35 !important;
+    pointer-events: none !important;
+    filter: grayscale(0.9);
+}
+
+.control-box.control-box-deshabilitado label {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+/* Sub-checkboxes E (Entrada) y S (Salida) para Antífonas */
+.ant-es-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.lbl-chk-es {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.76rem !important;
+    font-weight: 700 !important;
+    color: #455a64;
+    cursor: pointer;
+    user-select: none;
+    margin: 0 !important;
+    text-decoration: none !important;
+}
+
+.chk-omitir-es {
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    accent-color: #d32f2f;
+    margin: 0;
+    transition: transform 0.15s ease;
+}
+
+.chk-omitir-es:hover {
+    transform: scale(1.15);
+}
+
+
 

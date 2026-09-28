@@ -198,6 +198,10 @@ body {
     margin-bottom: 14px;
 }
 
+.form-grid-2.solo-un-campo {
+    grid-template-columns: 1fr;
+}
+
 .form-grupo {
     margin-bottom: 14px;
 }

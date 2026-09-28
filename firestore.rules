@@ -69,6 +69,38 @@ service cloud.firestore {
       allow write: if esAdmin();
     }
 
+    // Salterios y Horas Litúrgicas
+    match /salterios/{document=**} {
+      allow read: if true;
+      allow write: if esAdmin() || request.auth != null;
+    }
+
+    // Antífonas, Himnos, Lecturas, Preces y Oraciones
+    match /antifonas/{document=**} {
+      allow read: if true;
+      allow write: if esAdmin() || request.auth != null;
+    }
+
+    match /himnos/{document=**} {
+      allow read: if true;
+      allow write: if esAdmin() || request.auth != null;
+    }
+
+    match /lecturas/{document=**} {
+      allow read: if true;
+      allow write: if esAdmin() || request.auth != null;
+    }
+
+    match /preces/{document=**} {
+      allow read: if true;
+      allow write: if esAdmin() || request.auth != null;
+    }
+
+    match /oraciones/{document=**} {
+      allow read: if true;
+      allow write: if esAdmin() || request.auth != null;
+    }
+
     // 8. Chat de Asistencia y Soporte Fraternal ('support_chats')
     // Permite a usuarios autenticados (hermanos y admin) enviar y leer mensajes en vivo
     match /support_chats/{chatId} {

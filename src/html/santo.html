@@ -672,6 +672,7 @@
                         <th>Realidad</th>
                         <th style="width: 120px;">Nacimiento</th>
                         <th style="width: 120px;">Mortalidad</th>
+                        <th style="min-width: 220px;">Liturgia de las Horas</th>
                     </tr>
                 </thead>
                 <tbody id="tbody-santos-anual"></tbody>
@@ -1114,6 +1115,70 @@
             selectFiltro.innerHTML = opciones;
         }
 
+        function generarSlugSantoLocal(nombre) {
+            if (!nombre) return '';
+            return nombre.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+        }
+
+        function extraerDiaMesCelebracionLocal(santo) {
+            if (!santo) return { dia: '01', mes: '01' };
+            const raw = (santo.celebracion || santo.fechaFestividad || '').trim();
+            const mIso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (mIso) return { dia: String(mIso[3]).padStart(2, '0'), mes: String(mIso[2]).padStart(2, '0') };
+            const mSlash = raw.match(/^(\d{1,2})\/(\d{1,2})/);
+            if (mSlash) return { dia: String(mSlash[1]).padStart(2, '0'), mes: String(mSlash[2]).padStart(2, '0') };
+            if (santo.dia && santo.mes) return { dia: String(santo.dia).padStart(2, '0'), mes: String(santo.mes).padStart(2, '0') };
+            return { dia: '01', mes: '01' };
+        }
+
+        function generarIdSantoLocal(santo) {
+            if (!santo) return '';
+            const { dia, mes } = extraerDiaMesCelebracionLocal(santo);
+            const slug = generarSlugSantoLocal(santo.nombre);
+            return `sa${dia}${mes}${slug}`;
+        }
+
+        const HORAS_LITURGICAS_CONFIG = [
+            { key: 'oficio', sufijo: 'of', nombre: 'Oficio', icono: 'menu_book' },
+            { key: 'laudes', sufijo: 'la', nombre: 'Laudes', icono: 'wb_twilight' },
+            { key: 'tercia', sufijo: 'te', nombre: 'Tercia', icono: 'schedule' },
+            { key: 'sexta', sufijo: 'se', nombre: 'Sexta', icono: 'light_mode' },
+            { key: 'nona', sufijo: 'no', nombre: 'Nona', icono: 'wb_sunny' },
+            { key: 'vispera', sufijo: 'vi', nombre: 'Víspera', icono: 'wb_twilight' },
+            { key: 'completas', sufijo: 'co', nombre: 'Completas', icono: 'bedtime' }
+        ];
+
+        function obtenerCodigosLiturgiaSanto(santo) {
+            if (!santo) return {};
+            let codigos = santo.codigosLiturgia ? { ...santo.codigosLiturgia } : {};
+            const idSanto = generarIdSantoLocal(santo);
+            const slug = generarSlugSantoLocal(santo.nombre);
+
+            try {
+                const raw1 = localStorage.getItem(`lh_santo_codigos_${idSanto}`);
+                if (raw1) codigos = { ...JSON.parse(raw1), ...codigos };
+                const raw2 = localStorage.getItem(`lh_santo_codigos_${slug}`);
+                if (raw2) codigos = { ...JSON.parse(raw2), ...codigos };
+            } catch (_) {}
+
+            HORAS_LITURGICAS_CONFIG.forEach(h => {
+                if (!codigos[h.key]) {
+                    const idCodEsperado = `${idSanto}${h.sufijo}`;
+                    const guardado = localStorage.getItem(`lh_salterio_${idCodEsperado}`) || localStorage.getItem(`lh_salterio_${idCodEsperado.toLowerCase()}`);
+                    if (guardado) {
+                        codigos[h.key] = {
+                            libro: h.key,
+                            nombreLibro: h.nombre,
+                            codigo: idCodEsperado,
+                            origen: 'local'
+                        };
+                    }
+                }
+            });
+
+            return codigos;
+        }
+
         function renderTabla() {
             const filtroMes = document.getElementById('filtro-mes').value;
             const filtroSanto = document.getElementById('filtro-santo-select') ? document.getElementById('filtro-santo-select').value : 'todos';
@@ -1194,6 +1259,24 @@
 
                 const clickModal = santoObj ? 'onclick="verDetallePorNombre(\'' + santoAsignadoNombre.replace(/'/g, "\\'") + '\')"' : '';
 
+                let celdaLiturgiasHtml = '<span style="color:#b0bec5; font-size:0.8rem;">—</span>';
+                if (santoObj) {
+                    const codigosObj = obtenerCodigosLiturgiaSanto(santoObj);
+                    const listaCodigos = Object.values(codigosObj);
+                    if (listaCodigos.length > 0) {
+                        celdaLiturgiasHtml = `
+                            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                ${listaCodigos.map(item => `
+                                    <a href="../../salterios.html?libro=${item.libro}&id=${item.codigo}" target="_blank" style="text-decoration:none; background:#f0fdf4; color:#166534; border:1px solid #86efac; border-radius:4px; padding:2px 6px; font-size:0.75rem; font-weight:600; display:inline-flex; align-items:center; gap:4px;" title="Rezar ${item.nombreLibro} (${item.codigo})">
+                                        <span>${item.nombreLibro}:</span>
+                                        <span style="font-family:monospace; font-size:0.72rem; color:#0f766e;">${item.codigo}</span>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+                }
+
                 html += '<tr class="' + (esHoy ? 'fila-hoy' : '') + '" data-clave="' + d.clave + '">' +
                     '<td><strong>' + d.diaNum + ' ' + d.mesNombre.substring(0, 3) + '</strong></td>' +
                     '<td><span class="badge-dia ' + (d.esDomingo ? 'badge-domingo' : '') + '">' + d.diaSemana + '</span></td>' +
@@ -1202,10 +1285,11 @@
                     '<td class="dato-auto col-realidad ' + (santoObj ? 'santo-info-link' : '') + '" ' + clickModal + '>' + realidad + '</td>' +
                     '<td class="dato-auto col-nacimiento ' + (santoObj ? 'santo-info-link' : '') + '" ' + clickModal + '>' + nacimiento + '</td>' +
                     '<td class="dato-auto col-mortalidad ' + (santoObj ? 'santo-info-link' : '') + '" ' + clickModal + '>' + muerte + '</td>' +
+                    '<td class="dato-auto col-liturgias">' + celdaLiturgiasHtml + '</td>' +
                 '</tr>';
             });
 
-            tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">No se encontraron resultados</td></tr>';
+            tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#888;">No se encontraron resultados</td></tr>';
         }
 
         window.verDetallePorNombre = function(nombreSanto) {
@@ -1277,6 +1361,39 @@
             }
             if (s.detalle && s.detalle.trim() && s.detalle.trim() !== '—') {
                 cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.4; text-align: justify;">${s.detalle.trim()}</p></div>`;
+            }
+
+            // Liturgias de las Horas Asignadas
+            const codigosModal = obtenerCodigosLiturgiaSanto(s);
+            let liturgiasModalHtml = '';
+            HORAS_LITURGICAS_CONFIG.forEach(h => {
+                const asignado = codigosModal[h.key];
+                if (asignado) {
+                    liturgiasModalHtml += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 0.84rem;">
+                            <span style="font-weight: 600; color: #166534; display: flex; align-items: center; gap: 4px;">
+                                <span class="material-symbols-outlined" style="font-size: 16px; color: #16a34a;">${h.icono}</span>
+                                ${h.nombre}
+                            </span>
+                            <span style="font-family: monospace; color: #0f766e; font-weight: 600;">${asignado.codigo}</span>
+                            <a href="../../salterios.html?libro=${h.key}&id=${asignado.codigo}" target="_blank" style="background: #0288d1; color: white; text-decoration: none; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Rezar</a>
+                        </div>
+                    `;
+                }
+            });
+
+            if (liturgiasModalHtml) {
+                cuerpoHtml += `
+                    <div style="border-top: 1.5px solid #bbf7d0; padding-top: 10px; margin-top: 6px;">
+                        <strong style="color: #166534; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px; color: #16a34a;">auto_stories</span>
+                            Liturgia de las Horas Asignada:
+                        </strong>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            ${liturgiasModalHtml}
+                        </div>
+                    </div>
+                `;
             }
 
             document.getElementById('modal-santo-cuerpo').innerHTML = cuerpoHtml;

@@ -65,7 +65,7 @@ function generarTemplateLaudes(datos) {
         <p class="antifona"><span class="rubrica ant">Ant 3. </span> ${datos.Salmodias.Ant3}</p>
         <p class="abajo"><span class="rubrica"> ${datos.Salmodias.SalmoTRESt}</span></p>
         <div class="cuerpo-salmo">${datos.Salmodias.SalmoTRES}</div>
-        <p class="antifona"><span class="rubrica and">Ant. </span> ${datos.Salmodias.Ant3}</p>
+        <p class="antifona"><span class="rubrica ant">Ant. </span> ${datos.Salmodias.Ant3}</p>
         </div>
 
         <div> ${ "" /* LLAVE LECTURA BREVE */}
