@@ -159,6 +159,7 @@ function actualizarModoTiempo(valorPrevioSemana = null) {
                 if (inputFechaCeleb && opt) {
                     inputFechaCeleb.value = opt.getAttribute('data-fecha') || '';
                 }
+                recordarParametros();
                 manejarCambioParametros();
             }
         });
@@ -197,6 +198,58 @@ function actualizarModoTiempo(valorPrevioSemana = null) {
             selSemana.selectedIndex = 0;
         }
     }
+}
+
+// Guardar y restaurar parámetros litúrgicos seleccionados
+function recordarParametros() {
+    try {
+        const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+        const selSem = document.getElementById('form-semana');
+        const semana = selSem?.value || '1';
+        const optSanto = (tiempo === 'santos') ? selSem?.selectedOptions[0] : null;
+        const santoId = (tiempo === 'santos') ? (optSanto?.value || semana) : '';
+        const santoNombre = (tiempo === 'santos') ? (optSanto?.getAttribute('data-nombre') || '') : '';
+        const dia = document.getElementById('form-dia')?.value || 'domingo';
+        const fechaCeleb = document.getElementById('form-fecha-celebracion')?.value || '';
+        const libro = document.getElementById('form-libro')?.value || 'laudes';
+
+        const params = { tiempo, semana, santoId, santoNombre, dia, fechaCeleb, libro };
+        localStorage.setItem('lh_preces_ultimos_parametros', JSON.stringify(params));
+        localStorage.setItem('lh_parametros_liturgicos_compartidos', JSON.stringify(params));
+    } catch (_) {}
+}
+
+function restaurarParametros() {
+    try {
+        const raw = localStorage.getItem('lh_preces_ultimos_parametros') || localStorage.getItem('lh_parametros_liturgicos_compartidos');
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        if (!p) return;
+
+        const selTiempo = document.getElementById('form-tiempo');
+        if (selTiempo && p.tiempo) {
+            selTiempo.value = p.tiempo;
+            actualizarModoTiempo(p.santoId || p.semana);
+        }
+        const selSemana = document.getElementById('form-semana');
+        if (selSemana && (p.santoId || p.semana)) {
+            const val = p.santoId || p.semana;
+            if (Array.from(selSemana.options).some(o => o.value === val)) {
+                selSemana.value = val;
+            }
+        }
+        if (p.tiempo === 'santos') {
+            const inpFecha = document.getElementById('form-fecha-celebracion');
+            if (inpFecha && p.fechaCeleb) inpFecha.value = p.fechaCeleb;
+        } else {
+            const selDia = document.getElementById('form-dia');
+            if (selDia && p.dia) selDia.value = p.dia;
+        }
+        const selLibro = document.getElementById('form-libro');
+        if (selLibro && p.libro) {
+            selLibro.value = p.libro;
+        }
+    } catch (_) {}
 }
 
 // Buscar preces existente en memoria/catálogo
@@ -309,6 +362,7 @@ function manejarCambioParametros() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     actualizarModoTiempo();
+    restaurarParametros();
     configurarEventos();
     await cargarDatos();
     renderizarLista();
@@ -464,6 +518,7 @@ function configurarEventos() {
         // Cambio en tiempo litúrgico
         document.getElementById('form-tiempo')?.addEventListener('change', () => {
             actualizarModoTiempo();
+            recordarParametros();
             manejarCambioParametros();
         });
 
@@ -478,24 +533,27 @@ function configurarEventos() {
                     inputFecha.value = opt.getAttribute('data-fecha') || '';
                 }
             }
+            recordarParametros();
             manejarCambioParametros();
         });
 
         // Cambio en fecha de celebración
         document.getElementById('form-fecha-celebracion')?.addEventListener('input', () => {
+            recordarParametros();
             manejarCambioParametros();
         });
 
         // Cambio en día y libro
         ['form-dia', 'form-libro'].forEach(id => {
             document.getElementById(id)?.addEventListener('change', () => {
+                recordarParametros();
                 manejarCambioParametros();
             });
         });
     }
 
-    // Botón Limpiar Formulario
-    document.getElementById('btn-limpiar-form')?.addEventListener('click', limpiarFormulario);
+    // Botón Limpiar Formulario (preserva parámetros litúrgicos)
+    document.getElementById('btn-limpiar-form')?.addEventListener('click', () => limpiarFormulario(true));
 
     // Botón Subir a Firebase
     document.getElementById('btn-subir-semilla')?.addEventListener('click', subirAFirebase);
@@ -543,7 +601,14 @@ function actualizarLivePreview() {
     if (pLibre) pLibre.textContent = libreVal;
 
     const pConcl = document.getElementById('preview-concl');
-    if (pConcl) pConcl.textContent = conclVal;
+    if (pConcl) {
+        const parrafos = conclVal.split(/\n\s*\n/).filter(Boolean);
+        if (parrafos.length > 0) {
+            pConcl.innerHTML = parrafos.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+        } else {
+            pConcl.innerHTML = '';
+        }
+    }
 }
 
 // Renderizar la tabla del catálogo
@@ -567,7 +632,22 @@ function renderizarLista() {
             const ints = (Array.isArray(p.intenciones) ? p.intenciones.join(' ') : (p.intenciones || '')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const pId = (p.id || '').toLowerCase();
             const sNom = (p.santoNombre || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return tit.includes(fTexto) || intro.includes(fTexto) || resp.includes(fTexto) || ints.includes(fTexto) || pId.includes(fTexto) || sNom.includes(fTexto);
+
+            let coincideFecha = false;
+            const rawFecha = p.fechaCelebracion || '';
+            let mF = rawFecha.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+            if (!mF) mF = (p.id || '').match(/^sa(\d{2})(\d{2})/i);
+            if (!mF) mF = (p.titulo || '').match(/\((\d{1,2})[\/\-](\d{1,2})\)/);
+            if (mF) {
+                const dd = String(parseInt(mF[1], 10)).padStart(2, '0');
+                const mm = String(parseInt(mF[2], 10)).padStart(2, '0');
+                const d = String(parseInt(mF[1], 10));
+                const m = String(parseInt(mF[2], 10));
+                const variantes = [`${dd}/${mm}`, `${d}/${m}`, `${d}/${mm}`, `${dd}/${m}`, `${dd}-${mm}`, `${d}-${m}`, `${dd}${mm}`];
+                coincideFecha = variantes.some(v => v.includes(fTexto) || fTexto.includes(v));
+            }
+
+            return tit.includes(fTexto) || intro.includes(fTexto) || resp.includes(fTexto) || ints.includes(fTexto) || pId.includes(fTexto) || sNom.includes(fTexto) || coincideFecha;
         }
         return true;
     });
@@ -682,10 +762,52 @@ function cargarEnFormulario(id) {
 }
 
 // Limpiar formulario para nuevo registro
-function limpiarFormulario() {
+function limpiarFormulario(preservarParametros = true) {
     editandoId = null;
-    const form = document.getElementById('form-preces');
-    if (form) form.reset();
+
+    const tiempoActual = document.getElementById('form-tiempo')?.value;
+    const semanaActual = document.getElementById('form-semana')?.value;
+    const diaActual = document.getElementById('form-dia')?.value;
+    const fechaActual = document.getElementById('form-fecha-celebracion')?.value;
+    const libroActual = document.getElementById('form-libro')?.value;
+
+    const txtIntro = document.getElementById('form-intro');
+    const txtRespuesta = document.getElementById('form-respuesta');
+    const txtIntenciones = document.getElementById('form-intenciones');
+    const txtLibre = document.getElementById('form-libre');
+    const txtConcl = document.getElementById('form-concl');
+
+    if (txtIntro) txtIntro.value = '';
+    if (txtRespuesta) txtRespuesta.value = '';
+    if (txtIntenciones) txtIntenciones.value = '';
+    if (txtLibre) txtLibre.value = 'Se pueden añadir algunas intenciones libres';
+    if (txtConcl) txtConcl.value = 'Terminemos nuestra oración con la plegaria que Cristo nos enseñó:';
+
+    if (!preservarParametros) {
+        const form = document.getElementById('form-preces');
+        if (form) form.reset();
+        actualizarModoTiempo();
+    } else {
+        if (document.getElementById('form-tiempo') && tiempoActual) {
+            document.getElementById('form-tiempo').value = tiempoActual;
+        }
+        actualizarModoTiempo(semanaActual);
+        if (document.getElementById('form-semana') && semanaActual) {
+            document.getElementById('form-semana').value = semanaActual;
+        }
+        if (tiempoActual === 'santos') {
+            if (document.getElementById('form-fecha-celebracion') && fechaActual) {
+                document.getElementById('form-fecha-celebracion').value = fechaActual;
+            }
+        } else {
+            if (document.getElementById('form-dia') && diaActual) {
+                document.getElementById('form-dia').value = diaActual;
+            }
+        }
+        if (document.getElementById('form-libro') && libroActual) {
+            document.getElementById('form-libro').value = libroActual;
+        }
+    }
 
     const inputId = document.getElementById('form-id');
     if (inputId) {
@@ -698,7 +820,7 @@ function limpiarFormulario() {
         btnSubmit.innerHTML = `<span class="material-symbols-outlined">add_task</span> Guardar Preces`;
     }
 
-    actualizarModoTiempo();
+    manejarCambioParametros();
     renderizarLista();
     actualizarLivePreview();
 }
@@ -766,6 +888,7 @@ async function guardarPreces(e) {
     }
 
     localStorage.setItem('lh_preces_cache', JSON.stringify(listaPreces));
+    recordarParametros();
 
     // Si Firebase está activo, guardar también en Firestore
     try {
@@ -777,7 +900,7 @@ async function guardarPreces(e) {
         console.warn('No se pudo guardar en Firestore inmediatamente:', err);
     }
 
-    limpiarFormulario();
+    limpiarFormulario(true);
 }
 
 // Eliminar Preces

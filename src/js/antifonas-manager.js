@@ -111,10 +111,86 @@ const TIEMPOS_CONFIG = {
 
 document.addEventListener('DOMContentLoaded', async () => {
     inicializarSelectores();
+    restaurarParametros();
     await cargarDatos();
     configurarEventos();
     renderizarLista();
+    manejarCambioParametros();
 });
+
+// Guardar y restaurar parámetros litúrgicos seleccionados
+function recordarParametros() {
+    try {
+        const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+        const semana = document.getElementById('form-semana')?.value || '';
+        const dia = document.getElementById('form-dia')?.value || '';
+        const selSanto = document.getElementById('form-santo-select');
+        const optSanto = selSanto?.selectedOptions[0];
+        const santoId = (tiempo === 'santos') ? (selSanto?.value || '') : '';
+        const santoNombre = (tiempo === 'santos') ? (optSanto?.getAttribute('data-nombre') || document.getElementById('form-santo')?.value || '') : '';
+        const fechaCeleb = (tiempo === 'santos') ? (document.getElementById('form-fecha')?.value || '') : '';
+        const libro = document.getElementById('form-libro')?.value || 'laudes';
+        const tipo = document.getElementById('form-tipo')?.value || 'invitatoria';
+
+        const params = { tiempo, semana, dia, santoId, santoNombre, fechaCeleb, libro, tipo };
+        localStorage.setItem('lh_antifonas_ultimos_parametros', JSON.stringify(params));
+        localStorage.setItem('lh_parametros_liturgicos_compartidos', JSON.stringify(params));
+    } catch (_) {}
+}
+
+function restaurarParametros() {
+    try {
+        const raw = localStorage.getItem('lh_antifonas_ultimos_parametros') || localStorage.getItem('lh_parametros_liturgicos_compartidos');
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        if (!p) return;
+
+        const selTiempo = document.getElementById('form-tiempo');
+        if (selTiempo && p.tiempo) {
+            selTiempo.value = p.tiempo;
+            selTiempo.dispatchEvent(new Event('change'));
+        }
+        const selSemana = document.getElementById('form-semana');
+        if (selSemana && p.semana) {
+            if (Array.from(selSemana.options).some(o => o.value === String(p.semana))) {
+                selSemana.value = String(p.semana);
+            }
+        }
+        const selDia = document.getElementById('form-dia');
+        if (selDia && p.dia) {
+            if (Array.from(selDia.options).some(o => o.value === p.dia)) {
+                selDia.value = p.dia;
+            }
+        }
+        if (p.tiempo === 'santos') {
+            const selSanto = document.getElementById('form-santo-select');
+            if (selSanto && (p.santoId || p.santoNombre)) {
+                const match = Array.from(selSanto.options).find(o => 
+                    (p.santoId && o.value === p.santoId) || 
+                    (p.santoNombre && o.getAttribute('data-nombre') === p.santoNombre)
+                );
+                if (match) {
+                    selSanto.value = match.value;
+                    selSanto.dispatchEvent(new Event('change'));
+                }
+            }
+            const inpFecha = document.getElementById('form-fecha');
+            if (inpFecha && p.fechaCeleb) inpFecha.value = p.fechaCeleb;
+        }
+        const selLibro = document.getElementById('form-libro');
+        if (selLibro && p.libro) {
+            if (Array.from(selLibro.options).some(o => o.value === p.libro)) {
+                selLibro.value = p.libro;
+            }
+        }
+        const selTipo = document.getElementById('form-tipo');
+        if (selTipo && p.tipo) {
+            if (Array.from(selTipo.options).some(o => o.value === p.tipo)) {
+                selTipo.value = p.tipo;
+            }
+        }
+    } catch (_) {}
+}
 
 // Inicializar y sincronizar selects dinámicos (Semana y Día según Tiempo)
 function inicializarSelectores() {
@@ -162,6 +238,8 @@ function inicializarSelectores() {
                 } else {
                     if (inputSantoHidden) inputSantoHidden.value = '';
                 }
+                recordarParametros();
+                manejarCambioParametros();
             }
         });
         if (selSanto._customSantoContainer) {
@@ -177,6 +255,8 @@ function inicializarSelectores() {
         } else {
             if (inputSantoHidden) inputSantoHidden.value = '';
         }
+        recordarParametros();
+        manejarCambioParametros();
     });
 
     function actualizarOpcionesTiempo() {
@@ -212,7 +292,11 @@ function inicializarSelectores() {
         }
     }
 
-    selTiempo.addEventListener('change', actualizarOpcionesTiempo);
+    selTiempo.addEventListener('change', () => {
+        actualizarOpcionesTiempo();
+        recordarParametros();
+        manejarCambioParametros();
+    });
     actualizarOpcionesTiempo();
 }
 
@@ -321,16 +405,18 @@ function configurarEventos() {
     });
 
     // Botón Limpiar
-    document.getElementById('btn-limpiar-form')?.addEventListener('click', limpiarFormulario);
+    document.getElementById('btn-limpiar-form')?.addEventListener('click', () => limpiarFormulario(true));
 
     // Cambio en parámetros del formulario para auto-cargar si existe o preparar nuevo
     ['form-semana', 'form-dia', 'form-libro', 'form-tipo'].forEach(id => {
         document.getElementById(id)?.addEventListener('change', () => {
+            recordarParametros();
             manejarCambioParametros();
         });
     });
 
     document.getElementById('form-fecha')?.addEventListener('input', () => {
+        recordarParametros();
         manejarCambioParametros();
     });
 
@@ -479,19 +565,24 @@ async function guardarAntifona() {
     localStorage.setItem('lh_antifonas_cache', JSON.stringify(listaAntifonas));
 
     mostrarBannerEstado(`✅ Antífona guardada exitosamente.`, 'exito');
-    limpiarFormulario();
+    recordarParametros();
+    limpiarFormulario(true);
     renderizarLista();
+    manejarCambioParametros();
 }
 
-function limpiarFormulario() {
+function limpiarFormulario(preservarParametros = true) {
     editandoId = null;
     document.getElementById('form-texto').value = '';
-    const inpFecha = document.getElementById('form-fecha');
-    if (inpFecha) inpFecha.value = '';
-    const inpSanto = document.getElementById('form-santo');
-    if (inpSanto) inpSanto.value = '';
-    const selSanto = document.getElementById('form-santo-select');
-    if (selSanto) selSanto.value = '';
+
+    if (!preservarParametros) {
+        const inpFecha = document.getElementById('form-fecha');
+        if (inpFecha) inpFecha.value = '';
+        const inpSanto = document.getElementById('form-santo');
+        if (inpSanto) inpSanto.value = '';
+        const selSanto = document.getElementById('form-santo-select');
+        if (selSanto) selSanto.value = '';
+    }
 
     const btnSubmit = document.querySelector('#form-antifona button[type="submit"]');
     if (btnSubmit) btnSubmit.innerHTML = '<span class="material-symbols-outlined">save</span> Guardar Antífona';
@@ -514,7 +605,23 @@ function renderizarLista() {
         if (query) {
             const txt = (item.texto || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const santo = (item.santo || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            if (!txt.includes(query) && !santo.includes(query)) return false;
+            const id = (item.id || '').toLowerCase();
+
+            let dateMatch = false;
+            const rawFecha = item.fechaCelebracion || item.fecha || '';
+            let mF = rawFecha.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+            if (!mF) mF = (item.id || '').match(/^sa(\d{2})(\d{2})/i);
+            if (!mF) mF = (item.santo || '').match(/\((\d{1,2})[\/\-](\d{1,2})\)/);
+            if (mF) {
+                const dd = String(parseInt(mF[1], 10)).padStart(2, '0');
+                const mm = String(parseInt(mF[2], 10)).padStart(2, '0');
+                const d = String(parseInt(mF[1], 10));
+                const m = String(parseInt(mF[2], 10));
+                const variantes = [`${dd}/${mm}`, `${d}/${m}`, `${d}/${mm}`, `${dd}/${m}`, `${dd}-${mm}`, `${d}-${m}`, `${dd}${mm}`];
+                dateMatch = variantes.some(v => v.includes(query) || query.includes(v));
+            }
+
+            if (!txt.includes(query) && !santo.includes(query) && !id.includes(query) && !dateMatch) return false;
         }
         return true;
     });

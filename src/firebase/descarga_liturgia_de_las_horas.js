@@ -381,13 +381,8 @@ export function obtenerIdsEquivalentes(codigo) {
             resultado.add(clean);
             resultado.add(`${base}${horaCod}`);
             resultado.add(`${base}_${dec.libro}`);
+            resultado.add(`${base}_${horaCod}`);
             resultado.add(base);
-            ['of', 'la', 'te', 'se', 'no', 'vi', 'co'].forEach(hc => {
-                resultado.add(`${base}${hc}`);
-            });
-            ['laudes', 'oficio', 'visperas', 'tercia', 'sexta', 'nona', 'completas'].forEach(h => {
-                resultado.add(`${base}_${h}`);
-            });
             return Array.from(resultado);
         }
 
@@ -418,12 +413,6 @@ export function obtenerIdsEquivalentes(codigo) {
         if (clean.startsWith('sa')) {
             const base = clean.replace(/(?:of|la|te|se|no|vi|co)$/i, '').replace(/_(oficio|laudes|tercia|sexta|nona|visperas|completas)$/i, '');
             resultado.add(base);
-            ['of', 'la', 'te', 'se', 'no', 'vi', 'co'].forEach(hc => {
-                resultado.add(`${base}${hc}`);
-            });
-            ['laudes', 'oficio', 'visperas', 'tercia', 'sexta', 'nona', 'completas'].forEach(h => {
-                resultado.add(`${base}_${h}`);
-            });
         }
     }
 
@@ -441,6 +430,7 @@ const CONFIG_LIBROS_DEFECTO = {
     sexta:     { nombre: 'SEXTA',             subtitulo: '(Al mediodía)' },
     nona:      { nombre: 'NONA',              subtitulo: '(De la tarde)' },
     visperas:  { nombre: 'VÍSPERAS',          subtitulo: '(Oración de la tarde)' },
+    vispera:   { nombre: 'VÍSPERAS',          subtitulo: '(Oración de la tarde)' },
     completas: { nombre: 'COMPLETAS',         subtitulo: '(Oración antes del descanso nocturno)' }
 };
 
@@ -456,7 +446,8 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
     let rawSem = raw?.semana !== undefined ? String(raw.semana).replace('s', '') : null;
     const semana = parseInt(rawSem || dec?.semana || 24, 10);
     const dia = raw?.dia || dec?.dia || 'sabado';
-    const libro = (raw?.libro || dec?.libro || 'laudes').toLowerCase();
+    let libro = (raw?.libro || dec?.libro || 'laudes').toLowerCase();
+    if (libro === 'vispera') libro = 'visperas';
 
     const cfgLibro = CONFIG_LIBROS_DEFECTO[libro] || CONFIG_LIBROS_DEFECTO.laudes;
 
@@ -472,6 +463,63 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
 
     const d = raw || {};
 
+    const resolverSalmoLiturgicoNorm = (id, titRaw, txtRaw, fallbackId, fallbackTxt, fallbackTit) => {
+        const idFinal = id || fallbackId;
+        let sObj = null;
+        if (typeof window !== 'undefined' && window.SalmosDB && typeof window.SalmosDB.obtener === 'function') {
+            sObj = window.SalmosDB.obtener(idFinal);
+        }
+        if (!sObj && typeof localStorage !== 'undefined') {
+            try {
+                const raw = localStorage.getItem('lh_salmos_cache');
+                if (raw) {
+                    const list = JSON.parse(raw);
+                    if (Array.isArray(list)) {
+                        const clean = String(idFinal || '').toLowerCase().replace(/[\s\-_]/g, '');
+                        const eqMap = {
+                            'salmo94': ['invitatorio1', 'salmo94'],
+                            'invitatorio1': ['salmo94', 'invitatorio1'],
+                            'salmo99': ['invitatorio2', 'salmo99'],
+                            'invitatorio2': ['salmo99', 'invitatorio2'],
+                            'salmo66': ['invitatorio3', 'salmo66'],
+                            'invitatorio3': ['salmo66', 'invitatorio3'],
+                            'salmo23': ['invitatorio4', 'salmo23'],
+                            'invitatorio4': ['salmo23', 'invitatorio4']
+                        };
+                        const candidatos = eqMap[clean] || [idFinal];
+                        for (const cand of candidatos) {
+                            const candNorm = cand.toLowerCase().replace(/[\s\-_]/g, '');
+                            sObj = list.find(s => s && (s.id === cand || String(s.id).toLowerCase().replace(/[\s\-_]/g, '') === candNorm));
+                            if (sObj) break;
+                        }
+                    }
+                }
+            } catch (_) {}
+        }
+        if (!sObj && titRaw && typeof window !== 'undefined' && window.SalmosDB) {
+            const m = String(titRaw).match(/salmo\s*(\d+[a-zA-Z]?)/i);
+            if (m) {
+                const num = m[1];
+                sObj = window.SalmosDB.obtener(`Salmo_${num}`) || window.SalmosDB.obtener(`salmo${num}`) || window.SalmosDB.obtener(`salmo_${num}`) || window.SalmosDB.obtener(num);
+            }
+            if (!sObj && typeof window.SalmosDB.buscar === 'function') {
+                const buscados = window.SalmosDB.buscar(titRaw);
+                if (buscados && buscados.length > 0) sObj = buscados[0];
+            }
+        }
+
+        const idRet = sObj ? sObj.id : (id || fallbackId);
+        const titRet = sObj ? (sObj.titulo || titRaw || fallbackTit) : (titRaw || fallbackTit);
+        let txtRet = sObj ? (sObj.texto || txtRaw || fallbackTxt) : (txtRaw || fallbackTxt);
+        if (!txtRet && idRet === fallbackId) txtRet = fallbackTxt;
+
+        return {
+            id: idRet,
+            titulo: titRet,
+            texto: txtRet
+        };
+    };
+
     // 1. TÍTULO Y SUBTÍTULO
     const tituloFinal = d.titulo || d.tt || cfgLibro.nombre;
     const subtituloFinal = d.subtitulo || d.sub || cfgLibro.subtitulo;
@@ -486,6 +534,8 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
     const salmoTituloFinal = invRaw.salmoTitulo || salmoInvRaw.titulo || base.invitatorio?.salmoTitulo || "Salmo 94 - INVITACIÓN A LA ALABANZA DIVINA";
     let salmoTextoFinal = invRaw.salmoTexto || salmoInvRaw.contentInv || base.invitatorio?.salmoTexto || "";
 
+    const invSalmoInfo = resolverSalmoLiturgicoNorm(salmoIdFinal, salmoTituloFinal, salmoTextoFinal, 'salmo94', '', "Salmo 94 - INVITACIÓN A LA ALABANZA DIVINA");
+
     const invitatorioNorm = {
         activo: invRaw.activo !== undefined ? invRaw.activo : (libro === 'laudes' || libro === 'oficio'),
         titulo: invRaw.titulo || base.invitatorio?.titulo || "INVITATORIO",
@@ -495,9 +545,9 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
         antifona: antifonaFinal,
         antifonaId: antifonaIdFinal,
         antifonaTexto: antifonaFinal,
-        salmoId: salmoIdFinal,
-        salmoTitulo: salmoTituloFinal,
-        salmoTexto: salmoTextoFinal
+        salmoId: invSalmoInfo.id,
+        salmoTitulo: invSalmoInfo.titulo,
+        salmoTexto: invSalmoInfo.texto
     };
 
     // 3. HIMNO
@@ -512,45 +562,95 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
 
     // 4. SALMODIA
     const salmodiasRaw = d.Salmodias || d.salmodia || {};
-    let salmo1TextoNorm = salmodiasRaw.salmo1Texto || salmodiasRaw.SalmoUNO || base.salmodia?.salmo1Texto || TEXTO_SALMO_62_CANONICO;
-    if (salmo1TextoNorm.length < 150 || salmo1TextoNorm.trim().endsWith('...')) salmo1TextoNorm = TEXTO_SALMO_62_CANONICO;
 
-    let salmo2TextoNorm = salmodiasRaw.salmo2Texto || salmodiasRaw.SalmoDOS || base.salmodia?.salmo2Texto || TEXTO_CANTICO_DANIEL_CANONICO;
-    if (salmo2TextoNorm.length < 150 || salmo2TextoNorm.trim().endsWith('...')) salmo2TextoNorm = TEXTO_CANTICO_DANIEL_CANONICO;
-
-    let salmo3TextoNorm = salmodiasRaw.salmo3Texto || salmodiasRaw.SalmoTRES || base.salmodia?.salmo3Texto || TEXTO_SALMO_149_CANONICO;
-    if (salmo3TextoNorm.length < 150 || salmo3TextoNorm.trim().endsWith('...')) salmo3TextoNorm = TEXTO_SALMO_149_CANONICO;
+    const s1Info = resolverSalmoLiturgicoNorm(salmodiasRaw.salmo1Id || d.salmo1Id, salmodiasRaw.salmo1Titulo || salmodiasRaw.SalmoUNOt, salmodiasRaw.salmo1Texto || salmodiasRaw.SalmoUNO, base.salmodia?.salmo1Id || 'salmo62_2_9', TEXTO_SALMO_62_CANONICO, "SALMO 62, 2-9 - EL ALMA SEDIENTA DE DIOS");
+    const s2Info = resolverSalmoLiturgicoNorm(salmodiasRaw.salmo2Id || d.salmo2Id, salmodiasRaw.salmo2Titulo || salmodiasRaw.SalmoDOSt, salmodiasRaw.salmo2Texto || salmodiasRaw.SalmoDOS, base.salmodia?.salmo2Id || 'dn_3_57_88_56', TEXTO_CANTICO_DANIEL_CANONICO, "Cántico: TODA LA CREACIÓN ALABE AL SEÑOR - Dn 3, 57-88. 56");
+    const s3Info = resolverSalmoLiturgicoNorm(salmodiasRaw.salmo3Id || d.salmo3Id, salmodiasRaw.salmo3Titulo || salmodiasRaw.SalmoTRESt, salmodiasRaw.salmo3Texto || salmodiasRaw.SalmoTRES, base.salmodia?.salmo3Id || 'salmo149', TEXTO_SALMO_149_CANONICO, "SALMO 149 - ALEGRÍA DE LOS SANTOS");
 
     const salmodiaNorm = {
         ant1Id: salmodiasRaw.ant1Id || d.ant1Id || base.salmodia?.ant1Id || null,
         ant1: salmodiasRaw.ant1 || salmodiasRaw.Ant1 || base.salmodia?.ant1 || "Bendito el que viene en nombre del Señor. Aleluya.",
-        salmo1Id: salmodiasRaw.salmo1Id || d.salmo1Id || base.salmodia?.salmo1Id || "salmo62_2_9",
-        salmo1Titulo: salmodiasRaw.salmo1Titulo || salmodiasRaw.SalmoUNOt || base.salmodia?.salmo1Titulo || "SALMO 62, 2-9 - EL ALMA SEDIENTA DE DIOS",
-        salmo1Texto: salmo1TextoNorm,
+        salmo1Id: s1Info.id,
+        salmo1Titulo: s1Info.titulo,
+        salmo1Texto: s1Info.texto,
 
         ant2Id: salmodiasRaw.ant2Id || d.ant2Id || base.salmodia?.ant2Id || null,
         ant2: salmodiasRaw.ant2 || salmodiasRaw.Ant2 || base.salmodia?.ant2 || "Cantemos un himno al Señor nuestro Dios. Aleluya.",
-        salmo2Id: salmodiasRaw.salmo2Id || d.salmo2Id || base.salmodia?.salmo2Id || "dn_3_57_88_56",
-        salmo2Titulo: salmodiasRaw.salmo2Titulo || salmodiasRaw.SalmoDOSt || base.salmodia?.salmo2Titulo || "Cántico: TODA LA CREACIÓN ALABE AL SEÑOR - Dn 3, 57-88. 56",
-        salmo2Texto: salmo2TextoNorm,
+        salmo2Id: s2Info.id,
+        salmo2Titulo: s2Info.titulo,
+        salmo2Texto: s2Info.texto,
 
         ant3Id: salmodiasRaw.ant3Id || d.ant3Id || base.salmodia?.ant3Id || null,
         ant3: salmodiasRaw.ant3 || salmodiasRaw.Ant3 || base.salmodia?.ant3 || "Alabad al Señor por su inmensa grandeza. Aleluya.",
-        salmo3Id: salmodiasRaw.salmo3Id || d.salmo3Id || base.salmodia?.salmo3Id || "salmo149",
-        salmo3Titulo: salmodiasRaw.salmo3Titulo || salmodiasRaw.SalmoTRESt || base.salmodia?.salmo3Titulo || "SALMO 149 - ALEGRÍA DE LOS SANTOS",
-        salmo3Texto: salmo3TextoNorm
+        salmo3Id: s3Info.id,
+        salmo3Titulo: s3Info.titulo,
+        salmo3Texto: s3Info.texto
     };
 
     // 5. LECTURA BREVE
     const lbRaw = d.LecturaBreve || d.lecturaBreve || {};
-    const rbNorm = d.lecturaBreve?.responsorioBreve || {
-        v1: lbRaw.responsorio1 || base.lecturaBreve?.responsorioBreve?.v1 || "Cristo murió por nuestros pecados, para llevarnos a Dios.",
-        r1: lbRaw.responsorio2 || base.lecturaBreve?.responsorioBreve?.r1 || "Cristo murió por nuestros pecados, para llevarnos a Dios.",
-        v2: lbRaw.responsorio3 || base.lecturaBreve?.responsorioBreve?.v2 || "Muerto en la carne, pero vivificado en el espíritu.",
-        r2: lbRaw.responsorio4 || base.lecturaBreve?.responsorioBreve?.r2 || "Para llevarnos a Dios.",
-        v3: lbRaw.gloria || base.lecturaBreve?.responsorioBreve?.v3 || "Gloria al Padre, y al Hijo, y al Espíritu Santo.",
-        r3: lbRaw.responsorio5 || base.lecturaBreve?.responsorioBreve?.r3 || "Cristo murió por nuestros pecados, para llevarnos a Dios."
-    };
+    const esHoraMenor = (libro === 'tercia' || libro === 'sexta' || libro === 'nona');
+    let rbNorm;
+    if (d.lecturaBreve?.responsorioBreve) {
+        const origRb = d.lecturaBreve.responsorioBreve;
+        if (esHoraMenor) {
+            let vMenor = origRb.v || origRb.v1 || lbRaw.responsorio1 || "";
+            if (vMenor === "Tú que hoy te has manifestado." || vMenor === "Cristo, Hijo de Dios vivo, ten piedad de nosotros.") {
+                vMenor = "";
+            }
+            if (!vMenor) {
+                vMenor = base.lecturaBreve?.responsorioBreve?.v || "Se acordó el Señor de su misericordia. Aleluya.";
+            }
+            let rMenor = origRb.r || origRb.r1 || lbRaw.responsorio2 || "";
+            if (rMenor === "Ten piedad de nosotros." || rMenor === "Cristo, Hijo de Dios vivo, ten piedad de nosotros.") {
+                rMenor = "";
+            }
+            if (!rMenor) {
+                rMenor = base.lecturaBreve?.responsorioBreve?.r || "Y de su fidelidad en favor de la casa de Israel. Aleluya.";
+            }
+            rbNorm = {
+                v: vMenor,
+                r: rMenor,
+                v1: vMenor,
+                r1: rMenor,
+                v2: origRb.v2 || "",
+                r2: origRb.r2 || "",
+                v3: origRb.v3 || "",
+                r3: origRb.r3 || ""
+            };
+        } else {
+            rbNorm = {
+                v1: origRb.v1 || lbRaw.responsorio1 || base.lecturaBreve?.responsorioBreve?.v1 || "Cristo murió por nuestros pecados, para llevarnos a Dios.",
+                r1: origRb.r1 || lbRaw.responsorio2 || base.lecturaBreve?.responsorioBreve?.r1 || "Cristo murió por nuestros pecados, para llevarnos a Dios.",
+                v2: origRb.v2 || lbRaw.responsorio3 || base.lecturaBreve?.responsorioBreve?.v2 || "Muerto en la carne, pero vivificado en el espíritu.",
+                r2: origRb.r2 || lbRaw.responsorio4 || base.lecturaBreve?.responsorioBreve?.r2 || "Para llevarnos a Dios.",
+                v3: origRb.v3 || lbRaw.gloria || base.lecturaBreve?.responsorioBreve?.v3 || "Gloria al Padre, y al Hijo, y al Espíritu Santo.",
+                r3: origRb.r3 || lbRaw.responsorio5 || base.lecturaBreve?.responsorioBreve?.r3 || "Cristo murió por nuestros pecados, para llevarnos a Dios."
+            };
+        }
+    } else if (esHoraMenor) {
+        const vMenor = lbRaw.responsorio1 || base.lecturaBreve?.responsorioBreve?.v || "Se acordó el Señor de su misericordia. Aleluya.";
+        const rMenor = lbRaw.responsorio2 || base.lecturaBreve?.responsorioBreve?.r || "Y de su fidelidad en favor de la casa de Israel. Aleluya.";
+        rbNorm = {
+            v: vMenor,
+            r: rMenor,
+            v1: vMenor,
+            r1: rMenor,
+            v2: lbRaw.responsorio3 || "",
+            r2: lbRaw.responsorio4 || "",
+            v3: "",
+            r3: ""
+        };
+    } else {
+        rbNorm = {
+            v1: lbRaw.responsorio1 || base.lecturaBreve?.responsorioBreve?.v1 || "Cristo murió por nuestros pecados, para llevarnos a Dios.",
+            r1: lbRaw.responsorio2 || base.lecturaBreve?.responsorioBreve?.r1 || "Cristo murió por nuestros pecados, para llevarnos a Dios.",
+            v2: lbRaw.responsorio3 || base.lecturaBreve?.responsorioBreve?.v2 || "Muerto en la carne, pero vivificado en el espíritu.",
+            r2: lbRaw.responsorio4 || base.lecturaBreve?.responsorioBreve?.r2 || "Para llevarnos a Dios.",
+            v3: lbRaw.gloria || base.lecturaBreve?.responsorioBreve?.v3 || "Gloria al Padre, y al Hijo, y al Espíritu Santo.",
+            r3: lbRaw.responsorio5 || base.lecturaBreve?.responsorioBreve?.r3 || "Cristo murió por nuestros pecados, para llevarnos a Dios."
+        };
+    }
 
     const lecturaBreveNorm = {
         cita: lbRaw.cita || lbRaw.LecturaCita || base.lecturaBreve?.cita || "Rm 8, 1-2",
@@ -560,11 +660,15 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
 
     // 6. CÁNTICO EVANGÉLICO
     const cEvanRaw = d.cEvan_Conclusion || d.canticoEvangelico || {};
+    const canticoTipo = (libro === 'visperas' || libro === 'vispera') ? 'Magníficat' : (libro === 'completas' ? 'Nunc Dimittis' : 'Benedictus');
+    const canticoId = cEvanRaw.id || ((libro === 'visperas' || libro === 'vispera') ? 'magnificat' : (libro === 'completas' ? 'nuncdimittis' : 'benedictus'));
+    const ceInfo = resolverSalmoLiturgicoNorm(canticoId, cEvanRaw.titulo || cEvanRaw.canticoZacariast, cEvanRaw.texto || cEvanRaw.canticoZacarias, canticoId, base.canticoEvangelico?.texto || "", base.canticoEvangelico?.titulo || "");
     const canticoEvangelicoNorm = {
-        tipo: libro === 'visperas' ? 'Magníficat' : (libro === 'completas' ? 'Nunc Dimittis' : 'Benedictus'),
+        id: ceInfo.id || canticoId,
+        tipo: canticoTipo,
         antifona: cEvanRaw.antifona || cEvanRaw.cEvangelicoAnt || base.canticoEvangelico?.antifona || "Se presentó Jesús en medio de sus discípulos...",
-        titulo: cEvanRaw.titulo || cEvanRaw.canticoZacariast || base.canticoEvangelico?.titulo || "Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR",
-        texto: cEvanRaw.texto || cEvanRaw.canticoZacarias || base.canticoEvangelico?.texto || "Bendito sea el Señor, Dios de Israel..."
+        titulo: ceInfo.titulo || cEvanRaw.titulo || cEvanRaw.canticoZacariast || base.canticoEvangelico?.titulo || "Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR",
+        texto: ceInfo.texto || cEvanRaw.texto || cEvanRaw.canticoZacarias || base.canticoEvangelico?.texto || "Bendito sea el Señor, Dios de Israel..."
     };
 
     // 7. PRECES
@@ -723,14 +827,14 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
             salmo3Texto: salmodiaNorm.salmo3Texto
         },
         LecturaBreve: {
-            LecturaCita: lecturaBreveNorm.cita,
-            LecturaTexto: lecturaBreveNorm.texto,
-            responsorio1: rbNorm.v1,
-            responsorio2: rbNorm.r1,
-            responsorio3: rbNorm.v2,
-            responsorio4: rbNorm.r2,
-            gloria: rbNorm.v3,
-            responsorio5: rbNorm.r3
+            LecturaCita: lecturaBreveNorm.cita || "",
+            LecturaTexto: lecturaBreveNorm.texto || "",
+            responsorio1: rbNorm.v1 || rbNorm.v || "",
+            responsorio2: rbNorm.r1 || rbNorm.r || "",
+            responsorio3: rbNorm.v2 || "",
+            responsorio4: rbNorm.r2 || "",
+            gloria: rbNorm.v3 || "",
+            responsorio5: rbNorm.r3 || ""
         },
         cEvan_Conclusion: {
             cEvangelicoAnt: canticoEvangelicoNorm.antifona,
@@ -976,11 +1080,23 @@ export function obtenerHoraLocalSincrona(idCodigo, libroTarget = null) {
             if (raw) {
                 let parsed = JSON.parse(raw);
                 if (parsed) {
-                    if (libroTarget && parsed.horas && parsed.horas[libroTarget]) {
-                        parsed = { ...parsed, ...parsed.horas[libroTarget] };
+                    const libroAlt = libroTarget === 'vispera' ? 'visperas' : (libroTarget === 'visperas' ? 'vispera' : libroTarget);
+                    if (libroTarget && parsed.horas && (parsed.horas[libroTarget] || parsed.horas[libroAlt])) {
+                        parsed = { ...parsed, ...(parsed.horas[libroTarget] || parsed.horas[libroAlt]) };
+                    } else if (libroTarget && parsed.horas && !parsed.horas[libroTarget] && !parsed.horas[libroAlt]) {
+                        continue;
+                    } else if (libroTarget && parsed.libro) {
+                        const parsedLib = (parsed.libro || '').toLowerCase();
+                        const targetLib = (libroTarget || '').toLowerCase();
+                        const coincide = (parsedLib === targetLib) ||
+                                         (targetLib === 'visperas' && parsedLib === 'vispera') ||
+                                         (targetLib === 'vispera' && parsedLib === 'visperas');
+                        if (!coincide) {
+                            continue;
+                        }
                     }
                     console.log(`📦 [Local Síncrono] Hora litúrgica '${candId}' recuperada de LocalStorage.`);
-                    return normalizarObjetoLiturgico(parsed, idCodigo);
+                    return normalizarObjetoLiturgico(parsed, idCodigo, { libro: libroTarget });
                 }
             }
         } catch (_) {}
@@ -1113,8 +1229,21 @@ export async function consultarHoraEnFirebase(idCodigo, params = {}) {
                 if (docSnap.exists()) {
                     console.log(`✅ [Firebase] Documento '${candId}' encontrado en Firestore.`);
                     const rawData = docSnap.data();
-                    if (libroTarget && rawData.horas && rawData.horas[libroTarget]) {
-                        return { candId, data: { ...rawData, ...rawData.horas[libroTarget] } };
+                    const libroAlt = libroTarget === 'vispera' ? 'visperas' : (libroTarget === 'visperas' ? 'vispera' : libroTarget);
+                    if (libroTarget && rawData.horas && (rawData.horas[libroTarget] || rawData.horas[libroAlt])) {
+                        return { candId, data: { ...rawData, ...(rawData.horas[libroTarget] || rawData.horas[libroAlt]) } };
+                    } else if (libroTarget && rawData.horas) {
+                        return null;
+                    }
+                    if (libroTarget && rawData.libro) {
+                        const rawLib = (rawData.libro || '').toLowerCase();
+                        const targetLib = (libroTarget || '').toLowerCase();
+                        const coincide = (rawLib === targetLib) ||
+                                         (targetLib === 'visperas' && rawLib === 'vispera') ||
+                                         (targetLib === 'vispera' && rawLib === 'visperas');
+                        if (!coincide) {
+                            return null;
+                        }
                     }
                     return { candId, data: rawData };
                 }

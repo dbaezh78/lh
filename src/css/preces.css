@@ -349,6 +349,15 @@ body {
     color: #111;
 }
 
+.preview-conclusion-preces p {
+    margin: 0 0 14px 0;
+    line-height: 1.6;
+}
+
+.preview-conclusion-preces p:last-child {
+    margin-bottom: 0;
+}
+
 .preview-padrenuestro-link {
     color: var(--accent-red);
     font-size: 1.05rem;

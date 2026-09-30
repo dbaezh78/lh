@@ -41,6 +41,7 @@ body.pagina-salterios {
     @media (min-width: 411px){
         padding: 85px 12px 120px;
         margin-top: 24px;
+        max-width: max-content;
     }
 }
 
@@ -56,6 +57,10 @@ body.pagina-salterios {
     text-transform: uppercase;
     margin: 0 0 4px 0;
     letter-spacing: 0.5px;
+
+    @media(min-width: 411px){font-size: calc(1.05 * var(--size) * var(--font-zoom));}
+    @media(min-width: 768px){font-size: calc(1.5 * var(--size) * var(--font-zoom));}
+    @media(min-width: 992px){font-size: calc(1.9 * var(--size) * var(--font-zoom));}
 }
 
 /* Subtítulo del Libro (en cursiva roja) */
@@ -70,7 +75,7 @@ body.pagina-salterios {
 .salterio-seccion-header {
     color: var(--salterio-rubrica);
     font-size: calc(1.12 * var(--size) * var(--font-zoom));
-    text-transform: uppercase;
+    /*text-transform: uppercase;*/ /*ESTO NO LO QUIERO*/
     margin: 24px 0 10px 0;
     letter-spacing: 0.5px;
 }
@@ -207,11 +212,15 @@ body.pagina-salterios {
     font-size: calc(var(--size) * var(--font-zoom));
 }
 
-/* Responsorio de las lecturas */
+/* Responsorio de las lecturas y responsorio breve */
 .responsorio-bloque {
     margin: 16px 0;
     line-height: 1.6;
     font-size: calc(var(--size) * var(--font-zoom));
+}
+
+.responsorio-espacio {
+    height: 14px;
 }
 
 .rubrica-asterisco,
@@ -259,6 +268,16 @@ body.pagina-salterios {
     margin: 0 0 20px 0;
     line-height: 1.6;
     font-size: calc(var(--size) * var(--font-zoom));
+    white-space: pre-line;
+}
+
+.preces-conclusion p {
+    margin: 0 0 14px 0;
+    line-height: 1.6;
+}
+
+.preces-conclusion p:last-child {
+    margin-bottom: 0;
 }
 
 /* Padre Nuestro Interactivo y Desplegable */
@@ -474,4 +493,13 @@ body.pagina-salterios {
 .btn-c-accion.verde {
     background: #10b981;
     border-color: #059669;
+}
+
+
+/*Citas de las horas*/
+.hcitas {
+    font-weight: normal; 
+    font-size: calc(1.1 * var(--size) * var(--font-zoom));
+    color: #ff0000; 
+    margin-left: 8px;
 }

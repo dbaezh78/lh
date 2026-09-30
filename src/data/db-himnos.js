@@ -775,6 +775,7 @@ export const CATALOGO_HIMNOS_SEED = [
 export const HimnosDB = {
     lista: CATALOGO_HIMNOS_SEED,
     listar: () => CATALOGO_HIMNOS_SEED,
+    obtener: (id) => CATALOGO_HIMNOS_SEED.find(h => h.id === id || h.varName === id),
     obtenerPorId: (id) => CATALOGO_HIMNOS_SEED.find(h => h.id === id || h.varName === id),
     filtrar: (tiempo, semana, dia, libro) => {
         return CATALOGO_HIMNOS_SEED.filter(h => {

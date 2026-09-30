@@ -156,32 +156,32 @@
                         <textarea id="form-texto" placeholder="Pega o escribe el texto de la lectura bíblica..." required spellcheck="false"></textarea>
                     </div>
 
-                    <!-- Campos del Responsorio Breve -->
-                    <div class="seccion-form-responsorio">
-                        <h3>
+                    <!-- Campos del Responsorio Breve / Versículo -->
+                    <div class="seccion-form-responsorio" id="seccion-form-responsorio">
+                        <h3 id="titulo-seccion-responsorio">
                             <span class="material-symbols-outlined" style="font-size: 1.2rem;">format_quote</span>
-                            RESPONSORIO BREVE
+                            <span id="texto-titulo-seccion-responsorio">RESPONSORIO BREVE</span>
                         </h3>
                         
-                        <div class="campo-grupo">
-                            <label for="form-rb1">
+                        <div class="campo-grupo" id="grupo-form-rb1">
+                            <label for="form-rb1" id="lbl-form-rb1">
                                 <span style="color: #ff8a80; font-weight: bold;">V. y R. Principal:</span> (Se repite 3 veces en V.1, R.1 y tras el Gloria en R.3)
                             </label>
                             <input type="text" id="form-rb1" placeholder="ej: Cristo, Hijo de Dios vivo, ten piedad de nosotros." required>
                         </div>
 
-                        <div class="row-campos">
-                            <div class="campo-grupo">
-                                <label for="form-rb2"><span style="color: #ff8a80; font-weight: bold;">V. Segundo Versículo:</span></label>
+                        <div class="row-campos" id="row-campos-rb2-rb3">
+                            <div class="campo-grupo" id="grupo-form-rb2">
+                                <label for="form-rb2" id="lbl-form-rb2"><span style="color: #ff8a80; font-weight: bold;">V. Segundo Versículo:</span></label>
                                 <input type="text" id="form-rb2" placeholder="ej: Tú que hoy te has manifestado." required>
                             </div>
-                            <div class="campo-grupo">
-                                <label for="form-rb3"><span style="color: #ff8a80; font-weight: bold;">R. Segunda Respuesta:</span></label>
+                            <div class="campo-grupo" id="grupo-form-rb3">
+                                <label for="form-rb3" id="lbl-form-rb3"><span style="color: #ff8a80; font-weight: bold;">R. Segunda Respuesta:</span></label>
                                 <input type="text" id="form-rb3" placeholder="ej: Ten piedad de nosotros." required>
                             </div>
                         </div>
 
-                        <div class="nota-fija">
+                        <div class="nota-fija" id="nota-fija-responsorio">
                             <strong>Dato litúrgico fijo:</strong> Los rótulos <em>"LECTURA BREVE"</em> y <em>"RESPONSORIO BREVE"</em> son invariables. El tercer versículo <em>"V. Gloria al Padre, y al Hijo, y al Espíritu Santo."</em> se genera automáticamente.
                         </div>
                     </div>
@@ -218,41 +218,45 @@
                         El Espíritu del Señor está sobre mí, porque el Señor me ha ungido. Me ha enviado para dar la buena noticia a los pobres, para vendar los corazones desgarrados, para proclamar la amnistía a los cautivos, la libertad a los prisioneros, para proclamar el año de gracia del Señor.
                     </div>
 
-                    <!-- 3. Encabezado Responsorio Breve -->
-                    <div class="preview-titulo-responsorio">RESPONSORIO BREVE</div>
+                    <!-- 3. Encabezado Responsorio Breve (Se oculta en Tercia, Sexta y Nona) -->
+                    <div class="preview-titulo-responsorio" id="preview-titulo-responsorio">RESPONSORIO BREVE</div>
 
                     <!-- 4. Responsorios con sus respectivos espacios -->
-                    <div class="preview-fila-resp">
+                    <!-- Bloque V1 / R1 (o único V. y R. en Tercia, Sexta, Nona) -->
+                    <div class="preview-fila-resp" id="preview-fila-v1">
                         <span class="preview-letra-roja">V.</span>
                         <span class="preview-texto-resp" id="preview-v1">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
                     </div>
-                    <div class="preview-fila-resp">
+                    <div class="preview-fila-resp" id="preview-fila-r1">
                         <span class="preview-letra-roja">R.</span>
                         <span class="preview-texto-resp" id="preview-r1">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
                     </div>
 
-                    <!-- Espacio entre estrofas -->
-                    <div class="preview-espacio-resp"></div>
+                    <!-- Bloque adicional para horas mayores (Laudes, Vísperas, Completas) -->
+                    <div id="preview-bloque-mayor">
+                        <!-- Espacio entre estrofas -->
+                        <div class="preview-espacio-resp"></div>
 
-                    <div class="preview-fila-resp">
-                        <span class="preview-letra-roja">V.</span>
-                        <span class="preview-texto-resp" id="preview-v2">Tú que hoy te has manifestado.</span>
-                    </div>
-                    <div class="preview-fila-resp">
-                        <span class="preview-letra-roja">R.</span>
-                        <span class="preview-texto-resp" id="preview-r2">Ten piedad de nosotros.</span>
-                    </div>
+                        <div class="preview-fila-resp">
+                            <span class="preview-letra-roja">V.</span>
+                            <span class="preview-texto-resp" id="preview-v2">Tú que hoy te has manifestado.</span>
+                        </div>
+                        <div class="preview-fila-resp">
+                            <span class="preview-letra-roja">R.</span>
+                            <span class="preview-texto-resp" id="preview-r2">Ten piedad de nosotros.</span>
+                        </div>
 
-                    <!-- Espacio entre estrofas -->
-                    <div class="preview-espacio-resp"></div>
+                        <!-- Espacio entre estrofas -->
+                        <div class="preview-espacio-resp"></div>
 
-                    <div class="preview-fila-resp">
-                        <span class="preview-letra-roja">V.</span>
-                        <span class="preview-texto-resp">Gloria al Padre, y al Hijo, y al Espíritu Santo.</span>
-                    </div>
-                    <div class="preview-fila-resp">
-                        <span class="preview-letra-roja">R.</span>
-                        <span class="preview-texto-resp" id="preview-r3">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
+                        <div class="preview-fila-resp">
+                            <span class="preview-letra-roja">V.</span>
+                            <span class="preview-texto-resp">Gloria al Padre, y al Hijo, y al Espíritu Santo.</span>
+                        </div>
+                        <div class="preview-fila-resp">
+                            <span class="preview-letra-roja">R.</span>
+                            <span class="preview-texto-resp" id="preview-r3">Cristo, Hijo de Dios vivo, ten piedad de nosotros.</span>
+                        </div>
                     </div>
                 </div>
             </section>

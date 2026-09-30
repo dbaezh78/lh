@@ -157,6 +157,7 @@ function actualizarModoTiempo(valorPrevioSemana = null) {
                 if (inputFechaCeleb && opt) {
                     inputFechaCeleb.value = opt.getAttribute('data-fecha') || '';
                 }
+                recordarParametros();
                 manejarCambioParametros();
             }
         });
@@ -194,6 +195,58 @@ function actualizarModoTiempo(valorPrevioSemana = null) {
             selSemana.selectedIndex = 0;
         }
     }
+}
+
+// Guardar y restaurar parámetros litúrgicos seleccionados
+function recordarParametros() {
+    try {
+        const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+        const selSem = document.getElementById('form-semana');
+        const semana = selSem?.value || '1';
+        const optSanto = (tiempo === 'santos') ? selSem?.selectedOptions[0] : null;
+        const santoId = (tiempo === 'santos') ? (optSanto?.value || semana) : '';
+        const santoNombre = (tiempo === 'santos') ? (optSanto?.getAttribute('data-nombre') || '') : '';
+        const dia = document.getElementById('form-dia')?.value || 'lunes';
+        const fechaCeleb = document.getElementById('form-fecha-celebracion')?.value || '';
+        const libro = document.getElementById('form-libro')?.value || 'laudes';
+
+        const params = { tiempo, semana, santoId, santoNombre, dia, fechaCeleb, libro };
+        localStorage.setItem('lh_oracion_ultimos_parametros', JSON.stringify(params));
+        localStorage.setItem('lh_parametros_liturgicos_compartidos', JSON.stringify(params));
+    } catch (_) {}
+}
+
+function restaurarParametros() {
+    try {
+        const raw = localStorage.getItem('lh_oracion_ultimos_parametros') || localStorage.getItem('lh_parametros_liturgicos_compartidos');
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        if (!p) return;
+
+        const selTiempo = document.getElementById('form-tiempo');
+        if (selTiempo && p.tiempo) {
+            selTiempo.value = p.tiempo;
+            actualizarModoTiempo(p.santoId || p.semana);
+        }
+        const selSemana = document.getElementById('form-semana');
+        if (selSemana && (p.santoId || p.semana)) {
+            const val = p.santoId || p.semana;
+            if (Array.from(selSemana.options).some(o => o.value === val)) {
+                selSemana.value = val;
+            }
+        }
+        if (p.tiempo === 'santos') {
+            const inpFecha = document.getElementById('form-fecha-celebracion');
+            if (inpFecha && p.fechaCeleb) inpFecha.value = p.fechaCeleb;
+        } else {
+            const selDia = document.getElementById('form-dia');
+            if (selDia && p.dia) selDia.value = p.dia;
+        }
+        const selLibro = document.getElementById('form-libro');
+        if (selLibro && p.libro) {
+            selLibro.value = p.libro;
+        }
+    } catch (_) {}
 }
 
 // Buscar oración existente en memoria/catálogo
@@ -279,6 +332,7 @@ function manejarCambioParametros() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     actualizarModoTiempo();
+    restaurarParametros();
     configurarEventos();
     await cargarDatos();
     renderizarLista();
@@ -436,6 +490,7 @@ function configurarEventos() {
         // Cambio en selector de tiempo litúrgico
         document.getElementById('form-tiempo')?.addEventListener('change', () => {
             actualizarModoTiempo();
+            recordarParametros();
             manejarCambioParametros();
         });
 
@@ -450,17 +505,20 @@ function configurarEventos() {
                     inputFecha.value = opt.getAttribute('data-fecha') || '';
                 }
             }
+            recordarParametros();
             manejarCambioParametros();
         });
 
         // Cambio en fecha de celebración
         document.getElementById('form-fecha-celebracion')?.addEventListener('input', () => {
+            recordarParametros();
             manejarCambioParametros();
         });
 
         // Cambio en día y libro
         ['form-dia', 'form-libro'].forEach(id => {
             document.getElementById(id)?.addEventListener('change', () => {
+                recordarParametros();
                 manejarCambioParametros();
             });
         });
@@ -548,7 +606,22 @@ function renderizarLista() {
             const txt = (o.texto || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const oId = (o.id || '').toLowerCase();
             const sNom = (o.santoNombre || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return tit.includes(fTexto) || txt.includes(fTexto) || oId.includes(fTexto) || sNom.includes(fTexto);
+
+            let coincideFecha = false;
+            const rawFecha = o.fechaCelebracion || o.fecha || '';
+            let mF = rawFecha.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+            if (!mF) mF = (o.id || '').match(/^sa(\d{2})(\d{2})/i);
+            if (!mF) mF = (o.titulo || '').match(/\((\d{1,2})[\/\-](\d{1,2})\)/);
+            if (mF) {
+                const dd = String(parseInt(mF[1], 10)).padStart(2, '0');
+                const mm = String(parseInt(mF[2], 10)).padStart(2, '0');
+                const d = String(parseInt(mF[1], 10));
+                const m = String(parseInt(mF[2], 10));
+                const variantes = [`${dd}/${mm}`, `${d}/${m}`, `${d}/${mm}`, `${dd}/${m}`, `${dd}-${mm}`, `${d}-${m}`, `${dd}${mm}`];
+                coincideFecha = variantes.some(v => v.includes(fTexto) || fTexto.includes(v));
+            }
+
+            return tit.includes(fTexto) || txt.includes(fTexto) || oId.includes(fTexto) || sNom.includes(fTexto) || coincideFecha;
         }
         return true;
     });
@@ -709,7 +782,8 @@ async function guardarOracion(e) {
         console.warn('No se pudo sincronizar individualmente con Firebase:', err);
     }
 
-    limpiarFormulario();
+    recordarParametros();
+    limpiarFormulario(true);
     renderizarLista();
     actualizarLivePreview();
 }
@@ -736,19 +810,57 @@ async function eliminarOracion(id) {
 }
 
 // Limpiar formulario y reiniciar estado
-function limpiarFormulario() {
+function limpiarFormulario(preservarParametros = true) {
     editandoId = null;
-    document.getElementById('form-oracion')?.reset();
-    document.getElementById('form-id').value = '';
-    document.getElementById('form-titulo').value = '';
-    if (document.getElementById('form-oremos')) document.getElementById('form-oremos').value = '';
-    document.getElementById('form-texto').value = '';
-    document.getElementById('form-conclusion').value = '';
+
+    const tiempoActual = document.getElementById('form-tiempo')?.value;
+    const semanaActual = document.getElementById('form-semana')?.value;
+    const diaActual = document.getElementById('form-dia')?.value;
+    const libroActual = document.getElementById('form-libro')?.value;
+    const fechaActual = document.getElementById('form-fecha-celebracion')?.value;
+
+    const txtId = document.getElementById('form-id');
+    const txtTitulo = document.getElementById('form-titulo');
+    const txtOremos = document.getElementById('form-oremos');
+    const txtTexto = document.getElementById('form-texto');
+    const txtConcl = document.getElementById('form-conclusion');
+
+    if (txtId) txtId.value = '';
+    if (txtTitulo) txtTitulo.value = '';
+    if (txtOremos) txtOremos.value = '';
+    if (txtTexto) txtTexto.value = '';
+    if (txtConcl) txtConcl.value = '';
+
+    if (!preservarParametros) {
+        document.getElementById('form-oracion')?.reset();
+        actualizarModoTiempo();
+    } else {
+        if (document.getElementById('form-tiempo') && tiempoActual) {
+            document.getElementById('form-tiempo').value = tiempoActual;
+        }
+        actualizarModoTiempo(semanaActual);
+        if (document.getElementById('form-semana') && semanaActual) {
+            document.getElementById('form-semana').value = semanaActual;
+        }
+        if (tiempoActual === 'santos') {
+            if (document.getElementById('form-fecha-celebracion') && fechaActual) {
+                document.getElementById('form-fecha-celebracion').value = fechaActual;
+            }
+        } else {
+            if (document.getElementById('form-dia') && diaActual) {
+                document.getElementById('form-dia').value = diaActual;
+            }
+        }
+        if (document.getElementById('form-libro') && libroActual) {
+            document.getElementById('form-libro').value = libroActual;
+        }
+    }
 
     const btnGuardar = document.getElementById('btn-guardar-texto');
     if (btnGuardar) btnGuardar.textContent = 'Guardar Oración';
     document.getElementById('titulo-formulario').innerHTML = `<span class="material-symbols-outlined">add_circle</span> Nueva Oración`;
 
+    manejarCambioParametros();
     actualizarLivePreview();
 }
 

@@ -116,7 +116,39 @@ export function inicializarSearchableSantoSelect(selectElement, options = {}) {
             const tText = normalizarTextoBusqueda(opt.textContent || '');
             const tNombre = normalizarTextoBusqueda(opt.getAttribute('data-nombre') || '');
             const tFecha = normalizarTextoBusqueda(opt.getAttribute('data-fecha') || '');
-            li.setAttribute('data-search', `${tText} ${tNombre} ${tFecha}`.trim());
+
+            // Variantes de fecha de celebración (ej: 01/01, 1/1, 01-01, 0101, 29/06, 29/6, 2906)
+            let dateVariants = [];
+            const rawFecha = opt.getAttribute('data-fecha') || '';
+            let mFecha = rawFecha.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+            if (!mFecha) {
+                mFecha = (opt.textContent || '').match(/\((\d{1,2})[\/\-](\d{1,2})\)/);
+            }
+            if (!mFecha) {
+                mFecha = (opt.value || '').match(/^sa(\d{2})(\d{2})/i);
+            }
+            if (mFecha) {
+                const dNum = parseInt(mFecha[1], 10);
+                const mNum = parseInt(mFecha[2], 10);
+                if (!isNaN(dNum) && !isNaN(mNum) && dNum >= 1 && dNum <= 31 && mNum >= 1 && mNum <= 12) {
+                    const dd = String(dNum).padStart(2, '0');
+                    const mm = String(mNum).padStart(2, '0');
+                    const dStr = String(dNum);
+                    const mStr = String(mNum);
+                    dateVariants = [
+                        `${dd}/${mm}`,
+                        `${dStr}/${mStr}`,
+                        `${dStr}/${mm}`,
+                        `${dd}/${mStr}`,
+                        `${dd}-${mm}`,
+                        `${dStr}-${mStr}`,
+                        `${dd}${mm}`,
+                        `${dd} ${mm}`
+                    ];
+                }
+            }
+
+            li.setAttribute('data-search', `${tText} ${tNombre} ${tFecha} ${dateVariants.join(' ')}`.trim());
 
             li.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -142,12 +174,16 @@ export function inicializarSearchableSantoSelect(selectElement, options = {}) {
 
     // Filtro en tiempo real al tipear
     searchInput.addEventListener('input', () => {
-        const query = normalizarTextoBusqueda(searchInput.value);
+        const raw = searchInput.value.trim();
+        const query = normalizarTextoBusqueda(raw);
         const lis = ul.querySelectorAll('.custom-select-santo-opcion:not(.sin-resultados)');
         let visibles = 0;
         lis.forEach(li => {
             const searchStr = li.getAttribute('data-search') || normalizarTextoBusqueda(li.textContent || '');
-            const coincide = !query || searchStr.includes(query);
+            let coincide = !query || searchStr.includes(query);
+            if (!coincide && raw) {
+                coincide = searchStr.includes(raw.toLowerCase());
+            }
             li.style.display = coincide ? 'block' : 'none';
             if (coincide) visibles++;
         });

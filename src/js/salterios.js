@@ -312,6 +312,12 @@ const LIBROS_CONFIG = {
         orden: 6,
         icono: 'nightlight'
     },
+    vispera: {
+        nombre: 'VÍSPERAS',
+        subtitulo: '(Oración de la tarde)',
+        orden: 6,
+        icono: 'nightlight'
+    },
     completas: {
         nombre: 'COMPLETAS',
         subtitulo: '(Oración antes del descanso nocturno)',
@@ -333,7 +339,101 @@ document.addEventListener('DOMContentLoaded', async () => {
     await cargarYRenderizarHora(params);
     inicializarConstructor();
     inicializarEventosInteractivos();
+    sincronizarSalmosDesdeFirestore();
 });
+
+// Sincroniza en segundo plano los salmos editados desde Firebase Firestore
+async function sincronizarSalmosDesdeFirestore() {
+    try {
+        if (window.firebaseAPI && window.firebaseAPI.db) {
+            const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+            const snap = await getDocs(collection(window.firebaseAPI.db, "salmos"));
+            if (!snap.empty) {
+                const desdeFb = [];
+                snap.forEach(d => desdeFb.push({ id: d.id, ...d.data() }));
+                if (desdeFb.length > 0) {
+                    localStorage.setItem('lh_salmos_cache', JSON.stringify(desdeFb));
+                    if (horaActualDatos && typeof renderizarCuerpoLiturgico === 'function') {
+                        renderizarCuerpoLiturgico(horaActualDatos);
+                    }
+                }
+            }
+        }
+    } catch (_) {}
+}
+
+/**
+ * Resuelve dinámicamente un salmo litúrgico por su ID en el catálogo global
+ * (SalmosDB / lh_salmos_cache) para reflejar cambios de títulos o textos en tiempo real.
+ */
+export function resolverSalmoLiturgico(id, titGuardado, txtGuardado, idFallback = null) {
+    const sdb = (typeof window !== 'undefined') ? window.SalmosDB : null;
+    let sObj = null;
+
+    if (sdb && typeof sdb.obtener === 'function') {
+        if (id) {
+            sObj = sdb.obtener(id);
+        }
+        if (!sObj && titGuardado) {
+            const m = String(titGuardado).match(/salmo\s*(\d+[a-zA-Z]?)/i);
+            if (m) {
+                const num = m[1];
+                sObj = sdb.obtener(`Salmo_${num}`) || sdb.obtener(`salmo${num}`) || sdb.obtener(`salmo_${num}`) || sdb.obtener(num);
+            }
+            if (!sObj && typeof sdb.buscar === 'function') {
+                const buscados = sdb.buscar(titGuardado);
+                if (buscados && buscados.length > 0) sObj = buscados[0];
+            }
+        }
+        if (!sObj && idFallback) {
+            sObj = sdb.obtener(idFallback);
+        }
+    }
+
+    if (!sObj && typeof localStorage !== 'undefined') {
+        try {
+            const raw = localStorage.getItem('lh_salmos_cache');
+            if (raw) {
+                const list = JSON.parse(raw);
+                if (Array.isArray(list)) {
+                    const cleanId = String(id || idFallback || '').toLowerCase().replace(/[\s\-_]/g, '');
+                    const eqMap = {
+                        'salmo94': ['invitatorio1', 'salmo94'],
+                        'invitatorio1': ['salmo94', 'invitatorio1'],
+                        'salmo99': ['invitatorio2', 'salmo99'],
+                        'invitatorio2': ['salmo99', 'invitatorio2'],
+                        'salmo66': ['invitatorio3', 'salmo66'],
+                        'invitatorio3': ['salmo66', 'invitatorio3'],
+                        'salmo23': ['invitatorio4', 'salmo23'],
+                        'invitatorio4': ['salmo23', 'invitatorio4']
+                    };
+                    const candidatos = eqMap[cleanId] || [cleanId];
+                    for (const cand of candidatos) {
+                        const candNorm = cand.toLowerCase().replace(/[\s\-_]/g, '');
+                        sObj = list.find(s => s && (s.id === cand || String(s.id).toLowerCase().replace(/[\s\-_]/g, '') === candNorm));
+                        if (sObj) break;
+                    }
+                    if (!sObj && titGuardado) {
+                        const m = String(titGuardado).match(/salmo\s*(\d+[a-zA-Z]?)/i);
+                        if (m) {
+                            const cleanNum = `salmo${m[1]}`.toLowerCase();
+                            sObj = list.find(s => s && String(s.id).toLowerCase().replace(/[\s\-_]/g, '') === cleanNum);
+                        }
+                    }
+                }
+            }
+        } catch (_) {}
+    }
+
+    const titFinal = sObj ? (sObj.titulo || titGuardado || '') : (titGuardado || '');
+    const txtFinal = sObj ? (sObj.texto || txtGuardado || '') : (txtGuardado || '');
+
+    return {
+        id: sObj ? sObj.id : (id || idFallback || ''),
+        titulo: titFinal,
+        texto: txtFinal
+    };
+}
 
 // Decodificador del código litúrgico estándar (ej: tos24sala, tos01dola, tos1LAdo, tos1lami)
 export function decodificarCodigoLiturgico(codigo) {
@@ -488,17 +588,21 @@ export function decodificarCodigoLiturgico(codigo) {
 function obtenerParametrosUrl() {
     const search = window.location.search || '';
     const p = new URLSearchParams(search);
-    const horaParam = p.get('libro') || p.get('hora');
+    let horaParam = p.get('libro') || p.get('hora');
+    if (horaParam && horaParam.toLowerCase() === 'vispera') {
+        horaParam = 'visperas';
+    }
 
     // 1. Detectar si viene ?id=tos24sala, ?codigo=..., o ?laudes=tas1dola
-    const posibleCodigo = p.get('id') || p.get('codigo') || p.get('laudes') || p.get('oficio') || p.get('tercia') || p.get('visperas') || p.get('completas');
+    const posibleCodigo = p.get('id') || p.get('codigo') || p.get('laudes') || p.get('oficio') || p.get('tercia') || p.get('visperas') || p.get('vispera') || p.get('completas');
     if (posibleCodigo) {
         const dec = decodificarCodigoLiturgico(posibleCodigo);
         if (dec) {
             const tieneSufijoHora = /(of|la|te|se|no|vi|co)$/i.test(posibleCodigo.trim());
-            if (!tieneSufijoHora && horaParam) {
+            if (horaParam) {
                 dec.libro = horaParam.toLowerCase();
             }
+            if (dec.libro === 'vispera') dec.libro = 'visperas';
             if (p.get('santo')) dec.santo = p.get('santo');
             if (p.get('fiesta')) dec.fiesta = p.get('fiesta');
             if (p.get('fecha')) dec.fecha = p.get('fecha');
@@ -506,15 +610,26 @@ function obtenerParametrosUrl() {
                 dec.tiempo = 'fiestas';
                 dec.formato = 'fiesta';
             }
+            if (horaParam && tieneSufijoHora) {
+                const mapH = { oficio: 'of', laudes: 'la', tercia: 'te', sexta: 'se', nona: 'no', visperas: 'vi', completas: 'co' };
+                const baseCod = posibleCodigo.trim().replace(/(?:of|la|te|se|no|vi|co)$/i, '');
+                const hCode = mapH[dec.libro] || 'la';
+                dec.codigoCompleto = `${baseCod}${hCode}`;
+            }
             return dec;
         }
         if (posibleCodigo.toLowerCase().startsWith('sa') || p.get('tiempo') === 'santos') {
+            const libNorm = (horaParam || 'laudes').toLowerCase();
+            const targetLib = libNorm === 'vispera' ? 'visperas' : libNorm;
+            const mapH = { oficio: 'of', laudes: 'la', tercia: 'te', sexta: 'se', nona: 'no', visperas: 'vi', completas: 'co' };
+            const baseCod = posibleCodigo.trim().replace(/(?:of|la|te|se|no|vi|co)$/i, '');
+            const hCode = mapH[targetLib] || 'la';
             return {
                 tiempo: 'santos',
                 semana: 1,
-                dia: posibleCodigo,
-                libro: (horaParam || 'laudes').toLowerCase(),
-                codigoCompleto: posibleCodigo,
+                dia: baseCod,
+                libro: targetLib,
+                codigoCompleto: `${baseCod}${hCode}`,
                 santo: p.get('santo') || '',
                 fecha: p.get('fecha') || ''
             };
@@ -526,11 +641,13 @@ function obtenerParametrosUrl() {
         const decK = decodificarCodigoLiturgico(key);
         if (decK) {
             if (horaParam) decK.libro = horaParam.toLowerCase();
+            if (decK.libro === 'vispera') decK.libro = 'visperas';
             return decK;
         }
         const decV = decodificarCodigoLiturgico(val);
         if (decV) {
             if (horaParam) decV.libro = horaParam.toLowerCase();
+            if (decV.libro === 'vispera') decV.libro = 'visperas';
             return decV;
         }
     }
@@ -538,7 +655,8 @@ function obtenerParametrosUrl() {
     const t = p.get('tiempo') || 'ordinario';
     const s = p.get('semana') ? parseInt(p.get('semana'), 10) : 24;
     const d = p.get('dia') || 'sabado';
-    const lib = (horaParam || 'laudes').toLowerCase();
+    let lib = (horaParam || 'laudes').toLowerCase();
+    if (lib === 'vispera') lib = 'visperas';
 
     // Auto-generar el código canónico id (ej: tos01doof o tos24sala)
     const mapT = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'san' };
@@ -1082,6 +1200,7 @@ function renderizarCuerpoLiturgico(d) {
         if (d.invitatorio && d.invitatorio.activo && !omitirInvitatorioCompleto) {
             const omitirInv_E = Boolean(om.antifonaInvitatorio || om.antifonaInvitatorio_E);
             const omitirInv_S = Boolean(om.antifonaInvitatorio || om.antifonaInvitatorio_S);
+            const invSalmoInfo = resolverSalmoLiturgico(d.invitatorio.salmoId, d.invitatorio.salmoTitulo, d.invitatorio.salmoTexto, 'salmo94');
             html += `
                 <div class="salterio-seccion-header">INVITATORIO</div>
                 <div class="rubrica-nota">(Si esta no es la primera oración del día, se omite el Invitatorio y se inicia directamente con la Invocación inicial)</div>
@@ -1089,8 +1208,8 @@ function renderizarCuerpoLiturgico(d) {
                 <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${d.invitatorio.r}</span></div>
                 ${!omitirInv_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
                 ${!om.salmoInvitatorio ? `
-                    <div class="salmo-titulo-rubrica">${d.invitatorio.salmoTitulo}</div>
-                    <div class="texto-estrofas-salmo">${d.invitatorio.salmoTexto}</div>
+                    <div class="salmo-titulo-rubrica">${invSalmoInfo.titulo}</div>
+                    <div class="texto-estrofas-salmo">${invSalmoInfo.texto}</div>
                 ` : ''}
                 ${!omitirInv_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
             `;
@@ -1116,9 +1235,13 @@ function renderizarCuerpoLiturgico(d) {
     }
 
     // 5. SALMODIA
-    const mostrarSalmo1 = !om.salmo1 && d.salmodia?.salmo1Texto;
-    const mostrarSalmo2 = !om.salmo2 && d.salmodia?.salmo2Texto;
-    const mostrarSalmo3 = !om.salmo3 && d.salmodia?.salmo3Texto;
+    const s1Info = resolverSalmoLiturgico(d.salmodia?.salmo1Id, d.salmodia?.salmo1Titulo, d.salmodia?.salmo1Texto);
+    const s2Info = resolverSalmoLiturgico(d.salmodia?.salmo2Id, d.salmodia?.salmo2Titulo, d.salmodia?.salmo2Texto);
+    const s3Info = resolverSalmoLiturgico(d.salmodia?.salmo3Id, d.salmodia?.salmo3Titulo, d.salmodia?.salmo3Texto);
+
+    const mostrarSalmo1 = !om.salmo1 && (s1Info.texto || d.salmodia?.salmo1Texto);
+    const mostrarSalmo2 = !om.salmo2 && (s2Info.texto || d.salmodia?.salmo2Texto);
+    const mostrarSalmo3 = !om.salmo3 && (s3Info.texto || d.salmodia?.salmo3Texto);
 
     if (d.salmodia && (mostrarSalmo1 || mostrarSalmo2 || mostrarSalmo3)) {
         html += `<div class="salterio-seccion-header">SALMODIA</div>`;
@@ -1129,8 +1252,8 @@ function renderizarCuerpoLiturgico(d) {
             const omitirAnt1_S = Boolean(om.antifona1 || om.ant1_S);
             html += `
                 ${!omitirAnt1_E && d.salmodia.ant1 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 1.</span> ${d.salmodia.ant1}</div>` : ''}
-                <div class="salmo-titulo-rubrica">${d.salmodia.salmo1Titulo}</div>
-                <div class="texto-estrofas-salmo">${d.salmodia.salmo1Texto}</div>
+                <div class="salmo-titulo-rubrica">${s1Info.titulo}</div>
+                <div class="texto-estrofas-salmo">${s1Info.texto}</div>
                 ${!omitirAnt1_S && d.salmodia.ant1 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant1}</div>` : ''}
             `;
         }
@@ -1141,8 +1264,8 @@ function renderizarCuerpoLiturgico(d) {
             const omitirAnt2_S = Boolean(om.antifona2 || om.ant2_S);
             html += `
                 ${!omitirAnt2_E && d.salmodia.ant2 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 2.</span> ${d.salmodia.ant2}</div>` : ''}
-                <div class="salmo-titulo-rubrica">${d.salmodia.salmo2Titulo}</div>
-                <div class="texto-estrofas-salmo">${d.salmodia.salmo2Texto}</div>
+                <div class="salmo-titulo-rubrica">${s2Info.titulo}</div>
+                <div class="texto-estrofas-salmo">${s2Info.texto}</div>
                 ${!omitirAnt2_S && d.salmodia.ant2 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant2}</div>` : ''}
             `;
         }
@@ -1153,8 +1276,8 @@ function renderizarCuerpoLiturgico(d) {
             const omitirAnt3_S = Boolean(om.antifona3 || om.ant3_S);
             html += `
                 ${!omitirAnt3_E && d.salmodia.ant3 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 3.</span> ${d.salmodia.ant3}</div>` : ''}
-                <div class="salmo-titulo-rubrica">${d.salmodia.salmo3Titulo}</div>
-                <div class="texto-estrofas-salmo">${d.salmodia.salmo3Texto}</div>
+                <div class="salmo-titulo-rubrica">${s3Info.titulo}</div>
+                <div class="texto-estrofas-salmo">${s3Info.texto}</div>
                 ${!omitirAnt3_S && d.salmodia.ant3 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant3}</div>` : ''}
             `;
         }
@@ -1184,14 +1307,14 @@ function renderizarCuerpoLiturgico(d) {
 
             html += `
                 <div class="lectura-oficio-contenedor" style="margin-top: 26px;">
-                    <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.15rem; margin-bottom: 4px;">${l1.epigrafeTipo || l1.titulo || 'PRIMERA LECTURA'}</div>
+                    <div class="salterio-seccion-header">${l1.epigrafeTipo || l1.titulo || 'PRIMERA LECTURA'}</div>
                     <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000; white-space: pre-line;">${(l1.cita || '').replace(/\\n/g, '<br>')}</div>
                     <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l1.descripcion || l1.subtitulo || ''}</div>
                     <div class="texto-lectura-justificado" style="white-space: pre-line;">${l1.texto || ''}</div>
                     ${(r1Raw || r2Txt) ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
-                            <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.05rem; margin-bottom: 8px;">
-                                RESPONSORIO <span style="font-weight: normal; font-size: 0.9rem; color: #555555; margin-left: 8px;">${citaResp1}</span>
+                            <div class="salterio-seccion-header">
+                                RESPONSORIO <span class="hcitas">${citaResp1}</span>
                             </div>
                             <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${r1Formateado}</span></div>
                             <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${v1Txt}</span></div>
@@ -1214,14 +1337,14 @@ function renderizarCuerpoLiturgico(d) {
 
             html += `
                 <div class="lectura-oficio-contenedor" style="margin-top: 28px;">
-                    <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.15rem; margin-bottom: 4px;">${l2.epigrafeTipo || l2.titulo || 'SEGUNDA LECTURA'}</div>
+                    <div class="salterio-seccion-header">${l2.epigrafeTipo || l2.titulo || 'SEGUNDA LECTURA'}</div>
                     <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000; white-space: pre-line;">${(l2.cita || '').replace(/\\n/g, '<br>')}</div>
                     <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l2.descripcion || l2.subtitulo || ''}</div>
                     <div class="texto-lectura-justificado" style="white-space: pre-line;">${l2.texto || ''}</div>
                     ${(r1Raw2 || r2Txt2) ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
-                            <div class="salterio-seccion-header" style="color: #ff0000; font-size: 1.05rem; margin-bottom: 8px;">
-                                RESPONSORIO <span style="font-weight: normal; font-size: 0.9rem; color: #555555; margin-left: 8px;">${citaResp2}</span>
+                            <div class="salterio-seccion-header">
+                                RESPONSORIO <span class="hcitas">${citaResp2}</span>
                             </div>
                             <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${r1Formateado2}</span></div>
                             <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${v2Txt}</span></div>
@@ -1266,44 +1389,69 @@ function renderizarCuerpoLiturgico(d) {
 
     // 8. LECTURA BREVE Y RESPONSORIO (Laudes, Horas menores, Vísperas, Completas)
     if (d.libro !== 'oficio' && d.lecturaBreve && !om.lecturaBreve) {
+        const esHoraMenor = (libroKey === 'tercia' || libroKey === 'sexta' || libroKey === 'nona');
         html += `
             <div style="margin: 24px 0;">
-                <div class="salterio-seccion-header">LECTURA BREVE <span style="font-weight: normal; font-size: 0.95rem;">${d.lecturaBreve.cita}</span></div>
+                <div class="salterio-seccion-header">LECTURA BREVE <span class="hcitas">${d.lecturaBreve.cita}</span></div>
                 <div class="texto-lectura-justificado" style="white-space: pre-line;">${d.lecturaBreve.texto}</div>
             </div>
         `;
 
         if (d.lecturaBreve.responsorioBreve) {
             const rb = d.lecturaBreve.responsorioBreve;
-            html += `
-                <div class="salterio-seccion-header">RESPONSORIO BREVE</div>
-                <div class="responsorio-bloque">
-                    <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${rb.v1}</span></div>
-                    <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rb.r1}</span></div>
-                    <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${rb.v2}</span></div>
-                    <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rb.r2}</span></div>
-                    <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${rb.v3}</span></div>
-                    <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rb.r3}</span></div>
-                </div>
-            `;
+            if (esHoraMenor) {
+                // En Tercia, Sexta y Nona no lleva encabezado "RESPONSORIO BREVE", sólo V. y R. una sola vez
+                let vFinal = rb.v || rb.v1 || '';
+                if (vFinal === 'Tú que hoy te has manifestado.' || vFinal === 'Cristo, Hijo de Dios vivo, ten piedad de nosotros.') {
+                    vFinal = '';
+                }
+                if (!vFinal && rb.v2 && rb.v2 !== 'Tú que hoy te has manifestado.' && rb.v2 !== 'Cristo, Hijo de Dios vivo, ten piedad de nosotros.') {
+                    vFinal = rb.v2;
+                }
+                let rFinal = rb.r || rb.r1 || rb.r2 || rb.r3 || '';
+                if (rFinal === 'Ten piedad de nosotros.' || rFinal === 'Cristo, Hijo de Dios vivo, ten piedad de nosotros.') {
+                    rFinal = '';
+                }
+                html += `
+                    <div style="margin: 20px 0;">
+                        <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${vFinal}</span></div>
+                        <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rFinal}</span></div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="salterio-seccion-header" style="margin-top: 24px; margin-bottom: 16px;">RESPONSORIO BREVE</div>
+                    <div class="responsorio-bloque">
+                        <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${rb.v1}</span></div>
+                        <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rb.r1}</span></div>
+                        <div class="responsorio-espacio" style="height: 14px;"></div>
+                        <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${rb.v2}</span></div>
+                        <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rb.r2}</span></div>
+                        <div class="responsorio-espacio" style="height: 14px;"></div>
+                        <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${rb.v3}</span></div>
+                        <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rb.r3}</span></div>
+                    </div>
+                `;
+            }
         }
     }
 
     // 9. CÁNTICO EVANGÉLICO (Laudes, Vísperas, Completas)
-    if (d.canticoEvangelico && !om.cantico && (d.libro === 'laudes' || d.libro === 'visperas' || d.libro === 'completas')) {
+    if (d.canticoEvangelico && !om.cantico && (d.libro === 'laudes' || d.libro === 'visperas' || d.libro === 'vispera' || d.libro === 'completas')) {
         const omitirAntCant_E = Boolean(om.antifonaCantico || om.antifonaCantico_E || om.antCant_E);
         const omitirAntCant_S = Boolean(om.antifonaCantico || om.antifonaCantico_S || om.antCant_S);
+        const ceInfo = resolverSalmoLiturgico(d.canticoEvangelico.id || d.canticoEvangelico.tipo, d.canticoEvangelico.titulo, d.canticoEvangelico.texto);
         html += `
             <div class="salterio-seccion-header">CÁNTICO EVANGÉLICO</div>
             ${!omitirAntCant_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
-            <div class="salmo-titulo-rubrica">${d.canticoEvangelico.titulo}</div>
-            <div class="texto-estrofas-salmo">${d.canticoEvangelico.texto}</div>
+            <div class="salmo-titulo-rubrica">${ceInfo.titulo}</div>
+            <div class="texto-estrofas-salmo">${ceInfo.texto}</div>
             ${!omitirAntCant_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
         `;
     }
 
     // 10. PRECES
-    if (d.preces && !om.preces && (d.libro === 'laudes' || d.libro === 'visperas')) {
+    if (d.preces && !om.preces && (d.libro === 'laudes' || d.libro === 'visperas' || d.libro === 'vispera')) {
         let precesObj = d.preces;
         const canon = (PrecesDB && typeof PrecesDB.obtener === 'function') 
             ? PrecesDB.obtener(precesObj.id || d.codigo || d.id, d.tiempo, d.semana, d.dia, d.libro)
@@ -1314,7 +1462,7 @@ function renderizarCuerpoLiturgico(d) {
         const intsRaw = Array.isArray(precesObj.intenciones) ? precesObj.intenciones : [];
 
         const esCorrupta = (introRaw.length > 110 || introRaw.includes('Cristo Jesús, que')) ||
-                           (respRaw === "Confirma, Señor, lo que has realizado en nosotros." && (d.dia !== 'sabado' || d.libro !== 'visperas')) ||
+                           (respRaw === "Confirma, Señor, lo que has realizado en nosotros." && (d.dia !== 'sabado' || (d.libro !== 'visperas' && d.libro !== 'vispera'))) ||
                            (intsRaw.some(i => String(i).includes('dígnate sostener nuestra fe')));
 
         if (canon && (esCorrupta || intsRaw.length <= 1)) {
@@ -1339,6 +1487,16 @@ function renderizarCuerpoLiturgico(d) {
             }
         }
 
+        let conclHtml = '';
+        if (concl) {
+            const conclParas = concl.split(/\r?\n\s*\r?\n/).map(p => p.trim()).filter(Boolean);
+            if (conclParas.length > 1) {
+                conclHtml = conclParas.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+            } else {
+                conclHtml = concl.replace(/\n/g, '<br>');
+            }
+        }
+
         const intencionesHtml = intenciones.map(it => `<div class="preces-intencion">${String(it).replace(/\n/g, '<br>')}</div>`).join('');
 
         html += `
@@ -1348,7 +1506,7 @@ function renderizarCuerpoLiturgico(d) {
                 ${respuesta ? `<div class="preces-respuesta-pueblo">${respuesta}</div>` : ''}
                 ${intencionesHtml}
                 <div class="rubrica-intenciones-libres">${libre}</div>
-                ${concl ? `<div class="preces-conclusion">${concl}</div>` : ''}
+                ${conclHtml ? `<div class="preces-conclusion">${conclHtml}</div>` : ''}
             </div>
         `;
     }

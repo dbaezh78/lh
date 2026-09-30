@@ -664,6 +664,14 @@ export const CATALOGO_PRECES_SEED = [
 
 export const PrecesDB = {
     listar: () => CATALOGO_PRECES_SEED,
+    obtenerPorId: (id) => {
+        if (!id) return null;
+        const cleanId = String(id).toLowerCase().trim();
+        return CATALOGO_PRECES_SEED.find(p => 
+            (p.id && p.id.toLowerCase() === cleanId) || 
+            (p.varName && p.varName.toLowerCase() === cleanId)
+        ) || null;
+    },
     obtener: (id, tiempo = null, semana = null, dia = null, libro = 'laudes') => {
         if (!id && !tiempo) return null;
         const cleanId = String(id || '').toLowerCase().trim();
@@ -675,6 +683,10 @@ export const PrecesDB = {
                 (p.varName && p.varName.toLowerCase() === cleanId)
             );
             if (direct) return direct;
+        }
+
+        if (cleanId.startsWith('sa') || tiempo === 'santos') {
+            return null;
         }
 
         // 2. Decodificar códigos litúrgicos (ej: tos01dola, tos1dola, tos01mila, ordinario_semana_1_domingo_laudes)
@@ -709,6 +721,8 @@ export const PrecesDB = {
                 decL = mVerboso[4];
             }
         }
+
+        if (decT === 'santos') return null;
 
         if (decT || decS || decD) {
             return PrecesDB.obtenerRecomendada(decT || 'ordinario', decS || 1, decD || 'domingo', decL || 'laudes');

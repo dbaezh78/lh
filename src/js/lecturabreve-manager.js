@@ -159,6 +159,7 @@ function actualizarModoTiempo(valorPrevioSemana = null) {
                 if (inputFechaCeleb && opt) {
                     inputFechaCeleb.value = opt.getAttribute('data-fecha') || '';
                 }
+                recordarParametros();
                 manejarCambioParametros();
             }
         });
@@ -199,8 +200,61 @@ function actualizarModoTiempo(valorPrevioSemana = null) {
     }
 }
 
+// Guardar y restaurar parámetros litúrgicos seleccionados
+function recordarParametros() {
+    try {
+        const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+        const selSem = document.getElementById('form-semana');
+        const semana = selSem?.value || '1';
+        const optSanto = (tiempo === 'santos') ? selSem?.selectedOptions[0] : null;
+        const santoId = (tiempo === 'santos') ? (optSanto?.value || semana) : '';
+        const santoNombre = (tiempo === 'santos') ? (optSanto?.getAttribute('data-nombre') || '') : '';
+        const dia = document.getElementById('form-dia')?.value || 'domingo';
+        const fechaCeleb = document.getElementById('form-fecha-celebracion')?.value || '';
+        const libro = (document.getElementById('form-libro')?.value || 'laudes').toLowerCase();
+
+        const params = { tiempo, semana, santoId, santoNombre, dia, fechaCeleb, libro };
+        localStorage.setItem('lh_lecturabreve_ultimos_parametros', JSON.stringify(params));
+        localStorage.setItem('lh_parametros_liturgicos_compartidos', JSON.stringify(params));
+    } catch (_) {}
+}
+
+function restaurarParametros() {
+    try {
+        const raw = localStorage.getItem('lh_lecturabreve_ultimos_parametros') || localStorage.getItem('lh_parametros_liturgicos_compartidos');
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        if (!p) return;
+
+        const selTiempo = document.getElementById('form-tiempo');
+        if (selTiempo && p.tiempo) {
+            selTiempo.value = p.tiempo;
+            actualizarModoTiempo(p.santoId || p.semana);
+        }
+        const selSemana = document.getElementById('form-semana');
+        if (selSemana && (p.santoId || p.semana)) {
+            const val = p.santoId || p.semana;
+            if (Array.from(selSemana.options).some(o => o.value === val)) {
+                selSemana.value = val;
+            }
+        }
+        if (p.tiempo === 'santos') {
+            const inpFecha = document.getElementById('form-fecha-celebracion');
+            if (inpFecha && p.fechaCeleb) inpFecha.value = p.fechaCeleb;
+        } else {
+            const selDia = document.getElementById('form-dia');
+            if (selDia && p.dia) selDia.value = p.dia;
+        }
+        const selLibro = document.getElementById('form-libro');
+        if (selLibro && p.libro) {
+            selLibro.value = p.libro.toLowerCase();
+        }
+    } catch (_) {}
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     actualizarModoTiempo();
+    restaurarParametros();
     configurarEventos();
     await cargarDatos();
     renderizarLista();
@@ -369,13 +423,102 @@ function buscarLecturaExistente(idBuscado, tiempo, semana, dia, libro) {
     return null;
 }
 
+// Actualizar la interfaz del formulario y la vista previa según la hora seleccionada (Tercia, Sexta, Nona vs Mayores)
+function actualizarModoHora() {
+    const libro = (document.getElementById('form-libro')?.value || 'laudes').toLowerCase();
+    const esHoraMenor = (libro === 'tercia' || libro === 'sexta' || libro === 'nona');
+
+    const txtTituloSeccion = document.getElementById('texto-titulo-seccion-responsorio');
+    const lblRb1 = document.getElementById('lbl-form-rb1');
+    const inputRb1 = document.getElementById('form-rb1');
+    const rowRb2Rb3 = document.getElementById('row-campos-rb2-rb3');
+    const inputRb2 = document.getElementById('form-rb2');
+    const inputRb3 = document.getElementById('form-rb3');
+    const notaFija = document.getElementById('nota-fija-responsorio');
+
+    const previewTituloResponsorio = document.getElementById('preview-titulo-responsorio');
+    const previewBloqueMayor = document.getElementById('preview-bloque-mayor');
+
+    if (esHoraMenor) {
+        if (txtTituloSeccion) txtTituloSeccion.textContent = 'VERSÍCULO Y RESPUESTA (V. Y R.)';
+        if (lblRb1) {
+            lblRb1.innerHTML = `<span style="color: #ff8a80; font-weight: bold;">V. Versículo:</span> (Se dice una sola vez en ${libro.toUpperCase()})`;
+        }
+        if (inputRb1) {
+            inputRb1.placeholder = 'ej: Se acordó el Señor de su misericordia. Aleluya.';
+        }
+        if (rowRb2Rb3) {
+            rowRb2Rb3.style.display = 'grid';
+            // En hora menor sólo usamos R. Respuesta
+            const grupoRb2 = document.getElementById('grupo-form-rb2');
+            const grupoRb3 = document.getElementById('grupo-form-rb3');
+            if (grupoRb2) grupoRb2.style.display = 'none';
+            if (grupoRb3) {
+                grupoRb3.style.display = 'block';
+                const lblRb3 = document.getElementById('lbl-form-rb3');
+                if (lblRb3) lblRb3.innerHTML = `<span style="color: #ff8a80; font-weight: bold;">R. Respuesta:</span>`;
+            }
+        }
+        if (inputRb2) {
+            inputRb2.required = false;
+        }
+        if (inputRb3) {
+            inputRb3.required = true;
+            inputRb3.placeholder = 'ej: Y de su fidelidad en favor de la casa de Israel. Aleluya.';
+        }
+        if (notaFija) {
+            notaFija.innerHTML = `<strong>Dato litúrgico para ${libro.toUpperCase()}:</strong> En las horas menores (Tercia, Sexta y Nona) no hay título <em>"RESPONSORIO BREVE"</em> ni repeticiones ni Gloria Patri: solo se recita un <strong>V.</strong> (Versículo) y un <strong>R.</strong> (Respuesta).`;
+        }
+
+        // Preview: Ocultar título RESPONSORIO BREVE y ocultar estrofas repetidas / Gloria Patri
+        if (previewTituloResponsorio) previewTituloResponsorio.style.display = 'none';
+        if (previewBloqueMayor) previewBloqueMayor.style.display = 'none';
+    } else {
+        if (txtTituloSeccion) txtTituloSeccion.textContent = 'RESPONSORIO BREVE';
+        if (lblRb1) {
+            lblRb1.innerHTML = `<span style="color: #ff8a80; font-weight: bold;">V. y R. Principal:</span> (Se repite 3 veces en V.1, R.1 y tras el Gloria en R.3)`;
+        }
+        if (inputRb1) {
+            inputRb1.placeholder = 'ej: Cristo, Hijo de Dios vivo, ten piedad de nosotros.';
+        }
+        if (rowRb2Rb3) {
+            rowRb2Rb3.style.display = 'grid';
+            const grupoRb2 = document.getElementById('grupo-form-rb2');
+            const grupoRb3 = document.getElementById('grupo-form-rb3');
+            if (grupoRb2) grupoRb2.style.display = 'block';
+            if (grupoRb3) {
+                grupoRb3.style.display = 'block';
+                const lblRb3 = document.getElementById('lbl-form-rb3');
+                if (lblRb3) lblRb3.innerHTML = `<span style="color: #ff8a80; font-weight: bold;">R. Segunda Respuesta:</span>`;
+            }
+        }
+        if (inputRb2) {
+            inputRb2.required = true;
+            inputRb2.placeholder = 'ej: Tú que hoy te has manifestado.';
+        }
+        if (inputRb3) {
+            inputRb3.required = true;
+            inputRb3.placeholder = 'ej: Ten piedad de nosotros.';
+        }
+        if (notaFija) {
+            notaFija.innerHTML = `<strong>Dato litúrgico fijo:</strong> Los rótulos <em>"LECTURA BREVE"</em> y <em>"RESPONSORIO BREVE"</em> son invariables. El tercer versículo <em>"V. Gloria al Padre, y al Hijo, y al Espíritu Santo."</em> se genera automáticamente.`;
+        }
+
+        // Preview: Mostrar título RESPONSORIO BREVE y estrofas completas
+        if (previewTituloResponsorio) previewTituloResponsorio.style.display = 'block';
+        if (previewBloqueMayor) previewBloqueMayor.style.display = 'block';
+    }
+}
+
 // Coordinar cambio de parámetros, cálculo de ID y carga dinámica de la lectura correspondiente
 function manejarCambioParametros() {
+    actualizarModoHora();
+
     const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
     const selSemana = document.getElementById('form-semana');
     const semana = selSemana?.value || '1';
     const dia = (tiempo === 'santos') ? 'propio' : (document.getElementById('form-dia')?.value || 'domingo');
-    const libro = document.getElementById('form-libro')?.value || 'laudes';
+    const libro = (document.getElementById('form-libro')?.value || 'laudes').toLowerCase();
 
     const autoId = generarIdAutomatico();
     const lecturaExistente = buscarLecturaExistente(autoId, tiempo, semana, dia, libro);
@@ -397,9 +540,17 @@ function manejarCambioParametros() {
         }
         if (inputCita) inputCita.value = lecturaExistente.cita || '';
         if (inputTexto) inputTexto.value = lecturaExistente.texto || '';
-        if (inputRb1) inputRb1.value = lecturaExistente.rb1 || '';
-        if (inputRb2) inputRb2.value = lecturaExistente.rb2 || '';
-        if (inputRb3) inputRb3.value = lecturaExistente.rb3 || '';
+
+        const esHoraMenor = (libro === 'tercia' || libro === 'sexta' || libro === 'nona');
+        if (esHoraMenor) {
+            if (inputRb1) inputRb1.value = lecturaExistente.rb1 || lecturaExistente.v || '';
+            if (inputRb2) inputRb2.value = '';
+            if (inputRb3) inputRb3.value = lecturaExistente.rb3 || lecturaExistente.r || lecturaExistente.rb2 || '';
+        } else {
+            if (inputRb1) inputRb1.value = lecturaExistente.rb1 || '';
+            if (inputRb2) inputRb2.value = lecturaExistente.rb2 || '';
+            if (inputRb3) inputRb3.value = lecturaExistente.rb3 || '';
+        }
 
         if (btnSubmit) {
             btnSubmit.innerHTML = `<span class="material-symbols-outlined">edit</span> Actualizar Lectura y Responsorio`;
@@ -457,6 +608,7 @@ function configurarEventos() {
         // Cambio en tiempo litúrgico
         document.getElementById('form-tiempo')?.addEventListener('change', () => {
             actualizarModoTiempo();
+            recordarParametros();
             manejarCambioParametros();
         });
 
@@ -471,17 +623,20 @@ function configurarEventos() {
                     inputFecha.value = opt.getAttribute('data-fecha') || '';
                 }
             }
+            recordarParametros();
             manejarCambioParametros();
         });
 
         // Cambio en fecha de celebración
         document.getElementById('form-fecha-celebracion')?.addEventListener('input', () => {
+            recordarParametros();
             manejarCambioParametros();
         });
 
         // Cambio en día y libro (Hora / Oficio)
         ['form-dia', 'form-libro'].forEach(id => {
             document.getElementById(id)?.addEventListener('change', () => {
+                recordarParametros();
                 manejarCambioParametros();
             });
         });
@@ -504,12 +659,24 @@ function configurarEventos() {
 
 // Actualizar la vista previa fiel en tiempo real
 function actualizarLivePreview() {
-    const cita = document.getElementById('form-cita')?.value.trim() || 'Is 61, 1-2a';
-    const texto = document.getElementById('form-texto')?.value.trim() || 
-        'El Espíritu del Señor está sobre mí, porque el Señor me ha ungido. Me ha enviado para dar la buena noticia a los pobres, para vendar los corazones desgarrados, para proclamar la amnistía a los cautivos, la libertad a los prisioneros, para proclamar el año de gracia del Señor.';
-    const rb1 = document.getElementById('form-rb1')?.value.trim() || 'Cristo, Hijo de Dios vivo, ten piedad de nosotros.';
-    const rb2 = document.getElementById('form-rb2')?.value.trim() || 'Tú que hoy te has manifestado.';
-    const rb3 = document.getElementById('form-rb3')?.value.trim() || 'Ten piedad de nosotros.';
+    actualizarModoHora();
+
+    const libro = (document.getElementById('form-libro')?.value || 'laudes').toLowerCase();
+    const esHoraMenor = (libro === 'tercia' || libro === 'sexta' || libro === 'nona');
+
+    const defaultCita = esHoraMenor ? 'So 3, 14. 15b' : 'Is 61, 1-2a';
+    const defaultTexto = esHoraMenor
+        ? 'Regocíjate, hija de Sión; grita de júbilo, Israel; alégrate y gózate de todo corazón, hija de Jerusalén. El Señor será el rey de Israel, en medio de ti.'
+        : 'El Espíritu del Señor está sobre mí, porque el Señor me ha ungido. Me ha enviado para dar la buena noticia a los pobres, para vendar los corazones desgarrados, para proclamar la amnistía a los cautivos, la libertad a los prisioneros, para proclamar el año de gracia del Señor.';
+    const defaultRb1 = esHoraMenor ? 'Se acordó el Señor de su misericordia. Aleluya.' : 'Cristo, Hijo de Dios vivo, ten piedad de nosotros.';
+    const defaultRb2 = 'Tú que hoy te has manifestado.';
+    const defaultRb3 = esHoraMenor ? 'Y de su fidelidad en favor de la casa de Israel. Aleluya.' : 'Ten piedad de nosotros.';
+
+    const cita = document.getElementById('form-cita')?.value.trim() || defaultCita;
+    const texto = document.getElementById('form-texto')?.value.trim() || defaultTexto;
+    const rb1 = document.getElementById('form-rb1')?.value.trim() || defaultRb1;
+    const rb2 = document.getElementById('form-rb2')?.value.trim() || defaultRb2;
+    const rb3 = document.getElementById('form-rb3')?.value.trim() || defaultRb3;
 
     const elCita = document.getElementById('preview-cita');
     const elTexto = document.getElementById('preview-texto');
@@ -521,11 +688,19 @@ function actualizarLivePreview() {
 
     if (elCita) elCita.textContent = cita;
     if (elTexto) elTexto.textContent = texto;
-    if (elV1) elV1.textContent = rb1;
-    if (elR1) elR1.textContent = rb1;
-    if (elV2) elV2.textContent = rb2;
-    if (elR2) elR2.textContent = rb3;
-    if (elR3) elR3.textContent = rb1; // Se repite la respuesta principal
+
+    if (esHoraMenor) {
+        // En Tercia, Sexta y Nona: sólo V. y R. una sola vez
+        if (elV1) elV1.textContent = rb1;
+        if (elR1) elR1.textContent = rb3;
+    } else {
+        // En Horas Mayores: esquema tripartito de responsorio breve
+        if (elV1) elV1.textContent = rb1;
+        if (elR1) elR1.textContent = rb1;
+        if (elV2) elV2.textContent = rb2;
+        if (elR2) elR2.textContent = rb3;
+        if (elR3) elR3.textContent = rb1; // Se repite la respuesta principal
+    }
 }
 
 // Guardar lectura breve y responsorio
@@ -536,7 +711,7 @@ async function guardarLectura(e) {
     const tiempo = document.getElementById('form-tiempo').value;
     const semana = document.getElementById('form-semana').value;
     const dia = document.getElementById('form-dia').value;
-    const libro = document.getElementById('form-libro').value;
+    const libro = (document.getElementById('form-libro').value || 'laudes').toLowerCase();
     const cita = document.getElementById('form-cita').value.trim();
     const texto = document.getElementById('form-texto').value.trim();
     const rb1 = document.getElementById('form-rb1').value.trim();
@@ -545,9 +720,18 @@ async function guardarLectura(e) {
     const inputFechaCeleb = document.getElementById('form-fecha-celebracion');
     const fechaCelebracion = inputFechaCeleb?.value?.trim() || '';
 
-    if (!id || !cita || !texto || !rb1) {
-        alert('Por favor complete los campos requeridos (ID, Cita, Texto y Responsorio Principal).');
-        return;
+    const esHoraMenor = (libro === 'tercia' || libro === 'sexta' || libro === 'nona');
+
+    if (esHoraMenor) {
+        if (!id || !cita || !texto || !rb1 || !rb3) {
+            alert('Por favor complete los campos requeridos (ID, Cita, Texto, V. Versículo y R. Respuesta).');
+            return;
+        }
+    } else {
+        if (!id || !cita || !texto || !rb1) {
+            alert('Por favor complete los campos requeridos (ID, Cita, Texto y Responsorio Principal).');
+            return;
+        }
     }
 
     let santoNombre = '';
@@ -571,9 +755,10 @@ async function guardarLectura(e) {
         libro,
         cita,
         texto,
-        rb1,
-        rb2,
-        rb3,
+        rb1: rb1 || '',
+        rb2: esHoraMenor ? '' : (rb2 || ''),
+        rb3: rb3 || '',
+        ...(esHoraMenor ? { v: rb1, r: rb3 } : {}),
         actualizadoEn: new Date().toISOString(),
         ...(tiempo === 'santos' ? { santoNombre, fechaCelebracion } : {})
     };
@@ -600,15 +785,32 @@ async function guardarLectura(e) {
         console.warn('No se pudo sincronizar inmediatamente con Firestore:', fbErr);
     }
 
-    limpiarFormulario();
+    recordarParametros();
+    limpiarFormulario(true);
     renderizarLista();
 }
 
 // Limpiar formulario y reiniciar campos a valores por defecto
-function limpiarFormulario() {
+function limpiarFormulario(preservarParametros = true) {
     editandoId = null;
-    const form = document.getElementById('form-lectura');
-    if (form) form.reset();
+
+    const tiempoActual = document.getElementById('form-tiempo')?.value;
+    const semanaActual = document.getElementById('form-semana')?.value;
+    const diaActual = document.getElementById('form-dia')?.value;
+    const libroActual = document.getElementById('form-libro')?.value;
+    const fechaActual = document.getElementById('form-fecha-celebracion')?.value;
+
+    const inputCita = document.getElementById('form-cita');
+    const inputTexto = document.getElementById('form-texto');
+    const inputRb1 = document.getElementById('form-rb1');
+    const inputRb2 = document.getElementById('form-rb2');
+    const inputRb3 = document.getElementById('form-rb3');
+
+    if (inputCita) inputCita.value = '';
+    if (inputTexto) inputTexto.value = '';
+    if (inputRb1) inputRb1.value = '';
+    if (inputRb2) inputRb2.value = '';
+    if (inputRb3) inputRb3.value = '';
 
     const inputId = document.getElementById('form-id');
     if (inputId) {
@@ -616,12 +818,39 @@ function limpiarFormulario() {
         inputId.value = '';
     }
 
-    const btnSubmit = form?.querySelector('button[type="submit"]');
+    if (!preservarParametros) {
+        const form = document.getElementById('form-lectura');
+        if (form) form.reset();
+        actualizarModoTiempo();
+    } else {
+        if (document.getElementById('form-tiempo') && tiempoActual) {
+            document.getElementById('form-tiempo').value = tiempoActual;
+        }
+        actualizarModoTiempo(semanaActual);
+        if (document.getElementById('form-semana') && semanaActual) {
+            document.getElementById('form-semana').value = semanaActual;
+        }
+        if (tiempoActual === 'santos') {
+            if (document.getElementById('form-fecha-celebracion') && fechaActual) {
+                document.getElementById('form-fecha-celebracion').value = fechaActual;
+            }
+        } else {
+            if (document.getElementById('form-dia') && diaActual) {
+                document.getElementById('form-dia').value = diaActual;
+            }
+        }
+        if (document.getElementById('form-libro') && libroActual) {
+            document.getElementById('form-libro').value = libroActual;
+        }
+    }
+
+    const btnSubmit = document.querySelector('#form-lectura button[type="submit"]');
     if (btnSubmit) {
         btnSubmit.innerHTML = `<span class="material-symbols-outlined">save</span> Guardar Lectura y Responsorio`;
     }
 
-    actualizarModoTiempo();
+    actualizarModoHora();
+    manejarCambioParametros();
     actualizarLivePreview();
 }
 
@@ -649,12 +878,23 @@ function editarLectura(id) {
         if (document.getElementById('form-dia')) document.getElementById('form-dia').value = item.dia || 'domingo';
     }
 
-    if (document.getElementById('form-libro')) document.getElementById('form-libro').value = item.libro || 'laudes';
+    const libroNorm = (item.libro || 'laudes').toLowerCase();
+    if (document.getElementById('form-libro')) document.getElementById('form-libro').value = libroNorm;
+    actualizarModoHora();
+
     if (document.getElementById('form-cita')) document.getElementById('form-cita').value = item.cita || '';
     if (document.getElementById('form-texto')) document.getElementById('form-texto').value = item.texto || '';
-    if (document.getElementById('form-rb1')) document.getElementById('form-rb1').value = item.rb1 || '';
-    if (document.getElementById('form-rb2')) document.getElementById('form-rb2').value = item.rb2 || '';
-    if (document.getElementById('form-rb3')) document.getElementById('form-rb3').value = item.rb3 || '';
+
+    const esHoraMenor = (libroNorm === 'tercia' || libroNorm === 'sexta' || libroNorm === 'nona');
+    if (esHoraMenor) {
+        if (document.getElementById('form-rb1')) document.getElementById('form-rb1').value = item.rb1 || item.v || '';
+        if (document.getElementById('form-rb2')) document.getElementById('form-rb2').value = '';
+        if (document.getElementById('form-rb3')) document.getElementById('form-rb3').value = item.rb3 || item.r || item.rb2 || '';
+    } else {
+        if (document.getElementById('form-rb1')) document.getElementById('form-rb1').value = item.rb1 || '';
+        if (document.getElementById('form-rb2')) document.getElementById('form-rb2').value = item.rb2 || '';
+        if (document.getElementById('form-rb3')) document.getElementById('form-rb3').value = item.rb3 || '';
+    }
 
     const btnSubmit = document.querySelector('#form-lectura button[type="submit"]');
     if (btnSubmit) {
@@ -701,8 +941,25 @@ function renderizarLista() {
         const texto = (l.texto || '').toLowerCase();
         const rb1 = (l.rb1 || '').toLowerCase();
         const id = (l.id || '').toLowerCase();
+        const sNom = (l.santoNombre || '').toLowerCase();
 
-        const coincideBusqueda = !textoBuscar || cita.includes(textoBuscar) || texto.includes(textoBuscar) || rb1.includes(textoBuscar) || id.includes(textoBuscar);
+        let coincideFecha = false;
+        if (textoBuscar) {
+            const rawFecha = l.fechaCelebracion || '';
+            let mF = rawFecha.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+            if (!mF) mF = (l.id || '').match(/^sa(\d{2})(\d{2})/i);
+            if (!mF) mF = (l.cita || '').match(/\((\d{1,2})[\/\-](\d{1,2})\)/);
+            if (mF) {
+                const dd = String(parseInt(mF[1], 10)).padStart(2, '0');
+                const mm = String(parseInt(mF[2], 10)).padStart(2, '0');
+                const d = String(parseInt(mF[1], 10));
+                const m = String(parseInt(mF[2], 10));
+                const variantes = [`${dd}/${mm}`, `${d}/${m}`, `${d}/${mm}`, `${dd}/${m}`, `${dd}-${mm}`, `${d}-${m}`, `${dd}${mm}`];
+                coincideFecha = variantes.some(v => v.includes(textoBuscar) || textoBuscar.includes(v));
+            }
+        }
+
+        const coincideBusqueda = !textoBuscar || cita.includes(textoBuscar) || texto.includes(textoBuscar) || rb1.includes(textoBuscar) || id.includes(textoBuscar) || sNom.includes(textoBuscar) || coincideFecha;
         const coincideTiempo = !filtroTiempo || l.tiempo === filtroTiempo;
         const coincideDia = !filtroDia || l.dia === filtroDia;
 

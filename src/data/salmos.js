@@ -1201,7 +1201,7 @@ Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`
 
 // SALMO 94, SI HOY ESCUCHAIS SU VOZ
 const invitacion = "INVITACIÓN A LA ALABANZA DIVINA"
-const salmo94t = "Salmo 94"             // INVITACIÓN A LA ALABANZA DIVINA" //Salmo 94 Titulo Rojo
+const salmo94t = "Salmo 94 - INVITACIÓN A LA ALABANZA DIVINA"
 const salmo94 = `Venid, aclamemos al Señor,
 demos vítores a la Roca que nos salva;
 entremos a su presencia dándole gracias,
@@ -2816,10 +2816,23 @@ function obtenerPadreNuestro() {
     });
 
     // Registrar salmos invitatorios estándar (94, 99, 66, 23)
-    if (typeof invitatorio1 !== 'undefined') registrar('invitatorio1', 'Salmo 94 - Invitatorio', invitatorio1, 'invitatorio');
+    if (typeof invitatorio1 !== 'undefined') registrar('invitatorio1', 'Salmo 94 - INVITACIÓN A LA ALABANZA DIVINA', invitatorio1, 'invitatorio');
     if (typeof invitatorio2 !== 'undefined') registrar('invitatorio2', 'Salmo 99 - Invitatorio', invitatorio2, 'invitatorio');
     if (typeof invitatorio3 !== 'undefined') registrar('invitatorio3', 'Salmo 66 - Invitatorio', invitatorio3, 'invitatorio');
     if (typeof invitatorio4 !== 'undefined') registrar('invitatorio4', 'Salmo 23 - Invitatorio', invitatorio4, 'invitatorio');
+
+    function obtenerDesdeCache() {
+        if (typeof localStorage !== 'undefined') {
+            try {
+                const raw = localStorage.getItem('lh_salmos_cache');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch (_) {}
+        }
+        return [];
+    }
 
     const SalmosDB = {
         GLORIA_PATRI,
@@ -2828,14 +2841,66 @@ function obtenerPadreNuestro() {
         obtenerPadreNuestro,
         lista: catalogo,
         mapa: mapa,
-        listar: () => catalogo,
-        obtener: (id) => mapa[id] || null,
+        listar: () => {
+            const cache = obtenerDesdeCache();
+            if (cache.length === 0) return catalogo;
+            const mapaMerged = new Map();
+            catalogo.forEach(s => mapaMerged.set(s.id, s));
+            cache.forEach(s => {
+                if (s && s.id) mapaMerged.set(s.id, s);
+            });
+            return Array.from(mapaMerged.values());
+        },
+        obtener: (id) => {
+            if (!id) return null;
+            const cleanId = String(id).trim();
+            const cleanNorm = cleanId.toLowerCase().replace(/[\s\-_]/g, '');
+
+            // Equivalencias directas entre salmos canónicos e IDs de invitatorio del formulario
+            const equivalencias = {
+                'salmo94': ['invitatorio1', 'salmo94'],
+                'invitatorio1': ['salmo94', 'invitatorio1'],
+                'salmo99': ['invitatorio2', 'salmo99'],
+                'invitatorio2': ['salmo99', 'invitatorio2'],
+                'salmo66': ['invitatorio3', 'salmo66'],
+                'invitatorio3': ['salmo66', 'invitatorio3'],
+                'salmo23': ['invitatorio4', 'salmo23'],
+                'invitatorio4': ['salmo23', 'invitatorio4']
+            };
+            const clavesABuscar = equivalencias[cleanNorm] || [cleanId];
+
+            // 1. Probar en caché local dinámica (lh_salmos_cache)
+            const cache = obtenerDesdeCache();
+            if (cache.length > 0) {
+                for (const clave of clavesABuscar) {
+                    const cNorm = clave.toLowerCase().replace(/[\s\-_]/g, '');
+                    const exacto = cache.find(s => s && (s.id === clave || (s.id && s.id.toLowerCase().replace(/[\s\-_]/g, '') === cNorm)));
+                    if (exacto) return exacto;
+                }
+            }
+
+            // 2. Probar en mapa interno de salmos.js
+            for (const clave of clavesABuscar) {
+                if (mapa[clave]) return mapa[clave];
+                if (mapa[clave.toLowerCase()]) return mapa[clave.toLowerCase()];
+            }
+
+            // 3. Probar por normalización en catálogo semilla
+            for (const clave of clavesABuscar) {
+                const cNorm = clave.toLowerCase().replace(/[\s\-_]/g, '');
+                const enCatalogo = catalogo.find(s => s && s.id && s.id.toLowerCase().replace(/[\s\-_]/g, '') === cNorm);
+                if (enCatalogo) return enCatalogo;
+            }
+
+            return null;
+        },
         buscar: (termino) => {
-            if (!termino) return catalogo;
+            const listaCompleta = SalmosDB.listar();
+            if (!termino) return listaCompleta;
             const t = termino.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return catalogo.filter(s => {
-                const tit = s.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                const id = s.id.toLowerCase();
+            return listaCompleta.filter(s => {
+                const tit = (s.titulo || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const id = (s.id || '').toLowerCase();
                 return tit.includes(t) || id.includes(t);
             });
         },

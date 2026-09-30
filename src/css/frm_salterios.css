@@ -819,6 +819,16 @@ body {
     font-size: calc(var(--size) * var(--font-zoom));
     line-height: 1.6;
     margin-bottom: 12px;
+    white-space: pre-line;
+}
+
+.liturgia-intro-padrenuestro p {
+    margin: 0 0 14px 0;
+    line-height: 1.6;
+}
+
+.liturgia-intro-padrenuestro p:last-child {
+    margin-bottom: 0;
 }
 
 .liturgia-padrenuestro-rojo {
