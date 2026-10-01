@@ -8,7 +8,7 @@ service cloud.firestore {
       return request.auth != null && request.auth.token.email.lower() == 'dbaezh78@gmail.com';
     }
 
-    // 1. Catálogo y asignaciones anuales de santos
+    // 1. Catálogo y asignaciones anuales de santos (Administrador)
     match /catalogo/{document=**} {
       allow read: if true;
       allow write: if esAdmin();
@@ -22,40 +22,29 @@ service cloud.firestore {
 
     // 3. Control de acceso y configuración de grupos ('access_control')
     match /access_control/{document=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if true;
     }
 
     // 4. Usuarios registrados ('registered_users')
-    // Permite que el Administrador gestione a todos, y que cada usuario autenticado
-    // pueda registrar y actualizar su propio registro (su perfil o documento de email)
     match /registered_users/{userDocId} {
-      allow read: if true;
-      allow create, update: if request.auth != null;
+      allow read, create, update: if true;
       allow delete: if esAdmin();
     }
 
     // 5. Registro de Direcciones IP Públicas de Acceso ('user_ips')
-    // Permite que cualquier usuario autenticado guarde su registro de IP
     match /user_ips/{ipDocId} {
-      allow read: if true;
-      allow create, update: if request.auth != null;
+      allow read, create, update: if true;
       allow delete: if esAdmin();
     }
 
     // 6. Ajustes y preferencias ('ajustes' y 'configuraciones')
-    // El admin puede escribir ajustes globales; cada usuario autenticado puede guardar sus propios ajustes
+    // Permite guardar preferencias de lectura, tema, tamaño de texto y estado tanto anónimos como autenticados
     match /ajustes/{documentId} {
-      allow read: if true;
-      allow write: if request.auth != null && (
-        esAdmin() || 
-        request.auth.uid == documentId
-      );
+      allow read, write: if true;
     }
 
     match /configuraciones/{documentId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if true;
     }
 
     // 7. Historial de Actualizaciones ('actualizaciones') y Liturgia
@@ -102,12 +91,11 @@ service cloud.firestore {
     }
 
     // 8. Chat de Asistencia y Soporte Fraternal ('support_chats')
-    // Permite a usuarios autenticados (hermanos y admin) enviar y leer mensajes en vivo
     match /support_chats/{chatId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if true;
 
       match /messages/{messageId} {
-        allow read, write: if request.auth != null;
+        allow read, write: if true;
       }
     }
 

@@ -25,6 +25,13 @@ let horaActualDatos = null;
 let cintaInstancia = null;
 const currentYear = new Date().getFullYear();
 
+export function obtenerEsParActual() {
+    if (typeof window !== 'undefined' && window.__cicloAnioOficio) {
+        return window.__cicloAnioOficio === 'par';
+    }
+    return currentYear % 2 === 0;
+}
+
 export const NOMBRES_MESES_ESP = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -289,20 +296,20 @@ const LIBROS_CONFIG = {
         icono: 'wb_sunny'
     },
     tercia: {
-        nombre: 'TERCIA',
-        subtitulo: '(Antes del mediodía)',
+        nombre: 'HORA TERCIA',
+        subtitulo: '',
         orden: 3,
         icono: 'alarm'
     },
     sexta: {
-        nombre: 'SEXTA',
-        subtitulo: '(Al mediodía)',
+        nombre: 'HORA SEXTA',
+        subtitulo: '',
         orden: 4,
         icono: 'wb_cloudy'
     },
     nona: {
-        nombre: 'NONA',
-        subtitulo: '(De la tarde)',
+        nombre: 'HORA NONA',
+        subtitulo: '',
         orden: 5,
         icono: 'wb_twilight'
     },
@@ -755,8 +762,7 @@ function montarOActualizarVista(params, datos) {
     }
 
     // Cargar los 4 audios en la cinta litúrgica
-    const anioActual = new Date().getFullYear();
-    const esPar = (anioActual % 2 === 0);
+    const esPar = obtenerEsParActual();
 
     const rutasOficio = construirRutaOficioLectura({
         tiempo: tiempo,
@@ -773,12 +779,85 @@ function montarOActualizarVista(params, datos) {
         evangelio: urlEvangelio,
         subEvangelio: `${labelDia}`,
         hora: urlAudioHora,
-        subHora: `Rezo de ${libro.toUpperCase()}`,
+        subHora: `Rezo de ${(libro === 'tercia' || libro === 'sexta' || libro === 'nona') ? `HORA ${libro.toUpperCase()}` : libro.toUpperCase()}`,
         lectura1: urlLectura1,
         subLectura1: `${esPar ? 'Año Par' : 'Año Impar'}`,
         lectura2: urlLectura2,
         subLectura2: 'Lectura patrística'
     });
+
+    // Si es Oficio de Lectura, asegurar que la 1ª lectura corresponda estrictamente al ciclo del año activo (Par / Impar)
+    const libroActivo = (datos?.libro || libro || '').toLowerCase();
+    if (cintaInstancia) {
+        cintaInstancia.establecerCicloAnio(esPar ? 'par' : 'impar');
+    }
+
+    if (libroActivo === 'oficio') {
+        const tiempoActivo = datos?.tiempo || tiempo || 'ordinario';
+        const semanaActiva = datos?.semana || semana || 1;
+        const diaActivo = datos?.dia || dia || 'domingo';
+        const ldb = (typeof window !== 'undefined' && window.LecturasDB) || LecturasDB;
+
+        const l1Data = (ldb && typeof ldb.obtenerLectura1 === 'function')
+            ? ldb.obtenerLectura1(tiempoActivo, semanaActiva, diaActivo, esPar)
+            : null;
+        if (l1Data) {
+            if (!datos.lecturasOficio) datos.lecturasOficio = {};
+            datos.lecturasOficio.primera = {
+                id: l1Data.id,
+                etiqueta: '1ra Lectura',
+                audioUrl: l1Data.audioUrl || urlLectura1,
+                esPar: esPar,
+                titulo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
+                epigrafeTipo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
+                cita: l1Data.cita,
+                subtitulo: l1Data.descripcion,
+                descripcion: l1Data.descripcion,
+                texto: l1Data.texto,
+                respCita: l1Data.respCita,
+                respR1: l1Data.respR1,
+                respV: l1Data.respV,
+                respR2: l1Data.respR2,
+                responsorio: {
+                    ref: l1Data.respCita,
+                    r1: l1Data.respR1,
+                    v: l1Data.respV,
+                    r2: l1Data.respR2
+                }
+            };
+        }
+
+        // Asegurar también que exista la 2ª lectura patrística
+        if (!datos.lecturasOficio?.segunda || !datos.lecturasOficio.segunda.texto) {
+            const l2Data = (ldb && typeof ldb.obtenerLectura2 === 'function')
+                ? ldb.obtenerLectura2(tiempoActivo, semanaActiva, diaActivo)
+                : null;
+            if (l2Data) {
+                if (!datos.lecturasOficio) datos.lecturasOficio = {};
+                datos.lecturasOficio.segunda = {
+                    id: l2Data.id,
+                    etiqueta: '2da Lectura',
+                    audioUrl: l2Data.audioUrl || urlLectura2,
+                    titulo: l2Data.epigrafeTipo || 'SEGUNDA LECTURA',
+                    epigrafeTipo: l2Data.epigrafeTipo || 'SEGUNDA LECTURA',
+                    cita: l2Data.cita,
+                    subtitulo: l2Data.descripcion,
+                    descripcion: l2Data.descripcion,
+                    texto: l2Data.texto,
+                    respCita: l2Data.respCita,
+                    respR1: l2Data.respR1,
+                    respV: l2Data.respV,
+                    respR2: l2Data.respR2,
+                    responsorio: {
+                        ref: l2Data.respCita,
+                        r1: l2Data.respR1,
+                        v: l2Data.respV,
+                        r2: l2Data.respR2
+                    }
+                };
+            }
+        }
+    }
 
     // Renderizar cuerpo del salterio
     renderizarCuerpoLiturgico(datos);
@@ -883,7 +962,7 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
     }
 
     // Calcular URLs de audio para Oficio de Lectura (Par vs Impar)
-    const esPar = currentYear % 2 === 0;
+    const esPar = obtenerEsParActual();
     const rutaOficio = construirRutaOficioLectura({ tiempo, semana, dia });
     const audioLectura1 = esPar ? rutaOficio.lecturaPar : rutaOficio.lecturaImpar;
     const audioLectura2 = rutaOficio.segundaLectura;
@@ -1109,7 +1188,9 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
         conclusion: {
             v: libro === 'oficio' || libro === 'tercia' || libro === 'sexta' || libro === 'nona' ? 'Bendigamos al Señor.' : 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.',
             r: libro === 'oficio' || libro === 'tercia' || libro === 'sexta' || libro === 'nona' ? 'Demos gracias a Dios.' : 'Amén.'
-        }
+        },
+        id: (tiempo === 'santos' ? `santo_${(fecha || '01_01').replace('/', '_')}_${libro}` : `${tiempo}_semana_${semana}_${dia}_${libro}`),
+        codigo: (tiempo === 'santos' ? `santo_${(fecha || '01_01').replace('/', '_')}_${libro}` : `${tiempo}_semana_${semana}_${dia}_${libro}`)
     };
 }
 
@@ -1141,8 +1222,34 @@ function renderizarCuerpoLiturgico(d) {
 
     const libroKey = (d.libro || 'laudes').toLowerCase();
     const cfg = LIBROS_CONFIG[libroKey] || LIBROS_CONFIG.laudes;
-    const tituloLibro = d.titulo || cfg.nombre;
-    const subtituloLibro = d.subtitulo || cfg.subtitulo;
+    let tituloLibro = d.titulo || cfg.nombre;
+    let subtituloLibro = (d.subtitulo !== undefined) ? d.subtitulo : cfg.subtitulo;
+
+    if (libroKey === 'tercia') {
+        if (!tituloLibro || /^(hora\s+)?tercia$/i.test(String(tituloLibro).trim())) {
+            tituloLibro = 'HORA TERCIA';
+        }
+        subtituloLibro = '';
+        d.titulo = tituloLibro;
+        d.subtitulo = '';
+    } else if (libroKey === 'sexta') {
+        if (!tituloLibro || /^(hora\s+)?sexta$/i.test(String(tituloLibro).trim())) {
+            tituloLibro = 'HORA SEXTA';
+        }
+        subtituloLibro = '';
+        d.titulo = tituloLibro;
+        d.subtitulo = '';
+    } else if (libroKey === 'nona') {
+        if (!tituloLibro || /^(hora\s+)?nona$/i.test(String(tituloLibro).trim())) {
+            tituloLibro = 'HORA NONA';
+        }
+        subtituloLibro = '';
+        d.titulo = tituloLibro;
+        d.subtitulo = '';
+    } else if (libroKey === 'oficio') {
+        subtituloLibro = '';
+        d.subtitulo = '';
+    }
 
     let html = '';
 
@@ -1533,7 +1640,7 @@ function renderizarCuerpoLiturgico(d) {
         const textoOracion = typeof d.oracion === 'string' ? d.oracion : (d.oracion.textoCompleto || d.oracion.texto || '');
         html += `
             <div class="salterio-seccion-header">ORACIÓN</div>
-            <div style="margin-bottom: 20px; line-height: 1.6; text-align: justify; white-space: pre-line;">${textoOracion}</div>
+            <div style="margin-bottom: 20px; line-height: 1.3; text-align: justify; white-space: pre-line;">${textoOracion}</div>
         `;
     }
 
@@ -1570,6 +1677,85 @@ function inicializarEventosInteractivos() {
                     icono.textContent = bloque.classList.contains('activo') ? 'expand_less' : 'expand_more';
                 }
             }
+        }
+    });
+
+    // Escuchar cambio de ciclo (Año I Impar / Año II Par) desde la cinta superior en Oficio de Lectura
+    window.addEventListener('lh-cambiar-ciclo-anio', (e) => {
+        const { ciclo, esPar } = e.detail || {};
+        const params = obtenerParametrosUrl();
+        const libroNorm = ((horaActualDatos && horaActualDatos.libro) || params.libro || '').toLowerCase();
+        if (libroNorm !== 'oficio') return;
+
+        const tiempoAct = (horaActualDatos && horaActualDatos.tiempo) || params.tiempo || 'ordinario';
+        const semanaAct = (horaActualDatos && horaActualDatos.semana) || params.semana || 1;
+        const diaAct = (horaActualDatos && horaActualDatos.dia) || params.dia || 'domingo';
+
+        console.log(`🔄 [Oficio] Cambiando ciclo de 1ª Lectura a: ${esPar ? 'Año II (Par)' : 'Año I (Impar)'}`);
+
+        // 1. Obtener la 1ª lectura correspondiente al nuevo ciclo
+        const ldb = (typeof window !== 'undefined' && window.LecturasDB) || LecturasDB;
+        const l1Data = (ldb && typeof ldb.obtenerLectura1 === 'function')
+            ? ldb.obtenerLectura1(tiempoAct, semanaAct, diaAct, esPar)
+            : null;
+
+        const rutasOficio = construirRutaOficioLectura({
+            tiempo: tiempoAct,
+            semana: semanaAct,
+            dia: diaAct
+        });
+        const nuevoAudioL1 = esPar ? rutasOficio.lecturaPar : rutasOficio.lecturaImpar;
+
+        // 2. Si horaActualDatos no existe o no tiene lecturasOficio, reconstruir la hora por defecto
+        if (!horaActualDatos) {
+            horaActualDatos = ensamblarHoraPorDefecto(tiempoAct, semanaAct, diaAct, 'oficio', params.fecha, params.santo);
+        }
+        if (!horaActualDatos.lecturasOficio) {
+            horaActualDatos.lecturasOficio = {};
+        }
+
+        if (l1Data) {
+            horaActualDatos.lecturasOficio.primera = {
+                id: l1Data.id,
+                etiqueta: '1ra Lectura',
+                audioUrl: l1Data.audioUrl || nuevoAudioL1,
+                esPar: esPar,
+                titulo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
+                epigrafeTipo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
+                cita: l1Data.cita,
+                subtitulo: l1Data.descripcion,
+                descripcion: l1Data.descripcion,
+                texto: l1Data.texto,
+                respCita: l1Data.respCita,
+                respR1: l1Data.respR1,
+                respV: l1Data.respV,
+                respR2: l1Data.respR2,
+                responsorio: {
+                    ref: l1Data.respCita,
+                    r1: l1Data.respR1,
+                    v: l1Data.respV,
+                    r2: l1Data.respR2
+                }
+            };
+        }
+
+        // Persistir en LocalStorage para mantener sincronizada la copia offline
+        const docId = horaActualDatos.id || horaActualDatos.codigo || params.codigoCompleto || params.id;
+        if (docId) {
+            guardarHoraEnLocalStorage(docId, horaActualDatos);
+        }
+
+        // 3. Actualizar audio y subtítulo en la cinta litúrgica
+        if (cintaInstancia) {
+            cintaInstancia.cargarLectura1(nuevoAudioL1, esPar ? 'Año Par' : 'Año Impar');
+        }
+
+        // 4. Re-renderizar el cuerpo litúrgico con la nueva lectura
+        renderizarCuerpoLiturgico(horaActualDatos);
+
+        // 5. Reaplicar zoom tipográfico
+        if (cintaInstancia) {
+            cintaInstancia.aplicarTamanoTexto(cintaInstancia.fontZoom);
         }
     });
 }

@@ -7,8 +7,8 @@
 export const CATALOGO_RESPONSORIOS_SEED = [
     // TIEMPO ORDINARIO - SEMANA 1
     {
-        id: "tos1OFdo_resp",
-        varName: "tos1OFdo_resp",
+        id: "tos01doof_resp",
+        varName: "tos01doof_resp",
         titulo: "Responsorio de la Salmodia - Domingo Semana 1 / Bautismo (Oficio)",
         tiempo: "ordinario",
         semana: "1",
@@ -18,8 +18,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         r: "Escuchadlo."
     },
     {
-        id: "tos1OFlu_resp",
-        varName: "tos1OFlu_resp",
+        id: "tos01luof_resp",
+        varName: "tos01luof_resp",
         titulo: "Responsorio de la Salmodia - Lunes Semana 1 (Oficio)",
         tiempo: "ordinario",
         semana: "1",
@@ -29,8 +29,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         r: "Presta oído a mi inteligencia."
     },
     {
-        id: "tos1OFma_resp",
-        varName: "tos1OFma_resp",
+        id: "tos01maof_resp",
+        varName: "tos01maof_resp",
         titulo: "Responsorio de la Salmodia - Martes Semana 1 (Oficio)",
         tiempo: "ordinario",
         semana: "1",
@@ -40,8 +40,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         r: "Presta oído a las palabras de mi boca."
     },
     {
-        id: "tos1OFmi_resp",
-        varName: "tos1OFmi_resp",
+        id: "tos01miof_resp",
+        varName: "tos01miof_resp",
         titulo: "Responsorio de la Salmodia - Miércoles Semana 1 (Oficio)",
         tiempo: "ordinario",
         semana: "1",
@@ -51,8 +51,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         r: "Muéstrame tus senderos."
     },
     {
-        id: "tos1OFju_resp",
-        varName: "tos1OFju_resp",
+        id: "tos01juof_resp",
+        varName: "tos01juof_resp",
         titulo: "Responsorio de la Salmodia - Jueves Semana 1 (Oficio)",
         tiempo: "ordinario",
         semana: "1",
@@ -62,8 +62,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         r: "Porque tú eres mi Dios y Salvador."
     },
     {
-        id: "tos1OFvi_resp",
-        varName: "tos1OFvi_resp",
+        id: "tos01viof_resp",
+        varName: "tos01viof_resp",
         titulo: "Responsorio de la Salmodia - Viernes Semana 1 (Oficio)",
         tiempo: "ordinario",
         semana: "1",
@@ -73,8 +73,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         r: "Acuérdate de tu ternura."
     },
     {
-        id: "tos1OFsa_resp",
-        varName: "tos1OFsa_resp",
+        id: "tos01saof_resp",
+        varName: "tos01saof_resp",
         titulo: "Responsorio de la Salmodia - Sábado Semana 1 (Oficio)",
         tiempo: "ordinario",
         semana: "1",
@@ -86,8 +86,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
 
     // TIEMPO PASCUAL
     {
-        id: "tps1OFjs_resp",
-        varName: "tps1OFjs_resp",
+        id: "tps01juof_resp",
+        varName: "tps01juof_resp",
         titulo: "Responsorio de la Salmodia - Octava de Pascua Jueves (Oficio)",
         tiempo: "pascua",
         semana: "1",
@@ -97,8 +97,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         r: "El cielo y la tierra se alegran. Aleluya."
     },
     {
-        id: "tps1OFdo_resp",
-        varName: "tps1OFdo_resp",
+        id: "tps01doof_resp",
+        varName: "tps01doof_resp",
         titulo: "Responsorio de la Salmodia - Domingo de Pascua (Oficio)",
         tiempo: "pascua",
         semana: "1",
@@ -110,8 +110,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
 
     // TIEMPO DE ADVIENTO
     {
-        id: "tas1OFdo_resp",
-        varName: "tas1OFdo_resp",
+        id: "tas01doof_resp",
+        varName: "tas01doof_resp",
         titulo: "Responsorio de la Salmodia - Domingo Semana 1 (Adviento)",
         tiempo: "adviento",
         semana: "1",
@@ -123,8 +123,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
 
     // TIEMPO DE CUARESMA
     {
-        id: "tcs1OFdo_resp",
-        varName: "tcs1OFdo_resp",
+        id: "tcs01doof_resp",
+        varName: "tcs01doof_resp",
         titulo: "Responsorio de la Salmodia - Domingo Semana 1 (Cuaresma)",
         tiempo: "cuaresma",
         semana: "1",
@@ -154,11 +154,28 @@ export class ResponsoriosDB {
 
         if (id) {
             const idNorm = this.normalizarId(id);
-            const encontrada = todas.find(r => 
+            let encontrada = todas.find(r => 
                 this.normalizarId(r.id) === idNorm || 
                 this.normalizarId(r.varName) === idNorm
             );
             if (encontrada) return encontrada;
+
+            // Soporte de equivalencia entre formatos antiguos (tos1ofdo) y nuevos (tos01doof)
+            const mOld = id.match(/^(to|ta|tn|tc|tp|sa)s?(\d+)([a-zA-Z]{2})([a-zA-Z]{2})/i);
+            if (mOld) {
+                const t = mOld[1].toLowerCase();
+                const sem = mOld[2];
+                const p1 = mOld[3].toLowerCase();
+                const p2 = mOld[4].toLowerCase();
+                const semPad = String(sem).padStart(2, '0');
+                const cand1 = this.normalizarId(`${t}s${semPad}${p1}${p2}resp`);
+                const cand2 = this.normalizarId(`${t}s${semPad}${p2}${p1}resp`);
+                encontrada = todas.find(r => {
+                    const rNorm = this.normalizarId(r.id);
+                    return rNorm === cand1 || rNorm === cand2;
+                });
+                if (encontrada) return encontrada;
+            }
         }
 
         return this.obtenerRecomendado(tiempo, semana, dia, libro);

@@ -148,9 +148,9 @@ export const CODIGOS_DIA = {
 export const CODIGOS_LIBRO = {
     oficio:    { codigo: 'of', nombre: 'Oficio de Lectura' },
     laudes:    { codigo: 'la', nombre: 'Laudes' },
-    tercia:    { codigo: 'te', nombre: 'Tercia' },
-    sexta:     { codigo: 'se', nombre: 'Sexta' },
-    nona:      { codigo: 'no', nombre: 'Nona' },
+    tercia:    { codigo: 'te', nombre: 'Hora Tercia' },
+    sexta:     { codigo: 'se', nombre: 'Hora Sexta' },
+    nona:      { codigo: 'no', nombre: 'Hora Nona' },
     vispera:   { codigo: 'vi', nombre: 'Víspera' },
     completas: { codigo: 'co', nombre: 'Completas' }
 };
@@ -429,12 +429,10 @@ export function formatAsterisco(texto, textoR2 = '') {
 }
 
 /**
- * Obtener las antífonas directamente de la fuente de antifonas.html:
- * 1. localStorage 'lh_antifonas_cache'
- * 2. Fallback a CATALOGO_ANTIFONAS_SEED
- * 3. Filtrar estrictamente las de carácter invitatorio
+ * Helper unificado para obtener todas las antífonas de la base de datos y memoria local
+ * garantizando que cualquier antífona creada esté disponible para cualquiera de las antífonas (1, 2, 3, cántico o invitatoria).
  */
-export function obtenerAntifonasInvitatoriasDesdeCatalogo() {
+export function obtenerCatalogoCompletoAntifonas() {
     let todas = [];
     const cacheLocal = localStorage.getItem('lh_antifonas_cache');
     if (cacheLocal) {
@@ -449,205 +447,31 @@ export function obtenerAntifonasInvitatoriasDesdeCatalogo() {
         todas = Array.isArray(CATALOGO_ANTIFONAS_SEED) ? [...CATALOGO_ANTIFONAS_SEED] : [];
     }
 
-    // Filtrar estrictamente SOLO las de tipo invitatoria o con prefijo inv
-    const invitatorias = todas.filter(a => a && (
-        a.tipo === 'invitatoria' || 
-        (a.varName && (a.varName.startsWith('inv_') || a.varName.toLowerCase().includes('inv'))) ||
-        (a.id && a.id.toLowerCase().includes('invitatoria'))
-    ));
-
-    invitatorias.sort((a, b) => {
-        const tiempoA = a.tiempo || '';
-        const tiempoB = b.tiempo || '';
-        if (tiempoA !== tiempoB) return tiempoA.localeCompare(tiempoB);
-
-        const semA = Number(a.semana) || 0;
-        const semB = Number(b.semana) || 0;
-        if (semA !== semB) return semA - semB;
-
-        const ordenDias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-        const diaA = ordenDias.indexOf(a.dia);
-        const diaB = ordenDias.indexOf(b.dia);
-        if (diaA !== diaB) return diaA - diaB;
-
-        return (a.texto || '').localeCompare(b.texto || '');
-    });
-
-    return invitatorias;
-}
-
-/**
- * Obtener las antífonas de la Salmodia 1 desde:
- * 1. localStorage 'lh_antifonas_cache'
- * 2. Fallback a CATALOGO_ANTIFONAS_SEED
- * 3. Filtrar estrictamente las de tipo 'salmodia_1'
- */
-export function obtenerAntifonasSalmodia1DesdeCatalogo() {
-    let todas = [];
-    const cacheLocal = localStorage.getItem('lh_antifonas_cache');
-    if (cacheLocal) {
-        try {
-            todas = JSON.parse(cacheLocal);
-        } catch (e) {
-            console.warn("Error leyendo lh_antifonas_cache:", e);
-        }
-    }
-
-    if (!Array.isArray(todas) || todas.length === 0) {
-        todas = Array.isArray(CATALOGO_ANTIFONAS_SEED) ? [...CATALOGO_ANTIFONAS_SEED] : [];
-    }
-
-    // Filtrar estrictamente las de tipo salmodia_1
-    const salmodia1 = todas.filter(a => a && (
-        a.tipo === 'salmodia_1' || 
-        (a.id && a.id.includes('salmodia_1'))
-    ));
-
-    salmodia1.sort((a, b) => {
-        const tiempoA = a.tiempo || '';
-        const tiempoB = b.tiempo || '';
-        if (tiempoA !== tiempoB) return tiempoA.localeCompare(tiempoB);
-
-        const semA = Number(a.semana) || 0;
-        const semB = Number(b.semana) || 0;
-        if (semA !== semB) return semA - semB;
-
-        const ordenDias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-        const diaA = ordenDias.indexOf(a.dia);
-        const diaB = ordenDias.indexOf(b.dia);
-        if (diaA !== diaB) return diaA - diaB;
-
-        return (a.texto || '').localeCompare(b.texto || '');
-    });
-
-    return salmodia1;
-}
-
-/**
- * Obtener las antífonas de la Salmodia 2 desde catálogo
- */
-export function obtenerAntifonasSalmodia2DesdeCatalogo() {
-    let todas = [];
-    const cacheLocal = localStorage.getItem('lh_antifonas_cache');
-    if (cacheLocal) {
-        try {
-            todas = JSON.parse(cacheLocal);
-        } catch (e) {
-            console.warn("Error leyendo lh_antifonas_cache:", e);
-        }
-    }
-
-    if (!Array.isArray(todas) || todas.length === 0) {
-        todas = Array.isArray(CATALOGO_ANTIFONAS_SEED) ? [...CATALOGO_ANTIFONAS_SEED] : [];
-    }
-
-    const salmodia2 = todas.filter(a => a && (
-        a.tipo === 'salmodia_2' || 
-        (a.id && a.id.includes('salmodia_2'))
-    ));
-
-    salmodia2.sort((a, b) => {
-        const tiempoA = a.tiempo || '';
-        const tiempoB = b.tiempo || '';
-        if (tiempoA !== tiempoB) return tiempoA.localeCompare(tiempoB);
-
-        const semA = Number(a.semana) || 0;
-        const semB = Number(b.semana) || 0;
-        if (semA !== semB) return semA - semB;
-
-        const ordenDias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-        const diaA = ordenDias.indexOf(a.dia);
-        const diaB = ordenDias.indexOf(b.dia);
-        if (diaA !== diaB) return diaA - diaB;
-
-        return (a.texto || '').localeCompare(b.texto || '');
-    });
-
-    return salmodia2;
-}
-
-/**
- * Obtener las antífonas de la Salmodia 3 desde catálogo
- */
-export function obtenerAntifonasSalmodia3DesdeCatalogo() {
-    let todas = [];
-    const cacheLocal = localStorage.getItem('lh_antifonas_cache');
-    if (cacheLocal) {
-        try {
-            todas = JSON.parse(cacheLocal);
-        } catch (e) {
-            console.warn("Error leyendo lh_antifonas_cache:", e);
-        }
-    }
-
-    if (!Array.isArray(todas) || todas.length === 0) {
-        todas = Array.isArray(CATALOGO_ANTIFONAS_SEED) ? [...CATALOGO_ANTIFONAS_SEED] : [];
-    }
-
-    const salmodia3 = todas.filter(a => a && (
-        a.tipo === 'salmodia_3' || 
-        (a.id && a.id.includes('salmodia_3'))
-    ));
-
-    salmodia3.sort((a, b) => {
-        const tiempoA = a.tiempo || '';
-        const tiempoB = b.tiempo || '';
-        if (tiempoA !== tiempoB) return tiempoA.localeCompare(tiempoB);
-
-        const semA = Number(a.semana) || 0;
-        const semB = Number(b.semana) || 0;
-        if (semA !== semB) return semA - semB;
-
-        const ordenDias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-        const diaA = ordenDias.indexOf(a.dia);
-        const diaB = ordenDias.indexOf(b.dia);
-        if (diaA !== diaB) return diaA - diaB;
-
-        return (a.texto || '').localeCompare(b.texto || '');
-    });
-
-    return salmodia3;
-}
-
-/**
- * Obtener las antífonas de Cántico Evangélico fusionando:
- * 1. db-cantico-evangelico.js (semillas y 'lh_antifonas_cantico_cache')
- * 2. antifonas.html ('lh_antifonas_cache' y db-antifonas.js con tipo evangelico/cantico_evangelico)
- */
-export function obtenerAntifonasCanticoDesdeCatalogo() {
     const mapa = new Map();
-
-    // 1. Antífonas de cántico evangélico del módulo base
-    const base = obtenerTodasLasAntifonasCantico();
-    if (Array.isArray(base)) {
-        base.forEach(a => {
+    // 1. Añadir las de base de cántico evangélico
+    const baseCantico = (typeof obtenerTodasLasAntifonasCantico === 'function') ? obtenerTodasLasAntifonasCantico() : [];
+    if (Array.isArray(baseCantico)) {
+        baseCantico.forEach(a => {
             const txt = (a.texto || '').trim();
             if (txt) mapa.set(txt, { ...a, texto: txt });
         });
     }
 
-    // 2. Antífonas registradas en antifonas.html (localStorage 'lh_antifonas_cache' / CATALOGO_ANTIFONAS_SEED)
-    let listaAnt = [];
-    try {
-        const raw = localStorage.getItem('lh_antifonas_cache');
-        if (raw) listaAnt = JSON.parse(raw);
-    } catch (_) {}
-    if (!Array.isArray(listaAnt) || listaAnt.length === 0) {
-        listaAnt = Array.isArray(CATALOGO_ANTIFONAS_SEED) ? [...CATALOGO_ANTIFONAS_SEED] : [];
-    }
-
-    if (Array.isArray(listaAnt)) {
-        listaAnt.forEach(a => {
-            if (a && (a.tipo === 'evangelico' || a.tipo === 'cantico_evangelico' || (a.id && a.id.includes('evangelico')))) {
+    // 2. Añadir todas las registradas en el catálogo de antífonas
+    if (Array.isArray(todas)) {
+        todas.forEach(a => {
+            if (a) {
                 const txt = (a.texto || '').trim();
-                if (txt) {
+                if (txt && !mapa.has(txt)) {
                     mapa.set(txt, {
                         id: a.id || a.varName || txt,
                         varName: a.varName || a.id,
                         texto: txt,
+                        tipo: a.tipo || 'salmodia',
                         tiempo: a.tiempo,
                         semana: a.semana,
                         dia: a.dia,
+                        libro: a.libro,
                         santo: a.santo
                     });
                 }
@@ -656,6 +480,86 @@ export function obtenerAntifonasCanticoDesdeCatalogo() {
     }
 
     return Array.from(mapa.values());
+}
+
+/**
+ * Obtener las antífonas para el Invitatorio:
+ * Devuelve todas las antífonas disponibles, priorizando invitatorias.
+ */
+export function obtenerAntifonasInvitatoriasDesdeCatalogo() {
+    const todas = obtenerCatalogoCompletoAntifonas();
+    const esInv = (a) => (a.tipo === 'invitatoria' || (a.varName && a.varName.startsWith('inv_')) || (a.id && a.id.toLowerCase().includes('invitatoria')));
+
+    return todas.sort((a, b) => {
+        const invA = esInv(a) ? 0 : 1;
+        const invB = esInv(b) ? 0 : 1;
+        if (invA !== invB) return invA - invB;
+        return (a.texto || '').localeCompare(b.texto || '', 'es', { sensitivity: 'base' });
+    });
+}
+
+/**
+ * Obtener las antífonas de la Salmodia 1:
+ * Devuelve todas las antífonas disponibles (incluyendo antifona 1, 2, 3, etc.), priorizando salmodia_1.
+ */
+export function obtenerAntifonasSalmodia1DesdeCatalogo() {
+    const todas = obtenerCatalogoCompletoAntifonas();
+    const esS1 = (a) => (a.tipo === 'salmodia_1' || (a.id && a.id.includes('salmodia_1')));
+
+    return todas.sort((a, b) => {
+        const prioA = esS1(a) ? 0 : 1;
+        const prioB = esS1(b) ? 0 : 1;
+        if (prioA !== prioB) return prioA - prioB;
+        return (a.texto || '').localeCompare(b.texto || '', 'es', { sensitivity: 'base' });
+    });
+}
+
+/**
+ * Obtener las antífonas de la Salmodia 2:
+ * Devuelve todas las antífonas disponibles (incluyendo antifona 1, 2, 3, etc.), priorizando salmodia_2.
+ */
+export function obtenerAntifonasSalmodia2DesdeCatalogo() {
+    const todas = obtenerCatalogoCompletoAntifonas();
+    const esS2 = (a) => (a.tipo === 'salmodia_2' || (a.id && a.id.includes('salmodia_2')));
+
+    return todas.sort((a, b) => {
+        const prioA = esS2(a) ? 0 : 1;
+        const prioB = esS2(b) ? 0 : 1;
+        if (prioA !== prioB) return prioA - prioB;
+        return (a.texto || '').localeCompare(b.texto || '', 'es', { sensitivity: 'base' });
+    });
+}
+
+/**
+ * Obtener las antífonas de la Salmodia 3:
+ * Devuelve todas las antífonas disponibles (incluyendo antifona 1, 2, 3, etc.), priorizando salmodia_3.
+ */
+export function obtenerAntifonasSalmodia3DesdeCatalogo() {
+    const todas = obtenerCatalogoCompletoAntifonas();
+    const esS3 = (a) => (a.tipo === 'salmodia_3' || (a.id && a.id.includes('salmodia_3')));
+
+    return todas.sort((a, b) => {
+        const prioA = esS3(a) ? 0 : 1;
+        const prioB = esS3(b) ? 0 : 1;
+        if (prioA !== prioB) return prioA - prioB;
+        return (a.texto || '').localeCompare(b.texto || '', 'es', { sensitivity: 'base' });
+    });
+}
+
+/**
+ * Obtener las antífonas de Cántico Evangélico:
+ * Devuelve todas las antífonas disponibles, priorizando las evangélicas.
+ */
+export function obtenerAntifonasCanticoDesdeCatalogo() {
+    const todas = obtenerCatalogoCompletoAntifonas();
+    const esEv = (a) => (a.tipo === 'evangelico' || a.tipo === 'cantico_evangelico' || (a.id && a.id.includes('evangelico')));
+
+    return todas.sort((a, b) => {
+        const prioA = esEv(a) ? 0 : 1;
+        const prioB = esEv(b) ? 0 : 1;
+        if (prioA !== prioB) return prioA - prioB;
+        return (a.texto || '').localeCompare(b.texto || '', 'es', { sensitivity: 'base' });
+    });
 }
 
 /**
@@ -1071,11 +975,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Guardar atributos de búsqueda normalizados
                 const tText = normalizarTextoBusqueda(opt.textContent || '');
+                const tDataVal = normalizarTextoBusqueda(opt.value || '');
                 const tDataTexto = normalizarTextoBusqueda(opt.getAttribute('data-texto') || '');
                 const tDataTitulo = normalizarTextoBusqueda(opt.getAttribute('data-titulo') || '');
+                const tDataIntro = normalizarTextoBusqueda(opt.getAttribute('data-intro') || '');
+                const tDataResp = normalizarTextoBusqueda(opt.getAttribute('data-respuesta') || '');
                 const tDataCita = normalizarTextoBusqueda(opt.getAttribute('data-cita') || '');
                 const tDataDesc = normalizarTextoBusqueda(opt.getAttribute('data-desc') || '');
-                li.setAttribute('data-search', `${tText} ${tDataTexto} ${tDataTitulo} ${tDataCita} ${tDataDesc}`.trim());
+                const tDataV = normalizarTextoBusqueda(opt.getAttribute('data-v') || '');
+                const tDataR = normalizarTextoBusqueda(opt.getAttribute('data-r') || '');
+                li.setAttribute('data-search', `${tText} ${tDataVal} ${tDataTexto} ${tDataTitulo} ${tDataIntro} ${tDataResp} ${tDataCita} ${tDataDesc} ${tDataV} ${tDataR}`.trim());
 
                 li.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1628,6 +1537,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             opt.value = c.id;
             opt.setAttribute('data-nombre', c.nombre);
             opt.setAttribute('data-cita', c.cita);
+            opt.setAttribute('data-texto', c.texto || '');
+            opt.setAttribute('data-desc', c.nombre || '');
             opt.textContent = `${c.nombre} - ${c.cita}`;
             selCantico.appendChild(opt);
         });
@@ -1654,7 +1565,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const opt = document.createElement('option');
             opt.value = p.id || p.varName;
             opt.setAttribute('data-titulo', p.titulo || p.id);
+            opt.setAttribute('data-intro', p.intro || '');
             opt.setAttribute('data-respuesta', p.respuesta || '');
+            const intencionesStr = Array.isArray(p.intenciones) ? p.intenciones.join(' ') : (p.intenciones || '');
+            const textoCompleto = `${p.intro || ''} ${p.respuesta || ''} ${intencionesStr} ${p.concl || ''} ${p.textoCompleto || ''}`.trim();
+            opt.setAttribute('data-texto', textoCompleto);
+            opt.setAttribute('data-desc', p.intro || p.titulo || p.id);
             const tit = p.titulo || p.id;
             const resp = p.respuesta ? ` — ${p.respuesta}` : '';
             opt.textContent = `${tit}${resp}`;
@@ -1703,6 +1619,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const opt = document.createElement('option');
             opt.value = o.id || o.varName;
             opt.setAttribute('data-titulo', o.titulo || o.id);
+            const oracionTexto = `${o.textoCompleto || ''} ${o.texto || ''}`.trim();
+            opt.setAttribute('data-texto', oracionTexto);
+            opt.setAttribute('data-desc', o.titulo || o.id);
             const tit = o.titulo || o.id;
             const snip = o.texto ? ` — ${o.texto.slice(0, 50)}...` : '';
             opt.textContent = `${tit}${snip}`;
@@ -1737,6 +1656,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             opt.value = item.id || item.varName;
             opt.setAttribute('data-v', item.v || '');
             opt.setAttribute('data-r', item.r || '');
+            opt.setAttribute('data-texto', `${item.v || ''} ${item.r || ''}`);
             opt.textContent = `V. ${item.v ? item.v.slice(0, 45) : ''}... / R. ${item.r ? item.r.slice(0, 30) : ''}`;
             selResponsorioOficio.appendChild(opt);
         });
@@ -2170,9 +2090,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             laudes:    'LAUDES',
             oficio:    'OFICIO DE LECTURA',
             vispera:   'VÍSPERAS',
-            tercia:    'TERCIA',
-            sexta:     'SEXTA',
-            nona:      'NONA',
+            tercia:    'HORA TERCIA',
+            sexta:     'HORA SEXTA',
+            nona:      'HORA NONA',
             completas: 'COMPLETAS'
         };
         if (previewTituloHora) {
@@ -2184,19 +2104,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             laudes:    '(Oración de la mañana)',
             oficio:    '',
             vispera:   '(Oración de la tarde)',
-            tercia:    '(Antes del mediodía)',
-            sexta:     '(Al mediodía)',
-            nona:      '(De la tarde)',
+            tercia:    '',
+            sexta:     '',
+            nona:      '',
             completas: '(Oración antes del descanso nocturno)'
         };
         if (previewSubtituloHora) {
-            if (esOficio) {
+            const esHoraSinSubtitulo = (esOficio || libroVal === 'tercia' || libroVal === 'sexta' || libroVal === 'nona');
+            if (esHoraSinSubtitulo) {
                 previewSubtituloHora.style.display = 'none';
                 previewSubtituloHora.textContent = '';
                 if (previewTituloHora) previewTituloHora.style.marginBottom = '';
             } else {
-                previewSubtituloHora.style.display = 'block';
-                previewSubtituloHora.textContent = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
+                const sub = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
+                previewSubtituloHora.style.display = sub ? 'block' : 'none';
+                previewSubtituloHora.textContent = sub;
                 if (previewTituloHora) previewTituloHora.style.marginBottom = '';
             }
         }
@@ -4105,9 +4027,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             laudes:    'LAUDES',
             oficio:    'OFICIO DE LECTURA',
             vispera:   'VÍSPERAS',
-            tercia:    'TERCIA',
-            sexta:     'SEXTA',
-            nona:      'NONA',
+            tercia:    'HORA TERCIA',
+            sexta:     'HORA SEXTA',
+            nona:      'HORA NONA',
             completas: 'COMPLETAS'
         };
         if (previewTituloHora) {
@@ -4117,19 +4039,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             laudes:    '(Oración de la mañana)',
             oficio:    '',
             vispera:   '(Oración de la tarde)',
-            tercia:    '(Antes del mediodía)',
-            sexta:     '(Al mediodía)',
-            nona:      '(De la tarde)',
+            tercia:    '',
+            sexta:     '',
+            nona:      '',
             completas: '(Oración antes del descanso nocturno)'
         };
         if (previewSubtituloHora) {
-            if (libroVal === 'oficio') {
+            const esHoraSinSubtitulo = (libroVal === 'oficio' || libroVal === 'tercia' || libroVal === 'sexta' || libroVal === 'nona');
+            if (esHoraSinSubtitulo) {
                 previewSubtituloHora.style.display = 'none';
                 previewSubtituloHora.textContent = '';
                 if (previewTituloHora) previewTituloHora.style.marginBottom = '';
             } else {
-                previewSubtituloHora.style.display = 'block';
-                previewSubtituloHora.textContent = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
+                const sub = mapaSubtitulos[libroVal] || '(Oración de la mañana)';
+                previewSubtituloHora.style.display = sub ? 'block' : 'none';
+                previewSubtituloHora.textContent = sub;
                 if (previewTituloHora) previewTituloHora.style.marginBottom = '';
             }
         }
@@ -4406,8 +4330,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             id: idCodigo,
             codigo: idCodigo,
             codigoDia: (typeof codigoDia !== 'undefined' ? codigoDia : idCodigo.slice(0, -2)),
-            titulo: (previewTituloHora ? previewTituloHora.textContent : infoLibro.nombre.toUpperCase()),
-            subtitulo: (esOficio ? '' : (previewSubtituloHora ? previewSubtituloHora.textContent : (libroVal === 'oficio' ? '' : '(Oración de la mañana)'))),
+            titulo: ((libroVal === 'tercia') ? 'HORA TERCIA' : (libroVal === 'sexta') ? 'HORA SEXTA' : (libroVal === 'nona') ? 'HORA NONA' : (previewTituloHora ? previewTituloHora.textContent : infoLibro.nombre.toUpperCase())),
+            subtitulo: ((esOficio || libroVal === 'tercia' || libroVal === 'sexta' || libroVal === 'nona') ? '' : (previewSubtituloHora ? previewSubtituloHora.textContent : (libroVal === 'oficio' ? '' : '(Oración de la mañana)'))),
             tiempo: tiempoVal,
             tiempoCodigo: infoTiempo.codigo,
             tiempoNombre: infoTiempo.nombre,

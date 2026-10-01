@@ -6,9 +6,9 @@
     <title>Salterios — Liturgia de las Horas</title>
     <link rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <link rel="stylesheet" href="src/css/cinta.css">
-    <link rel="stylesheet" href="src/css/salterios.css">
-    <link rel="stylesheet" href="src/css/buttons.css">
+    <link rel="stylesheet" href="src/css/cinta.css?v=1.0.04">
+    <link rel="stylesheet" href="src/css/salterios.css?v=1.0.04">
+    <link rel="stylesheet" href="src/css/buttons.css?v=1.0.04">
 </head>
 <body class="pagina-salterios">
 
@@ -57,9 +57,9 @@
                 <select id="c-libro" onchange="const p = new URLSearchParams(window.location.search); p.set('libro', this.value); window.location.search = p.toString();">
                     <option value="oficio">Oficio de Lectura</option>
                     <option value="laudes" selected>Laudes</option>
-                    <option value="tercia">Tercia</option>
-                    <option value="sexta">Sexta</option>
-                    <option value="nona">Nona</option>
+                    <option value="tercia">Hora Tercia</option>
+                    <option value="sexta">Hora Sexta</option>
+                    <option value="nona">Hora Nona</option>
                     <option value="visperas">Vísperas</option>
                     <option value="completas">Completas</option>
                 </select>
@@ -136,15 +136,17 @@
     </aside>
 
     <!-- Scripts -->
-    <script src="src/data/salmos.js"></script>
-    <script src="src/data/db-antifonas.js" type="module"></script>
-    <script src="src/data/db-himnos.js" type="module"></script>
-    <script src="src/data/db-lecturabreve.js" type="module"></script>
-    <script src="src/data/db-preces.js" type="module"></script>
-    <script src="src/data/db-oracion.js" type="module"></script>
-    <script src="src/js/firebase-config.js" type="module"></script>
-    <script src="src/js/cinta.js" type="module"></script>
-    <script src="src/js/salterios.js" type="module"></script>
-    <script src="src/js/navigator.js"></script>
+    <script src="src/data/salmos.js?v=1.0.04"></script>
+    <script src="src/data/db-antifonas.js?v=1.0.04" type="module"></script>
+    <script src="src/data/db-himnos.js?v=1.0.04" type="module"></script>
+    <script src="src/data/db-lecturabreve.js?v=1.0.04" type="module"></script>
+    <script src="src/data/db-lecturas.js?v=1.0.04" type="module"></script>
+    <script src="src/data/db-responsorios.js?v=1.0.04" type="module"></script>
+    <script src="src/data/db-preces.js?v=1.0.04" type="module"></script>
+    <script src="src/data/db-oracion.js?v=1.0.04" type="module"></script>
+    <script src="src/js/firebase-config.js?v=1.0.04" type="module"></script>
+    <script src="src/js/cinta.js?v=1.0.04" type="module"></script>
+    <script src="src/js/salterios.js?v=1.0.04" type="module"></script>
+    <script src="src/js/navigator.js?v=1.0.04"></script>
 </body>
 </html>

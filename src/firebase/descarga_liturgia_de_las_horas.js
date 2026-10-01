@@ -426,9 +426,9 @@ export function obtenerIdsEquivalentes(codigo) {
 const CONFIG_LIBROS_DEFECTO = {
     oficio:    { nombre: 'OFICIO DE LECTURA', subtitulo: '' },
     laudes:    { nombre: 'LAUDES',            subtitulo: '(Oración de la mañana)' },
-    tercia:    { nombre: 'TERCIA',            subtitulo: '(Antes del mediodía)' },
-    sexta:     { nombre: 'SEXTA',             subtitulo: '(Al mediodía)' },
-    nona:      { nombre: 'NONA',              subtitulo: '(De la tarde)' },
+    tercia:    { nombre: 'HORA TERCIA',       subtitulo: '' },
+    sexta:     { nombre: 'HORA SEXTA',        subtitulo: '' },
+    nona:      { nombre: 'HORA NONA',         subtitulo: '' },
     visperas:  { nombre: 'VÍSPERAS',          subtitulo: '(Oración de la tarde)' },
     vispera:   { nombre: 'VÍSPERAS',          subtitulo: '(Oración de la tarde)' },
     completas: { nombre: 'COMPLETAS',         subtitulo: '(Oración antes del descanso nocturno)' }
@@ -521,8 +521,27 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
     };
 
     // 1. TÍTULO Y SUBTÍTULO
-    const tituloFinal = d.titulo || d.tt || cfgLibro.nombre;
-    const subtituloFinal = d.subtitulo || d.sub || cfgLibro.subtitulo;
+    let tituloFinal = d.titulo || d.tt || cfgLibro.nombre;
+    let subtituloFinal = (d.subtitulo !== undefined) ? (d.subtitulo || d.sub || '') : cfgLibro.subtitulo;
+
+    if (libro === 'tercia') {
+        if (!tituloFinal || /^(hora\s+)?tercia$/i.test(String(tituloFinal).trim())) {
+            tituloFinal = 'HORA TERCIA';
+        }
+        subtituloFinal = '';
+    } else if (libro === 'sexta') {
+        if (!tituloFinal || /^(hora\s+)?sexta$/i.test(String(tituloFinal).trim())) {
+            tituloFinal = 'HORA SEXTA';
+        }
+        subtituloFinal = '';
+    } else if (libro === 'nona') {
+        if (!tituloFinal || /^(hora\s+)?nona$/i.test(String(tituloFinal).trim())) {
+            tituloFinal = 'HORA NONA';
+        }
+        subtituloFinal = '';
+    } else if (libro === 'oficio') {
+        subtituloFinal = '';
+    }
 
     // 2. INVITATORIO
     const invRaw = d.invitatorio || {};

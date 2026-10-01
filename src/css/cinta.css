@@ -194,6 +194,44 @@
     position: relative;
     display: flex;
     align-items: center;
+    gap: 4px;
+}
+
+/* Botón Conmutador de Ciclo de Lecturas (Año I Impar / Año II Par en Oficio) */
+.cinta-btn-ciclo-anio {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 2px solid #ffd700;
+    color: #ffd700;
+    background: transparent;
+    font-weight: 800;
+    font-size: 0.85rem;
+    font-family: serif, "Times New Roman", Times, Georgia, sans-serif;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.cinta-btn-ciclo-anio.visible {
+    display: inline-flex;
+}
+
+.cinta-btn-ciclo-anio:hover {
+    background: rgba(255, 215, 0, 0.16);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    transform: scale(1.08);
+}
+
+.cinta-btn-ciclo-anio:active {
+    transform: scale(0.94);
 }
 
 .cinta-btn-iglesia {
@@ -458,7 +496,7 @@ color: red !important;
 
 .cinta-btn-hora {
     background: rgba(255, 255, 255, 0.08);
-    color: #cbd5e1;
+    color: white;
     font-size: 0.76rem;
     font-weight: 600;
     text-decoration: none;
@@ -468,6 +506,8 @@ color: red !important;
     border: 1px solid rgba(255, 255, 255, 0.08);
     transition: all 0.15s ease;
     cursor: pointer;
+    width: 30%;
+    text-align: center;
 }
 
 .cinta-btn-hora:hover {
@@ -696,6 +736,13 @@ color: red !important;
         flex-shrink: 0;
     }
 
+    .cinta-btn-ciclo-anio {
+        min-width: 22px;
+        height: 22px;
+        font-size: 0.78rem;
+        border-width: 1.5px;
+    }
+
     .cinta-btn-iglesia {
         padding: 0 1px;
         flex-shrink: 0;
@@ -734,7 +781,7 @@ color: red !important;
     }
 
     .cinta-btn-zoom {
-        padding: 0 10px;
+        padding: 0 6px;
         font-size: 1.5rem;
     }
 
@@ -769,13 +816,20 @@ color: red !important;
         padding: 2px 4px;
         letter-spacing: 0;
     }
-
+    
     .cinta-texto-metadatos {
         font-size: 0.78rem;
         margin: 0 2px;
     }
-
+    
     .cinta-btn-iglesia .material-symbols-outlined {
         font-size: 30px;
+    }
+}
+
+
+@media (min-width: 768px) {
+        .cinta-btn-zoom {
+        font-size: 2.25rem;
     }
 }

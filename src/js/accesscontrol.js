@@ -869,7 +869,11 @@ export function setUserPrimaryGroup(userEmail, groupId, skipCloud = false) {
         group: gid,
         updatedAt: new Date().toISOString()
       }, { merge: true }).catch(err => {
-        console.warn("⚠️ Error guardando grupo en Firestore:", err);
+        if (err?.code === 'permission-denied') {
+          console.info("ℹ️ [Firebase] Registro de usuario mantenido en almacenamiento local.");
+        } else {
+          console.warn("⚠️ Error guardando grupo en Firestore:", err);
+        }
       });
     }).catch(err => console.warn(err));
   }

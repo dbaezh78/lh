@@ -236,6 +236,14 @@ export class CintaLiturgica {
 
         // Estado del Reproductor y Modo Activo (Por defecto: Evangelio)
         this.modoActivo = 'evangelio';
+        // Ciclo de lectura para Oficio: 'par' (Año II) o 'impar' (Año I)
+        const anioActual = new Date().getFullYear();
+        this.cicloAnio = (typeof window !== 'undefined' && window.__cicloAnioOficio)
+            ? window.__cicloAnioOficio
+            : (anioActual % 2 === 0 ? 'par' : 'impar');
+        if (typeof window !== 'undefined') {
+            window.__cicloAnioOficio = this.cicloAnio;
+        }
         this.audios = {
             evangelio: '',
             hora: '',
@@ -403,6 +411,7 @@ export class CintaLiturgica {
                     </div>
 
                     <div class="cinta-sup-der">
+                        <button type="button" class="cinta-btn-ciclo-anio ${libro.toLowerCase() === 'oficio' ? 'visible' : ''}" id="btn-ciclo-anio" title="${this.cicloAnio === 'par' ? 'Año II (Par) - Toca para cambiar a Año I (Impar)' : 'Año I (Impar) - Toca para cambiar a Año II (Par)'}">${this.cicloAnio === 'par' ? 'II' : 'I'}</button>
                         <button type="button" class="cinta-btn-iglesia" id="btn-iglesia-selector" title="Seleccionar fuente de audio">
                             <span class="material-symbols-outlined">church</span>
                         </button>
@@ -509,6 +518,19 @@ export class CintaLiturgica {
 
             spanZoom.addEventListener('touchend', (e) => {
                 manejarDobleAccion(e);
+            });
+        }
+
+        // 2b. Botón Conmutador de Ciclo Año I (Impar) / Año II (Par) para Oficio
+        const btnCicloAnio = document.getElementById('btn-ciclo-anio');
+        if (btnCicloAnio) {
+            btnCicloAnio.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const nuevoCiclo = this.cicloAnio === 'par' ? 'impar' : 'par';
+                this.establecerCicloAnio(nuevoCiclo);
+                window.dispatchEvent(new CustomEvent('lh-cambiar-ciclo-anio', {
+                    detail: { ciclo: nuevoCiclo, esPar: nuevoCiclo === 'par' }
+                }));
             });
         }
 
@@ -1386,8 +1408,14 @@ export class CintaLiturgica {
             this.subtitulos.lectura1 = subtitulo;
             const sub = document.getElementById('menu-sub-lectura1');
             if (sub && subtitulo) sub.textContent = subtitulo;
-            if (this.modoActivo === 'lectura1' && (!this.audio.src || this.audio.paused)) {
-                this.audio.src = url;
+            if (this.modoActivo === 'lectura1') {
+                const estabaReproduciendo = !this.audio.paused;
+                if (this.audio.src !== url) {
+                    this.audio.src = url;
+                    if (estabaReproduciendo) {
+                        this.audio.play().catch(() => {});
+                    }
+                }
             }
         }
     }
@@ -1520,9 +1548,38 @@ export class CintaLiturgica {
             }
         });
 
+        // Actualizar botón conmutador de ciclo de lectura en Oficio
+        const btnCicloAnio = document.getElementById('btn-ciclo-anio');
+        if (btnCicloAnio) {
+            if (libroNorm === 'oficio') {
+                btnCicloAnio.classList.add('visible');
+                btnCicloAnio.textContent = this.cicloAnio === 'par' ? 'II' : 'I';
+                btnCicloAnio.title = this.cicloAnio === 'par'
+                    ? 'Año II (Par) - Toca para cambiar a Año I (Impar)'
+                    : 'Año I (Impar) - Toca para cambiar a Año II (Par)';
+            } else {
+                btnCicloAnio.classList.remove('visible');
+            }
+        }
+
         // Si el modo activo es hora, refrescar texto para TTS
         if (this.modoActivo === 'hora' && !this.ttsState.isSpeaking) {
             this.prepararTTS();
+        }
+    }
+
+    establecerCicloAnio(ciclo) {
+        const cNorm = (ciclo === 'impar' || ciclo === 1 || ciclo === '1') ? 'impar' : 'par';
+        this.cicloAnio = cNorm;
+        if (typeof window !== 'undefined') {
+            window.__cicloAnioOficio = cNorm;
+        }
+        const btnCicloAnio = document.getElementById('btn-ciclo-anio');
+        if (btnCicloAnio) {
+            btnCicloAnio.textContent = cNorm === 'par' ? 'II' : 'I';
+            btnCicloAnio.title = cNorm === 'par'
+                ? 'Año II (Par) - Toca para cambiar a Año I (Impar)'
+                : 'Año I (Impar) - Toca para cambiar a Año II (Par)';
         }
     }
 

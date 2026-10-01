@@ -351,7 +351,11 @@ window.firebaseAPI = {
             console.log(`☁️ [Firebase] Ajustes sección '${seccion}' guardados en Firestore.`);
             return true;
         } catch (err) {
-            console.warn(`⚠️ Error guardando ajustes en Firestore (${seccion}):`, err);
+            if (err?.code === 'permission-denied') {
+                console.info(`ℹ️ [Firebase] Ajustes '${seccion}' guardados localmente (publicar reglas en Firebase Console para sincronizar en la nube).`);
+            } else {
+                console.warn(`⚠️ Error guardando ajustes en Firestore (${seccion}):`, err);
+            }
             return false;
         }
     },

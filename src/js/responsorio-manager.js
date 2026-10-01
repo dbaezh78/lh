@@ -253,6 +253,25 @@ function mostrarBannerEstado(mensaje, tipo = 'info') {
     }
 }
 
+// Normalizar/migrar formato de ID de responsorios a la nomenclatura canónica (ej: tos05doof_resp)
+function migrarIdsResponsorios(items) {
+    if (!Array.isArray(items)) return [];
+    return items.map(r => {
+        if (!r || !r.id) return r;
+        // Si ya sigue la nomenclatura estándar o es de santos, verificar
+        if (r.tiempo === 'santos') return r;
+        const nuevoId = generarIdCanonicoResponsorio(r.tiempo, r.semana, r.dia, r.libro);
+        if (nuevoId && r.id !== nuevoId) {
+            return {
+                ...r,
+                id: nuevoId,
+                varName: nuevoId
+            };
+        }
+        return r;
+    });
+}
+
 // Cargar datos: primero Firestore/localStorage, con respaldo en db-responsorios.js
 async function cargarDatos() {
     mostrarBannerEstado('Cargando catálogo de responsorios...', 'info');
@@ -266,7 +285,7 @@ async function cargarDatos() {
                 const desdeFb = [];
                 snap.forEach(d => desdeFb.push({ id: d.id, ...d.data() }));
                 if (desdeFb.length >= 3) {
-                    listaResponsorios = desdeFb;
+                    listaResponsorios = migrarIdsResponsorios(desdeFb);
                     localStorage.setItem('lh_responsorios_cache', JSON.stringify(listaResponsorios));
                     mostrarBannerEstado(`✅ Se cargaron ${listaResponsorios.length} responsorios desde Firebase Firestore.`, 'exito');
                     return;
@@ -283,7 +302,8 @@ async function cargarDatos() {
         try {
             const parsed = JSON.parse(cacheLocal);
             if (Array.isArray(parsed) && parsed.length >= 3) {
-                listaResponsorios = parsed;
+                listaResponsorios = migrarIdsResponsorios(parsed);
+                localStorage.setItem('lh_responsorios_cache', JSON.stringify(listaResponsorios));
                 mostrarBannerEstado(`📂 Cargados ${listaResponsorios.length} responsorios desde la caché local.`, 'alerta');
                 return;
             }
@@ -292,7 +312,7 @@ async function cargarDatos() {
 
     // 3. Fallback a semilla canónica
     if (Array.isArray(CATALOGO_RESPONSORIOS_SEED) && CATALOGO_RESPONSORIOS_SEED.length > 0) {
-        listaResponsorios = [...CATALOGO_RESPONSORIOS_SEED];
+        listaResponsorios = migrarIdsResponsorios([...CATALOGO_RESPONSORIOS_SEED]);
         localStorage.setItem('lh_responsorios_cache', JSON.stringify(listaResponsorios));
         mostrarBannerEstado(`✨ Cargados los ${listaResponsorios.length} responsorios canónicos desde el catálogo base.`, 'exito');
         return;
@@ -365,6 +385,27 @@ function configurarEventos() {
     document.getElementById('filtro-dia')?.addEventListener('change', renderizarLista);
 }
 
+// Generar ID canónico según tiempo, semana/santo, día y libro litúrgico
+function generarIdCanonicoResponsorio(tiempo, semana, dia, libro) {
+    const tMap = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'sa' };
+    const dMap = { domingo: 'do', lunes: 'lu', martes: 'ma', miercoles: 'mi', miércoles: 'mi', jueves: 'ju', viernes: 'vi', sabado: 'sa', sábado: 'sa' };
+    const lMap = { oficio: 'of', laudes: 'la', visperas: 'vi', vispera: 'vi', tercia: 'te', sexta: 'se', nona: 'no', completas: 'co' };
+
+    const tCode = tMap[(tiempo || 'ordinario').toLowerCase()] || 'to';
+    const lCode = lMap[(libro || 'oficio').toLowerCase()] || 'of';
+
+    if (tCode === 'sa') {
+        const idSanto = String(semana || 'sa0101santo').toLowerCase();
+        return `${idSanto}${lCode}_resp`;
+    }
+
+    const numSemana = parseInt(semana, 10) || 1;
+    const sPad = String(numSemana).padStart(2, '0');
+    const dCode = dMap[(dia || 'domingo').toLowerCase()] || 'do';
+
+    return `${tCode}s${sPad}${dCode}${lCode}_resp`;
+}
+
 // Generar ID sugerido según tiempo, semana/santo y día
 function autogenerarIdYTitulo() {
     const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
@@ -373,35 +414,22 @@ function autogenerarIdYTitulo() {
     const dia = document.getElementById('form-dia')?.value || 'domingo';
     const libro = document.getElementById('form-libro')?.value || 'oficio';
 
-    const tMap = { ordinario: 'tos', adviento: 'tav', navidad: 'tna', cuaresma: 'tcu', pascua: 'tps', santos: 'san' };
-    const dMap = { domingo: 'do', lunes: 'lu', martes: 'ma', miercoles: 'mi', jueves: 'ju', viernes: 'vi', sabado: 'sa' };
-    const lMap = { oficio: 'OF', laudes: 'LA', visperas: 'VI', tercia: 'TE', sexta: 'SE', nona: 'NO', completas: 'CO' };
-
-    let idSugerido = '';
+    const idSugerido = generarIdCanonicoResponsorio(tiempo, semanaVal, dia, libro);
     let tituloSugerido = '';
 
     if (tiempo === 'santos') {
-        const horaCod = lMap[libro] || 'OF';
         const optSanto = semanaSel?.selectedOptions[0];
         const nombreSanto = optSanto ? (optSanto.getAttribute('data-nombre') || optSanto.textContent) : 'Santo';
         const fechaSanto = optSanto ? optSanto.getAttribute('data-fecha') : '';
-        const idSanto = semanaVal || 'sa0101santo';
-
-        idSugerido = `${idSanto}${horaCod.toLowerCase()}_resp`;
         tituloSugerido = `Responsorio - ${nombreSanto}${fechaSanto ? ' (' + fechaSanto + ')' : ''} (${libro.charAt(0).toUpperCase() + libro.slice(1)})`;
     } else {
-        const prefijo = tMap[tiempo] || 'tos';
-        const diaCod = dMap[dia] || 'do';
-        const horaCod = lMap[libro] || 'OF';
-
-        idSugerido = `${prefijo}${semanaVal}${horaCod}${diaCod}_resp`;
         const diaNombre = dia.charAt(0).toUpperCase() + dia.slice(1);
         const tiempoNombre = tiempo.charAt(0).toUpperCase() + tiempo.slice(1);
         tituloSugerido = `Responsorio de la Salmodia - ${diaNombre} Semana ${semanaVal} (${tiempoNombre})`;
     }
 
     const inputId = document.getElementById('form-id');
-    if (inputId && !editandoId) {
+    if (inputId) {
         inputId.value = idSugerido;
     }
 
@@ -543,8 +571,19 @@ async function guardarResponsorio(e) {
         nuevoObj.santoNombre = santoNombre;
     }
 
-    const idx = listaResponsorios.findIndex(x => x.id === id);
+    const idx = listaResponsorios.findIndex(x => x.id === id || (editandoId && x.id === editandoId));
     if (idx >= 0) {
+        // Si el ID cambió respecto al editandoId anterior en Firestore, eliminar el viejo
+        const viejoId = listaResponsorios[idx].id;
+        if (viejoId && viejoId !== id) {
+            try {
+                if (window.firebaseAPI && window.firebaseAPI.db) {
+                    import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js").then(({ doc, deleteDoc }) => {
+                        deleteDoc(doc(window.firebaseAPI.db, "responsorios", viejoId)).catch(() => {});
+                    });
+                }
+            } catch (e) {}
+        }
         listaResponsorios[idx] = nuevoObj;
     } else {
         listaResponsorios.push(nuevoObj);
@@ -594,9 +633,13 @@ function editarResponsorio(id) {
     setVal('form-v', item.v || '');
     setVal('form-r', item.r || '');
 
+    autogenerarIdYTitulo();
+    const idCanonico = document.getElementById('form-id')?.value || item.id;
+    editandoId = idCanonico;
+
     const tituloForm = document.getElementById('titulo-formulario');
     if (tituloForm) {
-        tituloForm.innerHTML = `<span class="material-symbols-outlined" style="color: var(--accent-gold);">edit</span> Editando: ${item.id}`;
+        tituloForm.innerHTML = `<span class="material-symbols-outlined" style="color: var(--accent-gold);">edit</span> Editando: ${idCanonico}`;
     }
 
     const btnGuardar = document.getElementById('btn-guardar-texto');

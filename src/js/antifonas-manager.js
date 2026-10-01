@@ -176,6 +176,13 @@ function restaurarParametros() {
             }
             const inpFecha = document.getElementById('form-fecha');
             if (inpFecha && p.fechaCeleb) inpFecha.value = p.fechaCeleb;
+        } else {
+            const inpSanto = document.getElementById('form-santo');
+            if (inpSanto) inpSanto.value = '';
+            const inpFecha = document.getElementById('form-fecha');
+            if (inpFecha) inpFecha.value = '';
+            const selSanto = document.getElementById('form-santo-select');
+            if (selSanto) selSanto.value = '';
         }
         const selLibro = document.getElementById('form-libro');
         if (selLibro && p.libro) {
@@ -289,6 +296,9 @@ function inicializarSelectores() {
         } else {
             if (boxSantoContainer) boxSantoContainer.style.display = 'none';
             selDia.disabled = false;
+            if (inputSantoHidden) inputSantoHidden.value = '';
+            if (inputFecha) inputFecha.value = '';
+            if (selSanto) selSanto.value = '';
         }
     }
 
@@ -304,11 +314,22 @@ function inicializarSelectores() {
 async function cargarDatos() {
     mostrarBannerEstado('Cargando antífonas desde Firebase...', 'info');
 
+    const sanitizar = (arr) => {
+        if (!Array.isArray(arr)) return arr;
+        arr.forEach(a => {
+            if (a && a.tiempo !== 'santos') {
+                delete a.santo;
+                delete a.fecha;
+            }
+        });
+        return arr;
+    };
+
     try {
         if (window.firebaseAPI && window.firebaseAPI.cargarAntifonasFirestore) {
             const desdeFirestore = await window.firebaseAPI.cargarAntifonasFirestore();
             if (desdeFirestore && desdeFirestore.length > 0) {
-                listaAntifonas = desdeFirestore;
+                listaAntifonas = sanitizar(desdeFirestore);
                 localStorage.setItem('lh_antifonas_cache', JSON.stringify(listaAntifonas));
                 mostrarBannerEstado(`✅ Se cargaron ${listaAntifonas.length} antífonas desde Firestore.`, 'exito');
                 return;
@@ -325,14 +346,15 @@ async function cargarDatos() {
             const parsed = JSON.parse(cacheLocal);
             // Si la caché tiene al menos 50 antífonas, es un catálogo representativo
             if (Array.isArray(parsed) && parsed.length >= 50) {
-                listaAntifonas = parsed;
+                listaAntifonas = sanitizar(parsed);
+                localStorage.setItem('lh_antifonas_cache', JSON.stringify(listaAntifonas));
                 mostrarBannerEstado(`📂 Cargadas ${listaAntifonas.length} antífonas desde caché local.`, 'alerta');
                 return;
             }
         } catch (e) {}
     }
 
-    listaAntifonas = [...CATALOGO_ANTIFONAS_SEED];
+    listaAntifonas = sanitizar([...CATALOGO_ANTIFONAS_SEED]);
     localStorage.setItem('lh_antifonas_cache', JSON.stringify(listaAntifonas));
     mostrarBannerEstado(`✨ Cargadas las 131 antífonas del catálogo base desde antifonas.js.`, 'exito');
 }
@@ -368,15 +390,16 @@ function buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo)
 // Coordinar cambio de parámetros (Santo, Tiempo, Semana, Día, Libro, Tipo)
 function manejarCambioParametros() {
     const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
+    const esTiempoSantos = (tiempo === 'santos');
     const semanaVal = document.getElementById('form-semana')?.value;
     const semana = semanaVal ? parseInt(semanaVal, 10) : null;
-    const dia = document.getElementById('form-dia')?.value || null;
-    const fecha = document.getElementById('form-fecha')?.value?.trim() || null;
+    const dia = esTiempoSantos ? null : (document.getElementById('form-dia')?.value || null);
+    const fecha = esTiempoSantos ? (document.getElementById('form-fecha')?.value?.trim() || null) : null;
     const selSanto = document.getElementById('form-santo-select');
     const optSanto = selSanto?.selectedOptions[0];
-    const santo = (tiempo === 'santos' && optSanto && optSanto.value) 
-        ? optSanto.getAttribute('data-nombre') 
-        : (document.getElementById('form-santo')?.value?.trim() || null);
+    const santo = esTiempoSantos
+        ? ((optSanto && optSanto.value) ? optSanto.getAttribute('data-nombre') : (document.getElementById('form-santo')?.value?.trim() || null))
+        : null;
     const libro = document.getElementById('form-libro')?.value || 'laudes';
     const tipo = document.getElementById('form-tipo')?.value || 'invitatoria';
 
@@ -507,15 +530,16 @@ function configurarEventos() {
 // Guardar o Actualizar antífona individual
 async function guardarAntifona() {
     const tiempo = document.getElementById('form-tiempo').value;
+    const esTiempoSantos = (tiempo === 'santos');
     const semanaVal = document.getElementById('form-semana').value;
     const semana = semanaVal ? parseInt(semanaVal, 10) : null;
-    const dia = document.getElementById('form-dia').value || null;
-    const fecha = document.getElementById('form-fecha')?.value.trim() || null;
+    const dia = esTiempoSantos ? null : (document.getElementById('form-dia').value || null);
+    const fecha = esTiempoSantos ? (document.getElementById('form-fecha')?.value.trim() || null) : null;
     const selSanto = document.getElementById('form-santo-select');
     const optSanto = selSanto?.selectedOptions[0];
-    const santo = (tiempo === 'santos' && optSanto && optSanto.value) 
-        ? optSanto.getAttribute('data-nombre') 
-        : (document.getElementById('form-santo')?.value.trim() || null);
+    const santo = esTiempoSantos
+        ? ((optSanto && optSanto.value) ? optSanto.getAttribute('data-nombre') : (document.getElementById('form-santo')?.value.trim() || null))
+        : null;
     const libro = document.getElementById('form-libro').value;
     const tipo = document.getElementById('form-tipo').value;
     const texto = document.getElementById('form-texto').value.trim();
@@ -526,24 +550,26 @@ async function guardarAntifona() {
     }
 
     // Sincronizar fecha de celebración en catálogo de santos si es tiempo santos
-    if (tiempo === 'santos' && optSanto && optSanto.value && fecha && /^\d{1,2}\/\d{1,2}$/.test(fecha)) {
+    if (esTiempoSantos && optSanto && optSanto.value && fecha && /^\d{1,2}\/\d{1,2}$/.test(fecha)) {
         actualizarFechaCelebracionSanto(optSanto.value, fecha);
     }
 
-    const diaFechaLimpia = (dia || fecha || 'gen').replace(/\//g, '_');
+    const diaFechaLimpia = (dia || (esTiempoSantos ? fecha : '') || 'gen').replace(/\//g, '_');
     const docId = (editandoId || `${tiempo}_s${semana || '0'}_${diaFechaLimpia}_${libro}_${tipo}_${Date.now()}`).replace(/\//g, '_');
     const payload = {
         id: docId,
         tiempo,
         semana,
         dia,
-        fecha,
-        santo,
         libro,
         tipo,
         texto,
         ultimaActualizacion: new Date().toISOString()
     };
+    if (esTiempoSantos) {
+        if (fecha) payload.fecha = fecha;
+        if (santo) payload.santo = santo;
+    }
 
     // Guardar en Firestore si está disponible
     mostrarBannerEstado('Guardando antífona...', 'info');
@@ -635,8 +661,8 @@ function renderizarLista() {
 
     contenedor.innerHTML = filtradas.map(item => {
         const semanaTxt = item.semana ? `Semana ${item.semana}` : '';
-        const diaTxt = item.dia ? capitalizar(item.dia) : (item.fecha || '');
-        const santoTxt = item.santo ? `• 😇 ${item.santo}` : '';
+        const diaTxt = item.dia ? capitalizar(item.dia) : (item.tiempo === 'santos' ? (item.fecha || '') : '');
+        const santoTxt = (item.tiempo === 'santos' && item.santo) ? `• 😇 ${item.santo}` : '';
         
         return `
             <div class="antifona-card-item" data-id="${item.id}">
@@ -675,17 +701,26 @@ window.editarAntifona = (id) => {
     document.getElementById('form-tiempo').dispatchEvent(new Event('change'));
     if (item.semana) document.getElementById('form-semana').value = item.semana;
     if (item.dia) document.getElementById('form-dia').value = item.dia;
-    if (item.fecha) document.getElementById('form-fecha').value = item.fecha;
-    if (item.santo) {
-        document.getElementById('form-santo').value = item.santo;
-        const selSanto = document.getElementById('form-santo-select');
-        if (selSanto) {
-            const opt = Array.from(selSanto.options).find(o => 
-                o.getAttribute('data-nombre') === item.santo || 
-                o.value === item.santo
-            );
-            if (opt) selSanto.value = opt.value;
+    if (item.tiempo === 'santos') {
+        if (item.fecha) document.getElementById('form-fecha').value = item.fecha;
+        if (item.santo) {
+            document.getElementById('form-santo').value = item.santo;
+            const selSanto = document.getElementById('form-santo-select');
+            if (selSanto) {
+                const opt = Array.from(selSanto.options).find(o => 
+                    o.getAttribute('data-nombre') === item.santo || 
+                    o.value === item.santo
+                );
+                if (opt) selSanto.value = opt.value;
+            }
         }
+    } else {
+        const inpFecha = document.getElementById('form-fecha');
+        if (inpFecha) inpFecha.value = '';
+        const inpSanto = document.getElementById('form-santo');
+        if (inpSanto) inpSanto.value = '';
+        const selSanto = document.getElementById('form-santo-select');
+        if (selSanto) selSanto.value = '';
     }
     document.getElementById('form-libro').value = item.libro;
     document.getElementById('form-tipo').value = item.tipo;
