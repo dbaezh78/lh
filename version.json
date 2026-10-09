@@ -1,0 +1,13 @@
+{
+  "latestVersion": "1.0.05",
+  "minVersion": "1.0.01",
+  "updateTitle": "Nueva Versión Disponible (v1.0.05)",
+  "updateMessage": "Nomenclatura unificada de IDs litúrgicos ([tiempo][semana][día][hora]), selector interactivo con búsqueda canónica en tiempo real y conmutador de lecturas para años pares/impares.",
+  "releaseNotes": [
+    "Nomenclatura unificada de IDs litúrgicos en todos los formularios (tos01dote, tos01doof, tos05doof).",
+    "Búsqueda por ID / Código en selectores interactivos de frm_salterios.html: resolución inmediata de códigos canónicos y alias mientras se visualiza el texto descriptivo.",
+    "Ciclo Litúrgico de 4 Semanas del Salterio en Tiempo Ordinario: herencia inteligente de salmos, antífonas e himnos base (semanas 5, 9, 13... a Salterio 1) manteniendo lecturas de oficio y oración propias de cada semana.",
+    "Actualización del gestor de Himnos (himno.html) con selectores de semana y día y autocompletado de ID canónico.",
+    "Conmutador de lecturas de Oficio de Lectura para años pares (II) e impares (I)."
+  ]
+}

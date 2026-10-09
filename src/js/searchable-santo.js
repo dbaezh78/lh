@@ -176,17 +176,17 @@ export function inicializarSearchableSantoSelect(selectElement, options = {}) {
     searchInput.addEventListener('input', () => {
         const raw = searchInput.value.trim();
         const query = normalizarTextoBusqueda(raw);
+        const tokens = query ? query.split(' ').filter(Boolean) : [];
         const lis = ul.querySelectorAll('.custom-select-santo-opcion:not(.sin-resultados)');
         let visibles = 0;
         lis.forEach(li => {
             const searchStr = li.getAttribute('data-search') || normalizarTextoBusqueda(li.textContent || '');
-            let coincide = !query || searchStr.includes(query);
-            if (!coincide && raw) {
-                coincide = searchStr.includes(raw.toLowerCase());
-            }
+            const coincide = (tokens.length === 0) || tokens.every(tok => searchStr.includes(tok));
             li.style.display = coincide ? 'block' : 'none';
             if (coincide) visibles++;
         });
+
+        ul.scrollTop = 0;
 
         let sinResultados = ul.querySelector('.sin-resultados');
         if (visibles === 0) {
@@ -245,6 +245,12 @@ export function inicializarSearchableSantoSelect(selectElement, options = {}) {
             dropdown.classList.remove('abierto');
             trigger.classList.remove('activo');
             container.classList.remove('dropdown-activo');
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const primerVisible = ul.querySelector('.custom-select-santo-opcion:not(.sin-resultados):not([style*="display: none"])');
+            if (primerVisible) {
+                primerVisible.click();
+            }
         }
     });
 

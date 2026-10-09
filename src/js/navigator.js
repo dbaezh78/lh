@@ -30,7 +30,7 @@
     // 3. Crear el HTML de la navegación 
     // Añadimos 'style="visibility: hidden"' para evitar el parpadeo sin estilos
 // 3. Crear el HTML de la navegación 
-    window.APP_VERSION = '1.0.04';
+    window.APP_VERSION = '1.0.05';
     const appVersion = window.APP_VERSION;
 
     // Función universal para mostrar ventana modal de archivos actualizándose
@@ -455,9 +455,10 @@
                     <span>Ajustes</span>
                 </button>
 
-                <button class="nav-item" id="nav-google-auth">
+                <button class="nav-item" id="nav-google-auth" style="position: relative;">
                     <span class="material-symbols-outlined" id="nav-auth-icon">account_circle</span>
                     <span id="nav-auth-text">Entrar</span>
+                    <span id="badge-nav-cuenta" class="badge-unread-nav-cuenta" style="display: none; position: absolute; top: -4px; right: calc(50% - 28px); background-color: #007aff; color: #ffffff; font-size: 0.72rem; font-weight: 900; min-width: 18px; height: 18px; line-height: 18px; border-radius: 9999px; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); pointer-events: none; z-index: 10; border: 1.5px solid #ffffff; box-sizing: border-box;">1</span>
                 </button>
             </div>
         </div>
@@ -611,13 +612,36 @@
         const pillAct = document.getElementById('account-action-actualizar-pill');
         if (!btnAct) return;
 
+        if (window._hasAppUpdateAvailable && window._latestRemoteVersion) {
+            btnAct.classList.add('has-update-ready');
+            btnAct.classList.remove('is-updated');
+            if (textAct) {
+                textAct.innerText = 'Actualizar App';
+                textAct.style.color = '#007aff';
+            }
+            if (pillAct) {
+                pillAct.innerText = `v${window._latestRemoteVersion}`;
+                pillAct.style.background = '#007aff';
+                pillAct.style.color = '#ffffff';
+                pillAct.style.border = 'none';
+            }
+            if (iconAct) {
+                iconAct.className = 'account-update-halo-ring';
+                iconAct.title = `¡Nueva versión disponible v${window._latestRemoteVersion}!`;
+            }
+            return;
+        }
+
         const lastUpdated = localStorage.getItem('lh_last_updated_version');
         const isUpToDate = (lastUpdated === appVersion);
 
         if (isUpToDate) {
             btnAct.classList.remove('has-update-ready');
             btnAct.classList.add('is-updated');
-            if (textAct) textAct.innerText = 'Refrescar App';
+            if (textAct) {
+                textAct.innerText = 'Refrescar App';
+                textAct.style.color = '#00e676';
+            }
             if (pillAct) {
                 pillAct.innerText = `v${appVersion}`;
                 pillAct.style.background = 'rgba(0, 230, 118, 0.15)';
@@ -632,7 +656,10 @@
         } else {
             btnAct.classList.add('has-update-ready');
             btnAct.classList.remove('is-updated');
-            if (textAct) textAct.innerText = 'Actualizar App';
+            if (textAct) {
+                textAct.innerText = 'Actualizar App';
+                textAct.style.color = '#00e676';
+            }
             if (pillAct) {
                 pillAct.innerText = `v${appVersion}`;
                 pillAct.style.background = '#ffd700';
@@ -650,11 +677,12 @@
             e.preventDefault();
             e.stopPropagation();
             if (accountCard) accountCard.classList.add('hidden');
+            const targetVer = window._latestRemoteVersion || appVersion;
             const lastUpdated = localStorage.getItem('lh_last_updated_version');
-            const isUpToDate = (lastUpdated === appVersion);
+            const isUpToDate = (!window._hasAppUpdateAvailable && lastUpdated === appVersion);
             const msg = isUpToDate
                 ? `🔄 ¿Desea refrescar y sincronizar los archivos de la aplicación (v${appVersion})?`
-                : `🔄 ¿Desea actualizar y sincronizar la aplicación a la última versión (v${appVersion})?`;
+                : `🚀 ¿Desea actualizar y sincronizar la aplicación a la última versión (v${targetVer})?`;
 
             if (confirm(msg)) {
                 await window.ejecutarActualizacionConListaArchivos('actualizar');
@@ -926,12 +954,275 @@
     window.addEventListener('lh-access-control-updated', verificarPermisosNavegacion);
     setTimeout(verificarPermisosNavegacion, 1200);
 
+    // ==========================================
+    // SISTEMA DE CONTROL DE VERSIONES Y ACTUALIZACIÓN REMOTA
+    // ==========================================
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Comparar versiones formato X.Y.ZZ
+    function esVersionSuperior(versionRemota, versionLocal) {
+        if (!versionRemota || !versionLocal) return false;
+        const partesR = String(versionRemota).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+        const partesL = String(versionLocal).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+
+        const maxLen = Math.max(partesR.length, partesL.length);
+        for (let i = 0; i < maxLen; i++) {
+            const vr = partesR[i] || 0;
+            const vl = partesL[i] || 0;
+            if (vr > vl) return true;
+            if (vr < vl) return false;
+        }
+        return false;
+    }
+
+    // Tono acústico armónico agradable
+    function reproducirSonidoNotificacion() {
+        try {
+            if (navigator.userActivation && !navigator.userActivation.hasBeenActive) {
+                return;
+            }
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            if (ctx.state === 'suspended') {
+                return;
+            }
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            const now = ctx.currentTime;
+            osc.frequency.setValueAtTime(587.33, now);
+            osc.frequency.setValueAtTime(880, now + 0.12);
+
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.28, now + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+            osc.start(now);
+            osc.stop(now + 0.46);
+        } catch (e) {}
+    }
+
+    // Notificación emergente superior en AZUL idéntica a Resucitó
+    function mostrarBannerActualizacion(versionNueva) {
+        let toast = document.getElementById('lh-update-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'lh-update-toast';
+            toast.style.cssText = `
+                position: fixed;
+                top: -95px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 100000;
+                background: #111b21;
+                color: #ffffff;
+                border: 1.5px solid #007aff;
+                border-radius: 14px;
+                padding: 10px 16px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45);
+                cursor: pointer;
+                transition: top 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                max-width: 90vw;
+                min-width: 280px;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            `;
+            toast.addEventListener('click', async () => {
+                toast.style.top = '-95px';
+                const card = document.getElementById('account-popup-card');
+                if (card) {
+                    document.querySelectorAll('.nav-submenu').forEach((m) => m.classList.remove('active'));
+                    card.classList.remove('hidden');
+                }
+                if (confirm(`🚀 Actualización de la App (v${versionNueva})\n\n¿Deseas actualizar y sincronizar la aplicación ahora?`)) {
+                    await window.ejecutarActualizacionConListaArchivos('actualizar');
+                }
+            });
+            document.body.appendChild(toast);
+        }
+
+        toast.innerHTML = `
+            <div style="background: #007aff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0, 122, 255, 0.4);">
+                <span class="material-symbols-outlined" style="color: #ffffff; font-size: 20px;">system_update</span>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: #007aff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    Actualización de la App (v${escapeHtml(versionNueva)})
+                </div>
+                <div style="font-size: 0.80rem; color: #e9edef; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    Toca aquí o entra a Cuenta ➔ Actualizar App
+                </div>
+            </div>
+            <span class="material-symbols-outlined" style="color: #8696a0; font-size: 18px; margin-left: 6px;">chevron_right</span>
+        `;
+
+        reproducirSonidoNotificacion();
+
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            try {
+                const notif = new Notification('🚀 Actualización de Liturgia de las Horas (v' + versionNueva + ')', {
+                    body: 'Nueva versión disponible. Entra a Cuenta para actualizar la App.',
+                    icon: '/src/img/icono.png',
+                    badge: '/src/img/icono.png',
+                    tag: 'lh-update-notif',
+                    renotify: true
+                });
+                notif.onclick = () => {
+                    window.focus();
+                    const card = document.getElementById('account-popup-card');
+                    if (card) {
+                        document.querySelectorAll('.nav-submenu').forEach((m) => m.classList.remove('active'));
+                        card.classList.remove('hidden');
+                    }
+                    notif.close();
+                };
+            } catch (e) {}
+        }
+
+        setTimeout(() => {
+            toast.style.top = '16px';
+        }, 50);
+
+        if (window._updateToastTimer) clearTimeout(window._updateToastTimer);
+        window._updateToastTimer = setTimeout(() => {
+            toast.style.top = '-95px';
+        }, 7000);
+    }
+
+    function renderizarBadgeActualizacion() {
+        const badge = document.getElementById('badge-nav-cuenta');
+        if (!badge) return;
+        if (window._hasAppUpdateAvailable) {
+            badge.textContent = '1';
+            badge.style.setProperty('display', 'inline-flex', 'important');
+            badge.style.setProperty('background-color', '#007aff', 'important');
+            badge.style.setProperty('color', '#ffffff', 'important');
+        } else {
+            badge.style.setProperty('display', 'none', 'important');
+        }
+    }
+
+    // Auto-registrar versión actual en Firestore si no estuviera registrada
+    async function autoRegistrarVersionEnFirestore() {
+        try {
+            if (!window.firebaseAPI?.cargarActualizacionesFirestore || !window.firebaseAPI?.guardarActualizacionFirestore) return;
+            const lista = await window.firebaseAPI.cargarActualizacionesFirestore();
+            const existe = Array.isArray(lista) && lista.some(u => u.version === appVersion || u.id === `v_${appVersion.replace(/[^a-zA-Z0-9_-]/g, "_")}`);
+            if (!existe) {
+                const vActual = {
+                    id: `v_${appVersion.replace(/[^a-zA-Z0-9_-]/g, "_")}`,
+                    version: appVersion,
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.05.\n• Nomenclatura unificada de IDs litúrgicos en todos los formularios ([tiempo][semana 2 dígitos][día][hora], ej: tos01dote, tos01doof, tos05doof).\n• Búsqueda por ID / Código en selectores interactivos de frm_salterios.html: resolución inmediata de códigos canónicos y alias mientras se visualiza el texto descriptivo.\n• Ciclo Litúrgico de 4 Semanas del Salterio en Tiempo Ordinario: herencia inteligente de salmos, antífonas e himnos base (semanas 5, 9, 13... a Salterio 1) manteniendo lecturas de oficio y oración propias de cada semana.\n• Actualización del gestor de Himnos (himno.html) con selectores de semana y día y autocompletado de ID canónico.\n• Conmutador de lecturas de Oficio de Lectura para años pares (II) e impares (I)."
+                };
+                await window.firebaseAPI.guardarActualizacionFirestore(vActual);
+                console.log(`🔥 [Firebase] Versión v${appVersion} registrada exitosamente en Firestore.`);
+            }
+        } catch (e) {
+            console.warn("⚠️ [Firebase] Aviso al auto-registrar versión:", e);
+        }
+    }
+
+    // Comprobar remotamente si hay una nueva versión (vía version.json y Firestore)
+    async function checkRemoteVersionForUpdates() {
+        try {
+            let maxVersion = null;
+
+            // 1. Consultar version.json
+            try {
+                const fetchUrl = (window.location.origin || '') + '/version.json?t=' + Date.now();
+                const res = await fetch(fetchUrl, { cache: 'no-store' });
+                if (res.ok) {
+                    const info = await res.json();
+                    if (info && info.latestVersion) {
+                        maxVersion = info.latestVersion;
+                    }
+                }
+            } catch (e) {}
+
+            // 2. Consultar Firestore 'actualizaciones'
+            try {
+                if (window.firebaseAPI?.cargarActualizacionesFirestore) {
+                    const actList = await window.firebaseAPI.cargarActualizacionesFirestore();
+                    if (Array.isArray(actList) && actList.length > 0) {
+                        for (const item of actList) {
+                            if (item.version) {
+                                if (!maxVersion || esVersionSuperior(item.version, maxVersion)) {
+                                    maxVersion = item.version;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            // 3. Evaluar versión y mostrar mensaje azul
+            if (maxVersion && esVersionSuperior(maxVersion, appVersion)) {
+                window._latestRemoteVersion = maxVersion;
+                window._hasAppUpdateAvailable = true;
+
+                const sessionKey = 'lh_update_notif_shown_' + maxVersion;
+                if (!sessionStorage.getItem(sessionKey)) {
+                    sessionStorage.setItem(sessionKey, '1');
+                    mostrarBannerActualizacion(maxVersion);
+                }
+
+                renderizarBadgeActualizacion();
+                actualizarVisualBotonActualizarApp();
+            } else {
+                window._hasAppUpdateAvailable = false;
+                renderizarBadgeActualizacion();
+                actualizarVisualBotonActualizarApp();
+            }
+        } catch (err) {
+            console.warn('⚠️ [Actualización] Error al verificar versión remota:', err);
+        }
+    }
+
+    window.esVersionSuperior = esVersionSuperior;
+    window.checkRemoteVersionForUpdates = checkRemoteVersionForUpdates;
+    window._mostrarBannerActualizacion = mostrarBannerActualizacion;
+    window.autoRegistrarVersionEnFirestore = autoRegistrarVersionEnFirestore;
+
+    // Ejecutar verificaciones iniciales
+    setTimeout(() => {
+        checkRemoteVersionForUpdates();
+    }, 1500);
+
+    window.addEventListener('focus', () => {
+        setTimeout(checkRemoteVersionForUpdates, 2000);
+    });
+
     if (window.firebaseAPI?.onAuthReady) {
-        window.firebaseAPI.onAuthReady(updateAuthUI);
+        window.firebaseAPI.onAuthReady((user) => {
+            updateAuthUI(user);
+            if (user) {
+                autoRegistrarVersionEnFirestore().then(checkRemoteVersionForUpdates);
+            }
+        });
     } else {
         const checkInterval = setInterval(() => {
             if (window.firebaseAPI?.onAuthReady) {
-                window.firebaseAPI.onAuthReady(updateAuthUI);
+                window.firebaseAPI.onAuthReady((user) => {
+                    updateAuthUI(user);
+                    if (user) {
+                        autoRegistrarVersionEnFirestore().then(checkRemoteVersionForUpdates);
+                    }
+                });
                 clearInterval(checkInterval);
             }
         }, 500);

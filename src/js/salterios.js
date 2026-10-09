@@ -281,6 +281,55 @@ export function formatearResponsorioR1(r1, r2) {
     return textoR1;
 }
 
+/**
+ * Formatea el texto litúrgico de un salmo o cántico:
+ * - Detecta rúbricas explicativas iniciales (ej. "El cántico siguiente se dice...") y las tiñe de rojo (#ff0000),
+ *   resaltando en negro la palabra "Aleluya" tal como prescribe la edición litúrgica.
+ * - Detecta y resalta las respuestas (R. y V.) con la clase rubrica-vr (#ff0000 en negrita).
+ * - Convierte asteriscos en asterisco rojo.
+ */
+export function formatearTextoSalmo(texto) {
+    if (!texto || typeof texto !== 'string') return '';
+
+    // Si ya contiene etiquetas HTML de rúbrica o span, evitar duplicar formateo
+    if (texto.includes('class="rubrica-vr"') || texto.includes('class="rubrica-salmo-intro"')) {
+        return texto;
+    }
+
+    const bloques = texto.split(/\r?\n\s*\r?\n/);
+    const procesados = bloques.map(bloque => {
+        let b = bloque.trim();
+        if (!b) return '';
+
+        // Detectar si el bloque es una rúbrica explicativa
+        const esRubrica = /^(El cántico siguiente|El salmo siguiente|Cuando el [Oo]ficio|Si el [Oo]ficio|Nota:|Rúbrica:)/i.test(b);
+        if (esRubrica) {
+            // Toda la rúbrica en rojo, y la palabra "Aleluya" en color texto normal (negro)
+            const rubricaHtml = b.replace(/\b(Aleluya)\b/g, '<span class="palabra-negra-salmo" style="color: var(--salterio-text, #1a1a1a); font-weight: normal;">$1</span>');
+            return `<div class="rubrica-salmo-intro" style="color: #ff0000; margin: 6px 0 16px 0; font-style: normal; line-height: 1.55;">${rubricaHtml}</div>`;
+        }
+
+        // Estrofas de texto litúrgico
+        let estrofa = b
+            // 1. (R. o (V. con la letra en rojo y el paréntesis en color texto
+            .replace(/\(R\.\s*/g, '(<span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">R.</span> ')
+            .replace(/\(V\.\s*/g, '(<span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">V.</span> ')
+            // 2. R. y V. al inicio de línea
+            .replace(/(^|\n)R\.\s*/g, '$1<span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">R.</span> ')
+            .replace(/(^|\n)V\.\s*/g, '$1<span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">V.</span> ')
+            // 3. Asterisco litúrgico
+            .replace(/\s\*\s/g, ' <span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; margin: 0 4px; font-size: 1.15em;">*</span> ');
+
+        return estrofa;
+    });
+
+    return procesados.filter(Boolean).join('\n\n');
+}
+
+if (typeof window !== 'undefined') {
+    window.formatearTextoSalmo = formatearTextoSalmo;
+}
+
 // Configuración de libros e información fija
 const LIBROS_CONFIG = {
     oficio: {
@@ -1022,10 +1071,17 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
         },
         versiculo: (() => {
             const respObj = (ResponsoriosDB && typeof ResponsoriosDB.obtenerRecomendado === 'function')
-                ? ResponsoriosDB.obtenerRecomendado(tiempo, semana, dia)
+                ? ResponsoriosDB.obtenerRecomendado(tiempo, semana, dia, libro)
                 : null;
             if (respObj) {
                 return { v: respObj.v, r: respObj.r, id: respObj.id };
+            }
+            if (libro === 'tercia') {
+                return {
+                    v: 'Inclina, Señor, mi corazón a tus preceptos.',
+                    r: 'Dame vida con tu palabra.',
+                    id: 'tos01dote_resp'
+                };
             }
             return {
                 v: 'Éste es mi Hijo amado.',
@@ -1125,18 +1181,55 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
                 }
             };
         })(),
-        lecturaBreve: {
-            cita: 'Rm 8, 1-2',
-            texto: 'No hay ya condenación alguna para los que están en Cristo Jesús, porque la ley del espíritu de vida en Cristo Jesús me libró de la ley del pecado y de la muerte.',
-            responsorioBreve: {
-                v1: 'Cristo murió por nuestros pecados, para llevarnos a Dios.',
-                r1: 'Cristo murió por nuestros pecados, para llevarnos a Dios.',
-                v2: 'Muerto en la carne, pero vivificado en el espíritu.',
-                r2: 'Para llevarnos a Dios.',
-                v3: 'Gloria al Padre, y al Hijo, y al Espíritu Santo.',
-                r3: 'Cristo murió por nuestros pecados, para llevarnos a Dios.'
+        lecturaBreve: (() => {
+            const recLec = (typeof LecturaBreveDB !== 'undefined' && typeof LecturaBreveDB.obtenerRecomendada === 'function')
+                ? LecturaBreveDB.obtenerRecomendada(tiempo, semana, dia, libro)
+                : null;
+            if (recLec) {
+                return {
+                    id: recLec.id,
+                    cita: recLec.cita,
+                    texto: recLec.texto,
+                    responsorioBreve: (libro === 'tercia' || libro === 'sexta' || libro === 'nona') ? {
+                        v: recLec.v || recLec.rb1 || 'Inclina, Señor, mi corazón a tus preceptos.',
+                        r: recLec.r || recLec.rb2 || 'Dame vida con tu palabra.',
+                        v1: recLec.v || recLec.rb1 || 'Inclina, Señor, mi corazón a tus preceptos.',
+                        r1: recLec.r || recLec.rb2 || 'Dame vida con tu palabra.'
+                    } : {
+                        v1: recLec.rb1,
+                        r1: recLec.rb1,
+                        v2: recLec.rb2,
+                        r2: recLec.rb3,
+                        v3: 'Gloria al Padre, y al Hijo, y al Espíritu Santo.',
+                        r3: recLec.rb1
+                    }
+                };
             }
-        },
+            if (libro === 'tercia') {
+                return {
+                    cita: 'Jr 17, 14',
+                    texto: 'Sáname, Señor, y quedaré sano; sálvame, y quedaré a salvo, pues mi alabanza eres tú.',
+                    responsorioBreve: {
+                        v: 'Inclina, Señor, mi corazón a tus preceptos.',
+                        r: 'Dame vida con tu palabra.',
+                        v1: 'Inclina, Señor, mi corazón a tus preceptos.',
+                        r1: 'Dame vida con tu palabra.'
+                    }
+                };
+            }
+            return {
+                cita: 'Rm 8, 1-2',
+                texto: 'No hay ya condenación alguna para los que están en Cristo Jesús, porque la ley del espíritu de vida en Cristo Jesús me libró de la ley del pecado y de la muerte.',
+                responsorioBreve: {
+                    v1: 'Cristo murió por nuestros pecados, para llevarnos a Dios.',
+                    r1: 'Cristo murió por nuestros pecados, para llevarnos a Dios.',
+                    v2: 'Muerto en la carne, pero vivificado en el espíritu.',
+                    r2: 'Para llevarnos a Dios.',
+                    v3: 'Gloria al Padre, y al Hijo, y al Espíritu Santo.',
+                    r3: 'Cristo murió por nuestros pecados, para llevarnos a Dios.'
+                }
+            };
+        })(),
         canticoEvangelico: {
             tipo: libro === 'visperas' ? 'Magníficat' : (libro === 'completas' ? 'Nunc Dimittis' : 'Benedictus'),
             antifona: antEvObj.texto,
@@ -1316,7 +1409,7 @@ function renderizarCuerpoLiturgico(d) {
                 ${!omitirInv_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
                 ${!om.salmoInvitatorio ? `
                     <div class="salmo-titulo-rubrica">${invSalmoInfo.titulo}</div>
-                    <div class="texto-estrofas-salmo">${invSalmoInfo.texto}</div>
+                    <div class="texto-estrofas-salmo">${formatearTextoSalmo(invSalmoInfo.texto)}</div>
                 ` : ''}
                 ${!omitirInv_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
             `;
@@ -1360,7 +1453,7 @@ function renderizarCuerpoLiturgico(d) {
             html += `
                 ${!omitirAnt1_E && d.salmodia.ant1 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 1.</span> ${d.salmodia.ant1}</div>` : ''}
                 <div class="salmo-titulo-rubrica">${s1Info.titulo}</div>
-                <div class="texto-estrofas-salmo">${s1Info.texto}</div>
+                <div class="texto-estrofas-salmo">${formatearTextoSalmo(s1Info.texto)}</div>
                 ${!omitirAnt1_S && d.salmodia.ant1 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant1}</div>` : ''}
             `;
         }
@@ -1372,7 +1465,7 @@ function renderizarCuerpoLiturgico(d) {
             html += `
                 ${!omitirAnt2_E && d.salmodia.ant2 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 2.</span> ${d.salmodia.ant2}</div>` : ''}
                 <div class="salmo-titulo-rubrica">${s2Info.titulo}</div>
-                <div class="texto-estrofas-salmo">${s2Info.texto}</div>
+                <div class="texto-estrofas-salmo">${formatearTextoSalmo(s2Info.texto)}</div>
                 ${!omitirAnt2_S && d.salmodia.ant2 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant2}</div>` : ''}
             `;
         }
@@ -1384,14 +1477,14 @@ function renderizarCuerpoLiturgico(d) {
             html += `
                 ${!omitirAnt3_E && d.salmodia.ant3 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 3.</span> ${d.salmodia.ant3}</div>` : ''}
                 <div class="salmo-titulo-rubrica">${s3Info.titulo}</div>
-                <div class="texto-estrofas-salmo">${s3Info.texto}</div>
+                <div class="texto-estrofas-salmo">${formatearTextoSalmo(s3Info.texto)}</div>
                 ${!omitirAnt3_S && d.salmodia.ant3 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant3}</div>` : ''}
             `;
         }
     }
 
-    // 6. VERSÍCULO (Oficio y Horas menores - Fiel a Imagen 3)
-    if (d.versiculo && !om.responsorioOficio && (libroKey === 'oficio' || libroKey === 'tercia' || libroKey === 'sexta' || libroKey === 'nona')) {
+    // 6. VERSÍCULO (Oficio de Lectura - Fiel a Imagen 3)
+    if (d.versiculo && !om.responsorioOficio && libroKey === 'oficio') {
         html += `
             <div style="margin: 22px 0;">
                 <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.versiculo.v}</span></div>
@@ -1504,8 +1597,8 @@ function renderizarCuerpoLiturgico(d) {
             </div>
         `;
 
-        if (d.lecturaBreve.responsorioBreve) {
-            const rb = d.lecturaBreve.responsorioBreve;
+        if (d.lecturaBreve.responsorioBreve || esHoraMenor) {
+            const rb = d.lecturaBreve.responsorioBreve || {};
             if (esHoraMenor) {
                 // En Tercia, Sexta y Nona no lleva encabezado "RESPONSORIO BREVE", sólo V. y R. una sola vez
                 let vFinal = rb.v || rb.v1 || '';
@@ -1515,10 +1608,24 @@ function renderizarCuerpoLiturgico(d) {
                 if (!vFinal && rb.v2 && rb.v2 !== 'Tú que hoy te has manifestado.' && rb.v2 !== 'Cristo, Hijo de Dios vivo, ten piedad de nosotros.') {
                     vFinal = rb.v2;
                 }
+
                 let rFinal = rb.r || rb.r1 || rb.r2 || rb.r3 || '';
                 if (rFinal === 'Ten piedad de nosotros.' || rFinal === 'Cristo, Hijo de Dios vivo, ten piedad de nosotros.') {
                     rFinal = '';
                 }
+
+                if (libroKey === 'tercia') {
+                    if (!vFinal) vFinal = 'Inclina, Señor, mi corazón a tus preceptos.';
+                    if (!rFinal) rFinal = 'Dame vida con tu palabra.';
+                } else {
+                    if (!vFinal && d.versiculo && d.versiculo.v) {
+                        vFinal = d.versiculo.v;
+                    }
+                    if (!rFinal && d.versiculo && d.versiculo.r) {
+                        rFinal = d.versiculo.r;
+                    }
+                }
+
                 html += `
                     <div style="margin: 20px 0;">
                         <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${vFinal}</span></div>
@@ -1552,7 +1659,7 @@ function renderizarCuerpoLiturgico(d) {
             <div class="salterio-seccion-header">CÁNTICO EVANGÉLICO</div>
             ${!omitirAntCant_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
             <div class="salmo-titulo-rubrica">${ceInfo.titulo}</div>
-            <div class="texto-estrofas-salmo">${ceInfo.texto}</div>
+            <div class="texto-estrofas-salmo">${formatearTextoSalmo(ceInfo.texto)}</div>
             ${!omitirAntCant_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
         `;
     }

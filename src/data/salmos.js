@@ -2712,6 +2712,74 @@ no nos dejes caer en la tentación,
 y líbranos del mal.
 Amén`;
 
+// CÁNTICO: LAS BODAS DEL CORDERO (Cf. Ap 19, 1-2. 5-7)
+const ap_19_1_7t = "Cántico: LAS BODAS DEL CORDERO - Cf. Ap 19,1-2, 5-7";
+const ap_19_1_7 = `El cántico siguiente se dice con todos los Aleluya intercalados cuando el oficio es cantado. Cuando el Oficio se dice sin canto es suficiente decir el Aleluya sólo al principio y al final de cada estrofa.
+
+Aleluya.
+La salvación y la gloria y el poder son de nuestro Dios
+(R. Aleluya)
+porque sus juicios son verdaderos y justos.
+R. Aleluya, (aleluya).
+
+Aleluya.
+Alabad al Señor sus siervos todos.
+(R. Aleluya)
+Los que le teméis, pequeños y grandes.
+R. Aleluya, (aleluya).
+
+Aleluya.
+Porque reina el Señor, nuestro Dios, dueño de todo.
+(R. Aleluya)
+Alegrémonos y gocemos y démosle gracias.
+R. Aleluya, (aleluya).
+
+Aleluya.
+Llegó la boda del cordero.
+(R. Aleluya)
+Su esposa se ha embellecido.
+R. Aleluya, (aleluya).`;
+
+// CÁNTICO DE LA SANTÍSIMA VIRGEN MARÍA (Magníficat - Lc 1, 46-55)
+const magnificatt = "Cántico de la Santísima Virgen María (Magníficat) - Lc 1, 46-55";
+const magnificat = `Proclama mi alma la grandeza del Señor,
+se alegra mi espíritu en Dios, mi salvador;
+porque ha mirado la humillación de su esclava.
+
+Desde ahora me felicitarán todas las generaciones,
+porque el Poderoso ha hecho obras grandes por mí:
+su nombre es santo,
+y su misericordia llega a sus fieles
+de generación en generación.
+
+Él hace proezas con su brazo:
+dispersa a los soberbios de corazón,
+derriba del trono a los poderosos
+y enaltece a los humildes,
+a los hambrientos los colma de bienes
+y a los ricos los despide vacíos.
+
+Auxilia a Israel, su siervo,
+acordándose de la misericordia
+—como lo había prometido a nuestros padres—
+en favor de Abraham y su descendencia por siempre.
+
+Gloria al Padre, y al Hijo, y al Espíritu Santo.
+Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`;
+
+// CÁNTICO DE SIMEÓN (Nunc Dimittis - Lc 2, 29-32)
+const nunc_dimittist = "Cántico de Simeón (Nunc Dimittis) - Lc 2, 29-32";
+const nunc_dimittis = `Ahora, Señor, según tu promesa,
+puedes dejar a tu siervo irse en paz.
+
+Porque mis ojos han visto a tu Salvador,
+a quien has presentado ante todos los pueblos:
+luz para alumbrar a las naciones
+y gloria de tu pueblo Israel.
+
+Gloria al Padre, y al Hijo, y al Espíritu Santo.
+Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`;
+
 function obtenerGloriaPatri(conAleluya = false) {
     return conAleluya 
         ? `${GLORIA_PATRI.slice(0, -1)}. Aleluya.`
@@ -2808,7 +2876,12 @@ function obtenerPadreNuestro() {
         ['jr_31_10_14', typeof jr_31_10_14t !== 'undefined' ? jr_31_10_14t : '', typeof jr_31_10_14 !== 'undefined' ? jr_31_10_14 : '', 'cantico'],
         ['ez_36_24_28', typeof ez_36_24_28t !== 'undefined' ? ez_36_24_28t : '', typeof ez_36_24_28 !== 'undefined' ? ez_36_24_28 : '', 'cantico'],
         ['ha3_2_4_13a_15_19', typeof ha3_2_4_13a_15_19t !== 'undefined' ? ha3_2_4_13a_15_19t : '', typeof ha3_2_4_13a_15_19 !== 'undefined' ? ha3_2_4_13a_15_19 : '', 'cantico'],
-        ['canticoZacarias', typeof canticoZacariast !== 'undefined' ? canticoZacariast : '', typeof canticoZacarias !== 'undefined' ? canticoZacarias : '', 'cantico_evangelico']
+        ['canticoZacarias', typeof canticoZacariast !== 'undefined' ? canticoZacariast : '', typeof canticoZacarias !== 'undefined' ? canticoZacarias : '', 'cantico_evangelico'],
+        ['ap_19_1_7', typeof ap_19_1_7t !== 'undefined' ? ap_19_1_7t : '', typeof ap_19_1_7 !== 'undefined' ? ap_19_1_7 : '', 'cantico_nt'],
+        ['cantico_ap19', typeof ap_19_1_7t !== 'undefined' ? ap_19_1_7t : '', typeof ap_19_1_7 !== 'undefined' ? ap_19_1_7 : '', 'cantico_nt'],
+        ['ap_19_1_2_5_7', typeof ap_19_1_7t !== 'undefined' ? ap_19_1_7t : '', typeof ap_19_1_7 !== 'undefined' ? ap_19_1_7 : '', 'cantico_nt'],
+        ['magnificat', typeof magnificatt !== 'undefined' ? magnificatt : '', typeof magnificat !== 'undefined' ? magnificat : '', 'cantico_evangelico'],
+        ['nunc_dimittis', typeof nunc_dimittist !== 'undefined' ? nunc_dimittist : '', typeof nunc_dimittis !== 'undefined' ? nunc_dimittis : '', 'cantico_evangelico']
     ];
 
     pares.forEach(([id, titulo, texto, tipo]) => {
@@ -2865,7 +2938,14 @@ function obtenerPadreNuestro() {
                 'salmo66': ['invitatorio3', 'salmo66'],
                 'invitatorio3': ['salmo66', 'invitatorio3'],
                 'salmo23': ['invitatorio4', 'salmo23'],
-                'invitatorio4': ['salmo23', 'invitatorio4']
+                'invitatorio4': ['salmo23', 'invitatorio4'],
+                'ap1917': ['ap_19_1_7', 'cantico_ap19', 'ap_19_1_2_5_7'],
+                'canticoap19': ['ap_19_1_7', 'cantico_ap19', 'ap_19_1_2_5_7'],
+                'ap191257': ['ap_19_1_7', 'cantico_ap19', 'ap_19_1_2_5_7'],
+                'canticozacarias': ['cantico_zacarias', 'canticoZacarias'],
+                'magnificat': ['magnificat', 'magnifica'],
+                'magnifica': ['magnificat', 'magnifica'],
+                'nuncdimittis': ['nunc_dimittis', 'simeon']
             };
             const clavesABuscar = equivalencias[cleanNorm] || [cleanId];
 

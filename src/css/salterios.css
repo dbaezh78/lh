@@ -126,10 +126,23 @@ body.pagina-salterios {
 
 /* Título de Salmos y Cánticos */
 .salmo-titulo-rubrica {
-    color: var(--salterio-rubrica);
+    color: var(--salterio-rubrica, #ff0000);
     font-size: calc(1.05 * var(--size) * var(--font-zoom));
     margin: 14px 0 10px 0;
-    text-transform: uppercase;
+}
+
+/* Rúbricas introductorias de Salmos o Cánticos (ej. Ap 19) */
+.rubrica-salmo-intro {
+    color: var(--salterio-rubrica, #ff0000);
+    font-size: calc(var(--size) * var(--font-zoom));
+    line-height: 1.55;
+    margin: 6px 0 16px 0;
+    font-style: normal;
+}
+
+.rubrica-salmo-intro .palabra-negra-salmo {
+    color: var(--salterio-text, #1a1a1a);
+    font-weight: normal;
 }
 
 /* Cuerpo de Salmos, Himnos y Estrofas (Texto Plano con separaciones) */

@@ -335,15 +335,15 @@ function generarIdAutomatico() {
     const inputFechaCeleb = document.getElementById('form-fecha-celebracion');
 
     const mapaHoras = {
-        oficio: 'OF',
-        laudes: 'LA',
-        tercia: 'TE',
-        sexta: 'SE',
-        nona: 'NO',
-        visperas: 'VI',
-        completas: 'CO'
+        oficio: 'of',
+        laudes: 'la',
+        tercia: 'te',
+        sexta: 'se',
+        nona: 'no',
+        visperas: 'vi',
+        completas: 'co'
     };
-    const horaAbrev = mapaHoras[libro] || 'LA';
+    const horaAbrev = mapaHoras[libro] || 'la';
 
     if (tiempo === 'santos') {
         const idSanto = semana;
@@ -355,7 +355,7 @@ function generarIdAutomatico() {
             const mm = m.padStart(2, '0');
             canonico = idSanto.replace(/^sa\d{4}/, `sa${dd}${mm}`);
         }
-        return `${canonico}${horaAbrev.toLowerCase()}_lb`;
+        return `${canonico}${horaAbrev}_lb`;
     }
 
     const mapaDias = {
@@ -363,19 +363,27 @@ function generarIdAutomatico() {
         lunes: 'lu',
         martes: 'ma',
         miercoles: 'mi',
+        miércoles: 'mi',
         jueves: 'ju',
         viernes: 'vi',
-        sabado: 'sa'
+        sabado: 'sa',
+        sábado: 'sa'
     };
     const diaAbrev = mapaDias[dia] || 'do';
 
-    let prefix = 'to';
-    if (tiempo === 'adviento') prefix = 'adv';
-    else if (tiempo === 'navidad') prefix = 'nav';
-    else if (tiempo === 'cuaresma') prefix = 'cua';
-    else if (tiempo === 'pascua') prefix = 'pas';
+    const mapaTiempos = {
+        ordinario: 'to',
+        adviento: 'ta',
+        navidad: 'tn',
+        cuaresma: 'tc',
+        pascua: 'tp'
+    };
+    const prefix = mapaTiempos[tiempo] || 'to';
+    const semNum = String(semana).replace(/\D/g, '') || '1';
+    const codSemana = `s${semNum.padStart(2, '0')}`;
 
-    return `${prefix}s${semana}${horaAbrev}${diaAbrev}`;
+    // Nomenclatura uniforme: [tiempo][semana 2 dígitos][día][hora] (ej: tos01dote, tos01dola)
+    return `${prefix}${codSemana}${diaAbrev}${horaAbrev}`;
 }
 
 // Buscar lectura existente en el catálogo local
@@ -385,8 +393,16 @@ function buscarLecturaExistente(idBuscado, tiempo, semana, dia, libro) {
     const norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const idNorm = norm(idBuscado);
 
-    // 1. Coincidencia directa por ID o ID normalizado
-    let m = listaLecturas.find(x => x.id === idBuscado || norm(x.id) === idNorm);
+    // 1. Coincidencia directa por ID o ID normalizado (incluye compatibilidad s01 <-> s1 y hora/día)
+    let m = listaLecturas.find(x => {
+        const xNorm = norm(x.id);
+        if (x.id === idBuscado || xNorm === idNorm) return true;
+        const semNum = String(semana).replace(/\D/g, '') || '1';
+        const semPad = semNum.padStart(2, '0');
+        const alt1 = idNorm.replace(`s${semPad}`, `s${semNum}`);
+        const alt2 = idNorm.replace(`s${semNum}`, `s${semPad}`);
+        return xNorm === alt1 || xNorm === alt2;
+    });
     if (m) return m;
 
     // 2. Búsqueda para santos

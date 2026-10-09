@@ -418,12 +418,164 @@ export const CATALOGO_LECTURAS_SEED = [
         "rb1": "Te aclamarán mis labios, Señor, cuando salmodie para ti.",
         "rb2": "Mi lengua recitará tu auxilio.",
         "rb3": "Cuando salmodie para ti."
+    },
+    // TERCIA - TIEMPO ORDINARIO SEMANA 1
+    {
+        "id": "tos01dote",
+        "varName": "tos01dote",
+        "alias": ["tos1TEdo", "tos1tedo", "tos01tedo"],
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "domingo",
+        "libro": "tercia",
+        "cita": "1Jn 4, 16",
+        "texto": "Nosotros hemos conocido el amor que Dios nos tiene y hemos creído en él. Dios es amor y quien permanece en el amor permanece en Dios, y Dios en él.",
+        "rb1": "Inclina, Señor, mi corazón a tus preceptos.",
+        "rb2": "Dame vida con tu palabra.",
+        "rb3": "Inclina, Señor, mi corazón a tus preceptos.",
+        "v": "Inclina, Señor, mi corazón a tus preceptos.",
+        "r": "Dame vida con tu palabra."
+    },
+    {
+        "id": "tos1TEdo",
+        "varName": "tos1TEdo",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "domingo",
+        "libro": "tercia",
+        "cita": "1Jn 4, 16",
+        "texto": "Nosotros hemos conocido el amor que Dios nos tiene y hemos creído en él. Dios es amor y quien permanece en el amor permanece en Dios, y Dios en él.",
+        "rb1": "Inclina, Señor, mi corazón a tus preceptos.",
+        "rb2": "Dame vida con tu palabra.",
+        "rb3": "Inclina, Señor, mi corazón a tus preceptos.",
+        "v": "Inclina, Señor, mi corazón a tus preceptos.",
+        "r": "Dame vida con tu palabra."
+    },
+    {
+        "id": "tos01lute",
+        "varName": "tos01lute",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "lunes",
+        "libro": "tercia",
+        "cita": "Jr 17, 7-8",
+        "texto": "Bendito quien confía en el Señor y pone en el Señor su confianza.",
+        "rb1": "Inclina, Señor, mi corazón a tus preceptos.",
+        "rb2": "Dame vida con tu palabra.",
+        "rb3": "Inclina, Señor, mi corazón a tus preceptos.",
+        "v": "Inclina, Señor, mi corazón a tus preceptos.",
+        "r": "Dame vida con tu palabra."
+    },
+    {
+        "id": "tos01mate",
+        "varName": "tos01mate",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "martes",
+        "libro": "tercia",
+        "cita": "Rm 13, 8. 10",
+        "texto": "A nadie debáis nada, más que amor mutuo; porque el que ama al prójimo ha cumplido la ley.",
+        "rb1": "Inclina, Señor, mi corazón a tus preceptos.",
+        "rb2": "Dame vida con tu palabra.",
+        "rb3": "Inclina, Señor, mi corazón a tus preceptos.",
+        "v": "Inclina, Señor, mi corazón a tus preceptos.",
+        "r": "Dame vida con tu palabra."
+    },
+    {
+        "id": "tos01mite",
+        "varName": "tos01mite",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "miercoles",
+        "libro": "tercia",
+        "cita": "Col 3, 12-13",
+        "texto": "Como elegidos de Dios, santos y amados, vestíos de la misericordia entrañable, bondad, humildad, dulzura, paciencia.",
+        "rb1": "Inclina, Señor, mi corazón a tus preceptos.",
+        "rb2": "Dame vida con tu palabra.",
+        "rb3": "Inclina, Señor, mi corazón a tus preceptos.",
+        "v": "Inclina, Señor, mi corazón a tus preceptos.",
+        "r": "Dame vida con tu palabra."
+    },
+    {
+        "id": "tos01jute",
+        "varName": "tos01jute",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "jueves",
+        "libro": "tercia",
+        "cita": "1 Ts 4, 3-5a",
+        "texto": "La voluntad de Dios es vuestra santificación: que os abstengáis de la fornicación, que cada uno sepa guardar su cuerpo en santidad y respeto.",
+        "rb1": "Inclina, Señor, mi corazón a tus preceptos.",
+        "rb2": "Dame vida con tu palabra.",
+        "rb3": "Inclina, Señor, mi corazón a tus preceptos.",
+        "v": "Inclina, Señor, mi corazón a tus preceptos.",
+        "r": "Dame vida con tu palabra."
+    },
+    {
+        "id": "tos01vite",
+        "varName": "tos01vite",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "viernes",
+        "libro": "tercia",
+        "cita": "Ef 4, 1-3",
+        "texto": "Os ruego yo, el prisionero por el Señor, que andéis como pide la vocación a la que habéis sido convocados.",
+        "rb1": "Inclina, Señor, mi corazón a tus preceptos.",
+        "rb2": "Dame vida con tu palabra.",
+        "rb3": "Inclina, Señor, mi corazón a tus preceptos.",
+        "v": "Inclina, Señor, mi corazón a tus preceptos.",
+        "r": "Dame vida con tu palabra."
+    },
+    {
+        "id": "tos01sate",
+        "varName": "tos01sate",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "sabado",
+        "libro": "tercia",
+        "cita": "2 Co 1, 3-4",
+        "texto": "Bendito sea el Dios y Padre de nuestro Señor Jesucristo, Padre de las misericordias y Dios de todo consuelo.",
+        "rb1": "Inclina, Señor, mi corazón a tus preceptos.",
+        "rb2": "Dame vida con tu palabra.",
+        "rb3": "Inclina, Señor, mi corazón a tus preceptos.",
+        "v": "Inclina, Señor, mi corazón a tus preceptos.",
+        "r": "Dame vida con tu palabra."
     }
 ];
 
 export const LecturaBreveDB = {
     listar: () => CATALOGO_LECTURAS_SEED,
     obtener: (id) => CATALOGO_LECTURAS_SEED.find(l => l.id === id || l.varName === id) || null,
+    obtenerRecomendada: (tiempo, semana, dia, libro) => {
+        const semNum = String(semana || '1').replace(/\D/g, '') || '1';
+        const semCiclo = String(((parseInt(semNum, 10) - 1) % 4) + 1);
+        const lNorm = (libro || 'laudes').toLowerCase().replace(/s$/, '');
+        const dNorm = (dia || 'domingo').toLowerCase();
+        const tNorm = (tiempo || 'ordinario').toLowerCase();
+
+        // 1. Coincidencia exacta
+        let m = CATALOGO_LECTURAS_SEED.find(l => {
+            const lLib = (l.libro || '').toLowerCase().replace(/s$/, '');
+            const lSem = String(l.semana || '').replace(/\D/g, '');
+            return (l.tiempo === tNorm) &&
+                   (lSem === semNum || lSem === semCiclo) &&
+                   (l.dia === dNorm) &&
+                   (!l.libro || lLib === lNorm);
+        });
+        if (m) return m;
+
+        // 2. Coincidencia por id canónico
+        const codId = `${tNorm.slice(0, 2)}s0${semCiclo}${dNorm.slice(0, 2)}${lNorm.slice(0, 2)}`;
+        m = CATALOGO_LECTURAS_SEED.find(l => (l.id || '').toLowerCase().includes(codId));
+        if (m) return m;
+
+        // 3. Fallback por libro
+        m = CATALOGO_LECTURAS_SEED.find(l => {
+            const lLib = (l.libro || '').toLowerCase().replace(/s$/, '');
+            return lLib === lNorm;
+        });
+        return m || CATALOGO_LECTURAS_SEED[0] || null;
+    },
     buscar: (termino) => {
         if (!termino) return CATALOGO_LECTURAS_SEED;
         const t = termino.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");

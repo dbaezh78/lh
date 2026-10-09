@@ -477,3 +477,25 @@ body {
     background: #d4cbb3;
     border-radius: 3px;
 }
+
+.salmo-card-cuerpo .rubrica-vr {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.salmo-card-cuerpo .rubrica-salmo-intro {
+    color: #ff0000;
+    line-height: 1.5;
+    margin: 4px 0 12px 0;
+    font-style: normal;
+}
+
+.salmo-card-cuerpo .rubrica-salmo-intro .palabra-negra-salmo {
+    color: #111111;
+    font-weight: normal;
+}
+
+.salmo-card-cuerpo .asterisco-rojo {
+    color: #ff0000;
+    font-weight: bold;
+}

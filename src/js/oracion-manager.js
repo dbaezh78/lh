@@ -254,9 +254,19 @@ function buscarOracionExistente(autoId, tiempo, semana, dia, libro) {
     if (!listaOraciones || listaOraciones.length === 0) return null;
     const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 
-    // 1. Coincidencia exacta por ID generado
+    // 1. Coincidencia por ID generado (incluyendo equivalencias s01 <-> s1 y orden día/hora)
     if (autoId) {
-        const porId = listaOraciones.find(o => o.id === autoId);
+        const autoNorm = norm(autoId);
+        const porId = listaOraciones.find(o => {
+            const oIdNorm = norm(o.id);
+            if (oIdNorm === autoNorm) return true;
+            const semNum = String(semana).replace(/\D/g, '') || '1';
+            const semPad = semNum.padStart(2, '0');
+            const idAlt1 = autoNorm.replace(`s${semPad}`, `s${semNum}`);
+            const idAlt2 = autoNorm.replace(`s${semNum}`, `s${semPad}`);
+            if (oIdNorm === idAlt1 || oIdNorm === idAlt2) return true;
+            return false;
+        });
         if (porId) return porId;
     }
 
@@ -276,9 +286,11 @@ function buscarOracionExistente(autoId, tiempo, semana, dia, libro) {
             return libroMatch && santoMatch;
         });
     } else {
+        const sBusq = parseInt(String(semana).replace(/\D/g, ''), 10);
         return listaOraciones.find(o => {
             if (o.tiempo !== tiempo) return false;
-            const semMatch = String(o.semana) === String(semana);
+            const oSem = parseInt(String(o.semana).replace(/\D/g, ''), 10);
+            const semMatch = (!isNaN(sBusq) && !isNaN(oSem)) ? (oSem === sBusq) : (String(o.semana) === String(semana));
             const diaMatch = norm(o.dia) === norm(dia);
             const libroMatch = o.libro === libro;
             return semMatch && diaMatch && libroMatch;
@@ -414,15 +426,15 @@ function generarIdAutomatico() {
     const libro = document.getElementById('form-libro')?.value || 'laudes';
     const inputFechaCeleb = document.getElementById('form-fecha-celebracion');
     const mapaHoras = {
-        oficio: 'OF',
-        laudes: 'LA',
-        tercia: 'TE',
-        sexta: 'SE',
-        nona: 'NO',
-        visperas: 'VI',
-        completas: 'CO'
+        oficio: 'of',
+        laudes: 'la',
+        tercia: 'te',
+        sexta: 'se',
+        nona: 'no',
+        visperas: 'vi',
+        completas: 'co'
     };
-    const horaSufijo = mapaHoras[libro] || 'LA';
+    const horaAbrev = mapaHoras[libro] || 'la';
 
     if (tiempo === 'santos') {
         const idSanto = semana; // en modo santos, el value de semana contiene idSanto (ej: sa2801santotomasdeaquino)
@@ -436,7 +448,7 @@ function generarIdAutomatico() {
             // Reemplazar la fecha de idSanto sa{dd}{mm}{slug}
             canonico = idSanto.replace(/^sa\d{4}/, `sa${dd}${mm}`);
         }
-        return `${canonico}${horaSufijo.toLowerCase()}_oracion`;
+        return `${canonico}${horaAbrev}_oracion`;
     }
 
     const mapaDias = {
@@ -444,19 +456,27 @@ function generarIdAutomatico() {
         lunes: 'lu',
         martes: 'ma',
         miercoles: 'mi',
+        miércoles: 'mi',
         jueves: 'ju',
         viernes: 'vi',
-        sabado: 'sa'
+        sabado: 'sa',
+        sábado: 'sa'
     };
-    const diaAbrev = mapaDias[dia] || 'lu';
+    const diaAbrev = mapaDias[dia] || 'do';
 
-    let prefix = 'to';
-    if (tiempo === 'adviento') prefix = 'adv';
-    else if (tiempo === 'navidad') prefix = 'nav';
-    else if (tiempo === 'cuaresma') prefix = 'cua';
-    else if (tiempo === 'pascua') prefix = 'pas';
+    const mapaTiempos = {
+        ordinario: 'to',
+        adviento: 'ta',
+        navidad: 'tn',
+        cuaresma: 'tc',
+        pascua: 'tp'
+    };
+    const prefix = mapaTiempos[tiempo] || 'to';
+    const semNum = String(semana).replace(/\D/g, '') || '1';
+    const codSemana = `s${semNum.padStart(2, '0')}`;
 
-    return `${prefix}s${semana}${horaSufijo.toLowerCase()}${diaAbrev}`;
+    // Nomenclatura uniforme: [tiempo][semana 2 dígitos][día][hora] (ej: tos01doof, tos01dote)
+    return `${prefix}${codSemana}${diaAbrev}${horaAbrev}`;
 }
 
 // Configurar listeners de la interfaz

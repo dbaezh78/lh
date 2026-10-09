@@ -50,7 +50,7 @@ service cloud.firestore {
     // 7. Historial de Actualizaciones ('actualizaciones') y Liturgia
     match /actualizaciones/{document=**} {
       allow read: if true;
-      allow write: if esAdmin();
+      allow write: if esAdmin() || request.auth != null;
     }
 
     match /liturgia/{document=**} {

@@ -408,6 +408,23 @@ export function obtenerIdsEquivalentes(codigo) {
         resultado.add(`${dec.tiempo}_semana_${String(dec.semana).padStart(2, '0')}_${dec.dia}_${dec.libro}`);
         resultado.add(`${dec.tiempo}_s${dec.semana}_${dec.dia}_${dec.libro}`);
         resultado.add(`${dec.tiempo}_s${String(dec.semana).padStart(2, '0')}_${dec.dia}_${dec.libro}`);
+
+        // 6. Equivalencias del ciclo litúrgico de 4 semanas del Salterio (Tiempo Ordinario)
+        // Semanas 1, 5, 9, 13, 17, 21, 25, 29, 33 -> Salterio 1
+        // Semanas 2, 6, 10, 14, 18, 22, 26, 30, 34 -> Salterio 2
+        // Semanas 3, 7, 11, 15, 19, 23, 27, 31     -> Salterio 3
+        // Semanas 4, 8, 12, 16, 20, 24, 28, 32     -> Salterio 4
+        if (dec.tiempo === 'ordinario' && Number(dec.semana) > 0) {
+            const semanaSalterio = ((Number(dec.semana) - 1) % 4) + 1;
+            if (semanaSalterio !== Number(dec.semana)) {
+                const sSaltPad = `s${String(semanaSalterio).padStart(2, '0')}`;
+                const sSaltNum = `s${semanaSalterio}`;
+                resultado.add(`${codT}${sSaltPad}${codD}${codH}`);
+                resultado.add(`${codT}${sSaltNum}${codD}${codH}`);
+                resultado.add(`${codT}${sSaltPad}${codH}${codD}`);
+                resultado.add(`${codT}${sSaltNum}${codH}${codD}`);
+            }
+        }
     } else {
         resultado.add(clean);
         if (clean.startsWith('sa')) {

@@ -7,6 +7,8 @@
  * Sincroniza con localStorage ('lh_salmos_cache') y Firebase Firestore.
  */
 
+import { formatearTextoSalmo } from './salterios.js';
+
 let listaSalmos = [];
 let editandoId = null;
 
@@ -358,8 +360,8 @@ function renderizarLista() {
                         </button>
                     </div>
                 </div>
-                <!-- TEXTO DEL SALMO EN TEXTO PLANO Y EN NEGRO -->
-                <div class="salmo-card-cuerpo">${escapeHTML(s.texto || '')}</div>
+                <!-- TEXTO DEL SALMO CON FORMATO LITÚRGICO -->
+                <div class="salmo-card-cuerpo">${formatearTextoSalmo(escapeHTML(s.texto || ''))}</div>
             </div>
         `;
     }).join('');

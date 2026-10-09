@@ -1028,3 +1028,47 @@ A Cristo, rey piadoso,
 y al Padre gloria eterna,
 y por todos los siglos
 al Espíritu sea. Amén.`
+
+// Tiempo Ordinario - Semana 1 - Domingo - Oficio de Lectura (Te Deum)
+const htos01dooft = "HIMNO: SEÑOR, DIOS ETERNO"
+const htos01doof = `Señor, Dios eterno, alegres te cantamos,
+a ti nuestra alabanza,
+a ti, Padre del cielo, te aclama la creación.
+
+Postrados ante ti, los ángeles te adoran
+y cantan sin cesar:
+
+Santo, santo, santo es el Señor,
+Dios del universo;
+llenos están el cielo y la tierra de tu gloria.
+
+A ti, Señor, te alaba
+el coro celestial de los apóstoles,
+la multitud de los profetas te enaltece,
+y el ejército glorioso de los mártires
+te aclama.
+
+A ti la Iglesia santa,
+por todos los confines extendida,
+con júbilo te adora y te confiesa:
+Padre de majestad infinita,
+Hijo único y verdadero, digno de todo honor,
+Espíritu Santo, Defensor.
+
+Tú eres el Rey de la gloria, Cristo,
+tú eres el Hijo único del Padre.
+Tú, para librar al hombre,
+aceptaste la condición humana
+sin desdeñar el seno de la Virgen.
+
+Tú, rotas las cadenas de la muerte,
+abriste a los creyentes el reino de los cielos.
+Tú estás sentado a la derecha de Dios
+en la gloria del Padre.
+Creemos que un día has de venir como juez.
+
+Te pedimos, pues, que vengas en ayuda
+de tus siervos,
+a quienes redimiste con tu preciosa sangre.
+Haz que en la gloria eterna nos contemos
+entre tus santos. Amén.`

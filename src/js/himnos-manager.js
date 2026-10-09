@@ -12,11 +12,99 @@ import { CATALOGO_HIMNOS_SEED } from '../data/db-himnos.js';
 let listaHimnos = [];
 let editandoId = null;
 
+const MAPA_SEMANAS_POR_TIEMPO = {
+    ordinario: Array.from({ length: 34 }, (_, i) => ({ valor: `${i + 1}`, texto: `Semana ${i + 1}` })),
+    adviento:  Array.from({ length: 4 }, (_, i) => ({ valor: `${i + 1}`, texto: `Semana ${i + 1}` })),
+    navidad:   [
+        { valor: '1', texto: 'Semana 1 (Octava de Navidad)' },
+        { valor: '2', texto: 'Semana 2 (Epifanía)' }
+    ],
+    cuaresma:  [
+        { valor: '1', texto: 'Semana 1' },
+        { valor: '2', texto: 'Semana 2' },
+        { valor: '3', texto: 'Semana 3' },
+        { valor: '4', texto: 'Semana 4' },
+        { valor: '5', texto: 'Semana 5' },
+        { valor: '6', texto: 'Semana 6 (Semana Santa)' }
+    ],
+    pascua:    [
+        { valor: '1', texto: 'Semana 1 (Octava de Pascua)' },
+        { valor: '2', texto: 'Semana 2' },
+        { valor: '3', texto: 'Semana 3' },
+        { valor: '4', texto: 'Semana 4' },
+        { valor: '5', texto: 'Semana 5' },
+        { valor: '6', texto: 'Semana 6' },
+        { valor: '7', texto: 'Semana 7 (Pentecostés)' }
+    ],
+    santos:    [
+        { valor: '1', texto: 'Común de Santos' },
+        { valor: '2', texto: 'Propio de los Santos' },
+        { valor: '3', texto: 'Solemnidades' },
+        { valor: '4', texto: 'Fiestas y Memorias' }
+    ]
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
+    actualizarOpcionesSemanas();
     configurarEventos();
+    autocompletarId();
     await cargarDatos();
     renderizarLista();
 });
+
+// Actualiza las opciones del selector de semanas según el tiempo litúrgico
+function actualizarOpcionesSemanas(semanaPrevia = null) {
+    const selTiempo = document.getElementById('form-tiempo');
+    const selSemana = document.getElementById('form-semana');
+    if (!selSemana) return;
+
+    const tiempoVal = selTiempo ? selTiempo.value : 'ordinario';
+    const semanas = MAPA_SEMANAS_POR_TIEMPO[tiempoVal] || MAPA_SEMANAS_POR_TIEMPO.ordinario;
+
+    selSemana.innerHTML = '';
+    semanas.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.valor;
+        opt.textContent = s.texto;
+        selSemana.appendChild(opt);
+    });
+
+    if (semanaPrevia && Array.from(selSemana.options).some(o => o.value === String(semanaPrevia))) {
+        selSemana.value = String(semanaPrevia);
+    } else {
+        selSemana.selectedIndex = 0;
+    }
+}
+
+// Autocompletar ID del himno siguiendo la nomenclatura litúrgica uniforme
+function autocompletarId() {
+    if (editandoId) return; // Si estamos editando un himno existente, no sobrescribir su ID
+
+    const selTiempo = document.getElementById('form-tiempo');
+    const selSemana = document.getElementById('form-semana');
+    const selDia = document.getElementById('form-dia');
+    const selLibro = document.getElementById('form-libro');
+    const inputId = document.getElementById('form-id');
+
+    if (!inputId) return;
+
+    const tiempo = selTiempo ? selTiempo.value : 'ordinario';
+    const semana = selSemana ? selSemana.value : '1';
+    const dia = selDia ? selDia.value : 'domingo';
+    const libro = selLibro ? selLibro.value : 'laudes';
+
+    const tMap = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp', santos: 'sa' };
+    const dMap = { domingo: 'do', lunes: 'lu', martes: 'ma', miercoles: 'mi', miércoles: 'mi', jueves: 'ju', viernes: 'vi', sabado: 'sa', sábado: 'sa' };
+    const lMap = { oficio: 'of', laudes: 'la', tercia: 'te', sexta: 'se', nona: 'no', visperas: 'vi', vispera: 'vi', completas: 'co' };
+
+    const prefix = tMap[tiempo] || 'to';
+    const semNum = String(semana).replace(/\D/g, '') || '1';
+    const codSemana = `s${semNum.padStart(2, '0')}`;
+    const diaAbrev = dMap[dia] || 'do';
+    const horaAbrev = lMap[libro] || 'la';
+
+    inputId.value = `${prefix}${codSemana}${diaAbrev}${horaAbrev}`;
+}
 
 // Mostrar notificaciones dinámicas
 function mostrarBannerEstado(mensaje, tipo = 'info') {
@@ -116,6 +204,15 @@ function configurarEventos() {
         }
     });
 
+    // Eventos de cambios en parámetros litúrgicos para autocompletar ID
+    document.getElementById('form-tiempo')?.addEventListener('change', () => {
+        actualizarOpcionesSemanas();
+        autocompletarId();
+    });
+    document.getElementById('form-semana')?.addEventListener('change', autocompletarId);
+    document.getElementById('form-dia')?.addEventListener('change', autocompletarId);
+    document.getElementById('form-libro')?.addEventListener('change', autocompletarId);
+
     // Filtros de búsqueda
     document.getElementById('filtro-buscar')?.addEventListener('input', renderizarLista);
     document.getElementById('filtro-tiempo')?.addEventListener('change', renderizarLista);
@@ -170,13 +267,17 @@ async function guardarHimno() {
     const inputId = document.getElementById('form-id');
     const inputTitulo = document.getElementById('form-titulo');
     const selectTiempo = document.getElementById('form-tiempo');
+    const selectSemana = document.getElementById('form-semana');
+    const selectDia = document.getElementById('form-dia');
     const selectLibro = document.getElementById('form-libro');
     const textareaTexto = document.getElementById('form-texto');
 
     const id = inputId.value.trim();
     const titulo = inputTitulo.value.trim();
-    const tiempo = selectTiempo.value || 'ordinario';
-    const libro = selectLibro.value || 'laudes';
+    const tiempo = selectTiempo ? selectTiempo.value : 'ordinario';
+    const semana = selectSemana ? parseInt(selectSemana.value, 10) || 1 : 1;
+    const dia = selectDia ? selectDia.value : 'domingo';
+    const libro = selectLibro ? selectLibro.value : 'laudes';
     const texto = textareaTexto.value.trim();
 
     if (!id || !titulo || !texto) {
@@ -189,6 +290,8 @@ async function guardarHimno() {
         varName: id,
         titulo,
         tiempo,
+        semana,
+        dia,
         libro,
         texto,
         tipo: 'himno',
@@ -225,13 +328,16 @@ window.editarHimno = function(id) {
     const h = listaHimnos.find(item => item.id === id);
     if (!h) return;
 
-    document.getElementById('form-id').value = h.id || '';
-    document.getElementById('form-titulo').value = h.titulo || '';
-    document.getElementById('form-tiempo').value = h.tiempo || 'ordinario';
-    document.getElementById('form-libro').value = h.libro || 'laudes';
-    document.getElementById('form-texto').value = h.texto || '';
-
     editandoId = id;
+
+    if (document.getElementById('form-tiempo')) document.getElementById('form-tiempo').value = h.tiempo || 'ordinario';
+    actualizarOpcionesSemanas(h.semana || 1);
+    if (document.getElementById('form-dia')) document.getElementById('form-dia').value = h.dia || 'domingo';
+    if (document.getElementById('form-libro')) document.getElementById('form-libro').value = h.libro || 'laudes';
+    if (document.getElementById('form-id')) document.getElementById('form-id').value = h.id || '';
+    if (document.getElementById('form-titulo')) document.getElementById('form-titulo').value = h.titulo || '';
+    if (document.getElementById('form-texto')) document.getElementById('form-texto').value = h.texto || '';
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
     document.getElementById('form-titulo').focus();
 };
@@ -276,6 +382,8 @@ window.copiarTextoHimno = async function(id) {
 function limpiarFormulario() {
     document.getElementById('form-himno')?.reset();
     editandoId = null;
+    actualizarOpcionesSemanas();
+    autocompletarId();
 }
 
 // Renderizar lista filtrada

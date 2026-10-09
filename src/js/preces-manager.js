@@ -257,9 +257,20 @@ function buscarPrecesExistente(autoId, tiempo, semana, dia, libro) {
     if (!listaPreces || listaPreces.length === 0) return null;
     const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 
-    // 1. Coincidencia exacta por ID generado
+    // 1. Coincidencia por ID generado (incluyendo equivalencias s01 <-> s1, sufijos _preces/_prec)
     if (autoId) {
-        const porId = listaPreces.find(p => p.id === autoId);
+        const autoNorm = norm(autoId);
+        const semNum = String(semana).replace(/\D/g, '') || '1';
+        const semPad = semNum.padStart(2, '0');
+        const porId = listaPreces.find(p => {
+            const pIdNorm = norm(p.id);
+            if (pIdNorm === autoNorm) return true;
+            if (pIdNorm === `${autoNorm}preces` || pIdNorm === `${autoNorm}prec`) return true;
+            const alt1 = autoNorm.replace(`s${semPad}`, `s${semNum}`);
+            const alt2 = autoNorm.replace(`s${semNum}`, `s${semPad}`);
+            if (pIdNorm === alt1 || pIdNorm === alt2 || pIdNorm === `${alt1}preces` || pIdNorm === `${alt2}preces`) return true;
+            return false;
+        });
         if (porId) return porId;
     }
 
@@ -279,9 +290,11 @@ function buscarPrecesExistente(autoId, tiempo, semana, dia, libro) {
             return libroMatch && santoMatch;
         });
     } else {
+        const sBusq = parseInt(String(semana).replace(/\D/g, ''), 10);
         return listaPreces.find(p => {
             if (p.tiempo !== tiempo) return false;
-            const semMatch = String(p.semana) === String(semana);
+            const pSem = parseInt(String(p.semana).replace(/\D/g, ''), 10);
+            const semMatch = (!isNaN(sBusq) && !isNaN(pSem)) ? (pSem === sBusq) : (String(p.semana) === String(semana));
             const diaMatch = norm(p.dia) === norm(dia);
             const libroMatch = p.libro === libro;
             return semMatch && diaMatch && libroMatch;
@@ -434,7 +447,7 @@ async function cargarDatos() {
     mostrarBannerEstado('No hay preces registradas. Agrega una nueva con el formulario.', 'alerta');
 }
 
-// Generar ID automático de preces
+// Generar ID automático de preces (sin sufijo _preces según instrucción del usuario)
 function generarIdAutomatico() {
     const tiempo = document.getElementById('form-tiempo')?.value || 'ordinario';
     const selSemana = document.getElementById('form-semana');
@@ -444,15 +457,15 @@ function generarIdAutomatico() {
     const inputFechaCeleb = document.getElementById('form-fecha-celebracion');
 
     const mapaHoras = {
-        oficio: 'OF',
-        laudes: 'LA',
-        tercia: 'TE',
-        sexta: 'SE',
-        nona: 'NO',
-        visperas: 'VI',
-        completas: 'CO'
+        oficio: 'of',
+        laudes: 'la',
+        tercia: 'te',
+        sexta: 'se',
+        nona: 'no',
+        visperas: 'vi',
+        completas: 'co'
     };
-    const horaAbrev = mapaHoras[libro] || 'LA';
+    const horaAbrev = mapaHoras[libro] || 'la';
 
     if (tiempo === 'santos') {
         const idSanto = semana;
@@ -464,7 +477,7 @@ function generarIdAutomatico() {
             const mm = m.padStart(2, '0');
             canonico = idSanto.replace(/^sa\d{4}/, `sa${dd}${mm}`);
         }
-        return `${canonico}${horaAbrev.toLowerCase()}_prec`;
+        return `${canonico}${horaAbrev}_prec`;
     }
 
     const mapaDias = {
@@ -472,19 +485,27 @@ function generarIdAutomatico() {
         lunes: 'lu',
         martes: 'ma',
         miercoles: 'mi',
+        miércoles: 'mi',
         jueves: 'ju',
         viernes: 'vi',
-        sabado: 'sa'
+        sabado: 'sa',
+        sábado: 'sa'
     };
-    const diaAbrev = mapaDias[dia] || 'lu';
+    const diaAbrev = mapaDias[dia] || 'do';
 
-    let prefix = 'to';
-    if (tiempo === 'adviento') prefix = 'adv';
-    else if (tiempo === 'navidad') prefix = 'nav';
-    else if (tiempo === 'cuaresma') prefix = 'cua';
-    else if (tiempo === 'pascua') prefix = 'pas';
+    const mapaTiempos = {
+        ordinario: 'to',
+        adviento: 'ta',
+        navidad: 'tn',
+        cuaresma: 'tc',
+        pascua: 'tp'
+    };
+    const prefix = mapaTiempos[tiempo] || 'to';
+    const semNum = String(semana).replace(/\D/g, '') || '1';
+    const codSemana = `s${semNum.padStart(2, '0')}`;
 
-    return `${prefix}s${semana}${horaAbrev.toLowerCase()}${diaAbrev}_preces`;
+    // Nomenclatura uniforme: [tiempo][semana 2 dígitos][día][hora] (ej: tos01doof, tos01dola)
+    return `${prefix}${codSemana}${diaAbrev}${horaAbrev}`;
 }
 
 // Configurar listeners de la interfaz

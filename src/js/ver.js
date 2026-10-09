@@ -275,12 +275,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     autor: "dbaezh78@gmail.com",
                     ultimaModificacion: new Date().toISOString()
                 };
+                const semillav5 = {
+                    id: "v_1_0_05",
+                    version: "1.0.05",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.05.\n• Nomenclatura unificada de IDs litúrgicos en todos los formularios ([tiempo][semana 2 dígitos][día][hora], ej: tos01dote, tos01doof, tos05doof).\n• Búsqueda por ID / Código en selectores interactivos de frm_salterios.html: resolución inmediata de códigos canónicos y alias mientras se visualiza el texto descriptivo.\n• Ciclo Litúrgico de 4 Semanas del Salterio en Tiempo Ordinario: herencia inteligente de salmos, antífonas e himnos base (semanas 5, 9, 13... a Salterio 1) manteniendo lecturas de oficio y oración propias de cada semana.\n• Actualización del gestor de Himnos (himno.html) con selectores de semana y día y autocompletado de ID canónico.\n• Conmutador de lecturas de Oficio de Lectura para años pares (II) e impares (I).",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav1);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav2);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav3);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav4);
-                    actualizacionesMemoria = [semillav4, semillav3, semillav2, semillav1];
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav5);
+                    actualizacionesMemoria = [semillav5, semillav4, semillav3, semillav2, semillav1];
                     renderListaActualizaciones(actualizacionesMemoria);
                     return;
                 } catch (e) {
@@ -337,6 +346,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(v4);
                     listaActualizada.unshift(v4);
+                } catch (e) {}
+            }
+
+            // Registrar automáticamente v1.0.05 si no existe
+            const tieneV5 = listaActualizada.some(d => d.version === "1.0.05" || d.id === "v_1_0_05");
+            if (!tieneV5 && window.firebaseAPI?.guardarActualizacionFirestore) {
+                const v5 = {
+                    id: "v_1_0_05",
+                    version: "1.0.05",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.05.\n• Nomenclatura unificada de IDs litúrgicos en todos los formularios ([tiempo][semana 2 dígitos][día][hora], ej: tos01dote, tos01doof, tos05doof).\n• Búsqueda por ID / Código en selectores interactivos de frm_salterios.html: resolución inmediata de códigos canónicos y alias mientras se visualiza el texto descriptivo.\n• Ciclo Litúrgico de 4 Semanas del Salterio en Tiempo Ordinario: herencia inteligente de salmos, antífonas e himnos base (semanas 5, 9, 13... a Salterio 1) manteniendo lecturas de oficio y oración propias de cada semana.\n• Actualización del gestor de Himnos (himno.html) con selectores de semana y día y autocompletado de ID canónico.\n• Conmutador de lecturas de Oficio de Lectura para años pares (II) e impares (I).",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                try {
+                    await window.firebaseAPI.guardarActualizacionFirestore(v5);
+                    listaActualizada.unshift(v5);
                 } catch (e) {}
             }
 

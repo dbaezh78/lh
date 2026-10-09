@@ -84,6 +84,85 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         r: "¿A quién temeré?"
     },
 
+    // TIEMPO ORDINARIO - HORA TERCIA (SALTERIO)
+    {
+        id: "tos01dote_resp",
+        varName: "tos01dote_resp",
+        titulo: "Responsorio de Tercia - Domingo Semana 1 (Tercia)",
+        tiempo: "ordinario",
+        semana: "1",
+        dia: "domingo",
+        libro: "tercia",
+        v: "Inclina, Señor, mi corazón a tus preceptos.",
+        r: "Dame vida con tu palabra."
+    },
+    {
+        id: "tos01lute_resp",
+        varName: "tos01lute_resp",
+        titulo: "Responsorio de Tercia - Lunes Semana 1 (Tercia)",
+        tiempo: "ordinario",
+        semana: "1",
+        dia: "lunes",
+        libro: "tercia",
+        v: "Inclina, Señor, mi corazón a tus preceptos.",
+        r: "Dame vida con tu palabra."
+    },
+    {
+        id: "tos01mate_resp",
+        varName: "tos01mate_resp",
+        titulo: "Responsorio de Tercia - Martes Semana 1 (Tercia)",
+        tiempo: "ordinario",
+        semana: "1",
+        dia: "martes",
+        libro: "tercia",
+        v: "Inclina, Señor, mi corazón a tus preceptos.",
+        r: "Dame vida con tu palabra."
+    },
+    {
+        id: "tos01mite_resp",
+        varName: "tos01mite_resp",
+        titulo: "Responsorio de Tercia - Miércoles Semana 1 (Tercia)",
+        tiempo: "ordinario",
+        semana: "1",
+        dia: "miercoles",
+        libro: "tercia",
+        v: "Inclina, Señor, mi corazón a tus preceptos.",
+        r: "Dame vida con tu palabra."
+    },
+    {
+        id: "tos01jute_resp",
+        varName: "tos01jute_resp",
+        titulo: "Responsorio de Tercia - Jueves Semana 1 (Tercia)",
+        tiempo: "ordinario",
+        semana: "1",
+        dia: "jueves",
+        libro: "tercia",
+        v: "Inclina, Señor, mi corazón a tus preceptos.",
+        r: "Dame vida con tu palabra."
+    },
+    {
+        id: "tos01vite_resp",
+        varName: "tos01vite_resp",
+        titulo: "Responsorio de Tercia - Viernes Semana 1 (Tercia)",
+        tiempo: "ordinario",
+        semana: "1",
+        dia: "viernes",
+        libro: "tercia",
+        v: "Inclina, Señor, mi corazón a tus preceptos.",
+        r: "Dame vida con tu palabra."
+    },
+    {
+        id: "tos01sate_resp",
+        varName: "tos01sate_resp",
+        titulo: "Responsorio de Tercia - Sábado Semana 1 (Tercia)",
+        tiempo: "ordinario",
+        semana: "1",
+        dia: "sabado",
+        libro: "tercia",
+        v: "Inclina, Señor, mi corazón a tus preceptos.",
+        r: "Dame vida con tu palabra."
+    },
+
     // TIEMPO PASCUAL
     {
         id: "tps01juof_resp",
@@ -195,19 +274,22 @@ export class ResponsoriosDB {
 
         const tNorm = (tiempo || 'ordinario').toLowerCase().replace('tiempo ', '');
         const dNorm = (dia || 'domingo').toLowerCase();
+        const lNorm = (libro || 'oficio').toLowerCase();
         const semNum = parseInt(String(semana).replace('s', ''), 10) || 1;
 
-        // Búsqueda exacta
+        // 1. Búsqueda exacta considerando libro
         let match = todas.find(r => 
+            ((r.libro || 'oficio').toLowerCase() === lNorm) &&
             (r.tiempo === tNorm || r.tiempo?.includes(tNorm)) &&
             (r.dia === dNorm || !r.dia) &&
             (parseInt(r.semana, 10) === semNum)
         );
 
         if (!match) {
-            // Ciclo de 4 semanas
+            // 2. Ciclo de 4 semanas
             const semCiclo = ((semNum - 1) % 4) + 1;
             match = todas.find(r => 
+                ((r.libro || 'oficio').toLowerCase() === lNorm) &&
                 (r.tiempo === tNorm || r.tiempo?.includes(tNorm)) &&
                 (r.dia === dNorm || !r.dia) &&
                 (parseInt(r.semana, 10) === semCiclo)
@@ -215,14 +297,29 @@ export class ResponsoriosDB {
         }
 
         if (!match) {
+            // 3. Coincidencia por tiempo y libro
             match = todas.find(r => 
-                (r.tiempo === tNorm || r.tiempo?.includes(tNorm)) &&
-                (r.dia === dNorm || !r.dia)
+                ((r.libro || 'oficio').toLowerCase() === lNorm) &&
+                (r.tiempo === tNorm || r.tiempo?.includes(tNorm))
             );
         }
 
+        if (!match && lNorm === 'tercia') {
+            return {
+                id: `tos${String(semNum).padStart(2, '0')}${dNorm.slice(0, 2)}te_resp`,
+                varName: `tos${String(semNum).padStart(2, '0')}${dNorm.slice(0, 2)}te_resp`,
+                titulo: `Responsorio de Tercia - Semana ${semNum} (${tNorm})`,
+                tiempo: tNorm,
+                semana: semNum,
+                dia: dNorm,
+                libro: 'tercia',
+                v: 'Inclina, Señor, mi corazón a tus preceptos.',
+                r: 'Dame vida con tu palabra.'
+            };
+        }
+
         if (!match && todas.length > 0) {
-            match = todas[0];
+            match = todas.find(r => (r.libro || 'oficio').toLowerCase() === lNorm) || todas[0];
         }
 
         return match || {

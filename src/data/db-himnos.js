@@ -1,6 +1,17 @@
 // Catálogo Estructurado de Himnos Litúrgicos
 export const CATALOGO_HIMNOS_SEED = [
   {
+    "id": "ordinario_s1_domingo_oficio_himno_htos01doof",
+    "varName": "htos01doof",
+    "titulo": "HIMNO: SEÑOR, DIOS ETERNO",
+    "texto": "Señor, Dios eterno, alegres te cantamos,\r\na ti nuestra alabanza,\r\na ti, Padre del cielo, te aclama la creación.\r\n\r\nPostrados ante ti, los ángeles te adoran\r\ny cantan sin cesar:\r\n\r\nSanto, santo, santo es el Señor,\r\nDios del universo;\r\nllenos están el cielo y la tierra de tu gloria.\r\n\r\nA ti, Señor, te alaba\r\nel coro celestial de los apóstoles,\r\nla multitud de los profetas te enaltece,\r\ny el ejército glorioso de los mártires\r\nte aclama.\r\n\r\nA ti la Iglesia santa,\r\npor todos los confines extendida,\r\ncon júbilo te adora y te confiesa:\r\nPadre de majestad infinita,\r\nHijo único y verdadero, digno de todo honor,\r\nEspíritu Santo, Defensor.\r\n\r\nTú eres el Rey de la gloria, Cristo,\r\ntú eres el Hijo único del Padre.\r\nTú, para librar al hombre,\r\naceptaste la condición humana\r\nsin desdeñar el seno de la Virgen.\r\n\r\nTú, rotas las cadenas de la muerte,\r\nabriste a los creyentes el reino de los cielos.\r\nTú estás sentado a la derecha de Dios\r\nen la gloria del Padre.\r\nCreemos que un día has de venir como juez.\r\n\r\nTe pedimos, pues, que vengas en ayuda\r\nde tus siervos,\r\na quienes redimiste con tu preciosa sangre.\r\nHaz que en la gloria eterna nos contemos\r\nentre tus santos. Amén.",
+    "tiempo": "ordinario",
+    "semana": 1,
+    "dia": "domingo",
+    "libro": "oficio",
+    "tipo": "himno"
+  },
+  {
     "id": "ordinario_s1_domingo_oficio_himno_hbautismoOF",
     "varName": "hbautismoOF",
     "titulo": "HIMNO: HOY DOS EXTREMOS SE HAN VISTO",
@@ -774,11 +785,40 @@ export const CATALOGO_HIMNOS_SEED = [
 
 export const HimnosDB = {
     lista: CATALOGO_HIMNOS_SEED,
-    listar: () => CATALOGO_HIMNOS_SEED,
-    obtener: (id) => CATALOGO_HIMNOS_SEED.find(h => h.id === id || h.varName === id),
-    obtenerPorId: (id) => CATALOGO_HIMNOS_SEED.find(h => h.id === id || h.varName === id),
+    listar: () => {
+        const mapa = new Map();
+        CATALOGO_HIMNOS_SEED.forEach(h => {
+            if (h && (h.id || h.varName)) mapa.set((h.id || h.varName).toLowerCase().trim(), h);
+        });
+        if (typeof localStorage !== 'undefined') {
+            const raw = localStorage.getItem('lh_himnos_cache');
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(h => {
+                            if (h && (h.id || h.varName)) mapa.set((h.id || h.varName).toLowerCase().trim(), h);
+                        });
+                    }
+                } catch (_) {}
+            }
+        }
+        return Array.from(mapa.values());
+    },
+    obtener: (id) => {
+        if (!id) return null;
+        const lista = HimnosDB.listar();
+        const idNorm = id.toLowerCase().trim();
+        return lista.find(h => 
+            (h.id && h.id.toLowerCase() === idNorm) || 
+            (h.varName && h.varName.toLowerCase() === idNorm) ||
+            (h.id && h.id.toLowerCase().endsWith(idNorm))
+        );
+    },
+    obtenerPorId: (id) => HimnosDB.obtener(id),
     filtrar: (tiempo, semana, dia, libro) => {
-        return CATALOGO_HIMNOS_SEED.filter(h => {
+        const lista = HimnosDB.listar();
+        return lista.filter(h => {
             if (tiempo && h.tiempo !== tiempo) return false;
             if (semana !== undefined && semana !== null && semana !== '') {
                 const sBusq = parseInt(String(semana).replace(/[^0-9]/g, ''), 10);
@@ -791,12 +831,14 @@ export const HimnosDB = {
         });
     },
     buscar: (termino) => {
-        if (!termino) return CATALOGO_HIMNOS_SEED;
-        const t = termino.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return CATALOGO_HIMNOS_SEED.filter(h => {
-            const tit = (h.titulo || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const txt = (h.texto || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return tit.includes(t) || txt.includes(t) || h.id.includes(t);
+        const lista = HimnosDB.listar();
+        if (!termino) return lista;
+        const t = termino.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+        return lista.filter(h => {
+            const tit = (h.titulo || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+            const txt = (h.texto || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+            const hid = (h.id || '').toLowerCase().replace(/[^a-z0-9]/g, "");
+            return tit.includes(t) || txt.includes(t) || hid.includes(t);
         });
     }
 };

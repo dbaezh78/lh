@@ -94,10 +94,6 @@
                 <form id="form-himno">
                     <div class="row-campos">
                         <div class="campo-grupo">
-                            <label for="form-id">ID / Clave:</label>
-                            <input type="text" id="form-id" placeholder="ej: htos1LAdo, htps1jsOf" required spellcheck="false">
-                        </div>
-                        <div class="campo-grupo">
                             <label for="form-tiempo">Tiempo Litúrgico:</label>
                             <select id="form-tiempo" required>
                                 <option value="ordinario" selected>Tiempo Ordinario</option>
@@ -108,9 +104,27 @@
                                 <option value="santos">Santos</option>
                             </select>
                         </div>
+                        <div class="campo-grupo">
+                            <label for="form-semana">Semana Litúrgica:</label>
+                            <select id="form-semana" required>
+                                <!-- Poblar dinámicamente -->
+                            </select>
+                        </div>
                     </div>
 
                     <div class="row-campos">
+                        <div class="campo-grupo">
+                            <label for="form-dia">Día de la Semana:</label>
+                            <select id="form-dia" required>
+                                <option value="domingo" selected>Domingo</option>
+                                <option value="lunes">Lunes</option>
+                                <option value="martes">Martes</option>
+                                <option value="miercoles">Miércoles</option>
+                                <option value="jueves">Jueves</option>
+                                <option value="viernes">Viernes</option>
+                                <option value="sabado">Sábado</option>
+                            </select>
+                        </div>
                         <div class="campo-grupo">
                             <label for="form-libro">Hora / Libro:</label>
                             <select id="form-libro" required>
@@ -122,6 +136,13 @@
                                 <option value="nona">Nona</option>
                                 <option value="completas">Completas</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="row-campos">
+                        <div class="campo-grupo">
+                            <label for="form-id">ID / Clave Primaria (Autocompletado):</label>
+                            <input type="text" id="form-id" placeholder="ej: tos01doof, htos01doof" required spellcheck="false">
                         </div>
                         <div class="campo-grupo">
                             <label for="form-titulo">Título del Himno (Rojo):</label>
