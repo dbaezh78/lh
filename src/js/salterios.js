@@ -285,7 +285,7 @@ export function formatearResponsorioR1(r1, r2) {
  * Formatea el texto litúrgico de un salmo o cántico:
  * - Detecta rúbricas explicativas iniciales (ej. "El cántico siguiente se dice...") y las tiñe de rojo (#ff0000),
  *   resaltando en negro la palabra "Aleluya" tal como prescribe la edición litúrgica.
- * - Detecta y resalta las respuestas (R. y V.) con la clase rubrica-vr (#ff0000 en negrita).
+ * - Detecta y resalta las respuestas (R. y V.) con la clase rubrica-vr (#ff0000 sin negrita / normal).
  * - Convierte asteriscos en asterisco rojo.
  */
 export function formatearTextoSalmo(texto) {
@@ -312,11 +312,11 @@ export function formatearTextoSalmo(texto) {
         // Estrofas de texto litúrgico
         let estrofa = b
             // 1. (R. o (V. con la letra en rojo y el paréntesis en color texto
-            .replace(/\(R\.\s*/g, '(<span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">R.</span> ')
-            .replace(/\(V\.\s*/g, '(<span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">V.</span> ')
+            .replace(/\(R\.\s*/g, '(<span class="rubrica-vr" style="color: #ff0000; font-weight: normal;">R.</span> ')
+            .replace(/\(V\.\s*/g, '(<span class="rubrica-vr" style="color: #ff0000; font-weight: normal;">V.</span> ')
             // 2. R. y V. al inicio de línea
-            .replace(/(^|\n)R\.\s*/g, '$1<span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">R.</span> ')
-            .replace(/(^|\n)V\.\s*/g, '$1<span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">V.</span> ')
+            .replace(/(^|\n)R\.\s*/g, '$1<span class="rubrica-vr" style="color: #ff0000; font-weight: normal;">R.</span> ')
+            .replace(/(^|\n)V\.\s*/g, '$1<span class="rubrica-vr" style="color: #ff0000; font-weight: normal;">V.</span> ')
             // 3. Asterisco litúrgico
             .replace(/\s\*\s/g, ' <span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; margin: 0 4px; font-size: 1.15em;">*</span> ');
 

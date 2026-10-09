@@ -87,7 +87,7 @@ body.pagina-salterios {
     color: #ff0000;
     min-width: 18px;
     flex-shrink: 0;
-    font-weight: 500;
+    font-weight: normal;
 }
 
 .linea-vr {
