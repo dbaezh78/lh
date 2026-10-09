@@ -1727,18 +1727,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (Array.isArray(cacheTodosLosSalmos)) {
             cacheTodosLosSalmos.forEach(s => {
                 if (!s || !s.id) return;
-                const esTipoCanticoEv = (s.tipo === 'cantico_evangelico') ||
-                                       (s.tipo === 'cantico_ev') ||
-                                       (String(s.id).toLowerCase().includes('cantico_evangelico')) ||
-                                       (String(s.id).toLowerCase().includes('canticoevangelico'));
+                const tipoNorm = String(s.tipo || '').toLowerCase().trim();
+                const idNorm = String(s.id || '').toLowerCase().trim();
+                const titNorm = String(s.titulo || '').toLowerCase().trim();
+
+                const esTipoCanticoEv = (tipoNorm === 'cantico_evangelico') ||
+                                       (tipoNorm === 'cantico_ev') ||
+                                       (tipoNorm === 'cantico evangelico') ||
+                                       idNorm.includes('cantico_evangelico') ||
+                                       idNorm.includes('canticoevangelico') ||
+                                       idNorm.includes('canticozacarias') ||
+                                       idNorm.includes('cantico_zacarias') ||
+                                       idNorm.includes('magnificat') ||
+                                       idNorm.includes('magnifica') ||
+                                       idNorm.includes('nunc_dimittis') ||
+                                       idNorm.includes('nuncdimittis') ||
+                                       titNorm.includes('magníficat') ||
+                                       titNorm.includes('magnificat') ||
+                                       titNorm.includes('zacarías') ||
+                                       titNorm.includes('zacarias') ||
+                                       titNorm.includes('simeón') ||
+                                       titNorm.includes('simeon') ||
+                                       titNorm.includes('nunc dimittis');
                 if (!esTipoCanticoEv) return;
 
                 let nom = (s.titulo || s.id).trim();
                 let cita = '';
-                const mCita = nom.match(/(?:[-–—]\s*)?((?:Lc|LC)\s*\d+[^-\n]*)$/);
+                const mCita = nom.match(/(?:[-–—]\s*)?((?:Lc|LC|lc)\s*\d+[^-\n]*)$/);
                 if (mCita) {
                     cita = mCita[1].trim();
-                    nom = nom.replace(/(?:[-–—]\s*)?(?:Lc|LC)\s*\d+[^-\n]*$/, '').trim();
+                    nom = nom.replace(/(?:[-–—]\s*)?(?:Lc|LC|lc)\s*\d+[^-\n]*$/, '').trim();
                 }
 
                 mapaCanticos.set(s.id, {
@@ -1786,6 +1804,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const valorDefecto = valorSeleccionadoPrevio || (selLibro?.value === 'vispera' ? 'magnificat' : (selLibro?.value === 'completas' ? 'nunc_dimittis' : 'cantico_zacarias'));
         ordenarOpcionesAZ(selCantico, valorDefecto);
         if (selCantico._reaplicarFiltro) selCantico._reaplicarFiltro();
+        if (typeof selCantico._actualizarCustomSelect === 'function') selCantico._actualizarCustomSelect();
     }
 
     // Cargar y poblar el selector de Preces desde db-preces.js / 'lh_preces_cache'
@@ -2140,9 +2159,45 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } catch (errHimnos) {
                     console.warn("Fallo sincronización Firestore himnos:", errHimnos);
                 }
+
+                // 4. Salmos y Cánticos (incluyendo cánticos evangélicos)
+                try {
+                    const snapSalmos = await getDocs(collection(window.firebaseAPI.db, "salmos"));
+                    if (!snapSalmos.empty) {
+                        const desdeFbSalmos = [];
+                        snapSalmos.forEach(d => desdeFbSalmos.push({ id: d.id, ...d.data() }));
+                        if (desdeFbSalmos.length > 0) {
+                            const todosSalmos = obtenerTodosLosSalmosDesdeCatalogo();
+                            const mapaSalmos = new Map();
+                            todosSalmos.forEach(x => {
+                                if (x && x.id) mapaSalmos.set(String(x.id).trim(), x);
+                            });
+                            desdeFbSalmos.forEach(x => {
+                                if (x && x.id) mapaSalmos.set(String(x.id).trim(), x);
+                            });
+                            const combinadosSalmos = Array.from(mapaSalmos.values());
+                            localStorage.setItem('lh_salmos_cache', JSON.stringify(combinadosSalmos));
+                            cacheTodosLosSalmos = combinadosSalmos;
+
+                            const valCantActual = selCantico ? selCantico.value : null;
+                            cargarYPoblarSelectCanticos(valCantActual);
+                            const valSalmo = selSalmo ? selSalmo.value : 'salmo94';
+                            cargarYPoblarSelectSalmos(valSalmo);
+                            const valSalmo1 = selSalmo1 ? selSalmo1.value : 'salmo62_2_9';
+                            cargarYPoblarSelectSalmos1(valSalmo1);
+                            const valSalmo2 = selSalmo2 ? selSalmo2.value : 'dn_3_57_88_56';
+                            cargarYPoblarSelectSalmos2(valSalmo2);
+                            const valSalmo3 = selSalmo3 ? selSalmo3.value : 'salmo149';
+                            cargarYPoblarSelectSalmos3(valSalmo3);
+                            actualizarInvitatorioPreview(false);
+                        }
+                    }
+                } catch (errSalmos) {
+                    console.warn("Fallo sincronización Firestore salmos:", errSalmos);
+                }
             }
         } catch (e) {
-            console.warn("Fallo sincronización Firestore lecturas/himnos:", e);
+            console.warn("Fallo sincronización Firestore lecturas/himnos/salmos:", e);
         }
     }
 
@@ -5262,6 +5317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     selLibro.addEventListener('change', () => {
         cargarYPoblarSelectResponsorios();
+        cargarYPoblarSelectCanticos();
         actualizarCodigoCombinado(true);
         recordarParametrosActuales();
     });
