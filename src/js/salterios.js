@@ -18,8 +18,12 @@ import {
     purgarLocalStorageSalterios,
     normalizarObjetoLiturgico,
     TEXTO_TEDUEM_CANONICO,
-    TEXTO_OPCIONAL_TEDUM_DOMINGO
+    TEXTO_OPCIONAL_TEDUM_DOMINGO,
+    EXAMEN_CONCIENCIA_CANONICO,
+    BENDICION_COMPLETAS_CANONICA
 } from '../firebase/descarga_liturgia_de_las_horas.js';
+
+export { EXAMEN_CONCIENCIA_CANONICO, BENDICION_COMPLETAS_CANONICA };
 
 let horaActualDatos = null;
 let cintaInstancia = null;
@@ -376,7 +380,7 @@ const LIBROS_CONFIG = {
     },
     completas: {
         nombre: 'COMPLETAS',
-        subtitulo: '(Oración antes del descanso nocturno)',
+        subtitulo: '(ORACIÓN ANTES DEL DESCANSO NOCTURNO)',
         orden: 7,
         icono: 'bedtime'
     }
@@ -1057,6 +1061,8 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
             v: 'Dios mío, ven en mi auxilio',
             r: `Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo.\nComo era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${tiempo === 'cuaresma' ? '' : ' Aleluya.'}`
         },
+        examenConciencia: (libro === 'completas') ? { ...EXAMEN_CONCIENCIA_CANONICO } : null,
+        bendicionCompletas: (libro === 'completas') ? { ...BENDICION_COMPLETAS_CANONICA } : null,
         himno: himnoFinal,
         salmodia: {
             ant1: ant1Obj.texto,
@@ -1342,6 +1348,11 @@ function renderizarCuerpoLiturgico(d) {
     } else if (libroKey === 'oficio') {
         subtituloLibro = '';
         d.subtitulo = '';
+    } else if (libroKey === 'completas') {
+        tituloLibro = 'COMPLETAS';
+        subtituloLibro = '(ORACIÓN ANTES DEL DESCANSO NOCTURNO)';
+        d.titulo = tituloLibro;
+        d.subtitulo = subtituloLibro;
     }
 
     let html = '';
@@ -1351,6 +1362,11 @@ function renderizarCuerpoLiturgico(d) {
         html += `
             <h1 class="salterio-libro-titulo" style="margin-bottom: 8px;">${tituloLibro}</h1>
             <hr class="salterio-divider" style="margin: 8px 0 14px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
+        `;
+    } else if (libroKey === 'completas') {
+        html += `
+            <h1 class="salterio-libro-titulo" style="color: #ff0000; font-weight: 700; font-size: calc(2.1rem * var(--font-zoom)); text-transform: uppercase; margin-bottom: 4px;">${tituloLibro}</h1>
+            <div class="salterio-libro-subtitulo" style="color: #ff0000 !important; font-weight: bold !important; font-style: italic; text-transform: uppercase; font-size: 1.15rem; margin: 0 0 24px 0;">${subtituloLibro}</div>
         `;
     } else {
         html += `
@@ -1362,7 +1378,7 @@ function renderizarCuerpoLiturgico(d) {
     const om = d.omisiones || {};
     const omitirInvitatorioCompleto = Boolean(om.antifonaInvitatorio && om.salmoInvitatorio);
 
-    // 2. INVITATORIO E INVOCACIÓN INICIAL (Fiel a Imagen 2 para Oficio)
+    // 2. INVITATORIO E INVOCACIÓN INICIAL (Fiel a Imagen 2)
     if (libroKey === 'oficio') {
         if (!omitirInvitatorioCompleto) {
             const antInv = d.invitatorio?.antifonaTexto || d.invitatorio?.antifona || 'Venid, adoremos a Cristo, el Hijo amado, en quien el Padre tiene sus complacencias.';
@@ -1396,34 +1412,53 @@ function renderizarCuerpoLiturgico(d) {
                 <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rInvocacion}</span></div>
             `;
         }
+    } else if (libroKey === 'laudes' && d.invitatorio && d.invitatorio.activo && !omitirInvitatorioCompleto) {
+        const omitirInv_E = Boolean(om.antifonaInvitatorio || om.antifonaInvitatorio_E);
+        const omitirInv_S = Boolean(om.antifonaInvitatorio || om.antifonaInvitatorio_S);
+        const invSalmoInfo = resolverSalmoLiturgico(d.invitatorio.salmoId, d.invitatorio.salmoTitulo, d.invitatorio.salmoTexto, 'salmo94');
+        html += `
+            <div class="salterio-seccion-header">INVITATORIO</div>
+            <div class="rubrica-nota">(Si esta no es la primera oración del día, se omite el Invitatorio y se inicia directamente con la Invocación inicial)</div>
+            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invitatorio.v}</span></div>
+            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${d.invitatorio.r}</span></div>
+            ${!omitirInv_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
+            ${!om.salmoInvitatorio ? `
+                <div class="salmo-titulo-rubrica">${invSalmoInfo.titulo}</div>
+                <div class="texto-estrofas-salmo">${formatearTextoSalmo(invSalmoInfo.texto)}</div>
+            ` : ''}
+            ${!omitirInv_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
+        `;
     } else {
-        if (d.invitatorio && d.invitatorio.activo && !omitirInvitatorioCompleto) {
-            const omitirInv_E = Boolean(om.antifonaInvitatorio || om.antifonaInvitatorio_E);
-            const omitirInv_S = Boolean(om.antifonaInvitatorio || om.antifonaInvitatorio_S);
-            const invSalmoInfo = resolverSalmoLiturgico(d.invitatorio.salmoId, d.invitatorio.salmoTitulo, d.invitatorio.salmoTexto, 'salmo94');
-            html += `
-                <div class="salterio-seccion-header">INVITATORIO</div>
-                <div class="rubrica-nota">(Si esta no es la primera oración del día, se omite el Invitatorio y se inicia directamente con la Invocación inicial)</div>
-                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invitatorio.v}</span></div>
-                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${d.invitatorio.r}</span></div>
-                ${!omitirInv_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
-                ${!om.salmoInvitatorio ? `
-                    <div class="salmo-titulo-rubrica">${invSalmoInfo.titulo}</div>
-                    <div class="texto-estrofas-salmo">${formatearTextoSalmo(invSalmoInfo.texto)}</div>
-                ` : ''}
-                ${!omitirInv_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.invitatorio.antifona}</div>` : ''}
-            `;
-        } else if (d.invocacionInicial) {
-            let rInvocacion = d.invocacionInicial.r || '';
-            if (d.tiempo !== 'cuaresma' && !rInvocacion.includes('Aleluya')) {
-                rInvocacion = `${rInvocacion.replace(/\.?$/, '')}. Aleluya.`;
-            }
-            html += `
-                <div class="salterio-seccion-header">INVOCACIÓN INICIAL</div>
-                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.invocacionInicial.v}</span></div>
-                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rInvocacion}</span></div>
-            `;
+        // Horas menores (Tercia, Sexta, Nona), Vísperas, Completas, o Laudes sin invitatorio
+        let rInvocacion = d.invocacionInicial?.r || 'Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.';
+        if (d.tiempo !== 'cuaresma' && !rInvocacion.includes('Aleluya')) {
+            rInvocacion = `${rInvocacion.replace(/\.?$/, '')}. Aleluya.`;
         }
+        html += `
+            <div class="salterio-seccion-header" style="color: #ff0000; font-weight: bold; margin-bottom: 12px;">INVOCACIÓN INICIAL</div>
+            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">V.</span> <span class="texto-vr">${d.invocacionInicial?.v || 'Dios mío, ven en mi auxilio'}</span></div>
+            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">R.</span> <span class="texto-vr">${rInvocacion}</span></div>
+        `;
+    }
+
+    // 3.b EXAMEN DE CONCIENCIA (Completas - antes del himno)
+    if (libroKey === 'completas' && !om.examenConciencia) {
+        const ex = d.examenConciencia || EXAMEN_CONCIENCIA_CANONICO;
+        const titExamen = ex.titulo || 'EXAMEN DE CONCIENCIA';
+        const monicionExamen = ex.monicion || 'Hermanos, habiendo llegado al final de esta jornada que Dios nos ha concedido, reconozcamos sinceramente nuestros pecados.';
+        const confesionExamen = ex.confesion || `Yo confieso ante Dios todopoderoso\ny ante vosotros, hermanos,\nque he pecado mucho\nde pensamiento, palabra, obra y omisión:\npor mi culpa, por mi culpa, por mi gran culpa.\n\nPor eso ruego a santa María, siempre Virgen,\na los ángeles, a los santos y a vosotros, hermanos,\nque intercedáis por mí ante Dios, nuestro Señor.`;
+        const vExamen = ex.v || 'El Señor todopoderoso tenga misericordia de nosotros, perdone nuestros pecados y nos lleve a la vida eterna.';
+        const rExamen = ex.r || 'Amén.';
+
+        html += `
+            <div class="salterio-seccion-header" style="color: #ff0000; font-weight: bold; margin-top: 22px; margin-bottom: 12px; font-size: 1.15rem; letter-spacing: 0.5px;">${titExamen}</div>
+            <div class="texto-examen-conciencia" style="margin-bottom: 14px;">
+                <p class="monicion-examen" style="margin-bottom: 14px; text-align: justify; line-height: 1.45;">${monicionExamen}</p>
+                <div class="confesion-estrofas" style="white-space: pre-line; margin-bottom: 16px; line-height: 1.4;">${confesionExamen}</div>
+            </div>
+            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">V.</span> <span class="texto-vr">${vExamen}</span></div>
+            <div class="linea-vr" style="margin-bottom: 22px;"><span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">R.</span> <span class="texto-vr">${rExamen}</span></div>
+        `;
     }
 
     // 4. HIMNO
@@ -1751,18 +1786,35 @@ function renderizarCuerpoLiturgico(d) {
         `;
     }
 
-    // 13. CONCLUSIÓN
-    const vConc = (libroKey === 'oficio' || libroKey === 'tercia' || libroKey === 'sexta' || libroKey === 'nona') 
-        ? 'Bendigamos al Señor.' 
-        : (d.conclusion?.v || 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.');
-    const rConc = (libroKey === 'oficio' || libroKey === 'tercia' || libroKey === 'sexta' || libroKey === 'nona') 
-        ? 'Demos gracias a Dios.' 
-        : (d.conclusion?.r || 'Amén.');
-    html += `
-        <div class="salterio-seccion-header">CONCLUSIÓN</div>
-        <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${vConc}</span></div>
-        <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rConc}</span></div>
-    `;
+    // 13. CONCLUSIÓN O BENDICIÓN (Completas - Fiel a Imagen 2)
+    if (libroKey === 'completas' && !om.bendicionCompletas) {
+        const ben = d.bendicionCompletas || BENDICION_COMPLETAS_CANONICA;
+        const titBen = ben.titulo || ben.tituloBendicion || 'BENDICIÓN';
+        const vBen = ben.v || ben.bendicionV || 'El Señor todopoderoso nos conceda una noche tranquila y una santa muerte.';
+        const rBen = ben.r || ben.bendicionR || 'Amén.';
+        const titMar = ben.tituloMariana || ben.tituloAntifonaMariana || 'ANTIFONA FINAL DE LA SANTISIMA VIRGEN';
+        const txtMar = ben.textoMariana || ben.textoAntifonaMariana || `Madre del Redentor, Virgen fecunda,\npuerta del cielo siempre abierta,\nestrella del mar,\n\nven a librar al pueblo que tropieza\ny se quiere levantar.\n\nAnte la admiración de cielo y tierra,\nengendraste a tu santo Creador,\ny permaneces siempre virgen.\n\nRecibe el saludo del ángel Gabriel,\ny ten piedad de nosotros, pecadores.`;
+
+        html += `
+            <div class="salterio-seccion-header" style="color: #ff0000; margin-top: 24px; margin-bottom: 12px;">${titBen}</div>
+            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000;">V.</span> <span class="texto-vr">${vBen}</span></div>
+            <div class="linea-vr" style="margin-bottom: 22px;"><span class="rubrica-vr" style="color: #ff0000;">R.</span> <span class="texto-vr">${rBen}</span></div>
+            <div class="salterio-seccion-header" style="color: #ff0000; margin-top: 24px; margin-bottom: 12px;">${titMar}</div>
+            <div class="antifona-mariana-bloque" style="white-space: pre-line; line-height: 1.45; margin-bottom: 24px;">${txtMar}</div>
+        `;
+    } else if (libroKey !== 'completas') {
+        const vConc = (libroKey === 'oficio' || libroKey === 'tercia' || libroKey === 'sexta' || libroKey === 'nona') 
+            ? 'Bendigamos al Señor.' 
+            : (d.conclusion?.v || 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.');
+        const rConc = (libroKey === 'oficio' || libroKey === 'tercia' || libroKey === 'sexta' || libroKey === 'nona') 
+            ? 'Demos gracias a Dios.' 
+            : (d.conclusion?.r || 'Amén.');
+        html += `
+            <div class="salterio-seccion-header">CONCLUSIÓN</div>
+            <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${vConc}</span></div>
+            <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rConc}</span></div>
+        `;
+    }
 
     contenedor.innerHTML = html;
 }

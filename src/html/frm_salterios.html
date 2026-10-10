@@ -45,6 +45,9 @@
                 <a href="lectura.html" class="btn-nav-frm" title="Ir a Lecturas del Oficio">
                     <span class="material-symbols-outlined" style="font-size:18px;">import_contacts</span> Lecturas Oficio
                 </a>
+                <a href="ecompletas.html" class="btn-nav-frm" title="Ir al Gestor de Examen de Conciencia / Completas">
+                    <span class="material-symbols-outlined" style="font-size:18px;">nightlight</span> Examen de Conciencia
+                </a>
                 <a href="/salterios.html" class="btn-nav-frm primario">
                     <span class="material-symbols-outlined" style="font-size:18px;">menu_book</span> Salterio
                 </a>
@@ -172,7 +175,7 @@
                 </h3>
                 <div class="grid-controles-invitatorio">
                     <!-- Selector de Antífona del Invitatorio -->
-                    <div class="control-box">
+                    <div class="control-box" id="ctrlBoxAntifonaInvitatorio">
                         <div class="control-header-row">
                             <input type="checkbox" id="chkOmitirAntifonaInvitatorio" class="chk-omitir-elemento" data-target="antifonaInvitatorio" title="Marcar para no incluir en el oficio">
                             <label for="selectAntifonaInvitatorio">
@@ -190,7 +193,7 @@
                     </div>
 
                     <!-- Selector de Salmo Invitatorio -->
-                    <div class="control-box">
+                    <div class="control-box" id="ctrlBoxSalmoInvitatorio">
                         <div class="control-header-row">
                             <input type="checkbox" id="chkOmitirSalmoInvitatorio" class="chk-omitir-elemento" data-target="salmoInvitatorio" title="Marcar para no incluir en el oficio">
                             <label for="selectSalmoInvitatorio">
@@ -206,8 +209,27 @@
                         </select>
                     </div>
 
+                    <!-- Selector de Examen de Conciencia (Completas) -->
+                    <div class="control-box" id="ctrlBoxExamenConciencia" style="display: none;">
+                        <div class="control-header-row" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="chkOmitirExamenConciencia" class="chk-omitir-elemento" data-target="examenConciencia" title="Marcar para no incluir en Completas">
+                                <label for="selectExamenConciencia" style="margin-bottom: 0;">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">self_improvement</span>
+                                    Examen de Conciencia
+                                </label>
+                            </div>
+                            <a href="ecompletas.html?modo=examen" target="_blank" class="btn-link-editor" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.75rem; text-decoration: none; color: #0288d1; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: #e0f2fe; border: 1px solid #b3e5fc;" title="Abrir Formulario de Examen de Conciencia">
+                                <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span> Formulario
+                            </a>
+                        </div>
+                        <select id="selectExamenConciencia" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-ecompletas.js / ecompletas.html -->
+                        </select>
+                    </div>
+
                     <!-- Selector de Himno -->
-                    <div class="control-box">
+                    <div class="control-box" id="ctrlBoxHimno">
                         <div class="control-header-row">
                             <input type="checkbox" id="chkOmitirHimno" class="chk-omitir-elemento" data-target="himno" title="Marcar para no incluir en el oficio">
                             <label for="selectHimno">
@@ -456,6 +478,25 @@
                             <!-- Rellenado dinámicamente desde db-oracion.js / lh_oracion_cache -->
                         </select>
                     </div>
+
+                    <!-- Selector de Bendición y Antífona Mariana (Completas) -->
+                    <div class="control-box" id="ctrlBoxBendicionCompletas" style="display: none;">
+                        <div class="control-header-row" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="chkOmitirBendicionCompletas" class="chk-omitir-elemento" data-target="bendicionCompletas" title="Marcar para no incluir en Completas">
+                                <label for="selectBendicionCompletas" style="margin-bottom: 0;">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">nightlight</span>
+                                    Bendición y Antífona Mariana
+                                </label>
+                            </div>
+                            <a href="ecompletas.html?modo=bendicion" target="_blank" class="btn-link-editor" style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.75rem; text-decoration: none; color: #0288d1; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: #e0f2fe; border: 1px solid #b3e5fc;" title="Abrir Formulario de Bendición y Antífona">
+                                <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span> Formulario
+                            </a>
+                        </div>
+                        <select id="selectBendicionCompletas" class="select-liturgico">
+                            <!-- Rellenado dinámicamente desde db-ecompletas.js / ecompletas.html -->
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -538,6 +579,29 @@
                         <span class="liturgia-texto-verso" id="previewInvocacionOficioR">Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén. Aleluya.</span>
                     </div>
                     <hr style="margin: 16px 0; border: none; border-top: 1px solid rgba(0,0,0,0.15);">
+                </div>
+
+                <!-- 8B. SECCIÓN EXAMEN DE CONCIENCIA PREVIEW (COMPLETAS - SEGÚN IMAGEN 1) -->
+                <div class="liturgia-seccion-examen-conciencia" id="seccionExamenConcienciaPreview" style="display: none; margin-bottom: 22px;">
+                    <div class="liturgia-titulo-examen" id="previewTituloExamenConciencia" style="color: #ff0000; font-weight: bold; margin-bottom: 12px; font-size: 1.15rem; letter-spacing: 0.5px;">EXAMEN DE CONCIENCIA</div>
+                    <div class="liturgia-monicion-examen" id="previewMonicionExamen" style="margin-bottom: 14px; text-align: justify; line-height: 1.45;">Hermanos, habiendo llegado al final de esta jornada que Dios nos ha concedido, reconozcamos sinceramente nuestros pecados.</div>
+                    <div class="liturgia-confesion-examen" id="previewConfesionExamen" style="white-space: pre-line; margin-bottom: 16px; line-height: 1.4;">Yo confieso ante Dios todopoderoso
+y ante vosotros, hermanos,
+que he pecado mucho
+de pensamiento, palabra, obra y omisión:
+por mi culpa, por mi culpa, por mi gran culpa.
+
+Por eso ruego a santa María, siempre Virgen,
+a los ángeles, a los santos y a vosotros, hermanos,
+que intercedáis por mí ante Dios, nuestro Señor.</div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja" style="color: #ff0000;">V.</span>
+                        <span class="liturgia-texto-verso" id="previewExamenV">El Señor todopoderoso tenga misericordia de nosotros, perdone nuestros pecados y nos lleve a la vida eterna.</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila" style="margin-bottom: 18px;">
+                        <span class="liturgia-letra-roja" style="color: #ff0000;">R.</span>
+                        <span class="liturgia-texto-verso" id="previewExamenR">Amén.</span>
+                    </div>
                 </div>
 
                 <!-- 9. SECCIÓN DEL HIMNO (DEBAJO DEL INVITATORIO) -->
@@ -875,6 +939,34 @@ Cristo Jesús, que en tu bautismo nos revelaste a la Trinidad, renueva el espír
                     <div class="liturgia-texto-oracion" id="previewTextoOracion">Tu gracia, Señor, inspire nuestras obras, las sostenga y acompañe; para que todo nuestro trabajo brote de ti, como de su fuente, y tienda a ti, como a su fin. Por nuestro Señor Jesucristo, tu Hijo, que vive y reina contigo en la unidad del Espíritu Santo y es Dios, por los siglos de los siglos. Amén.</div>
                 </div>
 
+                <!-- 14B. SECCIÓN BENDICIÓN Y ANTÍFONA FINAL MARIANA (COMPLETAS - SEGÚN IMAGEN 2) -->
+                <div class="liturgia-seccion-bendicion-completas" id="seccionBendicionCompletasPreview" style="display: none; margin-top: 24px;">
+                    <div class="liturgia-titulo-bendicion" id="previewTituloBendicionCompletas" style="color: #ff0000; font-weight: bold; margin-bottom: 12px; font-size: 1.15rem; letter-spacing: 0.5px;">BENDICIÓN</div>
+                    <div class="liturgia-versiculo-fila">
+                        <span class="liturgia-letra-roja" style="color: #ff0000;">V.</span>
+                        <span class="liturgia-texto-verso" id="previewBendicionV">El Señor todopoderoso nos conceda una noche tranquila y una santa muerte.</span>
+                    </div>
+                    <div class="liturgia-versiculo-fila" style="margin-bottom: 22px;">
+                        <span class="liturgia-letra-roja" style="color: #ff0000;">R.</span>
+                        <span class="liturgia-texto-verso" id="previewBendicionR">Amén.</span>
+                    </div>
+
+                    <div class="liturgia-titulo-antifona-mariana" id="previewTituloAntifonaMariana" style="color: #ff0000; font-weight: bold; margin-bottom: 14px; font-size: 1.15rem; letter-spacing: 0.5px;">ANTIFONA FINAL DE LA SANTISIMA VIRGEN</div>
+                    <div class="liturgia-texto-antifona-mariana" id="previewTextoAntifonaMariana" style="white-space: pre-line; line-height: 1.4; margin-bottom: 18px;">Madre del Redentor, Virgen fecunda,
+puerta del cielo siempre abierta,
+estrella del mar,
+
+ven a librar al pueblo que tropieza
+y se quiere levantar.
+
+Ante la admiración de cielo y tierra,
+engendraste a tu santo Creador,
+y permaneces siempre virgen.
+
+Recibe el saludo del ángel Gabriel,
+y ten piedad de nosotros, pecadores.</div>
+                </div>
+
                 <!-- 15. SECCIÓN DE CONCLUSIÓN (SEGÚN IMAGEN media_1789937648394.png) -->
                 <div class="liturgia-seccion-conclusion" id="seccionConclusionPreview">
                     <div class="liturgia-titulo-conclusion" id="previewTituloConclusion">CONCLUSIÓN</div>
@@ -910,6 +1002,7 @@ Cristo Jesús, que en tu bautismo nos revelaste a la Trinidad, renueva el espír
     <script src="../data/db-oracion.js" type="module"></script>
     <script src="../data/db-responsorios.js" type="module"></script>
     <script src="../data/db-lecturas.js" type="module"></script>
+    <script src="../data/db-ecompletas.js" type="module"></script>
     <script src="../js/firebase-config.js" type="module"></script>
     <script src="../js/frm_salterios.js" type="module"></script>
     <script src="../js/navigator.js"></script>

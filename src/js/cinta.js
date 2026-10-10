@@ -779,8 +779,10 @@ export class CintaLiturgica {
                 return segmentos;
             }
 
+            const libroNormalizado = (this.opciones?.libro || d.libro || '').toLowerCase();
+
             // 1. INVITATORIO / INVOCACION INICIAL (Laudes y otras horas)
-            if (d.invitatorio && d.invitatorio.activo) {
+            if (libroNormalizado === 'laudes' && d.invitatorio && d.invitatorio.activo) {
                 segmentos.push({ texto: "Señor, ábreme los labios. Y mi boca proclamará tu alabanza." });
                 if (d.invitatorio.antifona) {
                     segmentos.push({ texto: limpiarTextoParaVoz(d.invitatorio.antifona) });
@@ -791,8 +793,24 @@ export class CintaLiturgica {
                 if (d.invitatorio.antifona) {
                     segmentos.push({ texto: limpiarTextoParaVoz(d.invitatorio.antifona) });
                 }
-            } else if (d.invocacionInicial) {
+            } else if (d.invocacionInicial || libroNormalizado === 'completas' || libroNormalizado === 'visperas' || libroNormalizado === 'tercia' || libroNormalizado === 'sexta' || libroNormalizado === 'nona') {
                 segmentos.push({ texto: "Dios mío, ven en mi auxilio. Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén. Aleluya." });
+            }
+
+            // Examen de Conciencia (Completas - antes del himno)
+            if (libroNormalizado === 'completas' && !d.omisiones?.examenConciencia) {
+                segmentos.push({ texto: "Examen de conciencia." });
+                const ex = d.examenConciencia || {
+                    monicion: 'Hermanos, habiendo llegado al final de esta jornada que Dios nos ha concedido, reconozcamos sinceramente nuestros pecados.',
+                    confesion: 'Yo confieso ante Dios todopoderoso y ante vosotros, hermanos, que he pecado mucho de pensamiento, palabra, obra y omisión: por mi culpa, por mi culpa, por mi gran culpa. Por eso ruego a santa María, siempre Virgen, a los ángeles, a los santos y a vosotros, hermanos, que intercedáis por mí ante Dios, nuestro Señor.',
+                    v: 'El Señor todopoderoso tenga misericordia de nosotros, perdone nuestros pecados y nos lleve a la vida eterna.',
+                    r: 'Amén.'
+                };
+                if (ex.monicion) segmentos.push({ texto: limpiarTextoParaVoz(ex.monicion) });
+                if (ex.confesion) segmentos.push({ texto: limpiarTextoParaVoz(ex.confesion) });
+                const vText = ex.v || "El Señor todopoderoso tenga misericordia de nosotros, perdone nuestros pecados y nos lleve a la vida eterna.";
+                const rText = ex.r || "Amén.";
+                segmentos.push({ texto: `${limpiarTextoParaVoz(vText)} ${limpiarTextoParaVoz(rText)}` });
             }
 
             // 2. HIMNO
@@ -888,10 +906,12 @@ export class CintaLiturgica {
                 if (d.preces.concl) segmentos.push({ texto: limpiarTextoParaVoz(d.preces.concl) });
             }
 
-            // 8. PADRE NUESTRO
-            segmentos.push({ 
-                texto: "Padre nuestro, que estás en el cielo, santificado sea tu Nombre; venga a nosotros tu reino; hágase tu voluntad en la tierra como en el cielo. Danos hoy nuestro pan de cada día; perdona nuestras ofensas, como también nosotros perdonamos a los que nos ofenden; no nos dejes caer en la tentación, y líbranos del mal. Amén." 
-            });
+            // 8. PADRE NUESTRO (Laudes y Vísperas)
+            if (libroNormalizado !== 'oficio' && libroNormalizado !== 'completas' && libroNormalizado !== 'tercia' && libroNormalizado !== 'sexta' && libroNormalizado !== 'nona' && !d.omisiones?.preces) {
+                segmentos.push({ 
+                    texto: "Padre nuestro, que estás en el cielo, santificado sea tu Nombre; venga a nosotros tu reino; hágase tu voluntad en la tierra como en el cielo. Danos hoy nuestro pan de cada día; perdona nuestras ofensas, como también nosotros perdonamos a los que nos ofenden; no nos dejes caer en la tentación, y líbranos del mal. Amén." 
+                });
+            }
 
             // 9. ORACIÓN
             if (d.oracion) {
@@ -900,8 +920,23 @@ export class CintaLiturgica {
                 segmentos.push({ texto: limpiarTextoParaVoz(textoOr) });
             }
 
-            // 10. CONCLUSIÓN
-            segmentos.push({ texto: "El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén." });
+            // 10. CONCLUSIÓN O BENDICIÓN (Completas)
+            if (libroNormalizado === 'completas' && !d.omisiones?.bendicionCompletas) {
+                segmentos.push({ texto: "Bendición." });
+                const ben = d.bendicionCompletas || {};
+                const vBen = ben.v || ben.bendicionV || "El Señor todopoderoso nos conceda una noche tranquila y una santa muerte.";
+                const rBen = ben.r || ben.bendicionR || "Amén.";
+                segmentos.push({ texto: `${limpiarTextoParaVoz(vBen)} ${limpiarTextoParaVoz(rBen)}` });
+
+                const titMar = ben.tituloMariana || ben.tituloAntifonaMariana || "Antífona final de la Santísima Virgen.";
+                segmentos.push({ texto: limpiarTextoParaVoz(titMar) });
+                const txtMar = ben.textoMariana || ben.textoAntifonaMariana || "Madre del Redentor, Virgen fecunda, puerta del cielo siempre abierta, estrella del mar, ven a librar al pueblo que tropieza y se quiere levantar. Ante la admiración de cielo y tierra, engendraste a tu santo Creador, y permaneces siempre virgen. Recibe el saludo del ángel Gabriel, y ten piedad de nosotros, pecadores.";
+                segmentos.push({ texto: limpiarTextoParaVoz(txtMar) });
+            } else if (libroNormalizado === 'oficio' || libroNormalizado === 'tercia' || libroNormalizado === 'sexta' || libroNormalizado === 'nona') {
+                segmentos.push({ texto: "Bendigamos al Señor. Demos gracias a Dios." });
+            } else {
+                segmentos.push({ texto: "El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén." });
+            }
         } else {
             const fallbackTexto = this.extraerTextoLiturgicoDOM();
             segmentos.push({ texto: fallbackTexto });

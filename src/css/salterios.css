@@ -169,6 +169,32 @@ body.pagina-salterios {
     margin: 6px 0 14px;
 }
 
+/* Examen de Conciencia (Completas) */
+.texto-examen-conciencia {
+    margin: 12px 0 16px 0;
+    line-height: 1.35;
+    font-size: calc(var(--size) * var(--font-zoom));
+}
+
+.texto-examen-conciencia .monicion-examen {
+    margin-bottom: 14px;
+    text-align: justify;
+}
+
+.texto-examen-conciencia .confesion-estrofas {
+    white-space: pre-line;
+    margin-bottom: 16px;
+    line-height: 1.3;
+}
+
+/* Antífona Final de la Santísima Virgen (Completas) */
+.antifona-mariana-bloque {
+    margin: 12px 0 24px 0;
+    line-height: 1.35;
+    font-size: calc(var(--size) * var(--font-zoom));
+    white-space: pre-line;
+}
+
 /* =========================================================================
    LECTURAS Y REPRODUCTOR CUADRADO (OFICIO Y LAUDES)
    ========================================================================= */

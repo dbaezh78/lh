@@ -41,6 +41,7 @@ import {
 } from '../data/db-cantico-evangelico.js';
 import { CATALOGO_RESPONSORIOS_SEED, ResponsoriosDB } from '../data/db-responsorios.js';
 import { CATALOGO_LECTURAS_SEED as CATALOGO_LECTURAS_OFICIO_SEED, LecturasDB } from '../data/db-lecturas.js';
+import { CATALOGO_ECOMPLETAS_SEED, CompletasDB } from '../data/db-ecompletas.js';
 import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 import { generarHitosLiturgicos } from './form_etiempo.js';
 import { inicializarSearchableSantoSelect } from './searchable-santo.js';
@@ -279,6 +280,22 @@ let cacheTodasLasPreces = [];
 let cacheTodasLasOraciones = [];
 let cacheTodosLosResponsorios = [];
 let cacheTodasLasLecturasOficio = [];
+let cacheTodosLosExamenes = [];
+let cacheTodasLasBendiciones = [];
+
+function obtenerTodosLosExamenesDesdeCatalogo() {
+    if (typeof CompletasDB !== 'undefined' && CompletasDB.obtenerExamenes) {
+        return CompletasDB.obtenerExamenes();
+    }
+    return CATALOGO_ECOMPLETAS_SEED.filter(s => s.tipo === 'examen');
+}
+
+function obtenerTodasLasBendicionesDesdeCatalogo() {
+    if (typeof CompletasDB !== 'undefined' && CompletasDB.obtenerBendiciones) {
+        return CompletasDB.obtenerBendiciones();
+    }
+    return CATALOGO_ECOMPLETAS_SEED.filter(s => s.tipo === 'bendicion');
+}
 
 export const TEXTO_SALMO_94_CANONICO = `Venid, aclamemos al Señor,
 demos vítores a la Roca que nos salva;
@@ -887,6 +904,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     const seccionCanticoEvangelicoPreview = document.getElementById('seccionCanticoEvangelicoPreview');
     const seccionPrecesPreview = document.getElementById('seccionPrecesPreview');
 
+    // Selectores y contenedores específicos de Completas
+    const ctrlBoxAntifonaInvitatorio = document.getElementById('ctrlBoxAntifonaInvitatorio');
+    const ctrlBoxSalmoInvitatorio = document.getElementById('ctrlBoxSalmoInvitatorio');
+    const ctrlBoxExamenConciencia = document.getElementById('ctrlBoxExamenConciencia');
+    const ctrlBoxBendicionCompletas = document.getElementById('ctrlBoxBendicionCompletas');
+    const selExamenConciencia = document.getElementById('selectExamenConciencia');
+    const selBendicionCompletas = document.getElementById('selectBendicionCompletas');
+
+    // Secciones de vista previa pergamino para Completas
+    const seccionExamenConcienciaPreview = document.getElementById('seccionExamenConcienciaPreview');
+    const previewTituloExamenConciencia = document.getElementById('previewTituloExamenConciencia');
+    const previewMonicionExamen = document.getElementById('previewMonicionExamen');
+    const previewConfesionExamen = document.getElementById('previewConfesionExamen');
+    const previewExamenV = document.getElementById('previewExamenV');
+    const previewExamenR = document.getElementById('previewExamenR');
+
+    const seccionBendicionCompletasPreview = document.getElementById('seccionBendicionCompletasPreview');
+    const previewTituloBendicionCompletas = document.getElementById('previewTituloBendicionCompletas');
+    const previewBendicionV = document.getElementById('previewBendicionV');
+    const previewBendicionR = document.getElementById('previewBendicionR');
+    const previewTituloAntifonaMariana = document.getElementById('previewTituloAntifonaMariana');
+    const previewTextoAntifonaMariana = document.getElementById('previewTextoAntifonaMariana');
+
     // ==========================================
     // UTILIDADES DE FILTRADO Y ORDENAMIENTO A-Z
     // ==========================================
@@ -1263,7 +1303,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             'selectAntifona1', 'selectSalmo1', 'selectAntifona2', 'selectSalmo2',
             'selectAntifona3', 'selectSalmo3', 'selectLecturaBreve',
             'selectAntifonaCantico', 'selectCantico', 'selectPreces', 'selectOracion',
-            'selectResponsorioOficio', 'selectLectura1Oficio', 'selectLectura2Oficio', 'selectTeDeumOficio'
+            'selectResponsorioOficio', 'selectLectura1Oficio', 'selectLectura2Oficio', 'selectTeDeumOficio',
+            'selectExamenConciencia', 'selectBendicionCompletas'
         ];
         ids.forEach(id => {
             const el = document.getElementById(id);
@@ -2020,6 +2061,106 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Cargar y poblar el selector de Examen de Conciencia (Completas)
+    function cargarYPoblarSelectExamenConciencia(valorSeleccionadoPrevio = null) {
+        if (!selExamenConciencia) return;
+        cacheTodosLosExamenes = obtenerTodosLosExamenesDesdeCatalogo();
+
+        selExamenConciencia.innerHTML = '';
+        if (cacheTodosLosExamenes.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'No hay exámenes de conciencia registrados';
+            selExamenConciencia.appendChild(opt);
+            return;
+        }
+
+        cacheTodosLosExamenes.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.setAttribute('data-id', item.id);
+            opt.setAttribute('data-titulo', item.titulo || item.nombre);
+            opt.setAttribute('data-monicion', item.monicion || '');
+            opt.setAttribute('data-confesion', item.confesion || '');
+            opt.setAttribute('data-v', item.v || '');
+            opt.setAttribute('data-r', item.r || '');
+            opt.textContent = item.nombre || item.titulo || item.id;
+            selExamenConciencia.appendChild(opt);
+        });
+
+        let targetVal = valorSeleccionadoPrevio || 'examen_conciencia_canonico';
+        ordenarOpcionesAZ(selExamenConciencia, targetVal);
+        if (selExamenConciencia._reaplicarFiltro) selExamenConciencia._reaplicarFiltro();
+    }
+
+    // Cargar y poblar el selector de Bendición y Antífona Mariana (Completas)
+    function cargarYPoblarSelectBendicionCompletas(valorSeleccionadoPrevio = null) {
+        if (!selBendicionCompletas) return;
+        cacheTodasLasBendiciones = obtenerTodasLasBendicionesDesdeCatalogo();
+
+        selBendicionCompletas.innerHTML = '';
+        if (cacheTodasLasBendiciones.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'No hay bendiciones registradas';
+            selBendicionCompletas.appendChild(opt);
+            return;
+        }
+
+        cacheTodasLasBendiciones.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.setAttribute('data-id', item.id);
+            opt.setAttribute('data-titulo', item.titulo || item.nombre);
+            opt.setAttribute('data-v', item.v || '');
+            opt.setAttribute('data-r', item.r || '');
+            opt.setAttribute('data-titulomariana', item.tituloMariana || '');
+            opt.setAttribute('data-textomariana', item.textoMariana || '');
+            opt.textContent = item.nombre || item.titulo || item.id;
+            selBendicionCompletas.appendChild(opt);
+        });
+
+        let targetVal = valorSeleccionadoPrevio || 'bendicion_madre_del_redentor';
+        ordenarOpcionesAZ(selBendicionCompletas, targetVal);
+        if (selBendicionCompletas._reaplicarFiltro) selBendicionCompletas._reaplicarFiltro();
+    }
+
+    // Actualizar vista previa pergamino del Examen de Conciencia (según Imagen 1)
+    function actualizarExamenConcienciaPreview() {
+        if (!selExamenConciencia) return;
+        const opt = selExamenConciencia.selectedOptions[0];
+        const exId = opt ? opt.value : selExamenConciencia.value;
+        const exItem = (Array.isArray(cacheTodosLosExamenes) ? cacheTodosLosExamenes.find(e => e.id === exId) : null) || 
+                       CompletasDB.obtener(exId) || 
+                       CATALOGO_ECOMPLETAS_SEED[0];
+
+        if (exItem) {
+            if (previewTituloExamenConciencia) previewTituloExamenConciencia.textContent = exItem.titulo || 'EXAMEN DE CONCIENCIA';
+            if (previewMonicionExamen) previewMonicionExamen.textContent = exItem.monicion || '';
+            if (previewConfesionExamen) previewConfesionExamen.textContent = exItem.confesion || '';
+            if (previewExamenV) previewExamenV.textContent = exItem.v || '';
+            if (previewExamenR) previewExamenR.textContent = exItem.r || '';
+        }
+    }
+
+    // Actualizar vista previa pergamino de la Bendición y Antífona Mariana (según Imagen 2)
+    function actualizarBendicionCompletasPreview() {
+        if (!selBendicionCompletas) return;
+        const opt = selBendicionCompletas.selectedOptions[0];
+        const benId = opt ? opt.value : selBendicionCompletas.value;
+        const benItem = (Array.isArray(cacheTodasLasBendiciones) ? cacheTodasLasBendiciones.find(b => b.id === benId) : null) || 
+                        CompletasDB.obtener(benId) || 
+                        CATALOGO_ECOMPLETAS_SEED.find(s => s.tipo === 'bendicion');
+
+        if (benItem) {
+            if (previewTituloBendicionCompletas) previewTituloBendicionCompletas.textContent = benItem.titulo || 'BENDICIÓN';
+            if (previewBendicionV) previewBendicionV.textContent = benItem.v || 'El Señor todopoderoso nos conceda una noche tranquila y una santa muerte.';
+            if (previewBendicionR) previewBendicionR.textContent = benItem.r || 'Amén.';
+            if (previewTituloAntifonaMariana) previewTituloAntifonaMariana.textContent = benItem.tituloMariana || 'ANTIFONA FINAL DE LA SANTISIMA VIRGEN';
+            if (previewTextoAntifonaMariana) previewTextoAntifonaMariana.textContent = benItem.textoMariana || '';
+        }
+    }
+
     // Escuchar si se registran nuevas antífonas, salmos, himnos o lecturas breves desde otra pestaña
     window.addEventListener('storage', (e) => {
         if (e.key === 'lh_antifonas_cache') {
@@ -2079,6 +2220,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const val2 = selLectura2Oficio ? selLectura2Oficio.value : null;
             cargarYPoblarSelectLecturasOficio(val1, val2);
             manejarCambioParametros(false);
+        }
+        if (e.key === 'lh_ecompletas_cache') {
+            const valEx = selExamenConciencia ? selExamenConciencia.value : null;
+            cargarYPoblarSelectExamenConciencia(valEx);
+            actualizarExamenConcienciaPreview();
+
+            const valBen = selBendicionCompletas ? selBendicionCompletas.value : null;
+            cargarYPoblarSelectBendicionCompletas(valBen);
+            actualizarBendicionCompletasPreview();
         }
     });
 
@@ -2383,6 +2533,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const diaVal    = selDia.value;
         const libroVal  = selLibro.value;
         const esOficio  = (libroVal === 'oficio');
+        const esCompletas = (libroVal === 'completas');
         const esDomingo = (diaVal === 'domingo');
         const mostrarHimnoPost = esOficio && esDomingo;
 
@@ -2397,10 +2548,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (ctrlBoxLecturaBreve) ctrlBoxLecturaBreve.style.display = esOficio ? 'none' : 'block';
         if (ctrlBoxAntifonaCantico) ctrlBoxAntifonaCantico.style.display = esOficio ? 'none' : 'block';
         if (ctrlBoxCantico) ctrlBoxCantico.style.display = esOficio ? 'none' : 'block';
-        if (ctrlBoxPreces) ctrlBoxPreces.style.display = esOficio ? 'none' : 'block';
+        if (ctrlBoxPreces) ctrlBoxPreces.style.display = (esOficio || esCompletas) ? 'none' : 'block';
+
+        // Selectores específicos de Completas vs Invitatorio
+        if (ctrlBoxAntifonaInvitatorio) ctrlBoxAntifonaInvitatorio.style.display = esCompletas ? 'none' : 'block';
+        if (ctrlBoxSalmoInvitatorio) ctrlBoxSalmoInvitatorio.style.display = esCompletas ? 'none' : 'block';
+        if (ctrlBoxExamenConciencia) ctrlBoxExamenConciencia.style.display = esCompletas ? 'block' : 'none';
+        if (ctrlBoxBendicionCompletas) ctrlBoxBendicionCompletas.style.display = esCompletas ? 'block' : 'none';
 
         // Alternancia de secciones de la hoja de pergamino
-        if (seccionInvitatorioLaudesPreview) seccionInvitatorioLaudesPreview.style.display = esOficio ? 'none' : 'block';
+        if (seccionInvitatorioLaudesPreview) seccionInvitatorioLaudesPreview.style.display = (esOficio || esCompletas) ? 'none' : 'block';
         if (seccionInvitatorioOficioPreview) seccionInvitatorioOficioPreview.style.display = esOficio ? 'block' : 'none';
 
         if (seccionResponsorioOficioPreview) seccionResponsorioOficioPreview.style.display = esOficio ? 'block' : 'none';
@@ -2412,7 +2569,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (seccionLecturaBrevePreview) seccionLecturaBrevePreview.style.display = esOficio ? 'none' : 'block';
         if (seccionCanticoEvangelicoPreview) seccionCanticoEvangelicoPreview.style.display = esOficio ? 'none' : 'block';
-        if (seccionPrecesPreview) seccionPrecesPreview.style.display = esOficio ? 'none' : 'block';
+        if (seccionPrecesPreview) seccionPrecesPreview.style.display = (esOficio || esCompletas) ? 'none' : 'block';
+
+        if (esCompletas) {
+            if (seccionExamenConcienciaPreview) seccionExamenConcienciaPreview.style.display = 'block';
+            if (seccionBendicionCompletasPreview) seccionBendicionCompletasPreview.style.display = 'block';
+            if (seccionConclusionPreview) seccionConclusionPreview.style.display = 'none';
+            actualizarExamenConcienciaPreview();
+            actualizarBendicionCompletasPreview();
+        } else {
+            if (seccionExamenConcienciaPreview) seccionExamenConcienciaPreview.style.display = 'none';
+            if (seccionBendicionCompletasPreview) seccionBendicionCompletasPreview.style.display = 'none';
+            if (seccionConclusionPreview) seccionConclusionPreview.style.display = 'block';
+        }
 
         // Conclusión fija
         if (previewTituloConclusion) previewTituloConclusion.textContent = 'CONCLUSIÓN';
@@ -3362,6 +3531,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (seccionInvitatorioOficioPreview) {
                 seccionInvitatorioOficioPreview.style.display = omitirInvitatorioTotal ? 'none' : 'block';
             }
+        } else if (libroVal === 'completas') {
+            if (seccionInvitatorioLaudesPreview) seccionInvitatorioLaudesPreview.style.display = 'none';
+            if (seccionInvitatorioOficioPreview) seccionInvitatorioOficioPreview.style.display = 'none';
+            if (seccionInvocacionInicial) seccionInvocacionInicial.style.display = 'block';
         } else {
             if (seccionInvitatorioOficioPreview) seccionInvitatorioOficioPreview.style.display = 'none';
             if (omitirInvitatorioTotal) {
@@ -3461,13 +3634,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // 7. PRECES
-        if (!esOficio && seccionPrecesPreview) {
-            seccionPrecesPreview.style.display = (chkPreces && chkPreces.checked) ? 'none' : 'block';
+        if (seccionPrecesPreview) {
+            seccionPrecesPreview.style.display = (!esOficio && libroVal !== 'completas' && (!chkPreces || !chkPreces.checked)) ? 'block' : 'none';
         }
 
         // 8. ORACIÓN
         if (seccionOracionPreview) {
             seccionOracionPreview.style.display = (chkOracion && chkOracion.checked) ? 'none' : 'block';
+        }
+
+        // 9. EXAMEN DE CONCIENCIA (COMPLETAS)
+        const chkExamen = document.getElementById('chkOmitirExamenConciencia');
+        if (seccionExamenConcienciaPreview) {
+            seccionExamenConcienciaPreview.style.display = (libroVal === 'completas' && (!chkExamen || !chkExamen.checked)) ? 'block' : 'none';
+        }
+
+        // 10. BENDICIÓN Y ANTÍFONA MARIANA (COMPLETAS) vs CONCLUSIÓN
+        const chkBendicion = document.getElementById('chkOmitirBendicionCompletas');
+        if (seccionBendicionCompletasPreview) {
+            seccionBendicionCompletasPreview.style.display = (libroVal === 'completas' && (!chkBendicion || !chkBendicion.checked)) ? 'block' : 'none';
+        }
+        if (seccionConclusionPreview) {
+            seccionConclusionPreview.style.display = (libroVal === 'completas') ? 'none' : 'block';
         }
     }
 
@@ -4279,6 +4467,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (previewRespR1) previewRespR1.textContent = rTxt;
         }
 
+        if (libroActual === 'completas') {
+            const exData = datos.examenConciencia || {};
+            const exId = exData.id || 'examen_conciencia_canonico';
+            if (selExamenConciencia) {
+                seleccionarOpcion(selExamenConciencia, exId, exData.titulo || 'Examen de Conciencia - Yo confieso (Fórmula I)');
+                actualizarExamenConcienciaPreview();
+            }
+
+            const benData = datos.bendicionCompletas || {};
+            const benId = benData.id || 'bendicion_madre_del_redentor';
+            if (selBendicionCompletas) {
+                seleccionarOpcion(selBendicionCompletas, benId, benData.nombre || 'Bendición y Madre del Redentor (Alma Redemptoris Mater)');
+                actualizarBendicionCompletasPreview();
+            }
+        }
+
         // Restaurar estado de los checkboxes de omisión
         const omisionesGuardadas = datos.omisiones || {};
         document.querySelectorAll('.chk-omitir-elemento, .chk-omitir-es').forEach(chk => {
@@ -4813,9 +5017,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             lecturasOficio: lecturasOficio,
             himnoTeDeum: himnoTeDeum,
             seccionOpcional: seccionOpcional,
+            examenConciencia: (libroVal === 'completas') ? {
+                id: (selExamenConciencia ? selExamenConciencia.value : 'examen_conciencia_canonico'),
+                titulo: (previewTituloExamenConciencia ? previewTituloExamenConciencia.textContent.trim() : 'EXAMEN DE CONCIENCIA'),
+                monicion: (previewMonicionExamen ? previewMonicionExamen.textContent.trim() : ''),
+                confesion: (previewConfesionExamen ? previewConfesionExamen.textContent.trim() : ''),
+                v: (previewExamenV ? previewExamenV.textContent.trim() : ''),
+                r: (previewExamenR ? previewExamenR.textContent.trim() : '')
+            } : null,
+            bendicionCompletas: (libroVal === 'completas') ? {
+                id: (selBendicionCompletas ? selBendicionCompletas.value : 'bendicion_madre_del_redentor'),
+                titulo: (previewTituloBendicionCompletas ? previewTituloBendicionCompletas.textContent.trim() : 'BENDICIÓN'),
+                tituloBendicion: (previewTituloBendicionCompletas ? previewTituloBendicionCompletas.textContent.trim() : 'BENDICIÓN'),
+                v: (previewBendicionV ? previewBendicionV.textContent.trim() : 'El Señor todopoderoso nos conceda una noche tranquila y una santa muerte.'),
+                bendicionV: (previewBendicionV ? previewBendicionV.textContent.trim() : 'El Señor todopoderoso nos conceda una noche tranquila y una santa muerte.'),
+                r: (previewBendicionR ? previewBendicionR.textContent.trim() : 'Amén.'),
+                bendicionR: (previewBendicionR ? previewBendicionR.textContent.trim() : 'Amén.'),
+                tituloMariana: (previewTituloAntifonaMariana ? previewTituloAntifonaMariana.textContent.trim() : 'ANTIFONA FINAL DE LA SANTISIMA VIRGEN'),
+                tituloAntifonaMariana: (previewTituloAntifonaMariana ? previewTituloAntifonaMariana.textContent.trim() : 'ANTIFONA FINAL DE LA SANTISIMA VIRGEN'),
+                textoMariana: (previewTextoAntifonaMariana ? previewTextoAntifonaMariana.textContent.trim() : ''),
+                textoAntifonaMariana: (previewTextoAntifonaMariana ? previewTextoAntifonaMariana.textContent.trim() : '')
+            } : null,
             omisiones: omisiones,
+            invocacionInicial: {
+                v: 'Dios mío, ven en mi auxilio',
+                r: `Señor, date prisa en socorrerme. Gloria al Padre, y al Hijo, y al Espíritu Santo. Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.${tiempoVal === 'cuaresma' ? '' : ' Aleluya.'}`
+            },
             invitatorio: {
-                activo: !omisiones.antifonaInvitatorio || !omisiones.salmoInvitatorio,
+                activo: (libroVal === 'oficio' || libroVal === 'laudes') ? (!omisiones.antifonaInvitatorio || !omisiones.salmoInvitatorio) : false,
                 antifonaId: antifonaId,
                 antifonaTexto: antifonaTexto,
                 salmoId: salmoId,
@@ -5284,6 +5513,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Eventos interactivos en los selectores de Completas
+    if (selExamenConciencia) {
+        selExamenConciencia.addEventListener('change', () => {
+            actualizarExamenConcienciaPreview();
+            actualizarBadgeEstado(false);
+        });
+    }
+
+    if (selBendicionCompletas) {
+        selBendicionCompletas.addEventListener('change', () => {
+            actualizarBendicionCompletasPreview();
+            actualizarBadgeEstado(false);
+        });
+    }
+
     // Función para recordar los últimos parámetros seleccionados
     function recordarParametrosActuales() {
         try {
@@ -5318,6 +5562,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     selLibro.addEventListener('change', () => {
         cargarYPoblarSelectResponsorios();
         cargarYPoblarSelectCanticos();
+        cargarYPoblarSelectExamenConciencia();
+        cargarYPoblarSelectBendicionCompletas();
         actualizarCodigoCombinado(true);
         recordarParametrosActuales();
     });
@@ -5340,6 +5586,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarYPoblarSelectOracion();
     cargarYPoblarSelectResponsorios();
     cargarYPoblarSelectLecturasOficio();
+    cargarYPoblarSelectExamenConciencia();
+    cargarYPoblarSelectBendicionCompletas();
     if (selTeDeumOficio) {
         cargarYPoblarSelectHimnoPostLecturas();
     }

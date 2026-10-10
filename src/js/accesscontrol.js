@@ -159,7 +159,9 @@ export const PERMISSIONS = {
   PAGE_FRM_RESPONSORIO: "page_frm_responsorio",
   FRM_RESPONSORIO_GUARDAR: "frm_responsorio_guardar",
   PAGE_FRM_LECTURA: "page_frm_lectura",
-  FRM_LECTURA_GUARDAR: "frm_lectura_guardar"
+  FRM_LECTURA_GUARDAR: "frm_lectura_guardar",
+  PAGE_FRM_ECOMPLETAS: "page_frm_ecompletas",
+  FRM_ECOMPLETAS_GUARDAR: "frm_ecompletas_guardar"
 };
 
 // Árbol jerárquico anidado para la interfaz visual
@@ -446,6 +448,14 @@ export const PERMISSION_TREE = [
         children: [
           { key: "page_frm_lectura", label: "Ver página" },
           { key: "frm_lectura_guardar", label: "Guardar / Modificar" }
+        ]
+      },
+      {
+        key: "group_frm_ecompletas",
+        label: "Completas",
+        children: [
+          { key: "page_frm_ecompletas", label: "Ver página" },
+          { key: "frm_ecompletas_guardar", label: "Guardar / Modificar" }
         ]
       },
       {

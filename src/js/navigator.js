@@ -429,6 +429,7 @@
                         <a href="/src/html/oracion.html"><span class="material-symbols-outlined">church</span> Oración</a>
                         <a href="/src/html/responsorio.html"><span class="material-symbols-outlined">church</span> Responsorios</a>
                         <a href="/src/html/lectura.html"><span class="material-symbols-outlined">import_contacts</span> Lecturas Oficio</a>
+                        <a href="/src/html/ecompletas.html"><span class="material-symbols-outlined">nightlight</span> Examen de Conciencia</a>
                         <a href="/src/html/form_etiempo.html"><span class="material-symbols-outlined">edit_calendar</span> Cambio litúrgico</a>
                         <a href="/src/html/santo.html"><span class="material-symbols-outlined">calendar_today</span> Santo</a>
                         <a href="/src/html/nombresanto.html"><span class="material-symbols-outlined">person_add</span> Nombre Santo</a>
@@ -823,6 +824,7 @@
             else if (href.includes('oracion.html')) perm = 'page_frm_oracion';
             else if (href.includes('responsorio.html')) perm = 'page_frm_responsorio';
             else if (href.includes('lectura.html')) perm = 'page_frm_lectura';
+            else if (href.includes('ecompletas.html')) perm = 'page_frm_ecompletas';
             else if (href.includes('form_etiempo.html')) perm = 'page_cambio_liturgico';
             else if (href.includes('santo.html')) perm = 'page_santos_iglesia';
             else if (href.includes('nombresanto.html')) perm = 'page_registro_santo';
@@ -884,6 +886,9 @@
         } else if (path.includes("lectura.html") && !path.includes("lecturabreve") && !path.includes("oficiodelectura")) {
             requiredPerm = "page_frm_lectura";
             pageTitle = "Lecturas de Oficio";
+        } else if (path.includes("ecompletas.html")) {
+            requiredPerm = "page_frm_ecompletas";
+            pageTitle = "Examen de Conciencia";
         } else if (path.includes("form_etiempo.html")) {
             requiredPerm = "page_cambio_liturgico";
             pageTitle = "Cambio Litúrgico";

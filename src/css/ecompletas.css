@@ -1,0 +1,526 @@
+/* =========================================================================
+   ESTILOS PARA EL GESTOR DE COMPLETAS: EXAMEN Y BENDICIÓN (ecompletas.css)
+   Liturgia de las Horas
+   ========================================================================= */
+
+:root {
+    --bg-primary: #12151c;
+    --bg-surface: #1a1f2c;
+    --bg-card: #222838;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #f0f4f8;
+    --text-secondary: #94a3b8;
+    --accent-red: #ff0000;
+    --accent-red-hover: #e01212;
+    --accent-gold: #f59e0b;
+    --accent-green: #10b981;
+    --accent-blue: #3b82f6;
+    --card-preview-bg: #ffffea;
+    --card-preview-border: #e2dab8;
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-sm: 6px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: Verdana, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+.contenedor-ecompletas {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 20px 100px;
+}
+
+/* Cabecera */
+.header-ecompletas {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 20px 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    margin-bottom: 24px;
+}
+
+.titulo-box h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.titulo-box p {
+    margin: 6px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.header-controles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-ec {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #f8fafc;
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-ec:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-ec.btn-verde {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #34d399;
+}
+.btn-ec.btn-verde:hover {
+    background: rgba(16, 185, 129, 0.3);
+}
+
+.btn-ec.btn-primario {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
+}
+.btn-ec.btn-primario:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.btn-ec.btn-peligro {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+}
+
+/* Banner de estado */
+.estado-banner {
+    padding: 12px 18px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.estado-banner.exito {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+.estado-banner.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+.estado-banner.info {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+/* Selector Maestro de Modo */
+.card-selector-tipo {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.selector-tipo-izq {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.selector-tipo-izq label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.select-modo-principal {
+    background: #0f172a;
+    color: #ffffff;
+    border: 2px solid var(--accent-red);
+    padding: 10px 18px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    outline: none;
+}
+
+/* Layout 2 Columnas */
+.layout-ecompletas {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1080px) {
+    .layout-ecompletas {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Panel Formulario */
+.panel-formulario {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.form-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.form-grupo label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.form-grupo input,
+.form-grupo select,
+.form-grupo textarea {
+    background: #0f172a;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-grupo input:focus,
+.form-grupo select:focus,
+.form-grupo textarea:focus {
+    border-color: var(--accent-red);
+}
+
+.form-grupo textarea {
+    line-height: 1.45;
+    resize: vertical;
+}
+
+.form-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-accion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-accion.guardar {
+    background: var(--accent-red);
+    color: #ffffff;
+}
+.btn-accion.guardar:hover {
+    background: var(--accent-red-hover);
+}
+
+.btn-accion.limpiar {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+.btn-accion.limpiar:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-accion.eliminar {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    margin-left: auto;
+}
+.btn-accion.eliminar:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+/* Columna Derecha: Vista Previa y Catálogo */
+.panel-derecha {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Tarjeta Pergamino de Vista Previa (Fiel a Imagen 1 e Imagen 2) */
+.card-preview-completas {
+    background: var(--card-preview-bg, #ffffea);
+    border: 1px solid var(--card-preview-border, #e2dab8);
+    border-radius: var(--radius-lg);
+    padding: 30px 28px;
+    color: #000000;
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.45;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.preview-badge-header {
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.08);
+    color: #555555;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+}
+
+.preview-titulo-rojo {
+    color: #ff0000;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin: 0 0 16px 0;
+}
+
+.preview-subtitulo-rojo {
+    color: #ff0000;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin: 24px 0 14px 0;
+}
+
+.preview-texto-cuerpo {
+    color: #111111;
+    margin: 0 0 16px 0;
+    text-align: justify;
+    line-height: 1.45;
+}
+
+.preview-estrofas-cuerpo {
+    color: #111111;
+    white-space: pre-line;
+    margin: 0 0 18px 0;
+    line-height: 1.4;
+}
+
+.preview-linea-vr {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 6px 0;
+    font-size: 1.05rem;
+    line-height: 1.35;
+}
+
+.preview-linea-vr .letra-roja {
+    color: #ff0000;
+    font-weight: 700;
+    min-width: 18px;
+    flex-shrink: 0;
+}
+
+.preview-linea-vr .texto-vr {
+    color: #111111;
+}
+
+/* Panel de Lista / Catálogo */
+.card-catalogo-completas {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.catalogo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.catalogo-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.catalogo-buscador {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    flex: 1;
+    max-width: 300px;
+}
+
+.catalogo-buscador input {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 0.88rem;
+    outline: none;
+    width: 100%;
+}
+
+.tabla-wrapper {
+    overflow-x: auto;
+    max-height: 400px;
+}
+
+.tabla-ecompletas {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.tabla-ecompletas th {
+    text-align: left;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+}
+
+.tabla-ecompletas td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.tabla-ecompletas tr {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.tabla-ecompletas tr:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.tabla-ecompletas tr.activo {
+    background: rgba(255, 0, 0, 0.12);
+    border-left: 3px solid var(--accent-red);
+}
+
+.badge-tipo {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-tipo.examen {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.badge-tipo.bendicion {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}

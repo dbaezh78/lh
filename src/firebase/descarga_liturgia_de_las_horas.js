@@ -186,6 +186,60 @@ como lo esperamos de ti.
 A ti, Señor, me acojo,
 no quede yo nunca defraudado.`;
 
+export const EXAMEN_CONCIENCIA_CANONICO = {
+    titulo: 'EXAMEN DE CONCIENCIA',
+    monicion: 'Hermanos, habiendo llegado al final de esta jornada que Dios nos ha concedido, reconozcamos sinceramente nuestros pecados.',
+    confesion: `Yo confieso ante Dios todopoderoso
+y ante vosotros, hermanos,
+que he pecado mucho
+de pensamiento, palabra, obra y omisión:
+por mi culpa, por mi culpa, por mi gran culpa.
+
+Por eso ruego a santa María, siempre Virgen,
+a los ángeles, a los santos y a vosotros, hermanos,
+que intercedáis por mí ante Dios, nuestro Señor.`,
+    v: 'El Señor todopoderoso tenga misericordia de nosotros, perdone nuestros pecados y nos lleve a la vida eterna.',
+    r: 'Amén.'
+};
+
+export const BENDICION_COMPLETAS_CANONICA = {
+    id: 'bendicion_madre_del_redentor',
+    titulo: 'BENDICIÓN',
+    tituloBendicion: 'BENDICIÓN',
+    v: 'El Señor todopoderoso nos conceda una noche tranquila y una santa muerte.',
+    bendicionV: 'El Señor todopoderoso nos conceda una noche tranquila y una santa muerte.',
+    r: 'Amén.',
+    bendicionR: 'Amén.',
+    tituloMariana: 'ANTIFONA FINAL DE LA SANTISIMA VIRGEN',
+    tituloAntifonaMariana: 'ANTIFONA FINAL DE LA SANTISIMA VIRGEN',
+    textoMariana: `Madre del Redentor, Virgen fecunda,
+puerta del cielo siempre abierta,
+estrella del mar,
+
+ven a librar al pueblo que tropieza
+y se quiere levantar.
+
+Ante la admiración de cielo y tierra,
+engendraste a tu santo Creador,
+y permaneces siempre virgen.
+
+Recibe el saludo del ángel Gabriel,
+y ten piedad de nosotros, pecadores.`,
+    textoAntifonaMariana: `Madre del Redentor, Virgen fecunda,
+puerta del cielo siempre abierta,
+estrella del mar,
+
+ven a librar al pueblo que tropieza
+y se quiere levantar.
+
+Ante la admiración de cielo y tierra,
+engendraste a tu santo Creador,
+y permaneces siempre virgen.
+
+Recibe el saludo del ángel Gabriel,
+y ten piedad de nosotros, pecadores.`
+};
+
 
 // =========================================================================
 // DECODIFICADOR Y MAPEO DE EQUIVALENCIAS DE CÓDIGOS LITÚRGICOS
@@ -448,7 +502,7 @@ const CONFIG_LIBROS_DEFECTO = {
     nona:      { nombre: 'HORA NONA',         subtitulo: '' },
     visperas:  { nombre: 'VÍSPERAS',          subtitulo: '(Oración de la tarde)' },
     vispera:   { nombre: 'VÍSPERAS',          subtitulo: '(Oración de la tarde)' },
-    completas: { nombre: 'COMPLETAS',         subtitulo: '(Oración antes del descanso nocturno)' }
+    completas: { nombre: 'COMPLETAS',         subtitulo: '(ORACIÓN ANTES DEL DESCANSO NOCTURNO)' }
 };
 
 /**
@@ -573,7 +627,7 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
     const invSalmoInfo = resolverSalmoLiturgicoNorm(salmoIdFinal, salmoTituloFinal, salmoTextoFinal, 'salmo94', '', "Salmo 94 - INVITACIÓN A LA ALABANZA DIVINA");
 
     const invitatorioNorm = {
-        activo: invRaw.activo !== undefined ? invRaw.activo : (libro === 'laudes' || libro === 'oficio'),
+        activo: (libro === 'laudes' || libro === 'oficio') ? (invRaw.activo !== undefined ? invRaw.activo : true) : false,
         titulo: invRaw.titulo || base.invitatorio?.titulo || "INVITATORIO",
         instruccion: invRaw.instruccion || base.invitatorio?.instruccion || "(Si esta no es la primera oración del día se omite el Invitatorio)",
         v: invRaw.v || invRaw.v1 || base.invitatorio?.v || "Señor abre mis labios",
@@ -811,6 +865,8 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
         lecturasOficio: d.lecturasOficio || base.lecturasOficio || null,
         himnoTeDeum: d.himnoTeDeum || base.himnoTeDeum || null,
         seccionOpcional: d.seccionOpcional || base.seccionOpcional || null,
+        examenConciencia: d.examenConciencia || base.examenConciencia || (libro === 'completas' ? EXAMEN_CONCIENCIA_CANONICO : null),
+        bendicionCompletas: d.bendicionCompletas || base.bendicionCompletas || (libro === 'completas' ? BENDICION_COMPLETAS_CANONICA : null),
         omisiones: d.omisiones || raw?.omisiones || {},
         lecturaBreve: lecturaBreveNorm,
         canticoEvangelico: canticoEvangelicoNorm,
@@ -1082,6 +1138,8 @@ Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`
         oracion: {
             texto: 'Dios todopoderoso y eterno, guía nuestras acciones según tu santa voluntad. Por Jesucristo nuestro Señor. Amén.'
         },
+        examenConciencia: (libro === 'completas') ? { ...EXAMEN_CONCIENCIA_CANONICO } : null,
+        bendicionCompletas: (libro === 'completas') ? { ...BENDICION_COMPLETAS_CANONICA } : null,
         himnoTeDeum: (libro === 'oficio' && dia === 'domingo') ? {
             id: 'tedeum_canonico',
             titulo: 'HIMNO: A TI, OH DIOS (TE DEUM)',

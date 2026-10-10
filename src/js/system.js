@@ -77,7 +77,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         { id: "oracion", nombre: "Gestor de Oraciones", icono: "church", ruta: "src/html/oracion.html", css: "src/css/oracion.css", js: "src/js/oracion-manager.js", fecha: "2026-09-23 07:50:00", version: appVer, categoria: "gestion" },
         { id: "oficiodelectura", nombre: "Oficio de Lectura (Audios)", icono: "auto_stories", ruta: "src/html/oficiodelectura.html", css: "src/css/oficiodelectura.css", js: "src/js/oficiodelectura.js", fecha: "2026-09-23 13:00:00", version: appVer, categoria: "gestion" },
         { id: "responsorio", nombre: "Gestor de Responsorios", icono: "church", ruta: "src/html/responsorio.html", css: "src/css/responsorio.css", js: "src/js/responsorio-manager.js", fecha: "2026-09-23 14:00:00", version: appVer, categoria: "gestion" },
-        { id: "lectura", nombre: "Gestor de Lecturas (Oficio)", icono: "import_contacts", ruta: "src/html/lectura.html", css: "src/css/lectura.css", js: "src/js/lectura-manager.js", fecha: "2026-09-23 14:30:00", version: appVer, categoria: "gestion" }
+        { id: "lectura", nombre: "Gestor de Lecturas (Oficio)", icono: "import_contacts", ruta: "src/html/lectura.html", css: "src/css/lectura.css", js: "src/js/lectura-manager.js", fecha: "2026-09-23 14:30:00", version: appVer, categoria: "gestion" },
+        { id: "ecompletas", nombre: "Examen de Conciencia (Completas)", icono: "nightlight", ruta: "src/html/ecompletas.html", css: "src/css/ecompletas.css", js: "src/js/ecompletas-manager.js", fecha: "2026-10-10 00:00:00", version: appVer, categoria: "gestion" }
     ];
 
     // Resuelve la URL de un recurso con respecto a la raíz del repositorio
