@@ -22,6 +22,7 @@ import {
     setDoc 
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { CATALOGO_PRECES_SEED, PrecesDB } from '../data/db-preces.js';
+import { HimnosDB } from '../data/db-himnos.js';
 
 export const COLECCION_SALTERIOS = "salterios";
 export const PREFIJO_LOCAL = "lh_salterio_";
@@ -640,12 +641,19 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
         salmoTexto: invSalmoInfo.texto
     };
 
-    // 3. HIMNO
-    const himnoIdFinal = d.himno?.id || invRaw.himnoId || salmoInvRaw.himnoId || null;
-    const himnoTexto = d.himno?.texto || (typeof d.himno === 'string' ? d.himno : '') || salmoInvRaw.himno || base.himno?.texto || "";
-    const himnoTitulo = d.himno?.titulo || salmoInvRaw.himnot || base.himno?.titulo || "HIMNO";
+    // 3. HIMNO (Priorizando siempre la versión viva en himno.html / HimnosDB)
+    const himnoIdRaw = d.himno?.id || invRaw.himnoId || salmoInvRaw.himnoId || base.himno?.id || null;
+    const himnoTextoRaw = d.himno?.texto || (typeof d.himno === 'string' ? d.himno : '') || salmoInvRaw.himno || base.himno?.texto || "";
+    const himnoTituloRaw = d.himno?.titulo || salmoInvRaw.himnot || base.himno?.titulo || "HIMNO";
+    const himnoVivo = (himnoIdRaw && HimnosDB && typeof HimnosDB.obtener === 'function' ? HimnosDB.obtener(himnoIdRaw) : null) ||
+        (himnoTituloRaw && HimnosDB && typeof HimnosDB.obtenerPorTitulo === 'function' ? HimnosDB.obtenerPorTitulo(himnoTituloRaw) : null);
+    let himnoTitulo = (himnoVivo && himnoVivo.titulo) ? himnoVivo.titulo : himnoTituloRaw;
+    if (himnoTitulo && !himnoTitulo.toUpperCase().startsWith('HIMNO')) {
+        himnoTitulo = `HIMNO: ${himnoTitulo}`;
+    }
+    const himnoTexto = (himnoVivo && himnoVivo.texto) ? himnoVivo.texto : himnoTextoRaw;
     const himnoNorm = {
-        id: himnoIdFinal,
+        id: (himnoVivo && himnoVivo.id) ? himnoVivo.id : himnoIdRaw,
         titulo: himnoTitulo,
         texto: himnoTexto
     };

@@ -59,8 +59,8 @@ body.pagina-salterios {
     letter-spacing: 0.5px;
 
     @media(min-width: 411px){font-size: calc(1.05 * var(--size) * var(--font-zoom));}
-    @media(min-width: 768px){font-size: calc(1.5 * var(--size) * var(--font-zoom));}
-    @media(min-width: 992px){font-size: calc(1.9 * var(--size) * var(--font-zoom));}
+    @media(min-width: 768px){font-size: calc(1.2 * var(--size) * var(--font-zoom));}
+    @media(min-width: 992px){font-size: calc(1.2 * var(--size) * var(--font-zoom));}
 }
 
 /* Subtítulo del Libro (en cursiva roja) */

@@ -24,7 +24,7 @@ import {
     TEXTO_SALMO_149_CANONICO 
 } from '../firebase/descarga_liturgia_de_las_horas.js';
 import { CATALOGO_ANTIFONAS_SEED } from '../data/db-antifonas.js';
-import { CATALOGO_HIMNOS_SEED, HimnosDB } from '../data/db-himnos.js';
+import { CATALOGO_HIMNOS_SEED, HimnosDB, normalizarClaveHimno, generarAliasesClaveHimno } from '../data/db-himnos.js';
 import { CATALOGO_LECTURAS_SEED, LecturaBreveDB } from '../data/db-lecturabreve.js';
 import { CATALOGO_PRECES_SEED, PrecesDB } from '../data/db-preces.js';
 import { CATALOGO_ORACION_SEED, OracionDB } from '../data/db-oracion.js';
@@ -335,40 +335,46 @@ Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`
  * Obtener todos los himnos desde himno.html / db-himnos.js / 'lh_himnos_cache'
  */
 export function obtenerTodosLosHimnosDesdeCatalogo() {
-    const mapa = new Map();
-
-    // 1. Cargar semillas canónicas
-    if (Array.isArray(CATALOGO_HIMNOS_SEED)) {
-        CATALOGO_HIMNOS_SEED.forEach(h => {
-            if (h && (h.id || h.varName)) {
-                mapa.set((h.id || h.varName).toLowerCase().trim(), h);
-            }
-        });
-    }
-
-    // 2. Cargar HimnosDB si está disponible
     if (typeof HimnosDB !== 'undefined' && typeof HimnosDB.listar === 'function') {
         const list = HimnosDB.listar();
-        if (Array.isArray(list)) {
-            list.forEach(h => {
-                if (h && (h.id || h.varName)) {
-                    mapa.set((h.id || h.varName).toLowerCase().trim(), h);
-                }
-            });
+        if (Array.isArray(list) && list.length > 0) {
+            return list;
         }
     }
 
-    // 3. Cargar caché de localStorage
+    const mapa = new Map();
+    const agregar = (h, prioridadEdicion = false) => {
+        if (!h || !(h.id || h.varName)) return;
+        const clave = normalizarClaveHimno(h);
+        if (!clave) return;
+        const previo = mapa.get(clave);
+        if (!previo) {
+            mapa.set(clave, h);
+            return;
+        }
+        const idNuevo = String(h.id || h.varName);
+        const idPrev = String(previo.id || previo.varName);
+        const esCortoNuevo = !idNuevo.includes('_himno_');
+        const esCortoPrev = !idPrev.includes('_himno_');
+        if (prioridadEdicion || h.actualizadoEn || (esCortoNuevo && !esCortoPrev)) {
+            mapa.set(clave, {
+                ...previo,
+                ...h,
+                id: esCortoNuevo ? idNuevo : idPrev
+            });
+        }
+    };
+
+    if (Array.isArray(CATALOGO_HIMNOS_SEED)) {
+        CATALOGO_HIMNOS_SEED.forEach(h => agregar(h, false));
+    }
+
     const cacheLocal = localStorage.getItem('lh_himnos_cache');
     if (cacheLocal) {
         try {
             const parsed = JSON.parse(cacheLocal);
             if (Array.isArray(parsed)) {
-                parsed.forEach(h => {
-                    if (h && (h.id || h.varName)) {
-                        mapa.set((h.id || h.varName).toLowerCase().trim(), h);
-                    }
-                });
+                parsed.forEach(h => agregar(h, true));
             }
         } catch (e) {
             console.warn("Error leyendo lh_himnos_cache:", e);
@@ -632,16 +638,16 @@ export function obtenerAntifonasCanticoDesdeCatalogo() {
  * Garantiza que el texto del salmo se entregue íntegro y completo sin truncamiento (...).
  */
 export function asegurarTextoCompletoSalmo(salmoId, textoExistente, fallbackCanonico = '') {
-    if (textoExistente && textoExistente.length >= 150 && !textoExistente.trim().endsWith('...')) {
-        return textoExistente;
-    }
-
     if (salmoId) {
         const obj = cacheTodosLosSalmos.find(s => s.id === salmoId) ||
                     (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salmoId) : null);
-        if (obj && obj.texto && obj.texto.length >= 150 && !obj.texto.trim().endsWith('...')) {
+        if (obj && obj.texto && obj.texto.length >= 40 && !obj.texto.trim().endsWith('...')) {
             return obj.texto;
         }
+    }
+
+    if (textoExistente && textoExistente.length >= 150 && !textoExistente.trim().endsWith('...')) {
+        return textoExistente;
     }
 
     if (salmoId === 'salmo94' || salmoId === 'invitatorio1') return TEXTO_SALMO_94_CANONICO;
@@ -1626,8 +1632,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         optNinguno.textContent = 'Ninguno (Omitir himno)';
         selTeDeumOficio.appendChild(optNinguno);
 
-        if (valorSeleccionadoPrevio && Array.from(selTeDeumOficio.options).some(o => o.value === valorSeleccionadoPrevio)) {
-            selTeDeumOficio.value = valorSeleccionadoPrevio;
+        if (valorSeleccionadoPrevio) {
+            const valPrevNorm = normalizarClaveHimno(valorSeleccionadoPrevio);
+            const optMatch = Array.from(selTeDeumOficio.options).find(o =>
+                o.value === valorSeleccionadoPrevio ||
+                (valPrevNorm && normalizarClaveHimno(o.value) === valPrevNorm)
+            );
+            if (optMatch) {
+                selTeDeumOficio.value = optMatch.value;
+            } else {
+                selTeDeumOficio.value = 'tedeum_canonico';
+            }
         } else {
             selTeDeumOficio.value = 'tedeum_canonico';
         }
@@ -1663,12 +1678,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (previewTituloTeDeum) previewTituloTeDeum.textContent = 'HIMNO: A TI, OH DIOS (TE DEUM)';
             if (previewTextoTeDeum) previewTextoTeDeum.textContent = TEXTO_TEDUEM_CANONICO;
         } else {
-            const valNorm = (val || '').toLowerCase().trim();
-            const hEncontrado = (Array.isArray(cacheTodosLosHimnos) ? cacheTodosLosHimnos.find(h => (
-                (h.id && h.id.toLowerCase().trim() === valNorm) || 
-                (h.varName && h.varName.toLowerCase().trim() === valNorm)
-            )) : null) ||
-            (typeof HimnosDB !== 'undefined' ? (HimnosDB.obtener ? HimnosDB.obtener(val) : (HimnosDB.obtenerPorId ? HimnosDB.obtenerPorId(val) : null)) : null);
+            const valNorm = normalizarClaveHimno(val);
+            const hEncontrado = (typeof HimnosDB !== 'undefined' && HimnosDB.obtener ? HimnosDB.obtener(val) : null) ||
+                (Array.isArray(cacheTodosLosHimnos) ? cacheTodosLosHimnos.find(h => (
+                    normalizarClaveHimno(h) === valNorm ||
+                    (h.id && h.id.toLowerCase().trim() === (val || '').toLowerCase().trim()) ||
+                    (h.varName && h.varName.toLowerCase().trim() === (val || '').toLowerCase().trim())
+                )) : null);
             if (hEncontrado) {
                 if (previewTituloTeDeum) previewTituloTeDeum.textContent = hEncontrado.titulo || 'HIMNO';
                 if (previewTextoTeDeum) previewTextoTeDeum.textContent = hEncontrado.texto || '';
@@ -2291,16 +2307,48 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (desdeFbHimnos.length > 0) {
                             const todosHimnos = obtenerTodosLosHimnosDesdeCatalogo();
                             const mapaHimnos = new Map();
-                            todosHimnos.forEach(x => {
-                                if (x && (x.id || x.varName)) mapaHimnos.set((x.id || x.varName).toLowerCase().trim(), x);
-                            });
-                            desdeFbHimnos.forEach(x => {
-                                if (x && (x.id || x.varName)) mapaHimnos.set((x.id || x.varName).toLowerCase().trim(), x);
-                            });
+                            const agregarAlMapa = (x, prioridadFb = false) => {
+                                if (!x || !(x.id || x.varName)) return;
+                                const clave = normalizarClaveHimno(x);
+                                if (!clave) return;
+                                const previo = mapaHimnos.get(clave);
+                                if (!previo) {
+                                    mapaHimnos.set(clave, x);
+                                    return;
+                                }
+                                const idNuevo = String(x.id || x.varName);
+                                const idPrev = String(previo.id || previo.varName);
+                                const esCortoNuevo = !idNuevo.includes('_himno_');
+                                const esCortoPrev = !idPrev.includes('_himno_');
+                                if (prioridadFb || x.actualizadoEn || (esCortoNuevo && !esCortoPrev)) {
+                                    mapaHimnos.set(clave, {
+                                        ...previo,
+                                        ...x,
+                                        id: esCortoNuevo ? idNuevo : idPrev
+                                    });
+                                }
+                            };
+                            todosHimnos.forEach(x => agregarAlMapa(x, false));
+                            desdeFbHimnos.forEach(x => agregarAlMapa(x, true));
                             const combinadosHimnos = Array.from(mapaHimnos.values());
                             localStorage.setItem('lh_himnos_cache', JSON.stringify(combinadosHimnos));
+                            cacheTodosLosHimnos = combinadosHimnos;
                             const valorHimnoActual = selHimno ? selHimno.value : null;
                             cargarYPoblarSelectHimnos(valorHimnoActual);
+                            if (selHimno && selHimno.value) {
+                                const hActivo = (typeof HimnosDB !== 'undefined' && HimnosDB.obtener ? HimnosDB.obtener(selHimno.value) : null) ||
+                                    combinadosHimnos.find(h => normalizarClaveHimno(h) === normalizarClaveHimno(selHimno.value));
+                                if (hActivo) {
+                                    if (previewTituloHimno && hActivo.titulo) {
+                                        let t = hActivo.titulo;
+                                        if (!t.toUpperCase().startsWith('HIMNO:')) t = `HIMNO: ${t}`;
+                                        previewTituloHimno.textContent = t.toUpperCase();
+                                    }
+                                    if (previewTextoHimno && hActivo.texto) {
+                                        previewTextoHimno.textContent = hActivo.texto;
+                                    }
+                                }
+                            }
                             const valTeDeumActual = selTeDeumOficio ? selTeDeumOficio.value : null;
                             cargarYPoblarSelectHimnoPostLecturas(valTeDeumActual);
                             actualizarHimnoPostLecturasPreview();
@@ -3849,19 +3897,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             salTitulo = optSalmoActual.getAttribute('data-titulo') || optSalmoActual.textContent;
         }
 
-        if (previewTituloSalmo && salTitulo) {
-            previewTituloSalmo.textContent = salTitulo.toUpperCase();
-        }
-
-        // Recuperar texto completo del salmo si estaba vacío o truncado con "..."
-        if (!salTexto || (salTexto.includes('demos vítores a la Roca que nos salva...') && salTexto.length < 150)) {
-            const sObj = cacheTodosLosSalmos.find(s => s.id === salId) ||
-                         (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salId) : null);
-            if (sObj && sObj.texto) {
-                salTexto = sObj.texto;
-            } else if (salId === 'salmo94') {
+        // Priorizar siempre el texto vivo del catálogo de salmos (salmos.html)
+        const sObjInv = cacheTodosLosSalmos.find(s => s.id === salId) ||
+                        (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(salId) : null);
+        if (sObjInv && sObjInv.texto) {
+            salTexto = sObjInv.texto;
+            if (sObjInv.titulo) salTitulo = sObjInv.titulo;
+        } else if (!salTexto || (salTexto.includes('demos vítores a la Roca que nos salva...') && salTexto.length < 150)) {
+            if (salId === 'salmo94') {
                 salTexto = TEXTO_SALMO_94_CANONICO;
             }
+        }
+
+        if (previewTituloSalmo && salTitulo) {
+            previewTituloSalmo.textContent = salTitulo.toUpperCase();
         }
 
         if (previewTextoSalmo) {
@@ -3869,7 +3918,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             previewTextoSalmo.innerHTML = formatearTextoSalmo(salTexto || '');
         }
 
-        // 3. HIMNO
+        // 3. HIMNO (Priorizar siempre la versión viva de himno.html / HimnosDB)
         const himData = datos.himno || {};
         const himId = himData.id || inv.himnoId || datos.salmoInvitatorio?.himnoId || null;
         let himTitulo = himData.titulo || datos.salmoInvitatorio?.himnot || null;
@@ -3880,15 +3929,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const optHimnoActual = selHimno ? selHimno.selectedOptions[0] : null;
-        if (optHimnoActual) {
-            himTitulo = optHimnoActual.getAttribute('data-titulo') || optHimnoActual.textContent;
-        }
+        const idHimnoBuscado = (optHimnoActual && optHimnoActual.value) || himId;
+        const claveHimnoBuscada = normalizarClaveHimno(idHimnoBuscado);
+        const hObjVivo = (idHimnoBuscado && typeof HimnosDB !== 'undefined' && HimnosDB.obtener ? HimnosDB.obtener(idHimnoBuscado) : null) ||
+            (claveHimnoBuscada ? cacheTodosLosHimnos.find(h => normalizarClaveHimno(h) === claveHimnoBuscada) : null) ||
+            (himTitulo && typeof HimnosDB !== 'undefined' && HimnosDB.obtenerPorTitulo ? HimnosDB.obtenerPorTitulo(himTitulo) : null);
 
-        if (!himTexto && optHimnoActual) {
-            const hObj = cacheTodosLosHimnos.find(h => (h.id === optHimnoActual.value || h.varName === optHimnoActual.value));
-            if (hObj && hObj.texto) {
-                himTexto = hObj.texto;
-            }
+        if (hObjVivo) {
+            if (hObjVivo.titulo) himTitulo = hObjVivo.titulo;
+            if (hObjVivo.texto) himTexto = hObjVivo.texto;
+        } else if (optHimnoActual) {
+            himTitulo = optHimnoActual.getAttribute('data-titulo') || optHimnoActual.textContent || himTitulo;
+            const txtOpt = optHimnoActual.getAttribute('data-texto');
+            if (txtOpt) himTexto = txtOpt;
         }
 
         if (previewTituloHimno && himTitulo) {
@@ -4064,16 +4117,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const optLecturaActual = selLectura ? selLectura.selectedOptions[0] : null;
-        if (optLecturaActual && (!lbTexto || !rbV1)) {
+        if (optLecturaActual) {
             const lObj = cacheTodasLasLecturas.find(l => l.id === optLecturaActual.value || l.varName === optLecturaActual.value);
             if (lObj) {
-                if (!lbCita) lbCita = lObj.cita;
-                if (!lbTexto) lbTexto = lObj.texto;
-                if (!rbV1) rbV1 = lObj.rb1;
-                if (!rbR1) rbR1 = lObj.rb1;
-                if (!rbV2) rbV2 = lObj.rb2;
-                if (!rbR2) rbR2 = lObj.rb3;
-                if (!rbR3) rbR3 = lObj.rb1;
+                if (lObj.cita) lbCita = lObj.cita;
+                if (lObj.texto) lbTexto = lObj.texto;
+                if (lObj.rb1) {
+                    rbV1 = lObj.rb1;
+                    rbR1 = lObj.rb1;
+                    rbR3 = lObj.rb1;
+                }
+                if (lObj.rb2) rbV2 = lObj.rb2;
+                if (lObj.rb3) rbR2 = lObj.rb3;
             }
         }
 
@@ -4176,16 +4231,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cantObjSalmos = cacheTodosLosSalmos.find(s => s.id === canticoId) ||
                               (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(canticoId) : null);
 
-        const nomFinal = optCantActual?.getAttribute('data-nombre') || 
+        const nomFinal = (cantObjSalmos ? cantObjSalmos.titulo : '') ||
+                         optCantActual?.getAttribute('data-nombre') || 
                          (cantObjCatalogo ? cantObjCatalogo.nombre : '') || 
-                         (cantObjSalmos ? cantObjSalmos.titulo : '') || 
                          canticoTitulo || 'Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR';
         const citaFinal = optCantActual?.getAttribute('data-cita') || 
                           (cantObjCatalogo ? cantObjCatalogo.cita : '') || '';
-        const txtFinal = canticoTexto || 
+        const txtFinal = (cantObjSalmos ? cantObjSalmos.texto : '') || 
                          optCantActual?.getAttribute('data-texto') || 
                          (cantObjCatalogo ? cantObjCatalogo.texto : '') || 
-                         (cantObjSalmos ? cantObjSalmos.texto : '') || 
+                         canticoTexto || 
                          TEXTO_CANTICO_ZACARIAS_CANONICO;
 
         if (previewNombreCantico) previewNombreCantico.textContent = nomFinal;
@@ -4282,17 +4337,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Obtener el objeto definitivo de preces para asegurar texto íntegro y conclusión
         const optPrecesActual = selPreces ? selPreces.selectedOptions[0] : null;
         const precesIdFinal = optPrecesActual ? optPrecesActual.value : (selPreces ? selPreces.value : precesIdGuardado);
-        const pObj = cacheTodasLasPreces.find(p => p.id === precesIdFinal || p.varName === precesIdFinal) ||
+        const pObjEnCache = cacheTodasLasPreces.find(p => p.id === precesIdFinal || p.varName === precesIdFinal);
+        const pObj = pObjEnCache ||
                      (!esSanto ? canonPreces : null) ||
                      (!esSanto ? PrecesDB.obtener(precesIdFinal, selTiempo.value, selSemana.value, selDia.value, selLibro.value) : null) ||
                      (!esSanto ? PrecesDB.obtenerRecomendada(selTiempo.value, selSemana.value, selDia.value, selLibro.value) : null);
 
         if (pObj) {
-            if (!precesTextoGuardado || precesTextoGuardado.length < 80 || esCorrupta) {
-                precesTextoGuardado = pObj.textoCompleto || pObj.texto;
+            if (pObjEnCache || !precesTextoGuardado || precesTextoGuardado.length < 80 || esCorrupta) {
+                if (pObj.textoCompleto || pObj.texto) precesTextoGuardado = pObj.textoCompleto || pObj.texto;
             }
-            if (!precesConclGuardado || esCorrupta) {
-                precesConclGuardado = pObj.concl;
+            if (pObjEnCache || !precesConclGuardado || esCorrupta) {
+                if (pObj.concl) precesConclGuardado = pObj.concl;
             }
         }
 
@@ -4361,13 +4417,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const optOracionActual = selOracion ? selOracion.selectedOptions[0] : null;
         const oracionIdFinal = optOracionActual ? optOracionActual.value : (selOracion ? selOracion.value : oracionIdGuardado);
-        const oObj = cacheTodasLasOraciones.find(o => o.id === oracionIdFinal || o.varName === oracionIdFinal) ||
+        const oObjEnCache = cacheTodasLasOraciones.find(o => o.id === oracionIdFinal || o.varName === oracionIdFinal);
+        const oObj = oObjEnCache ||
                      OracionDB.obtener(oracionIdFinal) ||
                      OracionDB.obtenerRecomendada(selTiempo.value, selSemana.value, selDia.value, selLibro.value);
 
         if (oObj) {
-            if (!oracionTextoGuardado || oracionTextoGuardado.length < 30) {
-                oracionTextoGuardado = oObj.textoCompleto || oObj.texto;
+            if (oObjEnCache || !oracionTextoGuardado || oracionTextoGuardado.length < 30) {
+                if (oObj.textoCompleto || oObj.texto) oracionTextoGuardado = oObj.textoCompleto || oObj.texto;
             }
         }
 
@@ -4398,14 +4455,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (selResponsorioOficio && vData.id) {
                 selResponsorioOficio.value = vData.id;
             }
-            if (previewRespOficioV && vData.v) previewRespOficioV.textContent = vData.v;
-            if (previewRespOficioR && vData.r) previewRespOficioR.textContent = vData.r;
+            const rOficioVivo = vData.id ? cacheTodosLosResponsorios.find(r => r.id === vData.id || r.varName === vData.id) : null;
+            const vOficioFinal = (rOficioVivo && rOficioVivo.v) || vData.v;
+            const rOficioFinal = (rOficioVivo && rOficioVivo.r) || vData.r;
+            if (previewRespOficioV && vOficioFinal) previewRespOficioV.textContent = vOficioFinal;
+            if (previewRespOficioR && rOficioFinal) previewRespOficioR.textContent = rOficioFinal;
 
             // Lecturas Oficio
             const lData = datos.lecturasOficio || {};
-            const l1 = lData.primera;
-            if (l1) {
-                if (selLectura1Oficio && l1.id) selLectura1Oficio.value = l1.id;
+            const l1Raw = lData.primera;
+            if (l1Raw) {
+                if (selLectura1Oficio && l1Raw.id) selLectura1Oficio.value = l1Raw.id;
+                const l1Vivo = l1Raw.id ? cacheTodasLasLecturasOficio.find(x => x.id === l1Raw.id) : null;
+                const l1 = l1Vivo ? { ...l1Raw, ...l1Vivo } : l1Raw;
                 if (previewLec1Epigrafe) previewLec1Epigrafe.textContent = l1.titulo || l1.epigrafeTipo || 'PRIMERA LECTURA';
                 if (previewLec1Cita) previewLec1Cita.textContent = l1.cita || '';
                 if (previewLec1Desc) previewLec1Desc.textContent = l1.descripcion || l1.subtitulo || '';
@@ -4421,9 +4483,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 actualizarInvitatorioPreview(false);
             }
 
-            const l2 = lData.segunda;
-            if (l2) {
-                if (selLectura2Oficio && l2.id) selLectura2Oficio.value = l2.id;
+            const l2Raw = lData.segunda;
+            if (l2Raw) {
+                if (selLectura2Oficio && l2Raw.id) selLectura2Oficio.value = l2Raw.id;
+                const l2Vivo = l2Raw.id ? cacheTodasLasLecturasOficio.find(x => x.id === l2Raw.id) : null;
+                const l2 = l2Vivo ? { ...l2Raw, ...l2Vivo } : l2Raw;
                 if (previewLec2Epigrafe) previewLec2Epigrafe.textContent = l2.titulo || l2.epigrafeTipo || 'SEGUNDA LECTURA';
                 if (previewLec2Cita) previewLec2Cita.textContent = l2.cita || '';
                 if (previewLec2Desc) previewLec2Desc.textContent = l2.descripcion || l2.subtitulo || '';

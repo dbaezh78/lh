@@ -4,7 +4,7 @@ export const CATALOGO_HIMNOS_SEED = [
     "id": "ordinario_s1_domingo_oficio_himno_htos01doof",
     "varName": "htos01doof",
     "titulo": "HIMNO: SEÑOR, DIOS ETERNO",
-    "texto": "Señor, Dios eterno, alegres te cantamos,\r\na ti nuestra alabanza,\r\na ti, Padre del cielo, te aclama la creación.\r\n\r\nPostrados ante ti, los ángeles te adoran\r\ny cantan sin cesar:\r\n\r\nSanto, santo, santo es el Señor,\r\nDios del universo;\r\nllenos están el cielo y la tierra de tu gloria.\r\n\r\nA ti, Señor, te alaba\r\nel coro celestial de los apóstoles,\r\nla multitud de los profetas te enaltece,\r\ny el ejército glorioso de los mártires\r\nte aclama.\r\n\r\nA ti la Iglesia santa,\r\npor todos los confines extendida,\r\ncon júbilo te adora y te confiesa:\r\nPadre de majestad infinita,\r\nHijo único y verdadero, digno de todo honor,\r\nEspíritu Santo, Defensor.\r\n\r\nTú eres el Rey de la gloria, Cristo,\r\ntú eres el Hijo único del Padre.\r\nTú, para librar al hombre,\r\naceptaste la condición humana\r\nsin desdeñar el seno de la Virgen.\r\n\r\nTú, rotas las cadenas de la muerte,\r\nabriste a los creyentes el reino de los cielos.\r\nTú estás sentado a la derecha de Dios\r\nen la gloria del Padre.\r\nCreemos que un día has de venir como juez.\r\n\r\nTe pedimos, pues, que vengas en ayuda\r\nde tus siervos,\r\na quienes redimiste con tu preciosa sangre.\r\nHaz que en la gloria eterna nos contemos\r\nentre tus santos. Amén.",
+    "texto": "Señor, Dios eterno, alegres te cantamos,\r\na ti nuestra alabanza,\r\na ti, Padre del cielo, te aclama la creación.\r\n\r\nPostrados ante ti, los ángeles te adoran\r\ny cantan sin cesar:\r\n\r\nSanto, santo, santo es el Señor,\r\nDios del universo;\r\nllenos están el cielo y la tierra de tu gloria.\r\n\r\nA ti, Señor, te alaba el coro celestial de los apóstoles,\r\nla multitud de los profetas te enaltece,\r\ny el ejército glorioso de los mártires te aclama.\r\n\r\nA ti la Iglesia santa,\r\npor todos los confines extendida,\r\ncon júbilo te adora y te confiesa:\r\nPadre de majestad infinita,\r\nHijo único y verdadero, digno de todo honor,\r\nEspíritu Santo, Defensor.\r\n\r\nTú eres el Rey de la gloria, Cristo,\r\ntú eres el Hijo único del Padre.\r\nTú, para librar al hombre,\r\naceptaste la condición humana\r\nsin desdeñar el seno de la Virgen.\r\n\r\nTú, rotas las cadenas de la muerte,\r\nabriste a los creyentes el reino de los cielos.\r\nTú estás sentado a la derecha de Dios\r\nen la gloria del Padre.\r\nCreemos que un día has de venir como juez.\r\n\r\nTe pedimos, pues, que vengas en ayuda\r\nde tus siervos,\r\na quienes redimiste con tu preciosa sangre.\r\nHaz que en la gloria eterna nos contemos\r\nentre tus santos. Amén.",
     "tiempo": "ordinario",
     "semana": 1,
     "dia": "domingo",
@@ -783,12 +783,83 @@ export const CATALOGO_HIMNOS_SEED = [
   }
 ];
 
+export function normalizarClaveHimno(idOrObj) {
+    if (!idOrObj) return '';
+    let raw = '';
+    if (typeof idOrObj === 'object') {
+        const v = String(idOrObj.varName || '').trim();
+        const i = String(idOrObj.id || '').trim();
+        if (v && !v.includes('_himno_')) {
+            raw = v;
+        } else if (i.includes('_himno_')) {
+            raw = i.split('_himno_').pop().trim();
+        } else {
+            raw = i || v;
+        }
+    } else {
+        raw = String(idOrObj).trim();
+        if (raw.includes('_himno_')) {
+            raw = raw.split('_himno_').pop().trim();
+        }
+    }
+    return raw.toLowerCase();
+}
+
+export function generarAliasesClaveHimno(codigo) {
+    const base = normalizarClaveHimno(codigo);
+    if (!base) return [];
+    const set = new Set([base]);
+    const sinH = base.replace(/^h(?=(to|ta|tn|tc|tp|sa)s?\d)/, '');
+    set.add(sinH);
+    set.add(`h${sinH}`);
+
+    const mDiaHora = sinH.match(/^(to|ta|tn|tc|tp|sa)s?(\d{1,2})(do|lu|ma|mi|ju|vi|sa)(of|la|te|se|no|vi|co)$/);
+    const mHoraDia = sinH.match(/^(to|ta|tn|tc|tp|sa)s?(\d{1,2})(of|la|te|se|no|vi|co)(do|lu|ma|mi|ju|vi|sa)$/);
+    const m = mDiaHora || mHoraDia;
+    if (m) {
+        const t = m[1];
+        const numSem = parseInt(m[2], 10);
+        const dia = mDiaHora ? m[3] : m[4];
+        const hora = mDiaHora ? m[4] : m[3];
+        const sPad = `s${String(numSem).padStart(2, '0')}`;
+        const sNoPad = `s${numSem}`;
+        for (const pref of ['', 'h']) {
+            set.add(`${pref}${t}${sPad}${dia}${hora}`);
+            set.add(`${pref}${t}${sNoPad}${dia}${hora}`);
+            set.add(`${pref}${t}${sPad}${hora}${dia}`);
+            set.add(`${pref}${t}${sNoPad}${hora}${dia}`);
+        }
+    }
+    return Array.from(set);
+}
+
+function elegirMejorHimno(existente, candidato) {
+    if (!existente) return candidato;
+    if (!candidato) return existente;
+    const exAct = existente.actualizadoEn ? new Date(existente.actualizadoEn).getTime() : 0;
+    const caAct = candidato.actualizadoEn ? new Date(candidato.actualizadoEn).getTime() : 0;
+    if (caAct > exAct) return candidato;
+    if (exAct > caAct) return existente;
+
+    const exEsSeed = String(existente.id || '').includes('_himno_');
+    const caEsSeed = String(candidato.id || '').includes('_himno_');
+    if (exEsSeed && !caEsSeed) return candidato;
+    if (!exEsSeed && caEsSeed) return existente;
+
+    return candidato;
+}
+
 export const HimnosDB = {
     lista: CATALOGO_HIMNOS_SEED,
+    normalizarClaveHimno,
+    generarAliasesClaveHimno,
     listar: () => {
         const mapa = new Map();
         CATALOGO_HIMNOS_SEED.forEach(h => {
-            if (h && (h.id || h.varName)) mapa.set((h.id || h.varName).toLowerCase().trim(), h);
+            if (h && (h.id || h.varName)) {
+                const k = normalizarClaveHimno(h);
+                mapa.set(k, elegirMejorHimno(mapa.get(k), h));
+            }
         });
         if (typeof localStorage !== 'undefined') {
             const raw = localStorage.getItem('lh_himnos_cache');
@@ -797,7 +868,10 @@ export const HimnosDB = {
                     const parsed = JSON.parse(raw);
                     if (Array.isArray(parsed)) {
                         parsed.forEach(h => {
-                            if (h && (h.id || h.varName)) mapa.set((h.id || h.varName).toLowerCase().trim(), h);
+                            if (h && (h.id || h.varName)) {
+                                const k = normalizarClaveHimno(h);
+                                mapa.set(k, elegirMejorHimno(mapa.get(k), h));
+                            }
                         });
                     }
                 } catch (_) {}
@@ -808,14 +882,46 @@ export const HimnosDB = {
     obtener: (id) => {
         if (!id) return null;
         const lista = HimnosDB.listar();
-        const idNorm = id.toLowerCase().trim();
-        return lista.find(h => 
-            (h.id && h.id.toLowerCase() === idNorm) || 
-            (h.varName && h.varName.toLowerCase() === idNorm) ||
-            (h.id && h.id.toLowerCase().endsWith(idNorm))
+        const idNorm = String(id).toLowerCase().trim();
+        const claveNorm = normalizarClaveHimno(id);
+        const aliases = new Set(generarAliasesClaveHimno(id));
+
+        // 1. Coincidencia por clave canónica o id/varName directo
+        let encontrado = lista.find(h =>
+            normalizarClaveHimno(h) === claveNorm ||
+            (h.id && h.id.toLowerCase().trim() === idNorm) ||
+            (h.varName && h.varName.toLowerCase().trim() === idNorm)
         );
+        if (encontrado) return encontrado;
+
+        // 2. Coincidencia por alias de nomenclatura litúrgica (ej: htos01doof <-> tos01doof <-> htos1doof)
+        encontrado = lista.find(h => {
+            const hAliases = generarAliasesClaveHimno(h);
+            return hAliases.some(a => aliases.has(a));
+        });
+        if (encontrado) return encontrado;
+
+        // 3. Coincidencia por sufijo
+        return lista.find(h =>
+            (h.id && h.id.toLowerCase().endsWith(claveNorm)) ||
+            (h.varName && h.varName.toLowerCase().endsWith(claveNorm))
+        ) || null;
     },
     obtenerPorId: (id) => HimnosDB.obtener(id),
+    obtenerPorTitulo: (titulo) => {
+        if (!titulo) return null;
+        const normTit = (s) => String(s || '')
+            .replace(/^\[himno\]\s*/i, '')
+            .replace(/^himno\s*:\s*/i, '')
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]/g, "");
+        const tBusq = normTit(titulo);
+        if (!tBusq || tBusq.length < 4) return null;
+        const lista = HimnosDB.listar();
+        return lista.find(h => normTit(h.titulo) === tBusq) || null;
+    },
     filtrar: (tiempo, semana, dia, libro) => {
         const lista = HimnosDB.listar();
         return lista.filter(h => {
@@ -849,5 +955,5 @@ if (typeof window !== 'undefined') {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { CATALOGO_HIMNOS_SEED, HimnosDB };
+    module.exports = { CATALOGO_HIMNOS_SEED, HimnosDB, normalizarClaveHimno, generarAliasesClaveHimno };
 }

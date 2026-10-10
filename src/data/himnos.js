@@ -1042,11 +1042,9 @@ Santo, santo, santo es el Señor,
 Dios del universo;
 llenos están el cielo y la tierra de tu gloria.
 
-A ti, Señor, te alaba
-el coro celestial de los apóstoles,
+A ti, Señor, te alaba el coro celestial de los apóstoles,
 la multitud de los profetas te enaltece,
-y el ejército glorioso de los mártires
-te aclama.
+y el ejército glorioso de los mártires te aclama.
 
 A ti la Iglesia santa,
 por todos los confines extendida,

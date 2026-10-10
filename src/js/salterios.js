@@ -4,7 +4,7 @@
 
 import { CintaLiturgica } from './cinta.js';
 import { AntifonasDB } from '../data/db-antifonas.js';
-import { HimnosDB } from '../data/db-himnos.js';
+import { HimnosDB, normalizarClaveHimno } from '../data/db-himnos.js';
 import { PrecesDB } from '../data/db-preces.js';
 import { ResponsoriosDB } from '../data/db-responsorios.js';
 import { LecturasDB } from '../data/db-lecturas.js';
@@ -402,24 +402,95 @@ document.addEventListener('DOMContentLoaded', async () => {
     sincronizarSalmosDesdeFirestore();
 });
 
-// Sincroniza en segundo plano los salmos editados desde Firebase Firestore
+// Sincroniza en segundo plano los salmos e himnos editados desde Firebase Firestore
 async function sincronizarSalmosDesdeFirestore() {
     try {
         if (window.firebaseAPI && window.firebaseAPI.db) {
             const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-            const snap = await getDocs(collection(window.firebaseAPI.db, "salmos"));
-            if (!snap.empty) {
-                const desdeFb = [];
-                snap.forEach(d => desdeFb.push({ id: d.id, ...d.data() }));
-                if (desdeFb.length > 0) {
-                    localStorage.setItem('lh_salmos_cache', JSON.stringify(desdeFb));
-                    if (horaActualDatos && typeof renderizarCuerpoLiturgico === 'function') {
-                        renderizarCuerpoLiturgico(horaActualDatos);
+            let huboCambios = false;
+
+            try {
+                const snap = await getDocs(collection(window.firebaseAPI.db, "salmos"));
+                if (!snap.empty) {
+                    const desdeFb = [];
+                    snap.forEach(d => desdeFb.push({ id: d.id, ...d.data() }));
+                    if (desdeFb.length > 0) {
+                        localStorage.setItem('lh_salmos_cache', JSON.stringify(desdeFb));
+                        huboCambios = true;
                     }
                 }
+            } catch (_) {}
+
+            try {
+                const snapHimnos = await getDocs(collection(window.firebaseAPI.db, "himnos"));
+                if (!snapHimnos.empty) {
+                    const desdeFbHimnos = [];
+                    snapHimnos.forEach(d => desdeFbHimnos.push({ id: d.id, ...d.data() }));
+                    if (desdeFbHimnos.length > 0) {
+                        const base = (HimnosDB && typeof HimnosDB.listar === 'function') ? HimnosDB.listar() : [];
+                        const mapa = new Map();
+                        const agregar = (x, prioFb = false) => {
+                            if (!x || !(x.id || x.varName)) return;
+                            const clave = normalizarClaveHimno(x);
+                            if (!clave) return;
+                            const prev = mapa.get(clave);
+                            if (!prev || prioFb || x.actualizadoEn || (!String(x.id).includes('_himno_') && String(prev.id).includes('_himno_'))) {
+                                mapa.set(clave, prev ? { ...prev, ...x, id: !String(x.id).includes('_himno_') ? x.id : prev.id } : x);
+                            }
+                        };
+                        base.forEach(x => agregar(x, false));
+                        desdeFbHimnos.forEach(x => agregar(x, true));
+                        localStorage.setItem('lh_himnos_cache', JSON.stringify(Array.from(mapa.values())));
+                        huboCambios = true;
+                    }
+                }
+            } catch (_) {}
+
+            if (huboCambios && horaActualDatos && typeof renderizarCuerpoLiturgico === 'function') {
+                renderizarCuerpoLiturgico(horaActualDatos);
             }
         }
     } catch (_) {}
+}
+
+/**
+ * Resuelve dinámicamente un himno litúrgico desde HimnosDB / lh_himnos_cache
+ * priorizando siempre la versión editada en himno.html sobre cualquier texto antiguo guardado.
+ */
+export function resolverHimnoLiturgico(id, titGuardado, txtGuardado, tiempo = null, semana = null, dia = null, libro = null) {
+    if (id === 'tedeum_canonico') {
+        return {
+            id: 'tedeum_canonico',
+            titulo: titGuardado || 'HIMNO: A TI, OH DIOS (TE DEUM)',
+            texto: TEXTO_TEDUEM_CANONICO
+        };
+    }
+
+    let hObj = null;
+    if (typeof HimnosDB !== 'undefined') {
+        if (id && typeof HimnosDB.obtener === 'function') {
+            hObj = HimnosDB.obtener(id);
+        }
+        if (!hObj && titGuardado && typeof HimnosDB.obtenerPorTitulo === 'function') {
+            hObj = HimnosDB.obtenerPorTitulo(titGuardado);
+        }
+        if (!hObj && !id && !titGuardado && tiempo && dia && libro && typeof HimnosDB.filtrar === 'function') {
+            const filtrados = HimnosDB.filtrar(tiempo, semana || 1, dia, libro);
+            if (filtrados && filtrados.length > 0) hObj = filtrados[0];
+        }
+    }
+
+    let titFinal = (hObj && hObj.titulo) ? hObj.titulo : (titGuardado || 'HIMNO');
+    if (titFinal && !titFinal.toUpperCase().startsWith('HIMNO')) {
+        titFinal = `HIMNO: ${titFinal}`;
+    }
+    const txtFinal = (hObj && hObj.texto) ? hObj.texto : (txtGuardado || '');
+
+    return {
+        id: (hObj && hObj.id) ? hObj.id : (id || ''),
+        titulo: titFinal,
+        texto: txtFinal
+    };
 }
 
 /**
@@ -1461,11 +1532,12 @@ function renderizarCuerpoLiturgico(d) {
         `;
     }
 
-    // 4. HIMNO
+    // 4. HIMNO (Priorizando siempre la versión viva en himno.html / HimnosDB)
     if (d.himno && !om.himno) {
+        const himInfo = resolverHimnoLiturgico(d.himno.id, d.himno.titulo, d.himno.texto, d.tiempo, d.semana, d.dia, libroKey);
         html += `
-            <div class="salterio-seccion-header">${d.himno.titulo}</div>
-            <div class="texto-estrofas-salmo">${d.himno.texto}</div>
+            <div class="salterio-seccion-header">${himInfo.titulo}</div>
+            <div class="texto-estrofas-salmo">${himInfo.texto}</div>
         `;
     }
 
@@ -1520,10 +1592,15 @@ function renderizarCuerpoLiturgico(d) {
 
     // 6. VERSÍCULO (Oficio de Lectura - Fiel a Imagen 3)
     if (d.versiculo && !om.responsorioOficio && libroKey === 'oficio') {
+        const respVivo = (d.versiculo.id && ResponsoriosDB && typeof ResponsoriosDB.obtenerPorId === 'function')
+            ? ResponsoriosDB.obtenerPorId(d.versiculo.id)
+            : null;
+        const vOf = (respVivo && respVivo.v) || d.versiculo.v;
+        const rOf = (respVivo && respVivo.r) || d.versiculo.r;
         html += `
             <div style="margin: 22px 0;">
-                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${d.versiculo.v}</span></div>
-                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${d.versiculo.r}</span></div>
+                <div class="linea-vr"><span class="rubrica-vr">V.</span> <span class="texto-vr">${vOf}</span></div>
+                <div class="linea-vr"><span class="rubrica-vr">R.</span> <span class="texto-vr">${rOf}</span></div>
             </div>
         `;
     }
@@ -1531,8 +1608,12 @@ function renderizarCuerpoLiturgico(d) {
     // 7. LECTURAS DE OFICIO (Fiel a Imagen 4)
     if (libroKey === 'oficio' && d.lecturasOficio) {
         // Primera Lectura
-        const l1 = d.lecturasOficio.primera;
-        if (l1 && !om.lectura1Oficio) {
+        const l1Raw = d.lecturasOficio.primera;
+        if (l1Raw && !om.lectura1Oficio) {
+            const l1Vivo = (l1Raw.id && LecturasDB && typeof LecturasDB.obtenerPorId === 'function')
+                ? LecturasDB.obtenerPorId(l1Raw.id)
+                : null;
+            const l1 = l1Vivo ? { ...l1Raw, ...l1Vivo } : l1Raw;
             const resp1Obj = l1.responsorio || {};
             const r1Raw = l1.respR1 || resp1Obj.r1 || '';
             const v1Txt = l1.respV || resp1Obj.v || '';
@@ -1561,8 +1642,12 @@ function renderizarCuerpoLiturgico(d) {
         }
 
         // Segunda Lectura (Patrística)
-        const l2 = d.lecturasOficio.segunda;
-        if (l2 && !om.lectura2Oficio) {
+        const l2Raw = d.lecturasOficio.segunda;
+        if (l2Raw && !om.lectura2Oficio) {
+            const l2Vivo = (l2Raw.id && LecturasDB && typeof LecturasDB.obtenerPorId === 'function')
+                ? LecturasDB.obtenerPorId(l2Raw.id)
+                : null;
+            const l2 = l2Vivo ? { ...l2Raw, ...l2Vivo } : l2Raw;
             const resp2Obj = l2.responsorio || {};
             const r1Raw2 = l2.respR1 || resp2Obj.r1 || '';
             const v2Txt = l2.respV || resp2Obj.v || '';
@@ -1596,8 +1681,12 @@ function renderizarCuerpoLiturgico(d) {
         const mostrarHimnoPost = (esDomingoOficio || d.himnoTeDeum) && !omitirHimnoPost;
 
         if (mostrarHimnoPost) {
-            const tituloTeDeum = d.himnoTeDeum?.titulo || 'HIMNO: A TI, OH DIOS (TE DEUM)';
-            const textoTeDeum = d.himnoTeDeum?.texto || TEXTO_TEDUEM_CANONICO;
+            const tdId = d.himnoTeDeum?.id || 'tedeum_canonico';
+            const tdInfo = (tdId === 'tedeum_canonico')
+                ? { titulo: d.himnoTeDeum?.titulo || 'HIMNO: A TI, OH DIOS (TE DEUM)', texto: TEXTO_TEDUEM_CANONICO }
+                : resolverHimnoLiturgico(tdId, d.himnoTeDeum?.titulo, d.himnoTeDeum?.texto);
+            const tituloTeDeum = tdInfo.titulo || 'HIMNO: A TI, OH DIOS (TE DEUM)';
+            const textoTeDeum = tdInfo.texto || TEXTO_TEDUEM_CANONICO;
 
             html += `
                 <div class="salterio-seccion-header" style="margin-top: 30px;">${tituloTeDeum}</div>

@@ -7,10 +7,32 @@
  * Sincroniza con localStorage ('lh_himnos_cache') y Firebase Firestore.
  */
 
-import { CATALOGO_HIMNOS_SEED } from '../data/db-himnos.js';
+import { CATALOGO_HIMNOS_SEED, normalizarClaveHimno, generarAliasesClaveHimno } from '../data/db-himnos.js';
 
 let listaHimnos = [];
 let editandoId = null;
+
+function deduplicarHimnos(arr) {
+    if (!Array.isArray(arr)) return [];
+    const mapa = new Map();
+    arr.forEach(h => {
+        if (!h || (!h.id && !h.varName)) return;
+        const k = normalizarClaveHimno(h);
+        if (!mapa.has(k)) {
+            mapa.set(k, h);
+        } else {
+            const ex = mapa.get(k);
+            const exAct = ex.actualizadoEn ? new Date(ex.actualizadoEn).getTime() : 0;
+            const caAct = h.actualizadoEn ? new Date(h.actualizadoEn).getTime() : 0;
+            const exEsSeed = String(ex.id || '').includes('_himno_');
+            const caEsSeed = String(h.id || '').includes('_himno_');
+            if (caAct > exAct || (caAct === exAct && exEsSeed && !caEsSeed)) {
+                mapa.set(k, h);
+            }
+        }
+    });
+    return Array.from(mapa.values());
+}
 
 const MAPA_SEMANAS_POR_TIEMPO = {
     ordinario: Array.from({ length: 34 }, (_, i) => ({ valor: `${i + 1}`, texto: `Semana ${i + 1}` })),
@@ -103,7 +125,7 @@ function autocompletarId() {
     const diaAbrev = dMap[dia] || 'do';
     const horaAbrev = lMap[libro] || 'la';
 
-    inputId.value = `${prefix}${codSemana}${diaAbrev}${horaAbrev}`;
+    inputId.value = `h${prefix}${codSemana}${diaAbrev}${horaAbrev}`;
 }
 
 // Mostrar notificaciones dinámicas
@@ -134,7 +156,7 @@ async function cargarDatos() {
                 const desdeFb = [];
                 snap.forEach(d => desdeFb.push({ id: d.id, ...d.data() }));
                 if (desdeFb.length >= 10) {
-                    listaHimnos = desdeFb;
+                    listaHimnos = deduplicarHimnos(desdeFb);
                     localStorage.setItem('lh_himnos_cache', JSON.stringify(listaHimnos));
                     mostrarBannerEstado(`✅ Se cargaron ${listaHimnos.length} himnos desde Firebase Firestore.`, 'exito');
                     return;
@@ -151,7 +173,8 @@ async function cargarDatos() {
         try {
             const parsed = JSON.parse(cacheLocal);
             if (Array.isArray(parsed) && parsed.length >= 10) {
-                listaHimnos = parsed;
+                listaHimnos = deduplicarHimnos(parsed);
+                localStorage.setItem('lh_himnos_cache', JSON.stringify(listaHimnos));
                 mostrarBannerEstado(`📂 Cargados ${listaHimnos.length} himnos desde la caché local.`, 'alerta');
                 return;
             }
@@ -160,7 +183,7 @@ async function cargarDatos() {
 
     // 3. Fallback al catálogo semilla completo (69 himnos de himnos.js)
     if (Array.isArray(CATALOGO_HIMNOS_SEED) && CATALOGO_HIMNOS_SEED.length > 0) {
-        listaHimnos = [...CATALOGO_HIMNOS_SEED];
+        listaHimnos = deduplicarHimnos([...CATALOGO_HIMNOS_SEED]);
         localStorage.setItem('lh_himnos_cache', JSON.stringify(listaHimnos));
         mostrarBannerEstado(`✨ Cargados los ${listaHimnos.length} himnos canónicos desde himnos.js.`, 'exito');
         return;
@@ -298,15 +321,79 @@ async function guardarHimno() {
         actualizadoEn: new Date().toISOString()
     };
 
-    const indice = listaHimnos.findIndex(h => h.id === id);
+    const claveNueva = normalizarClaveHimno(id);
+    const idAnterior = editandoId;
+    const indice = listaHimnos.findIndex(h =>
+        h.id === id ||
+        (idAnterior && h.id === idAnterior) ||
+        normalizarClaveHimno(h) === claveNueva
+    );
     if (indice >= 0) {
         listaHimnos[indice] = himnoObjeto;
+        // Eliminar posibles duplicados heredados con la misma clave canónica
+        listaHimnos = listaHimnos.filter((h, idx) => idx === indice || normalizarClaveHimno(h) !== claveNueva);
     } else {
         listaHimnos.unshift(himnoObjeto);
     }
 
     // Persistir localmente
     localStorage.setItem('lh_himnos_cache', JSON.stringify(listaHimnos));
+
+    // Actualizar automáticamente cualquier salterio en caché local que utilice este himno
+    try {
+        const aliasesSet = new Set(generarAliasesClaveHimno(id));
+        if (idAnterior) {
+            generarAliasesClaveHimno(idAnterior).forEach(a => aliasesSet.add(a));
+        }
+        const normTit = (s) => String(s || '').replace(/^himno\s*:\s*/i, '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+        const titNuevoNorm = normTit(titulo);
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('lh_salterio_')) {
+                try {
+                    const docSal = JSON.parse(localStorage.getItem(k));
+                    if (!docSal || typeof docSal !== 'object') continue;
+                    let modificado = false;
+
+                    if (docSal.himno) {
+                        const hIdSal = normalizarClaveHimno(docSal.himno.id || '');
+                        const hTitSal = normTit(docSal.himno.titulo || '');
+                        if ((hIdSal && aliasesSet.has(hIdSal)) || (titNuevoNorm && hTitSal === titNuevoNorm)) {
+                            docSal.himno.id = id;
+                            docSal.himno.titulo = titulo;
+                            docSal.himno.texto = texto;
+                            modificado = true;
+                        }
+                    }
+                    if (docSal.salmoInvitatorio && (docSal.salmoInvitatorio.himnoId || docSal.salmoInvitatorio.himnot)) {
+                        const hIdInv = normalizarClaveHimno(docSal.salmoInvitatorio.himnoId || '');
+                        const hTitInv = normTit(docSal.salmoInvitatorio.himnot || '');
+                        if ((hIdInv && aliasesSet.has(hIdInv)) || (titNuevoNorm && hTitInv === titNuevoNorm)) {
+                            docSal.salmoInvitatorio.himnoId = id;
+                            docSal.salmoInvitatorio.himnot = titulo;
+                            docSal.salmoInvitatorio.himno = texto;
+                            modificado = true;
+                        }
+                    }
+                    if (docSal.himnoTeDeum) {
+                        const tdId = normalizarClaveHimno(docSal.himnoTeDeum.id || '');
+                        const tdTit = normTit(docSal.himnoTeDeum.titulo || '');
+                        if ((tdId && aliasesSet.has(tdId)) || (titNuevoNorm && tdTit === titNuevoNorm)) {
+                            docSal.himnoTeDeum.id = id;
+                            docSal.himnoTeDeum.titulo = titulo;
+                            docSal.himnoTeDeum.texto = texto;
+                            modificado = true;
+                        }
+                    }
+
+                    if (modificado) {
+                        localStorage.setItem(k, JSON.stringify(docSal));
+                    }
+                } catch (_) {}
+            }
+        }
+    } catch (_) {}
 
     // Persistir en Firestore si hay conexión
     try {
