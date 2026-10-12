@@ -1,7 +1,7 @@
 /**
  * oficiodelectura.js
  * Generador, Gestor y Reproductor de Lecturas del Oficio de Lectura
- * Liturgia de las Horas - Versión 1.0.05
+ * Liturgia de las Horas - Versión 1.0.06
  * 
  * Gestiona las 3 lecturas oficiales del Oficio:
  * 1. 1ª Lectura Año Impar: lectura1.mp3

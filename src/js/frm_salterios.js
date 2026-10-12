@@ -19,6 +19,7 @@ import {
     normalizarObjetoLiturgico,
     obtenerIdsEquivalentes,
     guardarHoraEnLocalStorage,
+    esEntradaLocalContaminada,
     TEXTO_SALMO_62_CANONICO,
     TEXTO_CANTICO_DANIEL_CANONICO,
     TEXTO_SALMO_149_CANONICO 
@@ -732,18 +733,30 @@ export function obtenerTodosLosSalmosDesdeCatalogo() {
  * Obtener todas las preces desde catálogo / 'lh_preces_cache'
  */
 export function obtenerTodasLasPrecesDesdeCatalogo() {
+    if (typeof PrecesDB !== 'undefined' && typeof PrecesDB.listar === 'function') {
+        return PrecesDB.listar();
+    }
     let todas = [];
     const cacheLocal = localStorage.getItem('lh_preces_cache');
     if (cacheLocal) {
         try {
-            todas = JSON.parse(cacheLocal);
+            const parsed = JSON.parse(cacheLocal);
+            if (Array.isArray(parsed)) todas = parsed;
         } catch (e) {
             console.warn("Error leyendo lh_preces_cache:", e);
         }
     }
 
-    if (!Array.isArray(todas) || todas.length === 0) {
-        todas = Array.isArray(CATALOGO_PRECES_SEED) ? [...CATALOGO_PRECES_SEED] : [];
+    if (Array.isArray(CATALOGO_PRECES_SEED)) {
+        const map = new Map();
+        CATALOGO_PRECES_SEED.forEach(p => map.set(p.id, p));
+        todas.forEach(p => {
+            if (p && p.id) {
+                if (p.id === 'tos1visab' && p.respuesta === 'Confirma, Señor, lo que has realizado en nosotros.') return;
+                map.set(p.id, p);
+            }
+        });
+        return Array.from(map.values());
     }
 
     return todas;
@@ -858,12 +871,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ctrlBoxPreces = document.getElementById('ctrlBoxPreces');
     // Selectores y campos específicos de Oficio / Horas menores
     const ctrlBoxResponsorioOficio = document.getElementById('ctrlBoxResponsorioOficio');
+    const ctrlBoxCicloOficio = document.getElementById('ctrlBoxCicloOficio');
     const ctrlBoxLectura1Oficio = document.getElementById('ctrlBoxLectura1Oficio');
     const ctrlBoxLectura2Oficio = document.getElementById('ctrlBoxLectura2Oficio');
     const ctrlBoxTeDeumOficio = document.getElementById('ctrlBoxTeDeumOficio');
     const ctrlBoxOpcionalOficio = document.getElementById('ctrlBoxOpcionalOficio');
     const lblResponsorioSalmodia = document.getElementById('lblResponsorioSalmodia');
     const selResponsorioOficio = document.getElementById('selectResponsorioOficio');
+    const selCicloOficio = document.getElementById('selectCicloOficio');
     const selLectura1Oficio = document.getElementById('selectLectura1Oficio');
     const selLectura2Oficio = document.getElementById('selectLectura2Oficio');
     const selTeDeumOficio = document.getElementById('selectTeDeumOficio');
@@ -888,6 +903,106 @@ document.addEventListener('DOMContentLoaded', async () => {
     const previewLec1RespR1 = document.getElementById('previewLec1RespR1');
     const previewLec1RespV = document.getElementById('previewLec1RespV');
     const previewLec1RespR2 = document.getElementById('previewLec1RespR2');
+
+    // Estado en memoria para 1ª Lectura de Oficio según Año Par / Impar
+    let cicloActivoOficio = (new Date().getFullYear() % 2 === 0) ? 'par' : 'impar';
+    if (selCicloOficio) {
+        selCicloOficio.value = cicloActivoOficio;
+    }
+    let lecturas1PorCiclo = {
+        par: null,
+        impar: null
+    };
+
+    function esCicloParSeleccionado() {
+        if (selCicloOficio && selCicloOficio.value) {
+            return selCicloOficio.value !== 'impar';
+        }
+        return (new Date().getFullYear() % 2 === 0);
+    }
+
+    function construirObjetoLectura1DesdeCatalogo(l1Id, esParCiclo, tiempoVal, semanaVal, diaVal) {
+        let l1Obj = null;
+        if (l1Id) {
+            l1Obj = cacheTodasLasLecturasOficio.find(l => l.id === l1Id || l.varName === l1Id) ||
+                    (typeof LecturasDB !== 'undefined' && LecturasDB.obtener ? LecturasDB.obtener(l1Id) : null);
+        }
+        if (!l1Obj && typeof LecturasDB !== 'undefined' && LecturasDB.obtenerLectura1) {
+            l1Obj = LecturasDB.obtenerLectura1(tiempoVal, semanaVal, diaVal, esParCiclo);
+        }
+        if (!l1Obj) return null;
+        const r1 = l1Obj.respR1 || l1Obj.responsorio?.r1 || '';
+        const v = l1Obj.respV || l1Obj.responsorio?.v || '';
+        const r2 = l1Obj.respR2 || l1Obj.responsorio?.r2 || '';
+        const ref = l1Obj.respCita || l1Obj.responsorio?.ref || '';
+        return {
+            id: l1Obj.id || l1Obj.varName || '',
+            etiqueta: '1ra Lectura',
+            esPar: Boolean(esParCiclo),
+            ciclo: esParCiclo ? 'par' : 'impar',
+            titulo: l1Obj.epigrafeTipo || l1Obj.titulo || 'PRIMERA LECTURA',
+            epigrafeTipo: l1Obj.epigrafeTipo || 'PRIMERA LECTURA',
+            cita: l1Obj.cita || '',
+            subtitulo: l1Obj.descripcion || l1Obj.subtitulo || '',
+            descripcion: l1Obj.descripcion || l1Obj.subtitulo || '',
+            texto: limpiarSaltosDeLineaLectura(l1Obj.texto || ''),
+            respCita: ref,
+            respR1: r1,
+            respV: v,
+            respR2: r2,
+            responsorio: {
+                ref: ref,
+                r1: r1,
+                v: v,
+                r2: r2
+            }
+        };
+    }
+
+    function capturarLectura1ActualEnMemoria(cicloKey) {
+        if (!selLectura1Oficio || !selLectura1Oficio.value) return;
+        const esParCiclo = (cicloKey === 'par');
+        const rCita = previewLec1RespCita ? previewLec1RespCita.textContent.trim() : '';
+        const r1 = previewLec1RespR1 ? previewLec1RespR1.textContent.trim() : '';
+        const v = previewLec1RespV ? previewLec1RespV.textContent.trim() : '';
+        const r2 = previewLec1RespR2 ? previewLec1RespR2.textContent.trim() : '';
+        lecturas1PorCiclo[cicloKey] = {
+            id: selLectura1Oficio.value,
+            etiqueta: '1ra Lectura',
+            esPar: esParCiclo,
+            ciclo: cicloKey,
+            titulo: previewLec1Epigrafe ? previewLec1Epigrafe.textContent.trim() : 'PRIMERA LECTURA',
+            epigrafeTipo: previewLec1Epigrafe ? previewLec1Epigrafe.textContent.trim() : 'PRIMERA LECTURA',
+            cita: previewLec1Cita ? previewLec1Cita.textContent.trim() : '',
+            subtitulo: previewLec1Desc ? previewLec1Desc.textContent.trim() : '',
+            descripcion: previewLec1Desc ? previewLec1Desc.textContent.trim() : '',
+            texto: previewLec1Texto ? previewLec1Texto.textContent.trim() : '',
+            respCita: rCita,
+            respR1: r1,
+            respV: v,
+            respR2: r2,
+            responsorio: {
+                ref: rCita,
+                r1: r1,
+                v: v,
+                r2: r2
+            }
+        };
+    }
+
+    function aplicarObjetoLectura1EnPreview(l1) {
+        if (!l1) return;
+        if (previewLec1Epigrafe) previewLec1Epigrafe.textContent = l1.titulo || l1.epigrafeTipo || 'PRIMERA LECTURA';
+        if (previewLec1Cita) previewLec1Cita.textContent = l1.cita || '';
+        if (previewLec1Desc) previewLec1Desc.textContent = l1.descripcion || l1.subtitulo || '';
+        if (previewLec1Texto) previewLec1Texto.textContent = limpiarSaltosDeLineaLectura(l1.texto || '');
+        const r1_1 = l1.respR1 || l1.responsorio?.r1 || '';
+        const r2_1 = l1.respR2 || l1.responsorio?.r2 || '';
+        if (previewLec1RespCita) previewLec1RespCita.textContent = l1.respCita || l1.responsorio?.ref || '';
+        if (previewLec1RespR1) previewLec1RespR1.innerHTML = formatAsterisco(r1_1, r2_1);
+        if (previewLec1RespV) previewLec1RespV.textContent = l1.respV || l1.responsorio?.v || '';
+        if (previewLec1RespR2) previewLec1RespR2.textContent = r2_1;
+    }
 
     const seccionLectura2OficioPreview = document.getElementById('seccionLectura2OficioPreview');
     const previewLec2Epigrafe = document.getElementById('previewLec2Epigrafe');
@@ -1309,7 +1424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             'selectAntifona1', 'selectSalmo1', 'selectAntifona2', 'selectSalmo2',
             'selectAntifona3', 'selectSalmo3', 'selectLecturaBreve',
             'selectAntifonaCantico', 'selectCantico', 'selectPreces', 'selectOracion',
-            'selectResponsorioOficio', 'selectLectura1Oficio', 'selectLectura2Oficio', 'selectTeDeumOficio',
+            'selectResponsorioOficio', 'selectCicloOficio', 'selectLectura1Oficio', 'selectLectura2Oficio', 'selectTeDeumOficio',
             'selectExamenConciencia', 'selectBendicionCompletas'
         ];
         ids.forEach(id => {
@@ -1799,6 +1914,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                        idNorm.includes('magnifica') ||
                                        idNorm.includes('nunc_dimittis') ||
                                        idNorm.includes('nuncdimittis') ||
+                                       idNorm.includes('lc_2') ||
+                                       idNorm.includes('lc2') ||
                                        titNorm.includes('magníficat') ||
                                        titNorm.includes('magnificat') ||
                                        titNorm.includes('zacarías') ||
@@ -1821,26 +1938,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                     nombre: nom,
                     cita: cita,
                     texto: s.texto || '',
-                    titulo: s.titulo || `${nom}${cita ? ' - ' + cita : ''}`
+                    titulo: (s.titulo || `${nom}${cita ? ' ' + cita : ''}`).replace(/\s{2,}/g, ' ').trim()
                 });
             });
         }
 
         // 2. Garantizar los canónicos oficiales (Zacarías, Magníficat, Nunc Dimittis)
         CATALOGO_CANTICOS.forEach(c => {
-            const yaRegistrado = Array.from(mapaCanticos.keys()).some(k => 
-                k.toLowerCase() === c.id.toLowerCase() ||
-                (c.id === 'cantico_zacarias' && k.toLowerCase() === 'canticozacarias') ||
-                (c.id === 'magnificat' && (k.toLowerCase() === 'magnificat' || k.toLowerCase() === 'magnifica')) ||
-                (c.id === 'nunc_dimittis' && k.toLowerCase() === 'nuncdimittis')
-            );
+            const yaRegistrado = Array.from(mapaCanticos.keys()).some(k => {
+                const kl = k.toLowerCase();
+                return kl === c.id.toLowerCase() ||
+                    (c.id === 'cantico_zacarias' && kl === 'canticozacarias') ||
+                    (c.id === 'magnificat' && (kl === 'magnificat' || kl === 'magnifica')) ||
+                    ((c.id === 'Lc_2,_29-32' || c.id === 'nunc_dimittis') && (kl === 'nuncdimittis' || kl === 'nunc_dimittis' || kl.includes('lc_2') || kl.includes('lc2')));
+            });
             if (!yaRegistrado) {
                 mapaCanticos.set(c.id, {
                     id: c.id,
                     nombre: c.nombre,
                     cita: c.cita,
                     texto: c.texto || '',
-                    titulo: `${c.nombre} - ${c.cita}`
+                    titulo: `${c.nombre} ${c.cita}`.trim()
                 });
             }
         });
@@ -1854,11 +1972,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             opt.setAttribute('data-cita', c.cita || '');
             opt.setAttribute('data-texto', c.texto || '');
             opt.setAttribute('data-desc', c.nombre || '');
-            opt.textContent = c.titulo || `${c.nombre}${c.cita ? ' - ' + c.cita : ''}`;
+            opt.textContent = c.titulo || `${c.nombre}${c.cita ? ' ' + c.cita : ''}`;
             selCantico.appendChild(opt);
         });
 
-        const valorDefecto = valorSeleccionadoPrevio || (selLibro?.value === 'vispera' ? 'magnificat' : (selLibro?.value === 'completas' ? 'nunc_dimittis' : 'cantico_zacarias'));
+        const valorDefecto = valorSeleccionadoPrevio || (selLibro?.value === 'vispera' ? 'magnificat' : (selLibro?.value === 'completas' ? 'Lc_2,_29-32' : 'cantico_zacarias'));
         ordenarOpcionesAZ(selCantico, valorDefecto);
         if (selCantico._reaplicarFiltro) selCantico._reaplicarFiltro();
         if (typeof selCantico._actualizarCustomSelect === 'function') selCantico._actualizarCustomSelect();
@@ -1997,8 +2115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Cargar y poblar los selectores de Lecturas de Oficio (Bíblica y Patrística)
     function cargarYPoblarSelectLecturasOficio(valLec1Previo = null, valLec2Previo = null) {
         cacheTodasLasLecturasOficio = obtenerTodasLasLecturasOficioDesdeCatalogo();
-        const anioActual = new Date().getFullYear();
-        const esPar = (anioActual % 2 === 0);
+        const esPar = esCicloParSeleccionado();
 
         const esPatristica = (l) => l && (
             l.tipo === 'lectura2' || 
@@ -2588,6 +2705,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Alternancia de cajas de control entre Horas
         if (ctrlBoxResponsorioOficio) ctrlBoxResponsorioOficio.style.display = esOficio ? 'block' : 'none';
         if (lblResponsorioSalmodia) lblResponsorioSalmodia.textContent = 'Responsorio (Post-Salmo 3)';
+        if (ctrlBoxCicloOficio) ctrlBoxCicloOficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxLectura1Oficio) ctrlBoxLectura1Oficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxLectura2Oficio) ctrlBoxLectura2Oficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxTeDeumOficio) ctrlBoxTeDeumOficio.style.display = mostrarHimnoPost ? 'block' : 'none';
@@ -3094,21 +3212,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (previewRespOficioR) previewRespOficioR.textContent = respObj ? respObj.r : 'Escuchadlo.';
             }
 
-            const anioActual = new Date().getFullYear();
-            const esPar = (anioActual % 2 === 0);
+            const esPar = esCicloParSeleccionado();
+            const cicloKey = esPar ? 'par' : 'impar';
 
             // 1ª Lectura Bíblica (Imagen 4)
             if (selLectura1Oficio) {
                 if (forzarRecomendado || !selLectura1Oficio.value) {
-                    const recomL1 = LecturasDB.obtenerLectura1(tiempoVal, semanaVal, diaVal, esPar);
+                    const guardadaCiclo = (!forzarRecomendado && lecturas1PorCiclo[cicloKey]) ? lecturas1PorCiclo[cicloKey] : null;
+                    const recomL1 = guardadaCiclo || LecturasDB.obtenerLectura1(tiempoVal, semanaVal, diaVal, esPar);
                     if (recomL1) {
-                        if (!Array.from(selLectura1Oficio.options).some(o => o.value === recomL1.id || o.value === recomL1.varName)) {
+                        const rId = recomL1.id || recomL1.varName || '';
+                        if (rId && !Array.from(selLectura1Oficio.options).some(o => o.value === rId)) {
                             const opt = document.createElement('option');
-                            opt.value = recomL1.id;
-                            opt.textContent = `[${esPar ? 'Año Par' : 'Año Impar'}] ${recomL1.cita} - ${recomL1.descripcion ? recomL1.descripcion.slice(0, 45) : ''}...`;
+                            opt.value = rId;
+                            opt.textContent = `[${esPar ? 'Año Par' : 'Año Impar'}] ${recomL1.cita || rId} - ${recomL1.descripcion ? recomL1.descripcion.slice(0, 45) : ''}...`;
                             selLectura1Oficio.appendChild(opt);
                         }
-                        selLectura1Oficio.value = recomL1.id;
+                        if (rId) selLectura1Oficio.value = rId;
                     }
                 }
 
@@ -3116,19 +3236,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const l1Id = optL1Actual ? optL1Actual.value : selLectura1Oficio.value;
                 const l1Obj = cacheTodasLasLecturasOficio.find(l => l.id === l1Id || l.varName === l1Id) ||
                               LecturasDB.obtener(l1Id) ||
+                              (lecturas1PorCiclo[cicloKey] && lecturas1PorCiclo[cicloKey].id === l1Id ? lecturas1PorCiclo[cicloKey] : null) ||
                               LecturasDB.obtenerLectura1(tiempoVal, semanaVal, diaVal, esPar);
 
                 if (l1Obj) {
-                    if (previewLec1Epigrafe) previewLec1Epigrafe.textContent = l1Obj.epigrafeTipo || 'PRIMERA LECTURA';
-                    if (previewLec1Cita) previewLec1Cita.textContent = l1Obj.cita || '';
-                    if (previewLec1Desc) previewLec1Desc.textContent = l1Obj.descripcion || l1Obj.subtitulo || '';
-                    if (previewLec1Texto) previewLec1Texto.textContent = limpiarSaltosDeLineaLectura(l1Obj.texto || '');
-                    const r1_1 = l1Obj.respR1 || l1Obj.responsorio?.r1 || '';
-                    const r2_1 = l1Obj.respR2 || l1Obj.responsorio?.r2 || '';
-                    if (previewLec1RespCita) previewLec1RespCita.textContent = l1Obj.respCita || l1Obj.responsorio?.ref || '';
-                    if (previewLec1RespR1) previewLec1RespR1.innerHTML = formatAsterisco(r1_1, r2_1);
-                    if (previewLec1RespV) previewLec1RespV.textContent = l1Obj.respV || l1Obj.responsorio?.v || '';
-                    if (previewLec1RespR2) previewLec1RespR2.textContent = r2_1;
+                    aplicarObjetoLectura1EnPreview(l1Obj);
+                    capturarLectura1ActualEnMemoria(cicloKey);
                 }
             }
 
@@ -3342,13 +3455,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 10. CÁNTICO EVANGÉLICO (ZACARÍAS EN LAUDES, MAGNÍFICAT EN VÍSPERAS, NUNC DIMITTIS EN COMPLETAS)
         if (selCantico) {
-            const canticoRecomendado = libroVal === 'vispera' ? 'magnificat' : (libroVal === 'completas' ? 'nunc_dimittis' : 'cantico_zacarias');
+            const canticoRecomendado = libroVal === 'vispera' ? 'magnificat' : (libroVal === 'completas' ? 'Lc_2,_29-32' : 'cantico_zacarias');
             if (forzarRecomendado || !selCantico.value) {
                 const optRecom = Array.from(selCantico.options).find(o => 
                     o.value === canticoRecomendado || 
                     (canticoRecomendado === 'magnificat' && (o.value.toLowerCase().includes('magnific') || o.value.toLowerCase().includes('maria'))) ||
                     (canticoRecomendado === 'cantico_zacarias' && o.value.toLowerCase().includes('zacarias')) ||
-                    (canticoRecomendado === 'nunc_dimittis' && (o.value.toLowerCase().includes('dimittis') || o.value.toLowerCase().includes('simeon')))
+                    (canticoRecomendado === 'Lc_2,_29-32' && (o.value.toLowerCase().includes('lc_2') || o.value.toLowerCase().includes('dimittis') || o.value.toLowerCase().includes('simeon')))
                 );
                 if (optRecom) {
                     selCantico.value = optRecom.value;
@@ -3367,10 +3480,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 'Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR';
             let citaCantico = optCantico?.getAttribute('data-cita') || 
                               (cantObjCatalogo ? cantObjCatalogo.cita : '') || '';
+            if (citaCantico && nombreCantico && nombreCantico.toLowerCase().includes(citaCantico.toLowerCase())) {
+                citaCantico = '';
+            }
             let textoCantico = optCantico?.getAttribute('data-texto') || 
                                (cantObjCatalogo ? cantObjCatalogo.texto : '') || 
                                (cantObjSalmos ? cantObjSalmos.texto : '') || 
                                TEXTO_CANTICO_ZACARIAS_CANONICO;
+            if (textoCantico && !/gloria al padre/i.test(textoCantico) && window.SalmosDB && typeof window.SalmosDB.asegurarGloria === 'function') {
+                textoCantico = window.SalmosDB.asegurarGloria(textoCantico, false);
+            }
 
             if (previewNombreCantico) previewNombreCantico.textContent = nombreCantico;
             if (previewCitaCantico) previewCitaCantico.textContent = citaCantico;
@@ -3408,7 +3527,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 11. PRECES (SEGÚN IMAGEN media_1789937648394.png)
         if (selPreces) {
-            if (forzarRecomendado || !selPreces.value) {
+            const valPrecesActual = String(selPreces.value || '');
+            const esVisperasActual = (libroVal === 'vispera' || libroVal === 'visperas');
+            const esPrecesDeOtraHora = Boolean(
+                valPrecesActual && (
+                    (esVisperasActual && /^(tos\d+la|bautismola)/i.test(valPrecesActual)) ||
+                    (libroVal === 'laudes' && /^(tos\d+vi|tos\d+[a-z]{2}vi)/i.test(valPrecesActual))
+                )
+            );
+            if (forzarRecomendado || !selPreces.value || esPrecesDeOtraHora) {
                 let precesRecom = null;
                 if (tiempoVal === 'santos') {
                     const idCelebracion = (diaVal || selDia.value || '').toLowerCase();
@@ -3440,7 +3567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const optPrecesActual = selPreces.selectedOptions[0];
             const precesId = optPrecesActual ? optPrecesActual.value : selPreces.value;
             const precesObj = cacheTodasLasPreces.find(p => p.id === precesId || p.varName === precesId) ||
-                              (tiempoVal !== 'santos' ? (PrecesDB.obtener(precesId) || PrecesDB.obtenerRecomendada(tiempoVal, semanaVal, diaVal, libroVal)) : null);
+                              (tiempoVal !== 'santos' ? (PrecesDB.obtener(precesId, tiempoVal, semanaVal, diaVal, libroVal) || PrecesDB.obtenerRecomendada(tiempoVal, semanaVal, diaVal, libroVal)) : null);
 
             if (previewTituloPreces) previewTituloPreces.textContent = 'PRECES';
             if (previewTextoPreces && precesObj) {
@@ -3797,8 +3924,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function restaurarDesdeDatos(datos) {
         if (!datos) return;
         const libroSolicitado = selLibro ? selLibro.value : 'laudes';
-        if (datos.horas && datos.horas[libroSolicitado]) {
-            datos = { ...datos, ...datos.horas[libroSolicitado] };
+        const horaGuardada = datos.horas ? (datos.horas[libroSolicitado] || (libroSolicitado === 'vispera' ? datos.horas['visperas'] : null)) : null;
+        if (horaGuardada) {
+            datos = { ...datos, ...horaGuardada };
         }
         actualizarBadgeEstado(!datos._esFallbackCiclo);
 
@@ -3830,6 +3958,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (ctrlBoxResponsorioOficio) ctrlBoxResponsorioOficio.style.display = esOficio ? 'block' : 'none';
         if (lblResponsorioSalmodia) lblResponsorioSalmodia.textContent = 'Responsorio (Post-Salmo 3)';
+        if (ctrlBoxCicloOficio) ctrlBoxCicloOficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxLectura1Oficio) ctrlBoxLectura1Oficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxLectura2Oficio) ctrlBoxLectura2Oficio.style.display = esOficio ? 'block' : 'none';
         if (ctrlBoxTeDeumOficio) ctrlBoxTeDeumOficio.style.display = esOficio ? 'block' : 'none';
@@ -4214,7 +4343,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (txtAntifonaCanticoFin) txtAntifonaCanticoFin.textContent = textoAntCEFinal;
         }
 
-        let canticoId = ceData.tipo || ceData.id || (ceData.canticoZacarias ? 'cantico_zacarias' : null) || 'cantico_zacarias';
+        const tipoCeValido = (ceData.tipo && !['Magníficat', 'Nunc Dimittis', 'Benedictus'].includes(ceData.tipo)) ? ceData.tipo : null;
+        let canticoId = ceData.id || tipoCeValido || (libroActual === 'completas' ? 'Lc_2,_29-32' : (libroActual === 'vispera' || libroActual === 'visperas' ? 'magnificat' : 'cantico_zacarias'));
+        if (canticoId === 'nunc_dimittis' || canticoId === 'nuncdimittis' || canticoId === 'Nunc Dimittis') {
+            canticoId = 'Lc_2,_29-32';
+        }
         let canticoTitulo = ceData.titulo || ceData.canticoZacariast || null;
         let canticoTexto = ceData.texto || ceData.canticoZacarias || null;
 
@@ -4231,17 +4364,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cantObjSalmos = cacheTodosLosSalmos.find(s => s.id === canticoId) ||
                               (window.SalmosDB && typeof window.SalmosDB.obtener === 'function' ? window.SalmosDB.obtener(canticoId) : null);
 
-        const nomFinal = (cantObjSalmos ? cantObjSalmos.titulo : '') ||
-                         optCantActual?.getAttribute('data-nombre') || 
+        const nomFinal = optCantActual?.getAttribute('data-nombre') || 
+                         (cantObjSalmos ? cantObjSalmos.titulo : '') ||
                          (cantObjCatalogo ? cantObjCatalogo.nombre : '') || 
                          canticoTitulo || 'Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR';
-        const citaFinal = optCantActual?.getAttribute('data-cita') || 
-                          (cantObjCatalogo ? cantObjCatalogo.cita : '') || '';
-        const txtFinal = (cantObjSalmos ? cantObjSalmos.texto : '') || 
-                         optCantActual?.getAttribute('data-texto') || 
-                         (cantObjCatalogo ? cantObjCatalogo.texto : '') || 
-                         canticoTexto || 
-                         TEXTO_CANTICO_ZACARIAS_CANONICO;
+        let citaFinal = optCantActual?.getAttribute('data-cita') || 
+                        (cantObjCatalogo ? cantObjCatalogo.cita : '') || '';
+        if (citaFinal && nomFinal && nomFinal.toLowerCase().includes(citaFinal.toLowerCase())) {
+            citaFinal = '';
+        }
+        let txtFinal = (cantObjSalmos ? cantObjSalmos.texto : '') || 
+                       optCantActual?.getAttribute('data-texto') || 
+                       (cantObjCatalogo ? cantObjCatalogo.texto : '') || 
+                       canticoTexto || 
+                       TEXTO_CANTICO_ZACARIAS_CANONICO;
+        if (txtFinal && !/gloria al padre/i.test(txtFinal) && window.SalmosDB && typeof window.SalmosDB.asegurarGloria === 'function') {
+            txtFinal = window.SalmosDB.asegurarGloria(txtFinal, false);
+        }
 
         if (previewNombreCantico) previewNombreCantico.textContent = nomFinal;
         if (previewCitaCantico) previewCitaCantico.textContent = citaFinal;
@@ -4265,18 +4404,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Detección de preces corruptas o desgloses fallidos guardados previamente
         const esSanto = selTiempo.value === 'santos';
+        const esVisperasForm = Boolean(selLibro && selLibro.value.startsWith('vispera'));
+        const idPrecesStr = String(precesIdGuardado || '');
+        const esPrecesDeOtraHora = !esSanto && Boolean(
+            (esVisperasForm && (precesData.libro === 'laudes' || /^(tos\d+la|bautismola)/i.test(idPrecesStr))) ||
+            (!esVisperasForm && selLibro.value === 'laudes' && (precesData.libro === 'visperas' || precesData.libro === 'vispera' || /^(tos\d+vi|tos\d+[a-z]{2}vi)/i.test(idPrecesStr)))
+        );
+
         const canonPreces = (typeof PrecesDB !== 'undefined' && PrecesDB.obtener && !esSanto)
-            ? PrecesDB.obtener(precesIdGuardado || (datos.id || datos.codigo), selTiempo.value, selSemana.value, selDia.value, selLibro.value)
+            ? PrecesDB.obtener(esPrecesDeOtraHora ? (datos.id || datos.codigo) : (precesIdGuardado || (datos.id || datos.codigo)), selTiempo.value, selSemana.value, selDia.value, selLibro.value)
             : null;
 
         const esCorrupta = !esSanto && Boolean(
-            (introRaw.length > 110 || introRaw.includes('Cristo Jesús, que')) ||
-            (respRaw === "Confirma, Señor, lo que has realizado en nosotros." && (selDia.value !== 'sabado' || !selLibro.value.startsWith('vispera'))) ||
+            esPrecesDeOtraHora ||
+            (introRaw.includes('\n\n') || introRaw.length > 350) ||
+            (respRaw === "Confirma, Señor, lo que has realizado en nosotros." && (selDia.value !== 'viernes' || !esVisperasForm)) ||
             (intsRaw.some(i => String(i).includes('dígnate sostener nuestra fe') || String(i).includes('Acompaña con tu bendición'))) ||
             (precesTextoGuardado && (
                 (precesTextoGuardado.includes('bautizado por Juan') && precesTextoGuardado.includes('dígnate sostener nuestra fe')) ||
-                (precesTextoGuardado.includes('Confirma, Señor, lo que has realizado en nosotros.') && (selDia.value !== 'sabado' || !selLibro.value.startsWith('vispera')))
+                (precesTextoGuardado.includes('Confirma, Señor, lo que has realizado en nosotros.') && (selDia.value !== 'viernes' || !esVisperasForm))
             )) ||
+            (esVisperasForm && canonPreces && Array.isArray(canonPreces.intenciones) && intsRaw.length === 5 && canonPreces.intenciones.length === 4 && (!precesConclGuardado || !precesConclGuardado.includes('\n\n'))) ||
             (canonPreces && intsRaw.length <= 1)
         );
 
@@ -4461,23 +4609,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (previewRespOficioV && vOficioFinal) previewRespOficioV.textContent = vOficioFinal;
             if (previewRespOficioR && rOficioFinal) previewRespOficioR.textContent = rOficioFinal;
 
-            // Lecturas Oficio
+            // Lecturas Oficio (Año Par e Impar)
             const lData = datos.lecturasOficio || {};
-            const l1Raw = lData.primera;
+            const enriquecerLectura1 = (rawObj, esParFlag) => {
+                if (!rawObj) return null;
+                const vivo = rawObj.id ? cacheTodasLasLecturasOficio.find(x => x.id === rawObj.id || x.varName === rawObj.id) : null;
+                return vivo ? { ...vivo, ...rawObj, esPar: esParFlag, ciclo: esParFlag ? 'par' : 'impar' } : { ...rawObj, esPar: esParFlag, ciclo: esParFlag ? 'par' : 'impar' };
+            };
+
+            const l1Guardada = lData.primera;
+            const esL1Impar = Boolean(l1Guardada && (l1Guardada.esPar === false || l1Guardada.ciclo === 'impar' || l1Guardada.tipo === 'lectura1_impar' || (l1Guardada.id && String(l1Guardada.id).toLowerCase().includes('impar'))));
+            const esL1Par = Boolean(l1Guardada && !esL1Impar);
+
+            lecturas1PorCiclo = {
+                par: enriquecerLectura1(lData.primeraPar || (esL1Par ? l1Guardada : null), true),
+                impar: enriquecerLectura1(lData.primeraImpar || (esL1Impar ? l1Guardada : null), false)
+            };
+
+            const esParRestaurar = esCicloParSeleccionado();
+            const cicloKeyRest = esParRestaurar ? 'par' : 'impar';
+            let l1Raw = lecturas1PorCiclo[cicloKeyRest];
+
+            if (!l1Raw) {
+                const tRest = selTiempo ? selTiempo.value : 'ordinario';
+                const sRest = selSemana ? (selSemana.value || 's01') : 's01';
+                const dRest = selDia ? selDia.value : 'domingo';
+                l1Raw = construirObjetoLectura1DesdeCatalogo(null, esParRestaurar, tRest, sRest, dRest);
+                if (l1Raw) {
+                    lecturas1PorCiclo[cicloKeyRest] = l1Raw;
+                }
+            }
+
             if (l1Raw) {
-                if (selLectura1Oficio && l1Raw.id) selLectura1Oficio.value = l1Raw.id;
-                const l1Vivo = l1Raw.id ? cacheTodasLasLecturasOficio.find(x => x.id === l1Raw.id) : null;
-                const l1 = l1Vivo ? { ...l1Vivo, ...l1Raw } : l1Raw;
-                if (previewLec1Epigrafe) previewLec1Epigrafe.textContent = l1.titulo || l1.epigrafeTipo || 'PRIMERA LECTURA';
-                if (previewLec1Cita) previewLec1Cita.textContent = l1.cita || '';
-                if (previewLec1Desc) previewLec1Desc.textContent = l1.descripcion || l1.subtitulo || '';
-                if (previewLec1Texto) previewLec1Texto.textContent = limpiarSaltosDeLineaLectura(l1.texto || '');
-                const r1_1 = l1.respR1 || l1.responsorio?.r1 || '';
-                const r2_1 = l1.respR2 || l1.responsorio?.r2 || '';
-                if (previewLec1RespCita) previewLec1RespCita.textContent = l1.respCita || l1.responsorio?.ref || '';
-                if (previewLec1RespR1) previewLec1RespR1.innerHTML = formatAsterisco(r1_1, r2_1);
-                if (previewLec1RespV) previewLec1RespV.textContent = l1.respV || l1.responsorio?.v || '';
-                if (previewLec1RespR2) previewLec1RespR2.textContent = r2_1;
+                if (selLectura1Oficio && l1Raw.id) {
+                    if (!Array.from(selLectura1Oficio.options).some(o => o.value === l1Raw.id)) {
+                        const opt = document.createElement('option');
+                        opt.value = l1Raw.id;
+                        opt.textContent = `[${esParRestaurar ? 'Año Par' : 'Año Impar'}] ${l1Raw.cita || l1Raw.id} - ${(l1Raw.descripcion || '').slice(0, 45)}...`;
+                        selLectura1Oficio.appendChild(opt);
+                    }
+                    selLectura1Oficio.value = l1Raw.id;
+                }
+                aplicarObjetoLectura1EnPreview(l1Raw);
             } else {
                 cargarYPoblarSelectLecturasOficio(null, null);
                 actualizarInvitatorioPreview(false);
@@ -4582,17 +4755,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Primero revisar si ya existe localmente bajo el ID o cualquier equivalente
+        // Primero revisar si ya existe localmente bajo el ID exacto de la misma semana
+        let huboMatchLocalExacto = false;
         for (const candId of candidatos) {
             const guardadoLocal = localStorage.getItem(`lh_salterio_${candId}`);
             if (guardadoLocal) {
                 try {
                     let datos = JSON.parse(guardadoLocal);
-                    const esCandGenerico = Boolean(idCelebracion && (candId === idCelebracion || candId.toLowerCase() === idCelebracion.toLowerCase()));
-                    if (datos && datos.horas && datos.horas[libroVal]) {
-                        datos = { ...datos, ...datos.horas[libroVal] };
+                    if (typeof esEntradaLocalContaminada === 'function' && esEntradaLocalContaminada(datos, candId)) {
+                        try {
+                            localStorage.removeItem(`lh_salterio_${candId}`);
+                        } catch (_) {}
+                        continue;
                     }
-                    if (datos && (datos.libro === libroVal || (!esCandGenerico && !datos.libro))) {
+                    const esCandGenerico = Boolean(idCelebracion && (candId === idCelebracion || candId.toLowerCase() === idCelebracion.toLowerCase()));
+                    const horaLocal = datos && datos.horas ? (datos.horas[libroVal] || (libroVal === 'vispera' ? datos.horas['visperas'] : null)) : null;
+                    if (horaLocal) {
+                        datos = { ...datos, ...horaLocal };
+                    }
+                    const coincideLibroLocal = Boolean(datos && (datos.libro === libroVal || (libroVal === 'vispera' && datos.libro === 'visperas') || (!esCandGenerico && !datos.libro)));
+                    if (coincideLibroLocal) {
                         const numSemActual = idCodigo.match(/s0?(\d+)/)?.[1];
                         const numSemCand = candId.match(/s0?(\d+)/)?.[1];
                         const esFallbackCiclo = Boolean(tiempoVal === 'ordinario' && numSemActual && numSemCand && parseInt(numSemActual, 10) !== parseInt(numSemCand, 10));
@@ -4602,19 +4784,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                             delete datos.lecturasOficio;
                             delete datos.oracion;
                             datos._esFallbackCiclo = true;
+                        } else {
+                            huboMatchLocalExacto = true;
                         }
 
                         restaurarDesdeDatos(datos);
                         if (esFallbackCiclo) {
                             actualizarBadgeEstado(false);
                         }
-                        return;
+                        break;
                     }
                 } catch (e) {}
             }
         }
 
-        // Si no está local, buscar en Firebase Firestore probando los identificadores equivalentes
+        // Consultar siempre Firebase Firestore en segundo plano para garantizar sincronización 100% real
         let datosCargados = null;
         let esFallbackCicloRemoto = false;
         if (window.firebaseAPI && window.firebaseAPI.db) {
@@ -4624,10 +4808,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const snap = await getDoc(doc(window.firebaseAPI.db, "salterios", candId));
                     if (snap && snap.exists()) {
                         const raw = snap.data();
+                        raw.origenCarga = 'firebase';
                         const esCandGenerico = Boolean(idCelebracion && (candId === idCelebracion || candId.toLowerCase() === idCelebracion.toLowerCase()));
-                        if (raw.horas && raw.horas[libroVal]) {
-                            datosCargados = { ...raw, ...raw.horas[libroVal] };
-                        } else if (raw.libro === libroVal) {
+                        const horaRemota = raw.horas ? (raw.horas[libroVal] || (libroVal === 'vispera' ? raw.horas['visperas'] : null)) : null;
+                        if (horaRemota) {
+                            datosCargados = { ...raw, ...horaRemota, origenCarga: 'firebase' };
+                        } else if (raw.libro === libroVal || (libroVal === 'vispera' && raw.libro === 'visperas')) {
                             datosCargados = raw;
                         } else if (!esCandGenerico && !raw.libro) {
                             datosCargados = raw;
@@ -4643,9 +4829,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 delete datosCargados.oracion;
                                 datosCargados._esFallbackCiclo = true;
                             } else {
-                                localStorage.setItem(`lh_salterio_${idCodigo}`, JSON.stringify(raw));
+                                guardarHoraEnLocalStorage(idCodigo, raw);
                                 if (tiempoVal === 'santos') {
-                                    localStorage.setItem(`lh_salterio_${idCodigo}_${libroVal}`, JSON.stringify(datosCargados));
+                                    try {
+                                        localStorage.setItem(`lh_salterio_${idCodigo}_${libroVal}`, JSON.stringify(datosCargados));
+                                    } catch (_) {}
                                 }
                             }
                             break;
@@ -4656,11 +4844,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (datosCargados) {
-            restaurarDesdeDatos(datosCargados);
-            if (esFallbackCicloRemoto) {
-                actualizarBadgeEstado(false);
+            // Si ya había match local exacto y el remoto es solo fallback de ciclo, respetar el local exacto
+            if (huboMatchLocalExacto && esFallbackCicloRemoto) {
+                return;
             }
-        } else {
+            // Verificar que el usuario siga en el mismo código antes de restaurar
+            if (!inputCodigo || inputCodigo.value === idCodigo) {
+                restaurarDesdeDatos(datosCargados);
+                if (esFallbackCicloRemoto) {
+                    actualizarBadgeEstado(false);
+                }
+            }
+        } else if (!huboMatchLocalExacto) {
             actualizarBadgeEstado(false);
             actualizarVisibilidadPorOmisiones();
             document.querySelectorAll('.select-liturgico').forEach(sel => {
@@ -4742,6 +4937,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
+        // Sincronizar enlace del botón "Salterio" en la barra superior para abrir directamente la hora activa
+        const libroNav = (libroVal === 'vispera') ? 'visperas' : libroVal;
+        const numSemNav = parseInt(String(codSemana).replace(/[^0-9]/g, ''), 10) || 1;
+        document.querySelectorAll('a.btn-nav-frm[href*="salterios.html"]').forEach(link => {
+            if (link.getAttribute('href').includes('frm_salterios')) return;
+            if (tiempoVal === 'santos') {
+                const optDiaSel = selDia ? selDia.selectedOptions[0] : null;
+                const nomSanto = optDiaSel ? (optDiaSel.getAttribute('data-nombre') || optDiaSel.textContent) : '';
+                const fecSanto = optDiaSel ? (optDiaSel.getAttribute('data-fecha') || '') : '';
+                link.href = `/salterios.html?tiempo=santos&libro=${libroNav}&id=${encodeURIComponent(codigoFinal)}${nomSanto ? `&santo=${encodeURIComponent(nomSanto)}` : ''}${fecSanto ? `&fecha=${encodeURIComponent(fecSanto)}` : ''}`;
+            } else {
+                link.href = `/salterios.html?tiempo=${encodeURIComponent(tiempoVal)}&semana=${numSemNav}&dia=${encodeURIComponent(diaVal)}&libro=${encodeURIComponent(libroNav)}&hora=${encodeURIComponent(libroNav)}&id=${encodeURIComponent(codigoFinal)}`;
+            }
+        });
+
         // Sincronizar título y subtítulo de la hora siempre
         const mapaTitulos = {
             laudes:    'LAUDES',
@@ -4795,11 +5005,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (localDataRaw) {
                 try {
                     let datos = JSON.parse(localDataRaw);
-                    const esCandGenerico = Boolean(idCelebracion && (candId === idCelebracion || candId.toLowerCase() === idCelebracion.toLowerCase()));
-                    if (datos && datos.horas && datos.horas[libroVal]) {
-                        datos = { ...datos, ...datos.horas[libroVal] };
+                    if (typeof esEntradaLocalContaminada === 'function' && esEntradaLocalContaminada(datos, candId)) {
+                        try {
+                            localStorage.removeItem(`lh_salterio_${candId}`);
+                        } catch (_) {}
+                        continue;
                     }
-                    if (datos && (datos.libro === libroVal || (!esCandGenerico && !datos.libro))) {
+                    const esCandGenerico = Boolean(idCelebracion && (candId === idCelebracion || candId.toLowerCase() === idCelebracion.toLowerCase()));
+                    const horaLocal = datos && datos.horas ? (datos.horas[libroVal] || (libroVal === 'vispera' ? datos.horas['visperas'] : null)) : null;
+                    if (horaLocal) {
+                        datos = { ...datos, ...horaLocal };
+                    }
+                    const coincideLibroLocal = Boolean(datos && (datos.libro === libroVal || (libroVal === 'vispera' && datos.libro === 'visperas') || (!esCandGenerico && !datos.libro)));
+                    if (coincideLibroLocal) {
                         const numSemActual = codSemana ? codSemana.match(/\d+/)?.[0] : (codigoFinal.match(/s0?(\d+)/)?.[1]);
                         const numSemCand = candId.match(/s0?(\d+)/)?.[1];
                         const esFallbackCiclo = Boolean(tiempoVal === 'ordinario' && numSemActual && numSemCand && parseInt(numSemActual, 10) !== parseInt(numSemCand, 10));
@@ -4815,6 +5033,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (esFallbackCiclo) {
                             actualizarBadgeEstado(false);
                         }
+                        // Verificar siempre en segundo plano con Firebase para sincronizar cualquier cambio remoto
+                        verificarEstadoId(codigoFinal);
                         return;
                     }
                 } catch (e) {}
@@ -4824,6 +5044,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Si no está en LocalStorage, renderizar recomendaciones por defecto
         actualizarBadgeEstado(false);
         if (esCambioParametro) {
+            lecturas1PorCiclo = { par: null, impar: null };
             // Limpiar omisiones previas (checkboxes) que pertenecían a la hora/parámetro anterior
             document.querySelectorAll('.chk-omitir-elemento, .chk-omitir-es').forEach(chk => {
                 chk.checked = false;
@@ -4953,8 +5174,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cantCita = (previewCitaCantico ? previewCitaCantico.textContent.trim() : 'Lc 1, 68-79');
         const cantTexto = (previewTextoCantico ? previewTextoCantico.textContent.trim() : TEXTO_CANTICO_ZACARIAS_CANONICO);
 
-        const precesTexto = (previewTextoPreces ? (previewTextoPreces.innerText || previewTextoPreces.textContent).trim() : '');
-        const precesIntroPadre = (previewIntroPadreNuestro ? (previewIntroPadreNuestro.innerText || previewIntroPadreNuestro.textContent).trim() : 'Terminemos nuestra oración con la plegaria que Cristo nos enseñó:');
+        const precesTexto = (previewTextoPreces ? previewTextoPreces.textContent.trim() : '');
+        const precesIntroPadre = (previewIntroPadreNuestro ? previewIntroPadreNuestro.textContent.trim() : 'Terminemos nuestra oración con la plegaria que Cristo nos enseñó:');
         const oracionTexto = (previewTextoOracion ? previewTextoOracion.textContent.trim() : '');
         const conclusionV = (previewConclusionV ? previewConclusionV.textContent.trim() : 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.');
         const conclusionR = (previewConclusionR ? previewConclusionR.textContent.trim() : 'Amén.');
@@ -4962,7 +5183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const optPrecesSel = selPreces ? selPreces.selectedOptions[0] : null;
         const precesIdSel = optPrecesSel ? optPrecesSel.value : (selPreces ? selPreces.value : '');
         const pObjSel = cacheTodasLasPreces.find(p => p.id === precesIdSel || p.varName === precesIdSel) ||
-                        PrecesDB.obtener(precesIdSel) ||
+                        PrecesDB.obtener(precesIdSel, tiempoVal, semanaVal, diaVal, libroVal) ||
                         PrecesDB.obtenerRecomendada(tiempoVal, semanaVal, diaVal, libroVal);
 
         const optOracionSel = selOracion ? selOracion.selectedOptions[0] : null;
@@ -4984,34 +5205,44 @@ document.addEventListener('DOMContentLoaded', async () => {
                 : (previewRespOficioR ? previewRespOficioR.textContent.trim() : 'Escuchadlo.')
         };
 
-        const anioActual = new Date().getFullYear();
-        const esPar = (anioActual % 2 === 0);
+        const esPar = esCicloParSeleccionado();
+        const cicloActualKey = esPar ? 'par' : 'impar';
 
         const lec1Id = (selLectura1Oficio ? selLectura1Oficio.value : '');
         const lec2Id = (selLectura2Oficio ? selLectura2Oficio.value : '');
 
+        const lectura1ActivaObj = {
+            id: lec1Id,
+            etiqueta: '1ra Lectura',
+            esPar: esPar,
+            ciclo: cicloActualKey,
+            titulo: (previewLec1Epigrafe ? previewLec1Epigrafe.textContent.trim() : 'PRIMERA LECTURA'),
+            epigrafeTipo: (previewLec1Epigrafe ? previewLec1Epigrafe.textContent.trim() : 'PRIMERA LECTURA'),
+            cita: (previewLec1Cita ? previewLec1Cita.textContent.trim() : ''),
+            subtitulo: (previewLec1Desc ? previewLec1Desc.textContent.trim() : ''),
+            descripcion: (previewLec1Desc ? previewLec1Desc.textContent.trim() : ''),
+            texto: (previewLec1Texto ? previewLec1Texto.textContent.trim() : ''),
+            respCita: (previewLec1RespCita ? previewLec1RespCita.textContent.trim() : ''),
+            respR1: (previewLec1RespR1 ? previewLec1RespR1.textContent.trim() : ''),
+            respV: (previewLec1RespV ? previewLec1RespV.textContent.trim() : ''),
+            respR2: (previewLec1RespR2 ? previewLec1RespR2.textContent.trim() : ''),
+            responsorio: {
+                ref: (previewLec1RespCita ? previewLec1RespCita.textContent.trim() : ''),
+                r1: (previewLec1RespR1 ? previewLec1RespR1.textContent.trim() : ''),
+                v: (previewLec1RespV ? previewLec1RespV.textContent.trim() : ''),
+                r2: (previewLec1RespR2 ? previewLec1RespR2.textContent.trim() : '')
+            }
+        };
+
+        lecturas1PorCiclo[cicloActualKey] = lectura1ActivaObj;
+        const lecturaParFinal = lecturas1PorCiclo.par || construirObjetoLectura1DesdeCatalogo(null, true, tiempoVal, semanaVal, diaVal) || lectura1ActivaObj;
+        const lecturaImparFinal = lecturas1PorCiclo.impar || construirObjetoLectura1DesdeCatalogo(null, false, tiempoVal, semanaVal, diaVal) || lectura1ActivaObj;
+
         const lecturasOficio = {
-            primera: {
-                id: lec1Id,
-                etiqueta: '1ra Lectura',
-                esPar: esPar,
-                titulo: (previewLec1Epigrafe ? previewLec1Epigrafe.textContent.trim() : 'PRIMERA LECTURA'),
-                epigrafeTipo: (previewLec1Epigrafe ? previewLec1Epigrafe.textContent.trim() : 'PRIMERA LECTURA'),
-                cita: (previewLec1Cita ? previewLec1Cita.textContent.trim() : ''),
-                subtitulo: (previewLec1Desc ? previewLec1Desc.textContent.trim() : ''),
-                descripcion: (previewLec1Desc ? previewLec1Desc.textContent.trim() : ''),
-                texto: (previewLec1Texto ? previewLec1Texto.textContent.trim() : ''),
-                respCita: (previewLec1RespCita ? previewLec1RespCita.textContent.trim() : ''),
-                respR1: (previewLec1RespR1 ? previewLec1RespR1.textContent.trim() : ''),
-                respV: (previewLec1RespV ? previewLec1RespV.textContent.trim() : ''),
-                respR2: (previewLec1RespR2 ? previewLec1RespR2.textContent.trim() : ''),
-                responsorio: {
-                    ref: (previewLec1RespCita ? previewLec1RespCita.textContent.trim() : ''),
-                    r1: (previewLec1RespR1 ? previewLec1RespR1.textContent.trim() : ''),
-                    v: (previewLec1RespV ? previewLec1RespV.textContent.trim() : ''),
-                    r2: (previewLec1RespR2 ? previewLec1RespR2.textContent.trim() : '')
-                }
-            },
+            cicloSeleccionado: cicloActualKey,
+            primera: lectura1ActivaObj,
+            primeraPar: lecturaParFinal,
+            primeraImpar: lecturaImparFinal,
             segunda: {
                 id: lec2Id,
                 etiqueta: '2da Lectura',
@@ -5157,11 +5388,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             },
             canticoEvangelico: {
+                id: cantId,
                 tipo: cantId,
                 antifonaId: antCEId,
                 antifona: antCETexto,
                 antifonaTexto: antCETexto,
-                titulo: `${cantNombre}    ${cantCita}`.trim(),
+                titulo: (cantCita && !cantNombre.toLowerCase().includes(cantCita.toLowerCase())) ? `${cantNombre} ${cantCita}`.trim() : cantNombre.trim(),
                 cita: cantCita,
                 texto: cantTexto
             },
@@ -5543,9 +5775,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    if (selCicloOficio) {
+        selCicloOficio.addEventListener('change', () => {
+            if (cicloActivoOficio) {
+                capturarLectura1ActualEnMemoria(cicloActivoOficio);
+            }
+            cicloActivoOficio = selCicloOficio.value === 'impar' ? 'impar' : 'par';
+            const esParNuevo = (cicloActivoOficio === 'par');
+            const tiempoVal = selTiempo ? selTiempo.value : 'ordinario';
+            const semanaVal = selSemana ? (selSemana.value || 's01') : 's01';
+            const diaVal = selDia ? selDia.value : 'domingo';
+
+            let l1Ciclo = lecturas1PorCiclo[cicloActivoOficio];
+            if (!l1Ciclo || !l1Ciclo.id) {
+                l1Ciclo = construirObjetoLectura1DesdeCatalogo(null, esParNuevo, tiempoVal, semanaVal, diaVal);
+                if (l1Ciclo) {
+                    lecturas1PorCiclo[cicloActivoOficio] = l1Ciclo;
+                }
+            }
+
+            if (l1Ciclo && selLectura1Oficio) {
+                if (l1Ciclo.id) {
+                    if (!Array.from(selLectura1Oficio.options).some(o => o.value === l1Ciclo.id)) {
+                        const opt = document.createElement('option');
+                        opt.value = l1Ciclo.id;
+                        opt.textContent = `[${esParNuevo ? 'Año Par' : 'Año Impar'}] ${l1Ciclo.cita || l1Ciclo.id} - ${(l1Ciclo.descripcion || '').slice(0, 45)}...`;
+                        selLectura1Oficio.appendChild(opt);
+                    }
+                    selLectura1Oficio.value = l1Ciclo.id;
+                    if (typeof selLectura1Oficio._actualizarCustomSelect === 'function') {
+                        selLectura1Oficio._actualizarCustomSelect();
+                    }
+                }
+                aplicarObjetoLectura1EnPreview(l1Ciclo);
+            } else {
+                actualizarInvitatorioPreview(true);
+            }
+            actualizarBadgeEstado(false);
+        });
+    }
+
     if (selLectura1Oficio) {
         selLectura1Oficio.addEventListener('change', () => {
             actualizarInvitatorioPreview(false);
+            capturarLectura1ActualEnMemoria(esCicloParSeleccionado() ? 'par' : 'impar');
             actualizarBadgeEstado(false);
         });
     }

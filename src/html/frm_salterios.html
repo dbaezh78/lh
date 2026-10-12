@@ -382,7 +382,7 @@
                         <select id="selectCantico" class="select-liturgico">
                             <option value="cantico_zacarias" selected>CÁNTICO DE ZACARÍAS. EL MESÍAS Y SU PRECURSOR - Lc 1, 68-79</option>
                             <option value="magnificat">CÁNTICO DE LA SANTÍSIMA VIRGEN MARÍA (MAGNÍFICAT) - Lc 1, 46-55</option>
-                            <option value="nunc_dimittis">CÁNTICO DE SIMEÓN (NUNC DIMITTIS) - Lc 2, 29-32</option>
+                            <option value="Lc_2,_29-32">CÁNTICO DE SIMEÓN Lc 2, 29-32</option>
                         </select>
                     </div>
 
@@ -411,6 +411,19 @@
                         </div>
                         <select id="selectResponsorioOficio" class="select-liturgico">
                             <!-- Rellenado dinámicamente desde db-responsorios.js -->
+                        </select>
+                    </div>
+
+                    <div class="control-box" id="ctrlBoxCicloOficio" style="display: none;">
+                        <div class="control-header-row">
+                            <label for="selectCicloOficio">
+                                <span class="material-symbols-outlined" style="font-size:16px;">event_repeat</span>
+                                Ciclo 1ª Lectura (Par / Impar)
+                            </label>
+                        </div>
+                        <select id="selectCicloOficio" class="select-liturgico">
+                            <option value="par">Año Par (Año II)</option>
+                            <option value="impar">Año Impar (Año I)</option>
                         </select>
                     </div>
 

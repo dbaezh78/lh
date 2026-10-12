@@ -1,13 +1,12 @@
 {
-  "latestVersion": "1.0.05",
+  "latestVersion": "1.0.06",
   "minVersion": "1.0.01",
-  "updateTitle": "Nueva Versión Disponible (v1.0.05)",
-  "updateMessage": "Nomenclatura unificada de IDs litúrgicos ([tiempo][semana][día][hora]), selector interactivo con búsqueda canónica en tiempo real y conmutador de lecturas para años pares/impares.",
+  "updateTitle": "Nueva Versión Disponible (v1.0.06)",
+  "updateMessage": "Selector interactivo de semanas y santos en la cinta superior, preces completas de Vísperas, Cántico de Simeón en Completas y fidelidad de formato en lecturas.",
   "releaseNotes": [
-    "Nomenclatura unificada de IDs litúrgicos en todos los formularios (tos01dote, tos01doof, tos05doof).",
-    "Búsqueda por ID / Código en selectores interactivos de frm_salterios.html: resolución inmediata de códigos canónicos y alias mientras se visualiza el texto descriptivo.",
-    "Ciclo Litúrgico de 4 Semanas del Salterio en Tiempo Ordinario: herencia inteligente de salmos, antífonas e himnos base (semanas 5, 9, 13... a Salterio 1) manteniendo lecturas de oficio y oración propias de cada semana.",
-    "Actualización del gestor de Himnos (himno.html) con selectores de semana y día y autocompletado de ID canónico.",
-    "Conmutador de lecturas de Oficio de Lectura para años pares (II) e impares (I)."
+    "Selector desplegable de semanas, días y horas litúrgicas al tocar 'Semana X • Día' en la cinta superior de salterios.html para todos los tiempos litúrgicos, Santos, Solemnidades y Fiestas.",
+    "Resolución y visualización canónica del Cántico de Simeón (Lc_2,_29-32) en Completas y en el Constructor de Salterios (frm_salterios.html).",
+    "Base de datos completa de Preces de Vísperas (Salterio de 4 semanas y Semana 5) con intercesión por los difuntos e invitación al Padre Nuestro.",
+    "Fidelidad exacta de saltos de línea y espacios entre párrafos en lecturas del Oficio entre el Constructor y salterios.html."
   ]
 }

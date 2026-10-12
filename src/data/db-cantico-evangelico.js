@@ -69,16 +69,16 @@ Como era en el principio, ahora y siempre, por los siglos de los siglos.
 Amén.`;
 
 export const TEXTO_NUNC_DIMITTIS_CANONICO = `Ahora, Señor, según tu promesa,
-puedes dejar a tu siervo irse en paz.
+puedes dejar a tu siervo irse en paz,
 
-Porque mis ojos han visto a tu Salvador,
-a quien has presentado ante todos los pueblos:
+porque mis ojos han visto a tu Salvador,
+a quien has presentado ante todos los pueblos
+
 luz para alumbrar a las naciones
 y gloria de tu pueblo Israel.
 
 Gloria al Padre, y al Hijo, y al Espíritu Santo.
-Como era en el principio, ahora y siempre, por los siglos de los siglos.
-Amén.`;
+Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`;
 
 export const CATALOGO_CANTICOS = [
     {
@@ -96,8 +96,8 @@ export const CATALOGO_CANTICOS = [
         texto: TEXTO_MAGNIFICAT_CANONICO
     },
     {
-        id: 'nunc_dimittis',
-        nombre: 'Cántico de Simeón (Nunc Dimittis)',
+        id: 'Lc_2,_29-32',
+        nombre: 'CÁNTICO DE SIMEÓN',
         cita: 'Lc 2, 29-32',
         libro: 'completas',
         texto: TEXTO_NUNC_DIMITTIS_CANONICO

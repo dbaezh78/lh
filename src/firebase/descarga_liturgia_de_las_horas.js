@@ -547,7 +547,7 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
                 if (raw) {
                     const list = JSON.parse(raw);
                     if (Array.isArray(list)) {
-                        const clean = String(idFinal || '').toLowerCase().replace(/[\s\-_]/g, '');
+                        const clean = String(idFinal || '').toLowerCase().replace(/[\s\-_,.]/g, '');
                         const eqMap = {
                             'salmo94': ['invitatorio1', 'salmo94'],
                             'invitatorio1': ['salmo94', 'invitatorio1'],
@@ -556,12 +556,14 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
                             'salmo66': ['invitatorio3', 'salmo66'],
                             'invitatorio3': ['salmo66', 'invitatorio3'],
                             'salmo23': ['invitatorio4', 'salmo23'],
-                            'invitatorio4': ['salmo23', 'invitatorio4']
+                            'invitatorio4': ['salmo23', 'invitatorio4'],
+                            'nuncdimittis': ['Lc_2,_29-32', 'nunc_dimittis'],
+                            'lc22932': ['Lc_2,_29-32', 'nunc_dimittis']
                         };
                         const candidatos = eqMap[clean] || [idFinal];
                         for (const cand of candidatos) {
-                            const candNorm = cand.toLowerCase().replace(/[\s\-_]/g, '');
-                            sObj = list.find(s => s && (s.id === cand || String(s.id).toLowerCase().replace(/[\s\-_]/g, '') === candNorm));
+                            const candNorm = cand.toLowerCase().replace(/[\s\-_,.]/g, '');
+                            sObj = list.find(s => s && (s.id === cand || String(s.id).toLowerCase().replace(/[\s\-_,.]/g, '') === candNorm));
                             if (sObj) break;
                         }
                     }
@@ -757,25 +759,40 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
     };
 
     // 6. CÁNTICO EVANGÉLICO
+    const ceObj = d.canticoEvangelico || {};
     const cEvanRaw = d.cEvan_Conclusion || d.canticoEvangelico || {};
     const canticoTipo = (libro === 'visperas' || libro === 'vispera') ? 'Magníficat' : (libro === 'completas' ? 'Nunc Dimittis' : 'Benedictus');
-    const canticoId = cEvanRaw.id || ((libro === 'visperas' || libro === 'vispera') ? 'magnificat' : (libro === 'completas' ? 'nuncdimittis' : 'benedictus'));
-    const ceInfo = resolverSalmoLiturgicoNorm(canticoId, cEvanRaw.titulo || cEvanRaw.canticoZacariast, cEvanRaw.texto || cEvanRaw.canticoZacarias, canticoId, base.canticoEvangelico?.texto || "", base.canticoEvangelico?.titulo || "");
+    const tipoCandidato = (ceObj.tipo && !['Magníficat', 'Nunc Dimittis', 'Benedictus'].includes(ceObj.tipo)) ? ceObj.tipo : null;
+    const canticoId = ceObj.id || tipoCandidato || cEvanRaw.id || ((libro === 'visperas' || libro === 'vispera') ? 'magnificat' : (libro === 'completas' ? 'Lc_2,_29-32' : 'benedictus'));
+    const titCandidato = ceObj.titulo || cEvanRaw.titulo || cEvanRaw.canticoZacariast;
+    const txtCandidato = ceObj.texto || cEvanRaw.texto || cEvanRaw.canticoZacarias;
+    const ceInfo = resolverSalmoLiturgicoNorm(canticoId, titCandidato, txtCandidato, canticoId, base.canticoEvangelico?.texto || "", base.canticoEvangelico?.titulo || "");
+    let textoCanticoNorm = ceInfo.texto || txtCandidato || base.canticoEvangelico?.texto || "Bendito sea el Señor, Dios de Israel...";
+    if (textoCanticoNorm && !/gloria al padre/i.test(textoCanticoNorm) && typeof window !== 'undefined' && window.SalmosDB && typeof window.SalmosDB.asegurarGloria === 'function') {
+        textoCanticoNorm = window.SalmosDB.asegurarGloria(textoCanticoNorm, false);
+    }
     const canticoEvangelicoNorm = {
         id: ceInfo.id || canticoId,
         tipo: canticoTipo,
-        antifona: cEvanRaw.antifona || cEvanRaw.cEvangelicoAnt || base.canticoEvangelico?.antifona || "Se presentó Jesús en medio de sus discípulos...",
-        titulo: ceInfo.titulo || cEvanRaw.titulo || cEvanRaw.canticoZacariast || base.canticoEvangelico?.titulo || "Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR",
-        texto: ceInfo.texto || cEvanRaw.texto || cEvanRaw.canticoZacarias || base.canticoEvangelico?.texto || "Bendito sea el Señor, Dios de Israel..."
+        antifonaId: ceObj.antifonaId || null,
+        antifona: ceObj.antifona || ceObj.antifonaTexto || cEvanRaw.antifona || cEvanRaw.cEvangelicoAnt || base.canticoEvangelico?.antifona || "Se presentó Jesús en medio de sus discípulos...",
+        titulo: (ceInfo.titulo || titCandidato || base.canticoEvangelico?.titulo || "Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR").replace(/\s{2,}/g, ' ').trim(),
+        texto: textoCanticoNorm
     };
 
     // 7. PRECES
     const precesRaw = d.preces || {};
+    const idPrecesRaw = String(precesRaw.id || precesRaw.varName || '');
+    const esPrecesDeOtraHora = Boolean(
+        (libro === 'visperas' && (precesRaw.libro === 'laudes' || /^(tos\d+la|bautismola)/i.test(idPrecesRaw))) ||
+        (libro === 'laudes' && (precesRaw.libro === 'visperas' || precesRaw.libro === 'vispera' || /^(tos\d+vi|tos\d+[a-z]{2}vi)/i.test(idPrecesRaw)))
+    );
+
     let canonPreces = null;
     if (typeof PrecesDB !== 'undefined' && PrecesDB.obtener) {
-        canonPreces = PrecesDB.obtener(precesRaw.id || id || d.codigo, tiempo, semana, dia, libro);
+        canonPreces = PrecesDB.obtener(esPrecesDeOtraHora ? (id || d.codigo) : (precesRaw.id || id || d.codigo), tiempo, semana, dia, libro);
     } else if (typeof CATALOGO_PRECES_SEED !== 'undefined') {
-        const idBuscado = (precesRaw.id || id || d.codigo || '').toLowerCase();
+        const idBuscado = (esPrecesDeOtraHora ? (id || d.codigo || '') : (precesRaw.id || id || d.codigo || '')).toLowerCase();
         canonPreces = CATALOGO_PRECES_SEED.find(p => p.id.toLowerCase() === idBuscado || idBuscado.includes(p.id.toLowerCase()));
     }
 
@@ -787,12 +804,13 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
     let libreNorm = precesRaw.libre || canonPreces?.libre || base.preces?.libre || "Se pueden añadir algunas intenciones libres";
     let conclNorm = precesRaw.concl || canonPreces?.concl || cEvanRaw.preces2 || base.preces?.concl || "Siguiendo las enseñanzas de Cristo, digamos al Padre celestial:";
 
-    // Detección estricta de preces corruptas (intro aglutinado con intenciones, respuesta fallback ajena o intenciones genéricas de relleno)
-    const introEsMuyLargo = Boolean(introNorm && (introNorm.length > 110 || introNorm.includes('Cristo Jesús, que')));
-    const respuestaEsFallbackAjeno = Boolean(respNorm === "Confirma, Señor, lo que has realizado en nosotros." && (dia !== 'sabado' || libro !== 'visperas'));
+    // Detección estricta de preces corruptas (intro aglutinado con intenciones, preces de otra hora, respuesta fallback ajena o intenciones genéricas de relleno)
+    const introEsMuyLargo = Boolean(introNorm && (introNorm.includes('\n\n') || introNorm.length > 350));
+    const respuestaEsFallbackAjeno = Boolean(respNorm === "Confirma, Señor, lo que has realizado en nosotros." && (dia !== 'viernes' || libro !== 'visperas'));
     const intencionesSonFallback = Boolean(Array.isArray(intsNorm) && intsNorm.some(i => String(i).includes('dígnate sostener nuestra fe')));
+    const usarCanonPreces = Boolean(canonPreces && (esPrecesDeOtraHora || introEsMuyLargo || respuestaEsFallbackAjeno || intencionesSonFallback || intsNorm.length <= 1));
 
-    if (canonPreces && (introEsMuyLargo || respuestaEsFallbackAjeno || intencionesSonFallback || intsNorm.length <= 1)) {
+    if (usarCanonPreces) {
         introNorm = canonPreces.intro;
         respNorm = canonPreces.respuesta;
         intsNorm = [...canonPreces.intenciones];
@@ -814,12 +832,14 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
         }
     }
 
-    const textoCompletoNorm = canonPreces?.textoCompleto || precesRaw.textoCompleto || `${introNorm}\n\n${respNorm}\n\n${intsNorm.join('\n\n')}`;
+    const textoCompletoNorm = usarCanonPreces
+        ? (canonPreces.textoCompleto || `${introNorm}\n\n${respNorm}\n\n${intsNorm.join('\n\n')}`)
+        : (precesRaw.textoCompleto || `${introNorm}\n\n${respNorm}\n\n${intsNorm.join('\n\n')}`);
 
     const precesNorm = {
-        id: canonPreces?.id || precesRaw.id || base.preces?.id || null,
-        varName: canonPreces?.varName || precesRaw.varName || base.preces?.varName || null,
-        titulo: canonPreces?.titulo || precesRaw.titulo || base.preces?.titulo || "PRECES",
+        id: usarCanonPreces ? canonPreces.id : (precesRaw.id || canonPreces?.id || base.preces?.id || null),
+        varName: usarCanonPreces ? canonPreces.varName : (precesRaw.varName || canonPreces?.varName || base.preces?.varName || null),
+        titulo: usarCanonPreces ? canonPreces.titulo : (precesRaw.titulo || canonPreces?.titulo || base.preces?.titulo || "PRECES"),
         intro: introNorm,
         respuesta: respNorm,
         intenciones: intsNorm,
@@ -849,8 +869,8 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
     // Construcción del objeto integrado de doble compatibilidad
     return {
         // Metadatos
-        id: id || `${tiempo}_s${semana}_${dia}_${libro}`,
-        codigo: id,
+        id: obtenerIdCanonico(idCodigo || raw?.id || raw?.codigo) || id || `${tiempo}_s${semana}_${dia}_${libro}`,
+        codigo: obtenerIdCanonico(idCodigo || raw?.id || raw?.codigo) || id,
         tiempo,
         semana,
         dia,
@@ -858,6 +878,7 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
         fecha: raw?.fecha || null,
         santo: raw?.santo || null,
         origenCarga: raw?.origenCarga || 'local',
+        actualizadoEn: raw?.actualizadoEn || null,
 
         // Esquema Moderno (salterios.js)
         titulo: tituloFinal,
@@ -1169,12 +1190,41 @@ Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`
 // =========================================================================
 
 /**
+ * Detecta si una entrada guardada en LocalStorage es un ensamblaje por defecto no guardado
+ * en Firebase o una contaminación previa con textos del Bautismo del Señor en Tiempo Ordinario.
+ */
+export function esEntradaLocalContaminada(parsed, idSolicitado = '') {
+    if (!parsed || typeof parsed !== 'object') return true;
+    if (parsed.origenCarga === 'canonico') return true;
+    const idClean = String(idSolicitado || parsed.id || parsed.codigo || '').toLowerCase();
+    const esOrdinario = idClean.startsWith('tos') || parsed.tiempo === 'ordinario';
+    const esBautismoExplicito = idClean.includes('bautismo');
+
+    // Si no tiene marca de guardado (actualizadoEn) ni proviene explícitamente de Firebase
+    if (!parsed.actualizadoEn && parsed.origenCarga !== 'firebase') {
+        return true;
+    }
+
+    // Si es Tiempo Ordinario pero tiene los textos por defecto del Bautismo del Señor sin fecha de guardado
+    if (esOrdinario && !esBautismoExplicito && !parsed.actualizadoEn) {
+        const titHimno = String(parsed.himno?.titulo || '').toUpperCase();
+        const antInv = String(parsed.invitatorio?.antifona || parsed.invitatorio?.antifonaTexto || '');
+        if (titHimno.includes('HOY DOS EXTREMOS SE HAN VISTO') || antInv.includes('en quien el Padre tiene sus complacencias')) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Consulta de forma SÍNCRONA en memoria local (LocalStorage / Catálogo en memoria)
  * Garantiza respuesta inmediata (0ms) sin pausas de red.
  */
 export function obtenerHoraLocalSincrona(idCodigo, libroTarget = null) {
     if (!idCodigo) return null;
     const equivalentes = obtenerIdsEquivalentes(idCodigo);
+    const decSolicitado = decodificarCodigoLiturgico(idCodigo);
 
     for (const candId of equivalentes) {
         try {
@@ -1182,6 +1232,13 @@ export function obtenerHoraLocalSincrona(idCodigo, libroTarget = null) {
             if (raw) {
                 let parsed = JSON.parse(raw);
                 if (parsed) {
+                    if (esEntradaLocalContaminada(parsed, candId)) {
+                        try {
+                            localStorage.removeItem(`${PREFIJO_LOCAL}${candId}`);
+                        } catch (_) {}
+                        continue;
+                    }
+
                     const libroAlt = libroTarget === 'vispera' ? 'visperas' : (libroTarget === 'visperas' ? 'vispera' : libroTarget);
                     if (libroTarget && parsed.horas && (parsed.horas[libroTarget] || parsed.horas[libroAlt])) {
                         parsed = { ...parsed, ...(parsed.horas[libroTarget] || parsed.horas[libroAlt]) };
@@ -1197,8 +1254,36 @@ export function obtenerHoraLocalSincrona(idCodigo, libroTarget = null) {
                             continue;
                         }
                     }
+
+                    const decCand = decodificarCodigoLiturgico(candId);
+                    const esFallbackCiclo = Boolean(
+                        decSolicitado && decCand &&
+                        decSolicitado.tiempo === 'ordinario' && decCand.tiempo === 'ordinario' &&
+                        Number(decSolicitado.semana) !== Number(decCand.semana)
+                    );
+
+                    if (esFallbackCiclo) {
+                        parsed = { ...parsed };
+                        delete parsed.lecturasOficio;
+                        delete parsed.Lecturas;
+                        delete parsed.oracion;
+                        parsed.semana = decSolicitado.semana;
+                        parsed.origenCarga = 'ciclo_local';
+                        parsed._esFallbackCiclo = true;
+                    }
+
                     console.log(`📦 [Local Síncrono] Hora litúrgica '${candId}' recuperada de LocalStorage.`);
-                    return normalizarObjetoLiturgico(parsed, idCodigo, { libro: libroTarget });
+                    const norm = normalizarObjetoLiturgico(parsed, idCodigo, {
+                        tiempo: decSolicitado?.tiempo,
+                        semana: decSolicitado?.semana,
+                        dia: decSolicitado?.dia,
+                        libro: libroTarget || decSolicitado?.libro
+                    });
+                    if (esFallbackCiclo) {
+                        norm.origenCarga = 'ciclo_local';
+                        norm._esFallbackCiclo = true;
+                    }
+                    return norm;
                 }
             }
         } catch (_) {}
@@ -1215,7 +1300,7 @@ export function obtenerIdCanonico(idCodigo) {
     const clean = idCodigo.trim().toLowerCase();
     const dec = decodificarCodigoLiturgico(clean);
     if (dec) {
-        if (dec.formato === 'santo' || dec.formato === 'solemnidad') {
+        if (dec.formato === 'santo' || dec.formato === 'solemnidad' || dec.formato === 'fiesta') {
             return clean;
         }
         const codT = REVERSO_TIEMPOS[dec.tiempo] || 'to';
@@ -1228,7 +1313,7 @@ export function obtenerIdCanonico(idCodigo) {
 }
 
 /**
- * Limpia claves duplicadas no canónicas y libera espacio en LocalStorage si se acerca a la cuota.
+ * Limpia claves duplicadas no canónicas, entradas contaminadas por defecto y libera espacio en LocalStorage.
  */
 export function purgarLocalStorageSalterios(idPreservar = null, maxEntradas = 25) {
     if (typeof localStorage === 'undefined') return 0;
@@ -1243,12 +1328,21 @@ export function purgarLocalStorageSalterios(idPreservar = null, maxEntradas = 25
         }
     }
 
-    // 1. Eliminar duplicados no canónicos (claves redundantes generadas previamente)
+    // 1. Eliminar duplicados no canónicos y entradas por defecto contaminadas
     const canonicas = [];
     for (const key of clavesSalterio) {
         const idSinPrefijo = key.replace(prefijo, '');
         const canonico = obtenerIdCanonico(idSinPrefijo);
-        if (idSinPrefijo !== canonico && (!idPreservar || idSinPrefijo !== idPreservar)) {
+        let contaminada = false;
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                contaminada = esEntradaLocalContaminada(parsed, idSinPrefijo);
+            }
+        } catch (_) {}
+
+        if (contaminada || (idSinPrefijo !== canonico && (!idPreservar || idSinPrefijo !== idPreservar))) {
             try {
                 localStorage.removeItem(key);
                 eliminadas++;
@@ -1319,25 +1413,25 @@ export async function consultarHoraEnFirebase(idCodigo, params = {}) {
     const idPrincipal = (idCodigo || params.codigoCompleto || '').toLowerCase();
     if (!idPrincipal) return null;
 
+    const decPrincipal = decodificarCodigoLiturgico(idPrincipal);
     const idsABuscar = obtenerIdsEquivalentes(idPrincipal);
-    // Tomar hasta 6 candidatos prioritarios únicos y consultar en paralelo
-    const candidatos = idsABuscar.filter((v, i, a) => a.indexOf(v) === i).slice(0, 6);
+    // Tomar candidatos únicos y consultar en paralelo
+    const candidatos = idsABuscar.filter((v, i, a) => a.indexOf(v) === i).slice(0, 12);
     try {
-        const libroTarget = (params.libro || params.hora || '').toLowerCase();
+        const libroTarget = (params.libro || params.hora || decPrincipal?.libro || '').toLowerCase();
         const promesas = candidatos.map(async (candId) => {
             try {
                 const docRef = doc(db, COLECCION_SALTERIOS, candId);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     console.log(`✅ [Firebase] Documento '${candId}' encontrado en Firestore.`);
-                    const rawData = docSnap.data();
+                    let rawData = docSnap.data();
                     const libroAlt = libroTarget === 'vispera' ? 'visperas' : (libroTarget === 'visperas' ? 'vispera' : libroTarget);
                     if (libroTarget && rawData.horas && (rawData.horas[libroTarget] || rawData.horas[libroAlt])) {
-                        return { candId, data: { ...rawData, ...(rawData.horas[libroTarget] || rawData.horas[libroAlt]) } };
+                        rawData = { ...rawData, ...(rawData.horas[libroTarget] || rawData.horas[libroAlt]) };
                     } else if (libroTarget && rawData.horas) {
                         return null;
-                    }
-                    if (libroTarget && rawData.libro) {
+                    } else if (libroTarget && rawData.libro) {
                         const rawLib = (rawData.libro || '').toLowerCase();
                         const targetLib = (libroTarget || '').toLowerCase();
                         const coincide = (rawLib === targetLib) ||
@@ -1347,7 +1441,24 @@ export async function consultarHoraEnFirebase(idCodigo, params = {}) {
                             return null;
                         }
                     }
-                    return { candId, data: rawData };
+
+                    const decCand = decodificarCodigoLiturgico(candId);
+                    const esFallbackCiclo = Boolean(
+                        decPrincipal && decCand &&
+                        decPrincipal.tiempo === 'ordinario' && decCand.tiempo === 'ordinario' &&
+                        Number(decPrincipal.semana) !== Number(decCand.semana)
+                    );
+
+                    if (esFallbackCiclo) {
+                        rawData = { ...rawData };
+                        delete rawData.lecturasOficio;
+                        delete rawData.Lecturas;
+                        delete rawData.oracion;
+                        rawData.semana = decPrincipal.semana;
+                        rawData._esFallbackCiclo = true;
+                    }
+
+                    return { candId, data: rawData, esFallbackCiclo };
                 }
             } catch (err) {
                 console.warn(`⚠️ [Firebase] Consulta '${candId}':`, err.message);
@@ -1356,7 +1467,9 @@ export async function consultarHoraEnFirebase(idCodigo, params = {}) {
         });
 
         const resultados = await Promise.all(promesas);
-        const match = resultados.find(r => r !== null);
+        // Priorizar siempre coincidencia exacta de la semana actual antes que un fallback del ciclo de 4 semanas
+        const matchExacto = resultados.find(r => r !== null && !r.esFallbackCiclo);
+        const match = matchExacto || resultados.find(r => r !== null);
         return match ? match.data : null;
     } catch (e) {
         console.warn("Aviso consultando Firebase:", e);

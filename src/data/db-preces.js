@@ -640,85 +640,713 @@ export const CATALOGO_PRECES_SEED = [
         "textoCompleto": "Adoremos a Dios, que por su Hijo ha dado vida y esperanza al mundo, y supliquémosle diciendo:\r\n\r\nEscúchanos, Señor.\r\n\r\nSeñor, Padre de todos, tú que nos has hecho llegar al comienzo de este día,\r\nhaz que toda nuestra vida unida a la de Cristo sea alabanza de tu gloria.\r\n\r\nQue vivamos siempre arraigados en la fe, esperanza y caridad,\r\nque tú mismo has infundido en nuestras almas.\r\n\r\nHaz que nuestros ojos estén siempre levantados hacia ti,\r\npara que respondamos con presteza a tus llamadas.\r\n\r\nDefiéndenos de los engaños y seducciones del mal,\r\ny presérvanos de todo pecado."
     },
     {
-        "id": "tos1visab",
-        "varName": "tos1visab",
+        "id": "tos01dovi",
+        "varName": "tos1VIdo",
+        "titulo": "Preces - Tiempo Ordinario - Semana 1 - Domingo / Bautismo (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "domingo",
+        "libro": "visperas",
+        "intro": "Roguemos a nuestro Redentor, bautizado por Juan en el Jordán, y supliquémosle, diciendo:",
+        "respuesta": "Envía, Señor, tu Espíritu sobre nosotros.",
+        "intenciones": [
+            "Cristo, siervo de Dios, en quien el Padre tiene todo su gozo,\nenvía tu Espíritu sobre nosotros.",
+            "Cristo, elegido de Dios, tú que no rompiste la caña resquebrajada ni apagaste la mecha humeante,\ncompadécete de cuantos te buscan con sinceridad.",
+            "Cristo, Hijo de Dios, a quien el Padre ha elegido como nueva alianza del pueblo y luz de las naciones,\nabre por el bautismo los ojos de los que no ven.",
+            "Cristo, salvador de los hombres, a quien el Padre ungió con el Espíritu Santo y envió para salvación del mundo,\nhaz que todos los hombres te conozcan y crean en ti para que así obtengan la vida eterna."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Cristo, esperanza nuestra, que llevas la luz de la salvación a los pueblos que yacen en las tinieblas de la ignorancia,\nrecibe en tu reino a nuestros difuntos.\n\nYa que somos la familia de Dios, digamos con grande confianza a nuestro Padre del cielo:",
+        "textoCompleto": "Roguemos a nuestro Redentor, bautizado por Juan en el Jordán, y supliquémosle, diciendo:\n\nEnvía, Señor, tu Espíritu sobre nosotros.\n\nCristo, siervo de Dios, en quien el Padre tiene todo su gozo,\nenvía tu Espíritu sobre nosotros.\n\nCristo, elegido de Dios, tú que no rompiste la caña resquebrajada ni apagaste la mecha humeante,\ncompadécete de cuantos te buscan con sinceridad.\n\nCristo, Hijo de Dios, a quien el Padre ha elegido como nueva alianza del pueblo y luz de las naciones,\nabre por el bautismo los ojos de los que no ven.\n\nCristo, salvador de los hombres, a quien el Padre ungió con el Espíritu Santo y envió para salvación del mundo,\nhaz que todos los hombres te conozcan y crean en ti para que así obtengan la vida eterna."
+    },
+    {
+        "id": "tos01luvi",
+        "varName": "tos1vilu",
+        "titulo": "Preces - Tiempo Ordinario - Semana 1 - Lunes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "lunes",
+        "libro": "visperas",
+        "intro": "Demos gracias a Dios, nuestro Padre, que recordando siempre su santa alianza, no cesa de bendecirnos, y digámosle con ánimo confiado:",
+        "respuesta": "Favorece a tu pueblo, Señor.",
+        "intenciones": [
+            "Salva a tu pueblo, Señor,\ny bendice a tu heredad.",
+            "Congrega en la unidad a todos los cristianos:\npara que el mundo crea en Cristo, tu enviado.",
+            "Derrama tu gracia sobre nuestros familiares y amigos:\nque encuentren en ti, Señor, su verdadera felicidad.",
+            "Muestra tu amor a los agonizantes:\nque puedan contemplar tu salvación."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Ten piedad de los que han muerto\ny acógelos en el descanso de Cristo.\n\nTerminemos nuestra oración con las palabras que nos enseñó Cristo:",
+        "textoCompleto": "Demos gracias a Dios, nuestro Padre, que recordando siempre su santa alianza, no cesa de bendecirnos, y digámosle con ánimo confiado:\n\nFavorece a tu pueblo, Señor.\n\nSalva a tu pueblo, Señor,\ny bendice a tu heredad.\n\nCongrega en la unidad a todos los cristianos:\npara que el mundo crea en Cristo, tu enviado.\n\nDerrama tu gracia sobre nuestros familiares y amigos:\nque encuentren en ti, Señor, su verdadera felicidad.\n\nMuestra tu amor a los agonizantes:\nque puedan contemplar tu salvación."
+    },
+    {
+        "id": "tos01mavi",
+        "varName": "tos1vima",
+        "titulo": "Preces - Tiempo Ordinario - Semana 1 - Martes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "martes",
+        "libro": "visperas",
+        "intro": "Alabemos a Cristo, que mora en medio de nosotros, su pueblo adquirido, y supliquémosle diciendo:",
+        "respuesta": "Por el honor de tu nombre, escúchanos, Señor.",
+        "intenciones": [
+            "Dueño y Señor de los pueblos, acude en ayuda de todas las naciones y de los que las gobiernan:\nque todos los hombres sean fieles a tu voluntad y trabajen por el bien y la paz.",
+            "Tú que al subir al cielo llevaste contigo una gran multitud de cautivos,\ndevuelve la libertad de los hijos de Dios a nuestros hermanos que sufren esclavitud en el cuerpo o en el espíritu.",
+            "Concede, Señor, a los jóvenes la realización de sus esperanzas\ny que sepan responder a tus llamadas en el transcurso de su vida.",
+            "Que los niños imiten tu ejemplo\ny crezcan siempre en sabiduría y en gracia."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Acoge a los difuntos en tu reino,\ndonde también nosotros esperamos reinar un día contigo.\n\nCon el gozo de sabernos hijos de Dios, acudamos a nuestro Padre:",
+        "textoCompleto": "Alabemos a Cristo, que mora en medio de nosotros, su pueblo adquirido, y supliquémosle diciendo:\n\nPor el honor de tu nombre, escúchanos, Señor.\n\nDueño y Señor de los pueblos, acude en ayuda de todas las naciones y de los que las gobiernan:\nque todos los hombres sean fieles a tu voluntad y trabajen por el bien y la paz.\n\nTú que al subir al cielo llevaste contigo una gran multitud de cautivos,\ndevuelve la libertad de los hijos de Dios a nuestros hermanos que sufren esclavitud en el cuerpo o en el espíritu.\n\nConcede, Señor, a los jóvenes la realización de sus esperanzas\ny que sepan responder a tus llamadas en el transcurso de su vida.\n\nQue los niños imiten tu ejemplo\ny crezcan siempre en sabiduría y en gracia."
+    },
+    {
+        "id": "tos01mivi",
+        "varName": "tos1vimi",
+        "titulo": "Preces - Tiempo Ordinario - Semana 1 - Miércoles (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "miercoles",
+        "libro": "visperas",
+        "intro": "Oremos, hermanos, a Dios Padre, que en su amor nos mira como hijos, y digámosle:",
+        "respuesta": "Muéstranos, Señor, la abundancia de tu amor.",
+        "intenciones": [
+            "Acuérdate, Señor, de tu Iglesia: guárdala de todo mal\ny haz que crezca en tu amor.",
+            "Que todos los pueblos, Señor, te reconozcan como al único Dios verdadero,\ny a Jesucristo como al Salvador que tú has enviado.",
+            "A nuestros parientes y bienhechores concédeles tus bienes\ny que tu bondad les dé la vida eterna.",
+            "Te pedimos, Señor, por los trabajadores que sufren: alivia sus dificultades\ny haz que todos los hombres reconozcan su dignidad."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "En tu misericordia acoge a los que hoy han muerto\ny dales posesión de tu reino.\n\nUnidos fraternalmente como hermanos de una misma familia, invoquemos a nuestro Padre común:",
+        "textoCompleto": "Oremos, hermanos, a Dios Padre, que en su amor nos mira como hijos, y digámosle:\n\nMuéstranos, Señor, la abundancia de tu amor.\n\nAcuérdate, Señor, de tu Iglesia: guárdala de todo mal\ny haz que crezca en tu amor.\n\nQue todos los pueblos, Señor, te reconozcan como al único Dios verdadero,\ny a Jesucristo como al Salvador que tú has enviado.\n\nA nuestros parientes y bienhechores concédeles tus bienes\ny que tu bondad les dé la vida eterna.\n\nTe pedimos, Señor, por los trabajadores que sufren: alivia sus dificultades\ny haz que todos los hombres reconozcan su dignidad."
+    },
+    {
+        "id": "tos01juvi",
+        "varName": "tos1viju",
+        "titulo": "Preces - Tiempo Ordinario - Semana 1 - Jueves (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "jueves",
+        "libro": "visperas",
+        "intro": "Invoquemos a Dios, nuestro refugio y nuestra fortaleza, y digámosle:",
+        "respuesta": "Escucha, Señor, nuestra oración.",
+        "intenciones": [
+            "Dios de amor que has hecho alianza con tu pueblo,\nhaz que recordemos siempre tus maravillas.",
+            "Que los sacerdotes, Señor, crezcan en la caridad\ny que los fieles vivan en la unidad del Espíritu y en el vínculo de la paz.",
+            "Que el mundo prospere y avance según tus designios\ny que los que lo construyen no trabajen en vano.",
+            "Envía, Señor, operarios a tu mies\npara que tu nombre sea conocido en el mundo."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "A nuestros familiares y bienhechores difuntos dales un lugar entre los santos\ny haz que nosotros un día nos encontremos con ellos en tu reino.\n\nYa que por Jesucristo hemos llegado a ser hijos de Dios, nos atrevemos a decir:",
+        "textoCompleto": "Invoquemos a Dios, nuestro refugio y nuestra fortaleza, y digámosle:\n\nEscucha, Señor, nuestra oración.\n\nDios de amor que has hecho alianza con tu pueblo,\nhaz que recordemos siempre tus maravillas.\n\nQue los sacerdotes, Señor, crezcan en la caridad\ny que los fieles vivan en la unidad del Espíritu y en el vínculo de la paz.\n\nQue el mundo prospere y avance según tus designios\ny que los que lo construyen no trabajen en vano.\n\nEnvía, Señor, operarios a tu mies\npara que tu nombre sea conocido en el mundo."
+    },
+    {
+        "id": "tos01vivi",
+        "varName": "tos1vivi",
+        "titulo": "Preces - Tiempo Ordinario - Semana 1 - Viernes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "1",
+        "dia": "viernes",
+        "libro": "visperas",
+        "intro": "Bendigamos a Dios que escucha con amor la oración de los humildes y a los hambrientos los colma de bienes; digámosle confiados:",
+        "respuesta": "Muéstranos, Señor, tu misericordia.",
+        "intenciones": [
+            "Señor, Padre lleno de amor, te pedimos por todos los miembros de la iglesia que sufren:\nacuérdate que por ellos, Cristo, cabeza de la iglesia, ofreció en la cruz el verdadero sacrificio vespertino.",
+            "Libra a los encarcelados, ilumina a los que viven en tinieblas, sé la ayuda de las viudas y de los huérfanos,\ny haz que todos nos preocupemos de los que sufren.",
+            "Concede a tus hijos la fuerza necesaria\npara resistir las tentaciones del Maligno.",
+            "Acude en nuestro auxilio, Señor, cuando llegue la hora de nuestra muerte:\nque seamos fieles hasta el fin y dejemos este mundo en tu paz."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Conduce a los difuntos a la luz donde tu habitas\npara que puedan contemplarte eternamente.\n\nFieles a la recomendación del Salvador, nos atrevemos a decir:",
+        "textoCompleto": "Bendigamos a Dios que escucha con amor la oración de los humildes y a los hambrientos los colma de bienes; digámosle confiados:\n\nMuéstranos, Señor, tu misericordia.\n\nSeñor, Padre lleno de amor, te pedimos por todos los miembros de la iglesia que sufren:\nacuérdate que por ellos, Cristo, cabeza de la iglesia, ofreció en la cruz el verdadero sacrificio vespertino.\n\nLibra a los encarcelados, ilumina a los que viven en tinieblas, sé la ayuda de las viudas y de los huérfanos,\ny haz que todos nos preocupemos de los que sufren.\n\nConcede a tus hijos la fuerza necesaria\npara resistir las tentaciones del Maligno.\n\nAcude en nuestro auxilio, Señor, cuando llegue la hora de nuestra muerte:\nque seamos fieles hasta el fin y dejemos este mundo en tu paz."
+    },
+    {
+        "id": "tos01savi",
+        "varName": "tos1visa",
         "titulo": "Preces - Tiempo Ordinario - Semana 1 - Sábado (Vísperas)",
         "tiempo": "ordinario",
         "semana": "1",
         "dia": "sabado",
         "libro": "visperas",
-        "intro": "Invoquemos a Cristo, en quien confian los que conocen su nombre, diciendo:",
+        "intro": "Demos gracias al Señor que ayuda y protege al pueblo que se ha escogido como heredad, y recordando su amor para con nosotros supliquémosle diciendo:",
+        "respuesta": "Escúchanos, Señor, que confiamos en ti.",
+        "intenciones": [
+            "Padre lleno de amor, te pedimos por el papa Francisco y por nuestro obispo N.;\nprotégelos con tu fuerza y santifícalos con tu gracia.",
+            "Que los enfermos vean en sus dolores una participación de la pasión de tu Hijo,\npara que así tengan también parte en su consuelo.",
+            "Mira con piedad a los que no tienen techo donde cobijarse\ny haz que encuentren pronto el hogar que desean.",
+            "Dígnate dar y conservar los frutos de la tierra\npara que a nadie falte el pan de cada día."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Señor, ten piedad de los difuntos\ny ábreles la puerta de tu mansión eterna.\n\nMovidos por el Espíritu Santo, dirijamos al Padre la oración que Cristo nos enseñó:",
+        "textoCompleto": "Demos gracias al Señor que ayuda y protege al pueblo que se ha escogido como heredad, y recordando su amor para con nosotros supliquémosle diciendo:\n\nEscúchanos, Señor, que confiamos en ti.\n\nPadre lleno de amor, te pedimos por el papa Francisco y por nuestro obispo N.;\nprotégelos con tu fuerza y santifícalos con tu gracia.\n\nQue los enfermos vean en sus dolores una participación de la pasión de tu Hijo,\npara que así tengan también parte en su consuelo.\n\nMira con piedad a los que no tienen techo donde cobijarse\ny haz que encuentren pronto el hogar que desean.\n\nDígnate dar y conservar los frutos de la tierra\npara que a nadie falte el pan de cada día."
+    },
+    {
+        "id": "tos02dovi",
+        "varName": "tos2VIdo",
+        "titulo": "Preces - Tiempo Ordinario - Semana 2 - Domingo (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "2",
+        "dia": "domingo",
+        "libro": "visperas",
+        "intro": "Demos gloria y honor a Cristo, que puede salvar definitivamente a los que por medio de él se acercan a Dios, porque vive para interceder en su favor, y digámosle con plena confianza:",
+        "respuesta": "Acuérdate, Señor, de tu pueblo.",
+        "intenciones": [
+            "Señor Jesús, sol de justicia que iluminas nuestras vidas, al llegar al umbral de la noche te pedimos por todos los hombres,\nque todos lleguen a gozar eternamente de tu luz.",
+            "Guarda, Señor, la alianza sellada con tu sangre\ny santifica a tu iglesia para que sea siempre inmaculada y santa.",
+            "Acuérdate de esta comunidad aquí reunida,\nque tú elegiste como morada de tu gloria.",
+            "Que los que están en camino tengan un viaje feliz\ny regresen a sus hogares con salud y alegría."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Acoge, Señor, a tus hijos difuntos\ny concédeles tu perdón y la vida eterna.\n\nTerminemos nuestras preces con la oración que Cristo nos enseñó:",
+        "textoCompleto": "Demos gloria y honor a Cristo, que puede salvar definitivamente a los que por medio de él se acercan a Dios, porque vive para interceder en su favor, y digámosle con plena confianza:\n\nAcuérdate, Señor, de tu pueblo.\n\nSeñor Jesús, sol de justicia que iluminas nuestras vidas, al llegar al umbral de la noche te pedimos por todos los hombres,\nque todos lleguen a gozar eternamente de tu luz.\n\nGuarda, Señor, la alianza sellada con tu sangre\ny santifica a tu iglesia para que sea siempre inmaculada y santa.\n\nAcuérdate de esta comunidad aquí reunida,\nque tú elegiste como morada de tu gloria.\n\nQue los que están en camino tengan un viaje feliz\ny regresen a sus hogares con salud y alegría."
+    },
+    {
+        "id": "tos02luvi",
+        "varName": "tos2vilu",
+        "titulo": "Preces - Tiempo Ordinario - Semana 2 - Lunes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "2",
+        "dia": "lunes",
+        "libro": "visperas",
+        "intro": "Alabemos a Cristo, que ama a la Iglesia y le da alimento y calor, y roguémosle confiados diciendo:",
+        "respuesta": "Atiende, Señor, los deseos de tu pueblo.",
+        "intenciones": [
+            "Haz, Señor, que todos los hombres se salven\ny lleguen al conocimiento de la verdad.",
+            "Guarda con tu protección al papa Francisco y a nuestro obispo N.,\nayúdalos con el poder de tu brazo.",
+            "Ten compasión de los que no encuentran trabajo\ny haz que consigan un empleo digno y estable.",
+            "Señor, sé refugio de los oprimidos\ny protégelos en todas sus necesidades."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Te pedimos por el eterno descanso de los que durante su vida ejercieron el ministerio para el bien de tu iglesia:\nque también te celebren eternamente en tu reino.\n\nFieles a la recomendación del Salvador nos atrevemos a decir:",
+        "textoCompleto": "Alabemos a Cristo, que ama a la Iglesia y le da alimento y calor, y roguémosle confiados diciendo:\n\nAtiende, Señor, los deseos de tu pueblo.\n\nHaz, Señor, que todos los hombres se salven\ny lleguen al conocimiento de la verdad.\n\nGuarda con tu protección al papa Francisco y a nuestro obispo N.,\nayúdalos con el poder de tu brazo.\n\nTen compasión de los que no encuentran trabajo\ny haz que consigan un empleo digno y estable.\n\nSeñor, sé refugio de los oprimidos\ny protégelos en todas sus necesidades."
+    },
+    {
+        "id": "tos02mavi",
+        "varName": "tos2vima",
+        "titulo": "Preces - Tiempo Ordinario - Semana 2 - Martes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "2",
+        "dia": "martes",
+        "libro": "visperas",
+        "intro": "Alabemos a Cristo, pastor y obispo de nuestras vidas, que vela siempre con amor por su pueblo, y digámosle suplicantes:",
+        "respuesta": "Protege, Señor, a tu pueblo.",
+        "intenciones": [
+            "Pastor eterno, protege a nuestro obispo N.\ny a todos los pastores de la Iglesia.",
+            "Mira con bondad a los que sufren persecución\ny líbralos de todas sus angustias.",
+            "Compadécete de los pobres y necesitados\ny da pan a los hambrientos.",
+            "Ilumina a los que tienen la misión de gobernar a los pueblos\ny dales sabiduría y prudencia."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "No olvides, Señor, a los difuntos redimidos por tu sangre\ny admítelos en el festín de las bodas eternas.\n\nUnidos fraternalmente como hermanos de una misma familia, invoquemos al Padre común:",
+        "textoCompleto": "Alabemos a Cristo, pastor y obispo de nuestras vidas, que vela siempre con amor por su pueblo, y digámosle suplicantes:\n\nProtege, Señor, a tu pueblo.\n\nPastor eterno, protege a nuestro obispo N.\ny a todos los pastores de la Iglesia.\n\nMira con bondad a los que sufren persecución\ny líbralos de todas sus angustias.\n\nCompadécete de los pobres y necesitados\ny da pan a los hambrientos.\n\nIlumina a los que tienen la misión de gobernar a los pueblos\ny dales sabiduría y prudencia."
+    },
+    {
+        "id": "tos02mivi",
+        "varName": "tos2vimi",
+        "titulo": "Preces - Tiempo Ordinario - Semana 2 - Miércoles (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "2",
+        "dia": "miercoles",
+        "libro": "visperas",
+        "intro": "Aclamemos, hermanos, a Dios, nuestro salvador, que se complace en enriquecernos con sus dones, y digámosle con fe:",
+        "respuesta": "Muéstranos, Señor, tu amor y danos tu paz.",
+        "intenciones": [
+            "Dios eterno, mil años en tu presencia son como un ayer que pasó;\nayúdanos a recordar siempre que nuestra vida es como una hierba que se renueva por la mañana y se seca por la tarde.",
+            "Alimenta a tu pueblo con el maná para que no perezca de hambre\ny dale el agua viva para que nunca más tenga sed.",
+            "Que tus fieles busquen y saboreen los bienes de arriba\ny te glorifiquen también con su descanso.",
+            "Concede, Señor, buen tiempo a las cosechas,\npara que la tierra de fruto abundante."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Que los difuntos puedan contemplar tu faz\ny que nosotros tengamos un día parte en su felicidad.\n\nConfiemos nuestras súplicas a Dios nuestro Padre, terminando nuestra oración con las palabras que Cristo nos enseñó:",
+        "textoCompleto": "Aclamemos, hermanos, a Dios, nuestro salvador, que se complace en enriquecernos con sus dones, y digámosle con fe:\n\nMuéstranos, Señor, tu amor y danos tu paz.\n\nDios eterno, mil años en tu presencia son como un ayer que pasó;\nayúdanos a recordar siempre que nuestra vida es como una hierba que se renueva por la mañana y se seca por la tarde.\n\nAlimenta a tu pueblo con el maná para que no perezca de hambre\ny dale el agua viva para que nunca más tenga sed.\n\nQue tus fieles busquen y saboreen los bienes de arriba\ny te glorifiquen también con su descanso.\n\nConcede, Señor, buen tiempo a las cosechas,\npara que la tierra de fruto abundante."
+    },
+    {
+        "id": "tos02juvi",
+        "varName": "tos2viju",
+        "titulo": "Preces - Tiempo Ordinario - Semana 2 - Jueves (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "2",
+        "dia": "jueves",
+        "libro": "visperas",
+        "intro": "Elevemos a Dios nuestros corazones agradecidos porque ha bendecido a su pueblo con toda clase de bienes espirituales y digámosle con fe:",
+        "respuesta": "Bendice, Señor, a tu pueblo.",
+        "intenciones": [
+            "Dios todopoderoso y lleno de misericordia, protege al Papa Francisco y a nuestro obispo N.,\nque tú mismo has elegido para guiar a la Iglesia.",
+            "Protege, Señor, a nuestros pueblos y ciudades\ny aleja de ellos todo mal.",
+            "Multiplica como renuevos de olivo alrededor de tu mesa hijos que se consagren a tu reino,\nsiguiendo a Jesucristo en pobreza, castidad y obediencia.",
+            "Conserva el propósito de aquellas de tus hijas que han consagrado a ti su virginidad,\npara que, en la integridad de su cuerpo y de su espíritu, sigan al cordero donde quiera que vaya."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Da la paz a los difuntos\ny permítenos encontrarlos nuevamente un día en tu reino.\n\nYa que por Jesucristo hemos llegado a ser hijos de Dios, acudamos con confianza a nuestro Padre:",
+        "textoCompleto": "Elevemos a Dios nuestros corazones agradecidos porque ha bendecido a su pueblo con toda clase de bienes espirituales y digámosle con fe:\n\nBendice, Señor, a tu pueblo.\n\nDios todopoderoso y lleno de misericordia, protege al Papa Francisco y a nuestro obispo N.,\nque tú mismo has elegido para guiar a la Iglesia.\n\nProtege, Señor, a nuestros pueblos y ciudades\ny aleja de ellos todo mal.\n\nMultiplica como renuevos de olivo alrededor de tu mesa hijos que se consagren a tu reino,\nsiguiendo a Jesucristo en pobreza, castidad y obediencia.\n\nConserva el propósito de aquellas de tus hijas que han consagrado a ti su virginidad,\npara que, en la integridad de su cuerpo y de su espíritu, sigan al cordero donde quiera que vaya."
+    },
+    {
+        "id": "tos02vivi",
+        "varName": "tos2vivi",
+        "titulo": "Preces - Tiempo Ordinario - Semana 2 - Viernes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "2",
+        "dia": "viernes",
+        "libro": "visperas",
+        "intro": "Bendigamos ahora al Señor Jesús, que en su vida mortal escuchó siempre con bondad las súplicas de los que acudían a él y enjugaba con amor las lágrimas de los que lloraban, y digámosle también nosotros:",
+        "respuesta": "Señor, ten piedad.",
+        "intenciones": [
+            "Señor Jesucristo, tú que consolaste a los tristes y desconsolados, pon ahora tus ojos en los sufrimientos de los pobres\ny consuela a los deprimidos.",
+            "Escucha los gemidos de los agonizantes\ny envíales tus ángeles para que los consuelen y conforten.",
+            "Que los emigrantes sientan el consuelo de tu amor en el destierro, que puedan regresar a su patria\ny que un día alcancen también la patria eterna.",
+            "Que los pecadores escuchando tu voz se conviertan,\ny encuentren en tu Iglesia el perdón y la paz."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Perdona las faltas de los que han muerto\ny dales la plenitud de tu salvación.\n\nCon el gozo que nos da el saber que somos hijos de Dios, digamos con plena confianza:",
+        "textoCompleto": "Bendigamos ahora al Señor Jesús, que en su vida mortal escuchó siempre con bondad las súplicas de los que acudían a él y enjugaba con amor las lágrimas de los que lloraban, y digámosle también nosotros:\n\nSeñor, ten piedad.\n\nSeñor Jesucristo, tú que consolaste a los tristes y desconsolados, pon ahora tus ojos en los sufrimientos de los pobres\ny consuela a los deprimidos.\n\nEscucha los gemidos de los agonizantes\ny envíales tus ángeles para que los consuelen y conforten.\n\nQue los emigrantes sientan el consuelo de tu amor en el destierro, que puedan regresar a su patria\ny que un día alcancen también la patria eterna.\n\nQue los pecadores escuchando tu voz se conviertan,\ny encuentren en tu Iglesia el perdón y la paz."
+    },
+    {
+        "id": "tos02savi",
+        "varName": "tos2visa",
+        "titulo": "Preces - Tiempo Ordinario - Semana 2 - Sábado (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "2",
+        "dia": "sabado",
+        "libro": "visperas",
+        "intro": "Recordando la bondad de Cristo, que se compadeció del pueblo hambriento y obró en favor suyo los prodigios de su amor, digámosle con fe:",
+        "respuesta": "Escúchanos, Señor.",
+        "intenciones": [
+            "Reconocemos, Señor, que todos los beneficios que hoy hemos recibido proceden de tu bondad;\nhaz que no sean estériles, sino que den fruto, encontrando un corazón noble de nuestra parte.",
+            "Dios nuestro, luz y salvación de todos los pueblos, protege a los que dan testimonio de ti en el mundo,\ny enciende en ellos el fuego de tu Espíritu.",
+            "Haz, Señor, que todos los hombres respeten la dignidad de sus hermanos,\ny que todos juntos edifiquemos un mundo cada vez más humano.",
+            "A ti, que eres el médico de las almas y de los cuerpos,\nte pedimos que alivies a los enfermos y des la paz a los agonizantes, visitándolos con tu bondad."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Dígnate agregar a los difuntos al número de tus escogidos,\ncuyos nombres están escritos en el libro de la vida.\n\nPorque Jesús ha resucitado, todos somos hijos de Dios; por eso nos atrevemos a decir:",
+        "textoCompleto": "Recordando la bondad de Cristo, que se compadeció del pueblo hambriento y obró en favor suyo los prodigios de su amor, digámosle con fe:\n\nEscúchanos, Señor.\n\nReconocemos, Señor, que todos los beneficios que hoy hemos recibido proceden de tu bondad;\nhaz que no sean estériles, sino que den fruto, encontrando un corazón noble de nuestra parte.\n\nDios nuestro, luz y salvación de todos los pueblos, protege a los que dan testimonio de ti en el mundo,\ny enciende en ellos el fuego de tu Espíritu.\n\nHaz, Señor, que todos los hombres respeten la dignidad de sus hermanos,\ny que todos juntos edifiquemos un mundo cada vez más humano.\n\nA ti, que eres el médico de las almas y de los cuerpos,\nte pedimos que alivies a los enfermos y des la paz a los agonizantes, visitándolos con tu bondad."
+    },
+    {
+        "id": "tos03dovi",
+        "varName": "tos3VIdo",
+        "titulo": "Preces - Tiempo Ordinario - Semana 3 - Domingo (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "3",
+        "dia": "domingo",
+        "libro": "visperas",
+        "intro": "Invoquemos a Dios, nuestro Padre, que maravillosamente creó el mundo, lo redimió de forma más admirable aún y no cesa de conservarlo con amor, y digámosle:",
+        "respuesta": "Renueva, Señor, las maravillas de tu amor.",
+        "intenciones": [
+            "Señor, tú que en el universo, obra de tus manos, nos revelas tu poder,\nhaz que sepamos ver tu providencia en los acontecimientos del mundo.",
+            "Tú que por la victoria de tu Hijo en la cruz anunciaste la paz al mundo,\nlíbranos de todo desaliento y de todo temor.",
+            "A todos los que aman la justicia y trabajan por conseguirla,\nconcédeles que cooperen con sinceridad y concordia en la edificación de un mundo mejor.",
+            "Ayuda a los oprimidos, consuela a los afligidos, libra a los cautivos, da pan a los hambrientos\ny fortalece a los débiles, para que en todos se manifieste el triunfo de la cruz."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Tú que al tercer día resucitaste a tu Hijo gloriosamente del sepulcro,\nhaz que nuestros hermanos difuntos lleguen también a la plenitud de la vida.\n\nConcluyamos nuestra súplica con la oración que el mismo Cristo nos enseñó:",
+        "textoCompleto": "Invoquemos a Dios, nuestro Padre, que maravillosamente creó el mundo, lo redimió de forma más admirable aún y no cesa de conservarlo con amor, y digámosle:\n\nRenueva, Señor, las maravillas de tu amor.\n\nSeñor, tú que en el universo, obra de tus manos, nos revelas tu poder,\nhaz que sepamos ver tu providencia en los acontecimientos del mundo.\n\nTú que por la victoria de tu Hijo en la cruz anunciaste la paz al mundo,\nlíbranos de todo desaliento y de todo temor.\n\nA todos los que aman la justicia y trabajan por conseguirla,\nconcédeles que cooperen con sinceridad y concordia en la edificación de un mundo mejor.\n\nAyuda a los oprimidos, consuela a los afligidos, libra a los cautivos, da pan a los hambrientos\ny fortalece a los débiles, para que en todos se manifieste el triunfo de la cruz."
+    },
+    {
+        "id": "tos03luvi",
+        "varName": "tos3vilu",
+        "titulo": "Preces - Tiempo Ordinario - Semana 3 - Lunes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "3",
+        "dia": "lunes",
+        "libro": "visperas",
+        "intro": "Cristo quiere que todos los hombres alcancen la salvación. Digámosle, pues, confiadamente:",
+        "respuesta": "Atrae, Señor, a todos hacia ti.",
+        "intenciones": [
+            "Te bendecimos, Señor, porque nos has redimido con tu preciosa sangre de la esclavitud del pecado;\nhaz que participemos en la gloriosa libertad de los hijos de Dios.",
+            "Ayuda con tu gracia a nuestro obispo N. y a todos los obispos de la Iglesia,\npara que con gozo y fervor sirvan a tu pueblo.",
+            "Que todos los que consagran su vida a la investigación de la verdad logren encontrarla\ny que, habiéndola encontrado, se esfuercen por difundirla entre sus hermanos.",
+            "Atiende, Señor, a los huérfanos, a las viudas y a los que viven abandonados;\nayúdalos en sus necesidades para que experimenten tu solicitud hacia ellos."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Acoge a nuestros hermanos difuntos en la ciudad santa de la Jerusalén celestial,\nallí donde tú, con el Padre y el Espíritu Santo, serás todo en todos.\n\nAdoctrinados por el mismo Señor, nos atrevemos a decir:",
+        "textoCompleto": "Cristo quiere que todos los hombres alcancen la salvación. Digámosle, pues, confiadamente:\n\nAtrae, Señor, a todos hacia ti.\n\nTe bendecimos, Señor, porque nos has redimido con tu preciosa sangre de la esclavitud del pecado;\nhaz que participemos en la gloriosa libertad de los hijos de Dios.\n\nAyuda con tu gracia a nuestro obispo N. y a todos los obispos de la Iglesia,\npara que con gozo y fervor sirvan a tu pueblo.\n\nQue todos los que consagran su vida a la investigación de la verdad logren encontrarla\ny que, habiéndola encontrado, se esfuercen por difundirla entre sus hermanos.\n\nAtiende, Señor, a los huérfanos, a las viudas y a los que viven abandonados;\nayúdalos en sus necesidades para que experimenten tu solicitud hacia ellos."
+    },
+    {
+        "id": "tos03mavi",
+        "varName": "tos3vima",
+        "titulo": "Preces - Tiempo Ordinario - Semana 3 - Martes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "3",
+        "dia": "martes",
+        "libro": "visperas",
+        "intro": "Invoquemos a Dios, esperanza de su pueblo, diciendo:",
+        "respuesta": "Escúchanos, Señor.",
+        "intenciones": [
+            "Te damos gracias, Señor, porque hemos sido enriquecidos en todo por Cristo, tu Hijo;\nhaz que por él crezcamos en todo conocimiento.",
+            "En tus manos, Señor, están el corazón y la mente de los que gobiernan;\ndales, pues, acierto en sus decisiones para que te sean gratos en su pensar y obrar.",
+            "Tú que a los artistas concedes inspiración para plasmar la belleza que de ti procede,\nhaz que con sus obras aumente el gozo y la esperanza de los hombres.",
+            "Tú que no permites que seamos tentados por encima de nuestras fuerzas,\nda fortaleza a los débiles, levanta a los caídos."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Tú que nos has prometido la resurrección en el último día,\nno te olvides de tus hijos que ya han dejado el cuerpo mortal.\n\nUnidos fraternalmente como hermanos de una misma familia, invoquemos al Padre común:",
+        "textoCompleto": "Invoquemos a Dios, esperanza de su pueblo, diciendo:\n\nEscúchanos, Señor.\n\nTe damos gracias, Señor, porque hemos sido enriquecidos en todo por Cristo, tu Hijo;\nhaz que por él crezcamos en todo conocimiento.\n\nEn tus manos, Señor, están el corazón y la mente de los que gobiernan;\ndales, pues, acierto en sus decisiones para que te sean gratos en su pensar y obrar.\n\nTú que a los artistas concedes inspiración para plasmar la belleza que de ti procede,\nhaz que con sus obras aumente el gozo y la esperanza de los hombres.\n\nTú que no permites que seamos tentados por encima de nuestras fuerzas,\nda fortaleza a los débiles, levanta a los caídos."
+    },
+    {
+        "id": "tos03mivi",
+        "varName": "tos3vimi",
+        "titulo": "Preces - Tiempo Ordinario - Semana 3 - Miércoles (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "3",
+        "dia": "miercoles",
+        "libro": "visperas",
+        "intro": "Invoquemos a Dios, que envió a su Hijo como salvador y modelo supremo de su pueblo, diciendo:",
+        "respuesta": "Que tu pueblo, Señor, te alabe.",
+        "intenciones": [
+            "Te damos gracias, Señor, porque nos has escogido como primicias para la salvación;\nhaz que sepamos corresponder y así logremos la gloria de nuestro Señor Jesucristo.",
+            "Haz que todos los que confiesan tu santo nombre sean concordes en la verdad\ny vivan unidos por la caridad.",
+            "Creador del universo, cuyo Hijo, al venir a este mundo, quiso trabajar con sus propias manos:\nacuérdate de los trabajadores que ganan el pan con el sudor de su rostro.",
+            "Acuérdate también de todos los que viven entregados al servicio de los demás;\nque no se dejen vencer por el desaliento ante la incomprensión de los hombres."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Ten piedad de nuestros hermanos difuntos\ny líbralos del poder del Maligno.\n\nLlenos de fe invoquemos juntos al Padre común, repitiendo la oración que Jesús nos enseñó:",
+        "textoCompleto": "Invoquemos a Dios, que envió a su Hijo como salvador y modelo supremo de su pueblo, diciendo:\n\nQue tu pueblo, Señor, te alabe.\n\nTe damos gracias, Señor, porque nos has escogido como primicias para la salvación;\nhaz que sepamos corresponder y así logremos la gloria de nuestro Señor Jesucristo.\n\nHaz que todos los que confiesan tu santo nombre sean concordes en la verdad\ny vivan unidos por la caridad.\n\nCreador del universo, cuyo Hijo, al venir a este mundo, quiso trabajar con sus propias manos:\nacuérdate de los trabajadores que ganan el pan con el sudor de su rostro.\n\nAcuérdate también de todos los que viven entregados al servicio de los demás;\nque no se dejen vencer por el desaliento ante la incomprensión de los hombres."
+    },
+    {
+        "id": "tos03juvi",
+        "varName": "tos3viju",
+        "titulo": "Preces - Tiempo Ordinario - Semana 3 - Jueves (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "3",
+        "dia": "jueves",
+        "libro": "visperas",
+        "intro": "Invoquemos a Cristo, pastor, protector y ayuda de su pueblo, diciendo:",
+        "respuesta": "Señor, refugio nuestro, escúchanos.",
+        "intenciones": [
+            "Bendito seas, Señor, que nos has llamado a tu santa Iglesia;\nhaz que seamos fieles a esta dignación de tu amor.",
+            "Tú que has encomendado al Papa Francisco la preocupación por todas las Iglesias,\nconcédele una fe inquebrantable, una esperanza viva y una caridad solícita.",
+            "Da a los pecadores la conversión, a los que caen, fortaleza,\ny concede a todos la penitencia y la salvación.",
+            "Tú que quisiste habitar en un país extranjero,\nacuérdate de los que viven lejos de su familia y de su patria."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "A todos los difuntos que esperaron en ti,\nconcédeles el descanso eterno.\n\nYa que por Jesucristo somos hijos de Dios, oremos con plena confianza a Dios nuestro Padre:",
+        "textoCompleto": "Invoquemos a Cristo, pastor, protector y ayuda de su pueblo, diciendo:\n\nSeñor, refugio nuestro, escúchanos.\n\nBendito seas, Señor, que nos has llamado a tu santa Iglesia;\nhaz que seamos fieles a esta dignación de tu amor.\n\nTú que has encomendado al Papa Francisco la preocupación por todas las Iglesias,\nconcédele una fe inquebrantable, una esperanza viva y una caridad solícita.\n\nDa a los pecadores la conversión, a los que caen, fortaleza,\ny concede a todos la penitencia y la salvación.\n\nTú que quisiste habitar en un país extranjero,\nacuérdate de los que viven lejos de su familia y de su patria."
+    },
+    {
+        "id": "tos03vivi",
+        "varName": "tos3vivi",
+        "titulo": "Preces - Tiempo Ordinario - Semana 3 - Viernes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "3",
+        "dia": "viernes",
+        "libro": "visperas",
+        "intro": "Invoquemos al Hijo de Dios, a quien el Padre entregó por nuestras faltas y lo resucitó para nuestra justificación, diciendo:",
+        "respuesta": "Señor, ten piedad.",
+        "intenciones": [
+            "Escucha, Señor, nuestras súplicas, perdona los pecados de los que se confiesen culpables\ny en tu bondad otórganos el perdón y la paz.",
+            "Tú que, por medio del Apóstol nos has enseñado que donde se multiplicó el pecado sobreabundó mucho más la gracia,\nperdona con largueza nuestros muchos pecados.",
+            "Hemos pecado mucho, Señor, pero confiamos en tu misericordia infinita;\nvuélvete a nosotros para que podamos convertirnos a ti.",
+            "Salva a tu pueblo de sus pecados, Señor,\ny sé benévolo con nosotros."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Tú que abriste las puertas del paraíso al buen ladrón,\nábrelas también para nuestros hermanos difuntos.\n\nReconociendo que nuestra fuerza para no caer en la tentación se halla en Dios, digamos confiadamente:",
+        "textoCompleto": "Invoquemos al Hijo de Dios, a quien el Padre entregó por nuestras faltas y lo resucitó para nuestra justificación, diciendo:\n\nSeñor, ten piedad.\n\nEscucha, Señor, nuestras súplicas, perdona los pecados de los que se confiesen culpables\ny en tu bondad otórganos el perdón y la paz.\n\nTú que, por medio del Apóstol nos has enseñado que donde se multiplicó el pecado sobreabundó mucho más la gracia,\nperdona con largueza nuestros muchos pecados.\n\nHemos pecado mucho, Señor, pero confiamos en tu misericordia infinita;\nvuélvete a nosotros para que podamos convertirnos a ti.\n\nSalva a tu pueblo de sus pecados, Señor,\ny sé benévolo con nosotros."
+    },
+    {
+        "id": "tos03savi",
+        "varName": "tos3visa",
+        "titulo": "Preces - Tiempo Ordinario - Semana 3 - Sábado (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "3",
+        "dia": "sabado",
+        "libro": "visperas",
+        "intro": "Invoquemos a Cristo, alegría de cuantos se refugian en él, y digámosle:",
+        "respuesta": "Míranos y escúchanos, Señor.",
+        "intenciones": [
+            "Testigo fiel y primogénito de entre los muertos, tú que nos purificaste con tu sangre\nno permitas que olvidemos nunca tus beneficios.",
+            "Haz que aquellos a quienes elegiste como ministros de tu Evangelio\nsean siempre fieles y celosos dispensadores de los misterios del reino.",
+            "Rey de la paz, concede abundantemente tu Espíritu a los que gobiernan las naciones\npara que cuiden con interés de los pobres y postergados.",
+            "Sé ayuda para cuantos son víctimas de cualquier segregación por causa de su raza, color, condición social, lengua o religión\ny haz que todos reconozcan su dignidad y respeten sus derechos."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "A los que han muerto en tu amor dales también parte en tu felicidad\ncon María y con todos tus santos.\n\nPorque Jesús ha resucitado, todos somos hijos de Dios; por eso nos atrevemos a decir:",
+        "textoCompleto": "Invoquemos a Cristo, alegría de cuantos se refugian en él, y digámosle:\n\nMíranos y escúchanos, Señor.\n\nTestigo fiel y primogénito de entre los muertos, tú que nos purificaste con tu sangre\nno permitas que olvidemos nunca tus beneficios.\n\nHaz que aquellos a quienes elegiste como ministros de tu Evangelio\nsean siempre fieles y celosos dispensadores de los misterios del reino.\n\nRey de la paz, concede abundantemente tu Espíritu a los que gobiernan las naciones\npara que cuiden con interés de los pobres y postergados.\n\nSé ayuda para cuantos son víctimas de cualquier segregación por causa de su raza, color, condición social, lengua o religión\ny haz que todos reconozcan su dignidad y respeten sus derechos."
+    },
+    {
+        "id": "tos04dovi",
+        "varName": "tos4VIdo",
+        "titulo": "Preces - Tiempo Ordinario - Semana 4 - Domingo (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "4",
+        "dia": "domingo",
+        "libro": "visperas",
+        "intro": "Alegrándonos en el Señor, de quien vienen todos los dones, digámosle:",
+        "respuesta": "Escucha, Señor, nuestra oración.",
+        "intenciones": [
+            "Padre y Señor de todos, que enviaste a tu Hijo al mundo para que tu nombre fuese glorificado desde donde sale el sol hasta el ocaso,\nfortalece el testimonio de tu Iglesia entre los pueblos.",
+            "Haz que seamos dóciles a la predicación de los apóstoles,\ny sumisos a la fe verdadera.",
+            "Tú que amas la justicia,\nhaz justicia a los oprimidos.",
+            "Libera a los cautivos, abre los ojos al ciego,\nendereza a los que ya se doblan, guarda a los peregrinos."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Haz que nuestros hermanos que duermen ya el sueño de la paz\nlleguen, por tu Hijo, a la santa resurrección.\n\nUnidos entre nosotros y con Jesucristo, y dispuestos a perdonarnos siempre unos a otros, dirijamos al Padre nuestra súplica confiada:",
+        "textoCompleto": "Alegrándonos en el Señor, de quien vienen todos los dones, digámosle:\n\nEscucha, Señor, nuestra oración.\n\nPadre y Señor de todos, que enviaste a tu Hijo al mundo para que tu nombre fuese glorificado desde donde sale el sol hasta el ocaso,\nfortalece el testimonio de tu Iglesia entre los pueblos.\n\nHaz que seamos dóciles a la predicación de los apóstoles,\ny sumisos a la fe verdadera.\n\nTú que amas la justicia,\nhaz justicia a los oprimidos.\n\nLibera a los cautivos, abre los ojos al ciego,\nendereza a los que ya se doblan, guarda a los peregrinos."
+    },
+    {
+        "id": "tos04luvi",
+        "varName": "tos4vilu",
+        "titulo": "Preces - Tiempo Ordinario - Semana 4 - Lunes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "4",
+        "dia": "lunes",
+        "libro": "visperas",
+        "intro": "Llenos de confianza en el Señor Jesús que no abandona nunca a los que se acogen a él, invoquémosle diciendo:",
+        "respuesta": "Escúchanos, Señor, Dios nuestro.",
+        "intenciones": [
+            "Señor Jesucristo, tú eres nuestra luz; ilumina a tu Iglesia\npara que proclame a todas las naciones el gran misterio de piedad manifestado en tu encarnación.",
+            "Guarda a los sacerdotes y ministros de la Iglesia,\ny haz que con su palabra y su ejemplo edifiquen tu pueblo santo.",
+            "Tú que, por tu sangre, pacificaste el mundo,\naparta de nosotros el pecado de discordia y el azote de la guerra.",
+            "Ayuda, Señor, a los que uniste con la gracia del matrimonio,\npara que su unión sea efectivamente signo del misterio de la Iglesia."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Concede, por tu misericordia, a todos los difuntos el perdón de sus faltas,\npara que sean contados entre tus elegidos.\n\nUnidos a Jesucristo, supliquemos ahora al Padre con la oración de los hijos de Dios:",
+        "textoCompleto": "Llenos de confianza en el Señor Jesús que no abandona nunca a los que se acogen a él, invoquémosle diciendo:\n\nEscúchanos, Señor, Dios nuestro.\n\nSeñor Jesucristo, tú eres nuestra luz; ilumina a tu Iglesia\npara que proclame a todas las naciones el gran misterio de piedad manifestado en tu encarnación.\n\nGuarda a los sacerdotes y ministros de la Iglesia,\ny haz que con su palabra y su ejemplo edifiquen tu pueblo santo.\n\nTú que, por tu sangre, pacificaste el mundo,\naparta de nosotros el pecado de discordia y el azote de la guerra.\n\nAyuda, Señor, a los que uniste con la gracia del matrimonio,\npara que su unión sea efectivamente signo del misterio de la Iglesia."
+    },
+    {
+        "id": "tos04mavi",
+        "varName": "tos4vima",
+        "titulo": "Preces - Tiempo Ordinario - Semana 4 - Martes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "4",
+        "dia": "martes",
+        "libro": "visperas",
+        "intro": "Invoquemos a Cristo, que da fuerza y poder a su pueblo, diciendo:",
+        "respuesta": "Señor, escúchanos.",
+        "intenciones": [
+            "Cristo, fortaleza nuestra, concede a todos tus fieles, a quienes has llamado a la luz de tu verdad,\nque tengan siempre fidelidad y constancia.",
+            "Haz, Señor, que los que gobiernan el mundo lo hagan conforme a tu querer,\ny que sus decisiones vayan encaminadas a la consecución de la paz.",
+            "Tú que con cinco panes saciaste a la multitud,\nenséñanos a socorrer con nuestros bienes a los hambrientos.",
+            "Que los que tienen en su mano los destinos de los pueblos no cuiden sólo del bienestar de su nación,\nsino que piensen también en los otros pueblos."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Cuando vengas en tu día a ser glorificado en los santos,\nda a nuestros hermanos difuntos la resurrección y la vida feliz.\n\nTodos juntos, en familia, repitamos las palabras que nos enseñó Jesús, y oremos al Padre diciendo:",
+        "textoCompleto": "Invoquemos a Cristo, que da fuerza y poder a su pueblo, diciendo:\n\nSeñor, escúchanos.\n\nCristo, fortaleza nuestra, concede a todos tus fieles, a quienes has llamado a la luz de tu verdad,\nque tengan siempre fidelidad y constancia.\n\nHaz, Señor, que los que gobiernan el mundo lo hagan conforme a tu querer,\ny que sus decisiones vayan encaminadas a la consecución de la paz.\n\nTú que con cinco panes saciaste a la multitud,\nenséñanos a socorrer con nuestros bienes a los hambrientos.\n\nQue los que tienen en su mano los destinos de los pueblos no cuiden sólo del bienestar de su nación,\nsino que piensen también en los otros pueblos."
+    },
+    {
+        "id": "tos04mivi",
+        "varName": "tos4vimi",
+        "titulo": "Preces - Tiempo Ordinario - Semana 4 - Miércoles (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "4",
+        "dia": "miercoles",
+        "libro": "visperas",
+        "intro": "Invoquemos a Dios, cuya bondad para con su pueblo es más grande que los cielos, y digámosle:",
+        "respuesta": "Que se alegren los que se acogen a ti, Señor.",
+        "intenciones": [
+            "Acuérdate, Señor, que enviaste a tu Hijo al mundo, no para condenarlo, sino para salvarlo;\nhaz que su muerte gloriosa nos traiga la salvación.",
+            "Tú que constituiste a tus sacerdotes servidores de Cristo y administradores de tus misterios,\nconcédeles un corazón fiel, ciencia abundante y caridad intensa.",
+            "Tú que desde el principio creaste hombre y mujer,\nguarda a todas las familias unidas en el verdadero amor.",
+            "Haz que los que has llamado a la castidad perfecta por el reino de los cielos,\nsigan con fidelidad a tu Hijo."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Tú que enviaste a Jesucristo al mundo para salvar a los pecadores,\nConcede a todos los difuntos el perdón de sus faltas.\n\nMovidos por el Espíritu Santo y llenos de su amor, dirijamos al Padre nuestra oración:",
+        "textoCompleto": "Invoquemos a Dios, cuya bondad para con su pueblo es más grande que los cielos, y digámosle:\n\nQue se alegren los que se acogen a ti, Señor.\n\nAcuérdate, Señor, que enviaste a tu Hijo al mundo, no para condenarlo, sino para salvarlo;\nhaz que su muerte gloriosa nos traiga la salvación.\n\nTú que constituiste a tus sacerdotes servidores de Cristo y administradores de tus misterios,\nconcédeles un corazón fiel, ciencia abundante y caridad intensa.\n\nTú que desde el principio creaste hombre y mujer,\nguarda a todas las familias unidas en el verdadero amor.\n\nHaz que los que has llamado a la castidad perfecta por el reino de los cielos,\nsigan con fidelidad a tu Hijo."
+    },
+    {
+        "id": "tos04juvi",
+        "varName": "tos4viju",
+        "titulo": "Preces - Tiempo Ordinario - Semana 4 - Jueves (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "4",
+        "dia": "jueves",
+        "libro": "visperas",
+        "intro": "Invoquemos a Cristo, luz del mundo y alegría de todo ser viviente, y digámosle confiados:",
+        "respuesta": "Señor, danos tu luz, la salvación y la paz.",
+        "intenciones": [
+            "Luz indeficiente y palabra eterna del Padre, tú que has venido a salvar a los hombres,\nilumina a los catecúmenos de la Iglesia con la luz de tu verdad.",
+            "No lleves cuenta de nuestros delitos, Señor,\npues de ti procede el perdón.",
+            "Señor, tú que has querido que la inteligencia del hombre investigara los secretos de la naturaleza,\nhaz que la ciencia y las artes contribuyan a tu gloria y al bienestar de todos los hombres.",
+            "Protege, Señor, a los que se han consagrado en el mundo al servicio de sus hermanos;\nque con libertad de espíritu y sin desánimo puedan realizar su ideal."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Señor, tú que abres y nadie puede cerrar, ilumina a nuestros difuntos que yacen en tiniebla y en sombra de muerte,\ny ábreles las puertas de tu reino.\n\nPorque todos nos sabemos hermanos, hijos de un mismo Dios, confiadamente nos atrevemos a decir:",
+        "textoCompleto": "Invoquemos a Cristo, luz del mundo y alegría de todo ser viviente, y digámosle confiados:\n\nSeñor, danos tu luz, la salvación y la paz.\n\nLuz indeficiente y palabra eterna del Padre, tú que has venido a salvar a los hombres,\nilumina a los catecúmenos de la Iglesia con la luz de tu verdad.\n\nNo lleves cuenta de nuestros delitos, Señor,\npues de ti procede el perdón.\n\nSeñor, tú que has querido que la inteligencia del hombre investigara los secretos de la naturaleza,\nhaz que la ciencia y las artes contribuyan a tu gloria y al bienestar de todos los hombres.\n\nProtege, Señor, a los que se han consagrado en el mundo al servicio de sus hermanos;\nque con libertad de espíritu y sin desánimo puedan realizar su ideal."
+    },
+    {
+        "id": "tos04vivi",
+        "varName": "tos4vivi",
+        "titulo": "Preces - Tiempo Ordinario - Semana 4 - Viernes (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "4",
+        "dia": "viernes",
+        "libro": "visperas",
+        "intro": "Invoquemos a Cristo, en quien confían los que conocen su nombre, diciendo:",
         "respuesta": "Confirma, Señor, lo que has realizado en nosotros.",
         "intenciones": [
             "Señor Jesucristo, consuelo de los humildes,\ndígnate sostener con tu gracia nuestra fragilidad, siempre inclinada al pecado.",
             "Que los que por nuestra debilidad estamos inclinados al mal,\npor tu misericordia obtengamos el perdón.",
             "Señor, a quien ofende el pecado y aplaca la penitencia,\naparta de nosotros el castigo merecido por nuestros pecados.",
-            "Tú que perdonaste a la mujer arrepentida y cargaste sobre los hombros la oveja descarriada,\nno apartes de nosotros tu misericordia.",
-            "Tú que por nosotros aceptaste el suplicio de la cruz,\nabre las puertas del cielo a todos los difuntos que en ti confiaron."
+            "Tú que perdonaste a la mujer arrepentida y cargaste sobre los hombros la oveja descarriada,\nno apartes de nosotros tu misericordia."
         ],
         "libre": "Se pueden añadir algunas intenciones libres",
-        "concl": "Siguiendo las enseñanzas de Jesucristo, digamos al Padre celestial:",
-        "textoCompleto": "Invoquemos a Cristo, en quien confian los que conocen su nombre, diciendo:\n\nConfirma, Señor, lo que has realizado en nosotros.\n\nSeñor Jesucristo, consuelo de los humildes,\ndígnate sostener con tu gracia nuestra fragilidad, siempre inclinada al pecado.\n\nQue los que por nuestra debilidad estamos inclinados al mal,\npor tu misericordia obtengamos el perdón.\n\nSeñor, a quien ofende el pecado y aplaca la penitencia,\naparta de nosotros el castigo merecido por nuestros pecados.\n\nTú que perdonaste a la mujer arrepentida y cargaste sobre los hombros la oveja descarriada,\nno apartes de nosotros tu misericordia.\n\nTú que por nosotros aceptaste el suplicio de la cruz,\nabre las puertas del cielo a todos los difuntos que en ti confiaron."
+        "concl": "Tú que por nosotros aceptaste el suplicio de la cruz,\nabre las puertas del cielo a todos los difuntos que en ti confiaron.\n\nSiguiendo las enseñanzas de Jesucristo, digamos al Padre celestial:",
+        "textoCompleto": "Invoquemos a Cristo, en quien confían los que conocen su nombre, diciendo:\n\nConfirma, Señor, lo que has realizado en nosotros.\n\nSeñor Jesucristo, consuelo de los humildes,\ndígnate sostener con tu gracia nuestra fragilidad, siempre inclinada al pecado.\n\nQue los que por nuestra debilidad estamos inclinados al mal,\npor tu misericordia obtengamos el perdón.\n\nSeñor, a quien ofende el pecado y aplaca la penitencia,\naparta de nosotros el castigo merecido por nuestros pecados.\n\nTú que perdonaste a la mujer arrepentida y cargaste sobre los hombros la oveja descarriada,\nno apartes de nosotros tu misericordia."
+    },
+    {
+        "id": "tos04savi",
+        "varName": "tos4visa",
+        "titulo": "Preces - Tiempo Ordinario - Semana 4 - Sábado (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "4",
+        "dia": "sabado",
+        "libro": "visperas",
+        "intro": "Glorifiquemos a Dios, Padre, Hijo, y Espíritu Santo, y supliquémosle diciendo:",
+        "respuesta": "Escucha a tu pueblo, Señor.",
+        "intenciones": [
+            "Padre todopoderoso, haz que abunde en la tierra la justicia\ny que tu pueblo se alegre en la paz.",
+            "Que todos los pueblos entren a formar parte de tu reino\ny que el pueblo judío sea salvado.",
+            "Que los esposos cumplan tu voluntad, vivan en concordia\ny que sean siempre fieles a su mutuo amor.",
+            "Recompensa, Señor, a nuestros bienhechores\ny concédeles la vida eterna."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Acoge con amor a los que han muerto víctimas del odio, de la violencia o de la guerra\ny dales el descanso eterno.\n\nMovidos por el Espíritu Santo, dirijamos al Padre la oración que Cristo nos enseñó:",
+        "textoCompleto": "Glorifiquemos a Dios, Padre, Hijo, y Espíritu Santo, y supliquémosle diciendo:\n\nEscucha a tu pueblo, Señor.\n\nPadre todopoderoso, haz que abunde en la tierra la justicia\ny que tu pueblo se alegre en la paz.\n\nQue todos los pueblos entren a formar parte de tu reino\ny que el pueblo judío sea salvado.\n\nQue los esposos cumplan tu voluntad, vivan en concordia\ny que sean siempre fieles a su mutuo amor.\n\nRecompensa, Señor, a nuestros bienhechores\ny concédeles la vida eterna."
+    },
+    {
+        "id": "tos05dovi",
+        "varName": "tos5VIdo",
+        "titulo": "Preces - Tiempo Ordinario - Semana 5 - Domingo (Vísperas)",
+        "tiempo": "ordinario",
+        "semana": "5",
+        "dia": "domingo",
+        "libro": "visperas",
+        "intro": "Adoremos a Cristo, Señor nuestro y cabeza de la Iglesia, y digámosle confiadamente:",
+        "respuesta": "Venga a nosotros tu reino, Señor.",
+        "intenciones": [
+            "Señor, amigo de los hombres, haz de tu Iglesia instrumento de concordia y unidad entre ellos\ny signo de salvación para todos los pueblos.",
+            "Protege con tu brazo poderoso al Papa y a todos los obispos\ny concédeles trabajar en unidad, amor y paz.",
+            "A los cristianos concédenos vivir íntimamente unidos a ti, nuestro Maestro,\ny dar testimonio en nuestras vidas de la llegada de tu reino.",
+            "Concede, Señor, al mundo el don de la paz\ny haz que en todos los pueblos reine la justicia y el bienestar."
+        ],
+        "libre": "Se pueden añadir algunas intenciones libres",
+        "concl": "Otorga, a los que han muerto, una resurrección gloriosa\ny haz que los que aún vivimos en este mundo gocemos un día con ellos de la felicidad eterna.\n\nTerminemos nuestra oración con las palabras del Señor:",
+        "textoCompleto": "Adoremos a Cristo, Señor nuestro y cabeza de la Iglesia, y digámosle confiadamente:\n\nVenga a nosotros tu reino, Señor.\n\nSeñor, amigo de los hombres, haz de tu Iglesia instrumento de concordia y unidad entre ellos\ny signo de salvación para todos los pueblos.\n\nProtege con tu brazo poderoso al Papa y a todos los obispos\ny concédeles trabajar en unidad, amor y paz.\n\nA los cristianos concédenos vivir íntimamente unidos a ti, nuestro Maestro,\ny dar testimonio en nuestras vidas de la llegada de tu reino.\n\nConcede, Señor, al mundo el don de la paz\ny haz que en todos los pueblos reine la justicia y el bienestar."
     }
 ];
 
+function normalizarLibroPreces(libro) {
+    const l = String(libro || 'laudes').toLowerCase().trim();
+    if (l === 'vispera' || l === 'visperas' || l === 'vi') return 'visperas';
+    if (l === 'laudes' || l === 'laud' || l === 'la') return 'laudes';
+    return l;
+}
+
+function coincideLibroPreces(pLibro, libroBuscado) {
+    if (!pLibro || !libroBuscado) return true;
+    return normalizarLibroPreces(pLibro) === normalizarLibroPreces(libroBuscado);
+}
+
 export const PrecesDB = {
-    listar: () => CATALOGO_PRECES_SEED,
+    getCatalogo: () => {
+        const mapa = new Map();
+        if (typeof localStorage !== 'undefined') {
+            try {
+                const raw = localStorage.getItem('lh_preces_cache');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        for (const p of parsed) {
+                            if (!p || !p.id) continue;
+                            // Ignorar semilla antigua errónea tos1visab (que tenía texto de viernes semana 4)
+                            if (p.id === 'tos1visab' && p.respuesta === 'Confirma, Señor, lo que has realizado en nosotros.') {
+                                continue;
+                            }
+                            mapa.set(String(p.id).toLowerCase(), p);
+                        }
+                    }
+                }
+            } catch (_) {}
+        }
+        for (const s of CATALOGO_PRECES_SEED) {
+            const k = String(s.id).toLowerCase();
+            const kVar = s.varName ? String(s.varName).toLowerCase() : null;
+            if (!mapa.has(k) && (!kVar || !mapa.has(kVar))) {
+                mapa.set(k, s);
+            }
+        }
+        return Array.from(mapa.values());
+    },
+    listar: () => PrecesDB.getCatalogo(),
     obtenerPorId: (id) => {
         if (!id) return null;
-        const cleanId = String(id).toLowerCase().trim();
-        return CATALOGO_PRECES_SEED.find(p => 
-            (p.id && p.id.toLowerCase() === cleanId) || 
-            (p.varName && p.varName.toLowerCase() === cleanId)
-        ) || null;
+        let cleanId = String(id).toLowerCase().trim().replace(/_(prec|preces)$/, '');
+        if (cleanId === 'tos1visab') cleanId = 'tos01savi';
+        const catalogo = PrecesDB.getCatalogo();
+        const exact = catalogo.find(p =>
+            (p.id && p.id.toLowerCase().replace(/_(prec|preces)$/, '') === cleanId) ||
+            (p.varName && p.varName.toLowerCase().replace(/_(prec|preces)$/, '') === cleanId)
+        );
+        if (exact) return exact;
+
+        // Probar equivalencia entre formato nuevo (tos01dovi) y antiguo (tos1vido)
+        const mDiaHora = cleanId.match(/^(to|ta|tn|tc|tp)s0?(\d+)(do|lu|ma|mi|ju|vi|sa)(of|la|te|se|no|vi|co)$/);
+        if (mDiaHora) {
+            const [, t, s, d, h] = mDiaHora;
+            const sNum = parseInt(s, 10);
+            const sPad = String(sNum).padStart(2, '0');
+            const cands = [
+                `${t}s${sPad}${d}${h}`,
+                `${t}s${sNum}${d}${h}`,
+                `${t}s${sNum}${h}${d}`,
+                `${t}s${sPad}${h}${d}`
+            ];
+            for (const c of cands) {
+                const f = catalogo.find(p =>
+                    (p.id && p.id.toLowerCase() === c) ||
+                    (p.varName && p.varName.toLowerCase() === c)
+                );
+                if (f) return f;
+            }
+        }
+        return null;
     },
-    obtener: (id, tiempo = null, semana = null, dia = null, libro = 'laudes') => {
+    obtener: (id, tiempo = null, semana = null, dia = null, libro = null) => {
         if (!id && !tiempo) return null;
         const cleanId = String(id || '').toLowerCase().trim();
+        const libroTarget = libro ? normalizarLibroPreces(libro) : null;
 
-        // 1. Coincidencia exacta o insensible a mayúsculas
+        // 1. Coincidencia por ID (verificando que no sea una preces de Laudes inyectada por error en Vísperas)
         if (cleanId) {
-            const direct = CATALOGO_PRECES_SEED.find(p => 
-                (p.id && p.id.toLowerCase() === cleanId) || 
-                (p.varName && p.varName.toLowerCase() === cleanId)
-            );
-            if (direct) return direct;
+            const direct = PrecesDB.obtenerPorId(cleanId);
+            if (direct) {
+                if (!libroTarget || coincideLibroPreces(direct.libro, libroTarget) || cleanId.startsWith('sa') || tiempo === 'santos') {
+                    return direct;
+                }
+            }
         }
 
         if (cleanId.startsWith('sa') || tiempo === 'santos') {
             return null;
         }
 
-        // 2. Decodificar códigos litúrgicos (ej: tos01dola, tos1dola, tos01mila, ordinario_semana_1_domingo_laudes)
+        // 2. Decodificar códigos litúrgicos (ej: tos01dovi, tos1vido, tos01dola, ordinario_semana_1_domingo_visperas)
         let decT = tiempo;
         let decS = semana;
         let decD = dia;
-        let decL = libro || 'laudes';
+        let decL = libroTarget || 'laudes';
 
         if (cleanId) {
-            const mNuevo = cleanId.match(/^(to|ta|tn|tc|tp|san)(s\d+)(do|lu|ma|mi|ju|vi|sa)(of|la|te|se|no|vi|co)?$/);
-            const mAntiguo = cleanId.match(/^(to|ta|tn|tc|tp|san)(s\d+)(of|la|te|se|no|vi|co)(do|lu|ma|mi|ju|vi|sa)$/);
-            const mVerboso = cleanId.match(/^([a-z]+)_(?:semana_)?(\d+)_([a-z]+)_([a-z]+)$/);
+            const cleanSinSuf = cleanId.replace(/_(prec|preces)$/, '');
+            const mNuevo = cleanSinSuf.match(/^(to|ta|tn|tc|tp|san)(s\d+)(do|lu|ma|mi|ju|vi|sa)(of|la|te|se|no|vi|co)?$/);
+            const mAntiguo = cleanSinSuf.match(/^(to|ta|tn|tc|tp|san)(s\d+)(of|la|te|se|no|vi|co)(do|lu|ma|mi|ju|vi|sa)$/);
+            const mVerboso = cleanSinSuf.match(/^([a-z]+)_(?:semana_)?(\d+)_([a-z]+)_([a-z]+)$/);
 
             const MAPA_T = { to: 'ordinario', ta: 'adviento', tn: 'navidad', tc: 'cuaresma', tp: 'pascua' };
             const MAPA_D = { do: 'domingo', lu: 'lunes', ma: 'martes', mi: 'miercoles', ju: 'jueves', vi: 'viernes', sa: 'sabado' };
             const MAPA_L = { of: 'oficio', la: 'laudes', te: 'tercia', se: 'sexta', no: 'nona', vi: 'visperas', co: 'completas' };
 
             if (mNuevo) {
-                decT = MAPA_T[mNuevo[1]] || decT;
-                decS = parseInt(mNuevo[2].replace('s', ''), 10);
-                decD = MAPA_D[mNuevo[3]] || decD;
-                decL = mNuevo[4] ? (MAPA_L[mNuevo[4]] || decL) : decL;
+                decT = decT || MAPA_T[mNuevo[1]];
+                decS = decS || parseInt(mNuevo[2].replace('s', ''), 10);
+                decD = decD || MAPA_D[mNuevo[3]];
+                decL = libroTarget || (mNuevo[4] ? (MAPA_L[mNuevo[4]] || decL) : decL);
             } else if (mAntiguo) {
-                decT = MAPA_T[mAntiguo[1]] || decT;
-                decS = parseInt(mAntiguo[2].replace('s', ''), 10);
-                decL = MAPA_L[mAntiguo[3]] || decL;
-                decD = MAPA_D[mAntiguo[4]] || decD;
+                decT = decT || MAPA_T[mAntiguo[1]];
+                decS = decS || parseInt(mAntiguo[2].replace('s', ''), 10);
+                decL = libroTarget || MAPA_L[mAntiguo[3]] || decL;
+                decD = decD || MAPA_D[mAntiguo[4]];
             } else if (mVerboso) {
-                decT = mVerboso[1];
-                decS = parseInt(mVerboso[2], 10);
-                decD = mVerboso[3];
-                decL = mVerboso[4];
+                decT = decT || mVerboso[1];
+                decS = decS || parseInt(mVerboso[2], 10);
+                decD = decD || mVerboso[3];
+                decL = libroTarget || normalizarLibroPreces(mVerboso[4]);
             }
         }
 
@@ -728,73 +1356,93 @@ export const PrecesDB = {
             return PrecesDB.obtenerRecomendada(decT || 'ordinario', decS || 1, decD || 'domingo', decL || 'laudes');
         }
 
-        return CATALOGO_PRECES_SEED[0] || null;
+        return null;
     },
     buscar: (termino) => {
-        if (!termino) return CATALOGO_PRECES_SEED;
+        const catalogo = PrecesDB.getCatalogo();
+        if (!termino) return catalogo;
         const t = termino.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return CATALOGO_PRECES_SEED.filter(p => {
+        return catalogo.filter(p => {
             const tit = (p.titulo || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const intro = (p.intro || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const resp = (p.respuesta || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const ints = (p.intenciones || []).join(' ').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            return tit.includes(t) || intro.includes(t) || resp.includes(t) || ints.includes(t) || p.id.toLowerCase().includes(t);
+            const ints = (Array.isArray(p.intenciones) ? p.intenciones.join(' ') : (p.intenciones || '')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const concl = (p.concl || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return tit.includes(t) || intro.includes(t) || resp.includes(t) || ints.includes(t) || concl.includes(t) || (p.id && p.id.toLowerCase().includes(t));
         });
     },
     obtenerRecomendada: (tiempo, semana, dia, libro = 'laudes') => {
+        const catalogo = PrecesDB.getCatalogo();
         const semNum = parseInt(String(semana).replace(/[^0-9]/g, ''), 10) || 1;
         const semCiclo = ((semNum - 1) % 4) + 1;
-        const diaNorm = (dia || 'lunes').toLowerCase();
+        const semPad = String(semNum).padStart(2, '0');
+        const semCicloPad = String(semCiclo).padStart(2, '0');
+        const diaNorm = (dia || 'lunes').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const diaPref = diaNorm.slice(0, 2);
+        const libroNorm = normalizarLibroPreces(libro);
+        const mapT = { ordinario: 'to', adviento: 'ta', navidad: 'tn', cuaresma: 'tc', pascua: 'tp' };
+        const tPref = mapT[tiempo] || 'to';
+        const hPref = libroNorm === 'visperas' ? 'vi' : (libroNorm === 'laudes' ? 'la' : libroNorm.slice(0, 2));
 
-        // Claves prioritarias
+        const esDomCiclo1Posterior = (tiempo === 'ordinario' && diaNorm === 'domingo' && semNum > 1 && semCiclo === 1);
+
         const clavesBuscar = [
-            'tos' + semNum + 'la' + diaPref,
-            'tos' + semCiclo + 'la' + diaPref,
-            'tos' + semNum + 'LA' + diaPref,
-            'tos' + semCiclo + 'LA' + diaPref,
-            diaNorm === 'domingo' && semNum === 1 ? 'bautismoLA' : null,
-            diaNorm === 'domingo' && semNum === 1 ? 'tos1LAdo' : null,
-            diaNorm === 'domingo' ? 'tos' + semNum + 'LAdo' : null,
-            diaNorm === 'domingo' ? 'tos' + semCiclo + 'LAdo' : null,
-            'tos' + semNum + 'vi' + diaPref,
-            'tos' + semCiclo + 'vi' + diaPref
+            `${tPref}s${semPad}${diaPref}${hPref}`,
+            `${tPref}s${semNum}${diaPref}${hPref}`,
+            `${tPref}s${semNum}${hPref}${diaPref}`,
+            `${tPref}s${semPad}${hPref}${diaPref}`,
+            esDomCiclo1Posterior ? `${tPref}s05do${hPref}` : null,
+            esDomCiclo1Posterior ? `${tPref}s5${hPref}do` : null,
+            `${tPref}s${semCicloPad}${diaPref}${hPref}`,
+            `${tPref}s${semCiclo}${diaPref}${hPref}`,
+            `${tPref}s${semCiclo}${hPref}${diaPref}`,
+            `${tPref}s${semCicloPad}${hPref}${diaPref}`,
+            (libroNorm === 'laudes' && diaNorm === 'domingo' && semNum === 1) ? 'tos1LAdo' : null,
+            (libroNorm === 'laudes' && diaNorm === 'domingo' && semNum === 1) ? 'bautismoLA' : null
         ].filter(Boolean);
 
         for (const k of clavesBuscar) {
             const cleanK = k.toLowerCase();
-            const found = CATALOGO_PRECES_SEED.find(p => 
-                p.id.toLowerCase() === cleanK || 
-                (p.varName && p.varName.toLowerCase() === cleanK)
+            const found = catalogo.find(p =>
+                coincideLibroPreces(p.libro, libroNorm) && (
+                    (p.id && p.id.toLowerCase().replace(/_(prec|preces)$/, '') === cleanK) ||
+                    (p.varName && p.varName.toLowerCase().replace(/_(prec|preces)$/, '') === cleanK)
+                )
             );
             if (found) return found;
         }
 
-        // Búsqueda por tiempo, semana, día y libro
-        const matchExacto = CATALOGO_PRECES_SEED.find(p => 
-            p.tiempo === tiempo && 
-            Number(p.semana) === semNum && 
-            p.dia === diaNorm && 
-            (p.libro === libro || (p.libro === 'visperas' && libro === 'vispera'))
+        // Búsqueda por tiempo, semana exacta, día y libro
+        const matchExacto = catalogo.find(p =>
+            p.tiempo === tiempo &&
+            parseInt(String(p.semana).replace(/\D/g, ''), 10) === semNum &&
+            (p.dia || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === diaNorm &&
+            coincideLibroPreces(p.libro, libroNorm)
         );
         if (matchExacto) return matchExacto;
 
-        const matchCiclo = CATALOGO_PRECES_SEED.find(p => 
-            p.tiempo === tiempo && 
-            Number(p.semana) === semCiclo && 
-            p.dia === diaNorm && 
-            (p.libro === libro || (p.libro === 'visperas' && libro === 'vispera'))
+        // Búsqueda por ciclo de 4 semanas
+        const matchCiclo = catalogo.find(p =>
+            p.tiempo === tiempo &&
+            parseInt(String(p.semana).replace(/\D/g, ''), 10) === (esDomCiclo1Posterior ? 5 : semCiclo) &&
+            (p.dia || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === diaNorm &&
+            coincideLibroPreces(p.libro, libroNorm)
+        ) || catalogo.find(p =>
+            p.tiempo === tiempo &&
+            parseInt(String(p.semana).replace(/\D/g, ''), 10) === semCiclo &&
+            (p.dia || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === diaNorm &&
+            coincideLibroPreces(p.libro, libroNorm)
         );
         if (matchCiclo) return matchCiclo;
 
-        const matchDia = CATALOGO_PRECES_SEED.find(p => 
-            p.dia === diaNorm && 
-            (p.libro === libro || (p.libro === 'visperas' && libro === 'vispera'))
+        const matchDia = catalogo.find(p =>
+            (p.dia || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === diaNorm &&
+            coincideLibroPreces(p.libro, libroNorm)
         );
         if (matchDia) return matchDia;
 
-        // Fallback primer elemento
-        return CATALOGO_PRECES_SEED[0];
+        // Fallback primer elemento del mismo libro
+        return catalogo.find(p => coincideLibroPreces(p.libro, libroNorm)) || catalogo[0];
     }
 };
 

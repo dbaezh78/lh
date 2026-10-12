@@ -125,6 +125,16 @@
     font-size: 0.95rem;
     white-space: nowrap;
     letter-spacing: 0.2px;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 4px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.cinta-texto-metadatos:hover,
+.cinta-texto-metadatos.activo {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fbbf24;
 }
 
 .lbl-semana-larga {
@@ -829,7 +839,498 @@ color: red !important;
 
 
 @media (min-width: 768px) {
-        .cinta-btn-zoom {
+    .cinta-btn-zoom {
         font-size: 2.25rem;
     }
 }
+
+/* =========================================================================
+   PANEL DESPLEGABLE DE SEMANAS / SANTOS / CELEBRACIONES EN LA CINTA
+   ========================================================================= */
+
+.cinta-selector-semanas {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.25s ease, padding 0.25s ease;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 340px;
+    box-sizing: border-box;
+}
+
+.cinta-selector-semanas.desplegado {
+    max-height: calc(100vh - 105px);
+    opacity: 1;
+    overflow-y: auto;
+    margin: 8px auto 12px;
+    padding: 0 4px 6px;
+}
+
+/* 1. Grid numérico para semanas (1, 2, 3, 4, 5, 6 ...) */
+.cinta-selector-semanas .sub-acordeon-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    padding: 6px 2px;
+}
+
+.cinta-selector-semanas .btn-sub-semana {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    color: #333333;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    font-family: inherit;
+}
+
+.cinta-selector-semanas .btn-sub-semana:hover {
+    background: #f0f0f0;
+    transform: scale(1.05);
+}
+
+.cinta-selector-semanas .btn-sub-semana:active {
+    transform: scale(0.95);
+}
+
+.cinta-selector-semanas .btn-sub-semana.activo {
+    background: var(--color-tiempo, #2e7d32) !important;
+    color: #ffffff !important;
+    border-color: var(--color-tiempo, #1b5e20) !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Panel de las 7 horas bajo la fila del número pulsado */
+.cinta-selector-semanas .semana-horas-panel {
+    grid-column: 1 / -1;
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 12px;
+    padding: 10px 8px;
+    margin: 6px 0 10px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    border: 2px solid var(--color-tiempo, #2e7d32);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeInSlideCinta 0.25s ease-out;
+}
+
+@keyframes fadeInSlideCinta {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cinta-selector-semanas .semana-horas-panel-header {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--color-tiempo, #333);
+    text-align: center;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Selector de Días de la Semana (D, L, M, M, J, V, S) */
+.cinta-selector-semanas .semana-dias-selector {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin: 4px 0 8px;
+}
+
+.cinta-selector-semanas .btn-semana-dia {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    color: #333333;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s ease;
+    user-select: none;
+    font-family: inherit;
+}
+
+.cinta-selector-semanas .btn-semana-dia:hover {
+    background: #f0f0f0;
+    border-color: var(--color-tiempo, #2e7d32);
+    transform: translateY(-1px);
+}
+
+.cinta-selector-semanas .btn-semana-dia.activo {
+    background: var(--color-tiempo, #2e7d32) !important;
+    color: #ffffff !important;
+    border-color: var(--color-tiempo, #2e7d32) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.cinta-selector-semanas .semana-horas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.cinta-selector-semanas .btn-semana-hora {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    color: #333333;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.cinta-selector-semanas .btn-semana-hora:hover,
+.cinta-selector-semanas .btn-semana-hora:active {
+    background: var(--color-tiempo, #2e7d32) !important;
+    color: #ffffff !important;
+    border-color: var(--color-tiempo, #2e7d32) !important;
+    transform: translateY(-1px);
+}
+
+.cinta-selector-semanas .btn-semana-hora .material-symbols-outlined {
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+.cinta-selector-semanas .btn-semana-hora:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-content: center;
+}
+
+/* 2. Horizontal para los Santos (meses del año) */
+.cinta-selector-semanas .sub-acordeon-h {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    padding: 6px 2px;
+}
+
+.cinta-selector-semanas .btn-sub-mes {
+    padding: 7px 12px;
+    background: #ffffff;
+    border: 1px solid rgba(183, 28, 28, 0.35);
+    border-radius: 16px;
+    color: #b71c1c;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: all 0.15s ease;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+}
+
+.cinta-selector-semanas .btn-sub-mes:hover {
+    background: #b71c1c;
+    color: #ffffff;
+    border-color: #b71c1c;
+    transform: translateY(-2px);
+}
+
+.cinta-selector-semanas .btn-sub-mes.activo {
+    background: #ffffff !important;
+    border: 2px solid #111827 !important;
+    color: #b71c1c !important;
+    font-weight: 800 !important;
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.22) !important;
+}
+
+.cinta-selector-semanas .santos-mes-contenedor {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+    animation: fadeInSlideCinta 0.25s ease-out;
+}
+
+.cinta-selector-semanas .santos-dias-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    padding: 6px 2px;
+}
+
+.cinta-selector-semanas .btn-santo-dia-activo {
+    background: #ffffff !important;
+    border: 1.5px solid #b71c1c !important;
+    color: #b71c1c !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.cinta-selector-semanas .btn-santo-dia-activo:hover {
+    background: #ffebee !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 2px 6px rgba(183, 28, 28, 0.25) !important;
+}
+
+.cinta-selector-semanas .btn-santo-dia-activo.activo {
+    background: #b71c1c !important;
+    color: #ffffff !important;
+    border-color: #b71c1c !important;
+    box-shadow: 0 3px 10px rgba(183, 28, 28, 0.45) !important;
+    transform: scale(1.08) !important;
+}
+
+.cinta-selector-semanas .btn-santo-dia-inactivo {
+    background: rgba(245, 245, 245, 0.6) !important;
+    border: 1px solid #e0e0e0 !important;
+    color: #b0bec5 !important;
+    opacity: 0.45 !important;
+    cursor: default !important;
+    pointer-events: none !important;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-santos-rojo {
+    --color-tiempo: #b71c1c !important;
+    background: #ffffff !important;
+    border: 2px solid #b71c1c !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 16px rgba(183, 28, 28, 0.22), 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+    margin: 6px 0 12px 0 !important;
+    padding: 12px 10px !important;
+    animation: fadeInSlideCinta 0.25s ease-out;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-santos-rojo .semana-horas-panel-header {
+    color: #b71c1c !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 8px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-santos-rojo .btn-semana-hora {
+    background: #ffffff !important;
+    border: 1px solid #dcdcdc !important;
+    border-radius: 10px !important;
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    padding: 9px 12px !important;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-santos-rojo .btn-semana-hora:hover,
+.cinta-selector-semanas .semana-horas-panel.panel-santos-rojo .btn-semana-hora:active {
+    background: #b71c1c !important;
+    color: #ffffff !important;
+    border-color: #b71c1c !important;
+    transform: translateY(-1px);
+}
+
+/* 3. Vertical para Solemnidades y Fiestas */
+.cinta-selector-semanas .sub-acordeon-v {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 6px 2px;
+}
+
+.cinta-selector-semanas .btn-sub-solem {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    padding: 10px 16px;
+    background: #ffffff;
+    border: 1px solid rgba(2, 136, 209, 0.3);
+    border-radius: 10px;
+    color: #0288D1;
+    font-size: 0.98rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18);
+    transition: all 0.15s ease;
+}
+
+.cinta-selector-semanas .btn-sub-solem .material-symbols-outlined {
+    margin-right: 10px;
+    font-size: 1.25rem;
+    color: #0288D1;
+    transition: color 0.15s ease;
+}
+
+.cinta-selector-semanas .btn-sub-solem:hover {
+    background: #0288D1;
+    color: #ffffff;
+    transform: translateX(4px);
+}
+
+.cinta-selector-semanas .btn-sub-solem:hover .material-symbols-outlined {
+    color: #ffffff;
+}
+
+.cinta-selector-semanas .btn-sub-solem.activo {
+    background: #0288D1 !important;
+    color: #ffffff !important;
+    border-color: #0288D1 !important;
+    box-shadow: 0 3px 10px rgba(2, 136, 209, 0.4) !important;
+    transform: translateX(4px);
+}
+
+.cinta-selector-semanas .btn-sub-solem.activo .material-symbols-outlined {
+    color: #ffffff !important;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-solemnidad-pascua {
+    --color-tiempo: #0288D1 !important;
+    background: #ffffff !important;
+    border: 2px solid #0288D1 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 16px rgba(2, 136, 209, 0.22), 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+    margin: 6px 0 12px 0 !important;
+    padding: 12px 10px !important;
+    animation: fadeInSlideCinta 0.25s ease-out;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-solemnidad-pascua .semana-horas-panel-header {
+    color: #0288D1 !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 8px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-solemnidad-pascua .btn-semana-hora {
+    background: #ffffff !important;
+    border: 1px solid #dcdcdc !important;
+    border-radius: 10px !important;
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    padding: 9px 12px !important;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-solemnidad-pascua .btn-semana-hora:hover,
+.cinta-selector-semanas .semana-horas-panel.panel-solemnidad-pascua .btn-semana-hora:active {
+    background: #0288D1 !important;
+    color: #ffffff !important;
+    border-color: #0288D1 !important;
+    transform: translateY(-1px);
+}
+
+.cinta-selector-semanas .btn-sub-fiesta {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    padding: 10px 16px;
+    background: #ffffff;
+    border: 1px solid rgba(217, 119, 6, 0.3);
+    border-radius: 10px;
+    color: #D97706;
+    font-size: 0.98rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: all 0.15s ease;
+}
+
+.cinta-selector-semanas .btn-sub-fiesta .material-symbols-outlined {
+    margin-right: 10px;
+    font-size: 1.25rem;
+    color: #D97706;
+    transition: color 0.15s ease;
+}
+
+.cinta-selector-semanas .btn-sub-fiesta:hover {
+    background: #D97706;
+    color: #ffffff;
+    transform: translateX(4px);
+}
+
+.cinta-selector-semanas .btn-sub-fiesta:hover .material-symbols-outlined {
+    color: #ffffff;
+}
+
+.cinta-selector-semanas .btn-sub-fiesta.activo {
+    background: #D97706 !important;
+    color: #ffffff !important;
+    border-color: #D97706 !important;
+    box-shadow: 0 3px 10px rgba(217, 119, 6, 0.4) !important;
+    transform: translateX(4px);
+}
+
+.cinta-selector-semanas .btn-sub-fiesta.activo .material-symbols-outlined {
+    color: #ffffff !important;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-fiestas {
+    --color-tiempo: #D97706 !important;
+    background: #ffffff !important;
+    border: 2px solid #D97706 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 16px rgba(217, 119, 6, 0.22), 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+    margin: 6px 0 12px 0 !important;
+    padding: 12px 10px !important;
+    animation: fadeInSlideCinta 0.25s ease-out;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-fiestas .semana-horas-panel-header {
+    color: #D97706 !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 8px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-fiestas .btn-semana-hora {
+    background: #ffffff !important;
+    border: 1px solid #dcdcdc !important;
+    border-radius: 10px !important;
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    padding: 9px 12px !important;
+}
+
+.cinta-selector-semanas .semana-horas-panel.panel-fiestas .btn-semana-hora:hover,
+.cinta-selector-semanas .semana-horas-panel.panel-fiestas .btn-semana-hora:active {
+    background: #D97706 !important;
+    color: #ffffff !important;
+    border-color: #D97706 !important;
+    transform: translateY(-1px);
+}
+

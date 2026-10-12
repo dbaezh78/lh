@@ -296,7 +296,7 @@ function buscarPrecesExistente(autoId, tiempo, semana, dia, libro) {
             const pSem = parseInt(String(p.semana).replace(/\D/g, ''), 10);
             const semMatch = (!isNaN(sBusq) && !isNaN(pSem)) ? (pSem === sBusq) : (String(p.semana) === String(semana));
             const diaMatch = norm(p.dia) === norm(dia);
-            const libroMatch = p.libro === libro;
+            const libroMatch = (p.libro === libro) || ((libro === 'visperas' || libro === 'vispera') && (p.libro === 'visperas' || p.libro === 'vispera'));
             return semMatch && diaMatch && libroMatch;
         });
     }
@@ -327,7 +327,7 @@ function manejarCambioParametros() {
         editandoId = precesExistente.id;
         if (txtId) txtId.value = precesExistente.id || autoId;
         if (txtTitulo) txtTitulo.value = precesExistente.titulo || '';
-        if (txtIntro) txtIntro.value = precesExistente.introduccion || '';
+        if (txtIntro) txtIntro.value = precesExistente.intro || precesExistente.introduccion || '';
         if (txtRespuesta) txtRespuesta.value = precesExistente.respuesta || '';
         
         // Manejar intenciones array u objeto/string
@@ -341,8 +341,8 @@ function manejarCambioParametros() {
                 txtIntenciones.value = precesExistente.intenciones || '';
             }
         }
-        if (txtLibre) txtLibre.value = precesExistente.oracionLibre || '';
-        if (txtConcl) txtConcl.value = precesExistente.padrenuestro || precesExistente.conclusion || '';
+        if (txtLibre) txtLibre.value = precesExistente.libre || precesExistente.oracionLibre || '';
+        if (txtConcl) txtConcl.value = precesExistente.concl || precesExistente.padrenuestro || precesExistente.conclusion || '';
 
         if (btnGuardar) btnGuardar.textContent = 'Actualizar Preces';
         if (tituloForm) tituloForm.innerHTML = `<span class="material-symbols-outlined">edit_note</span> Editando: ${precesExistente.id}`;
@@ -402,6 +402,22 @@ function mostrarBannerEstado(mensaje, tipo = 'info') {
 async function cargarDatos() {
     mostrarBannerEstado('Cargando preces canónicas...', 'info');
 
+    const fusionarConSeed = (coleccion) => {
+        const map = new Map();
+        if (Array.isArray(CATALOGO_PRECES_SEED)) {
+            CATALOGO_PRECES_SEED.forEach(p => map.set(p.id, p));
+        }
+        if (Array.isArray(coleccion)) {
+            coleccion.forEach(p => {
+                if (p && p.id) {
+                    if (p.id === 'tos1visab' && p.respuesta === 'Confirma, Señor, lo que has realizado en nosotros.') return;
+                    map.set(p.id, p);
+                }
+            });
+        }
+        return Array.from(map.values());
+    };
+
     // 1. Probar desde Firestore si está disponible
     try {
         if (window.firebaseAPI && window.firebaseAPI.db) {
@@ -411,7 +427,7 @@ async function cargarDatos() {
                 const desdeFb = [];
                 snap.forEach(d => desdeFb.push({ id: d.id, ...d.data() }));
                 if (desdeFb.length >= 5) {
-                    listaPreces = desdeFb;
+                    listaPreces = fusionarConSeed(desdeFb);
                     localStorage.setItem('lh_preces_cache', JSON.stringify(listaPreces));
                     mostrarBannerEstado(`✅ Se cargaron ${listaPreces.length} preces desde Firebase Firestore.`, 'exito');
                     return;
@@ -428,7 +444,8 @@ async function cargarDatos() {
         try {
             const parsed = JSON.parse(cacheLocal);
             if (Array.isArray(parsed) && parsed.length >= 5) {
-                listaPreces = parsed;
+                listaPreces = fusionarConSeed(parsed);
+                localStorage.setItem('lh_preces_cache', JSON.stringify(listaPreces));
                 mostrarBannerEstado(`📂 Cargadas ${listaPreces.length} preces desde la caché local.`, 'alerta');
                 return;
             }

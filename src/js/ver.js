@@ -283,13 +283,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     autor: "dbaezh78@gmail.com",
                     ultimaModificacion: new Date().toISOString()
                 };
+                const semillav6 = {
+                    id: "v_1_0_06",
+                    version: "1.0.06",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.06.\n• Selector interactivo de semanas, días y horas litúrgicas al tocar 'Semana X • Día' en la cinta superior de salterios.html para todos los tiempos litúrgicos, Santos, Solemnidades y Fiestas.\n• Resolución y visualización canónica del Cántico de Simeón (Lc_2,_29-32) en Completas y en el Constructor de Salterios (frm_salterios.html).\n• Base de datos completa de Preces de Vísperas (Salterio de 4 semanas y Semana 5) con intercesión por los difuntos e invitación al Padre Nuestro.\n• Fidelidad exacta de saltos de línea y espacios entre párrafos en lecturas del Oficio entre el Constructor y salterios.html.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav1);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav2);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav3);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav4);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav5);
-                    actualizacionesMemoria = [semillav5, semillav4, semillav3, semillav2, semillav1];
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav6);
+                    actualizacionesMemoria = [semillav6, semillav5, semillav4, semillav3, semillav2, semillav1];
                     renderListaActualizaciones(actualizacionesMemoria);
                     return;
                 } catch (e) {
@@ -363,6 +372,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(v5);
                     listaActualizada.unshift(v5);
+                } catch (e) {}
+            }
+
+            // Registrar automáticamente v1.0.06 si no existe
+            const tieneV6 = listaActualizada.some(d => d.version === "1.0.06" || d.id === "v_1_0_06");
+            if (!tieneV6 && window.firebaseAPI?.guardarActualizacionFirestore) {
+                const v6 = {
+                    id: "v_1_0_06",
+                    version: "1.0.06",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.06.\n• Selector interactivo de semanas, días y horas litúrgicas al tocar 'Semana X • Día' en la cinta superior de salterios.html para todos los tiempos litúrgicos, Santos, Solemnidades y Fiestas.\n• Resolución y visualización canónica del Cántico de Simeón (Lc_2,_29-32) en Completas y en el Constructor de Salterios (frm_salterios.html).\n• Base de datos completa de Preces de Vísperas (Salterio de 4 semanas y Semana 5) con intercesión por los difuntos e invitación al Padre Nuestro.\n• Fidelidad exacta de saltos de línea y espacios entre párrafos en lecturas del Oficio entre el Constructor y salterios.html.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                try {
+                    await window.firebaseAPI.guardarActualizacionFirestore(v6);
+                    listaActualizada.unshift(v6);
                 } catch (e) {}
             }
 

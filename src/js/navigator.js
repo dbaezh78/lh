@@ -30,7 +30,7 @@
     // 3. Crear el HTML de la navegación 
     // Añadimos 'style="visibility: hidden"' para evitar el parpadeo sin estilos
 // 3. Crear el HTML de la navegación 
-    window.APP_VERSION = '1.0.05';
+    window.APP_VERSION = '1.0.06';
     const appVersion = window.APP_VERSION;
 
     // Función universal para mostrar ventana modal de archivos actualizándose
@@ -1132,7 +1132,7 @@
                     id: `v_${appVersion.replace(/[^a-zA-Z0-9_-]/g, "_")}`,
                     version: appVersion,
                     fecha: new Date().toISOString().split("T")[0],
-                    detalles: "• Actualización a versión 1.0.05.\n• Nomenclatura unificada de IDs litúrgicos en todos los formularios ([tiempo][semana 2 dígitos][día][hora], ej: tos01dote, tos01doof, tos05doof).\n• Búsqueda por ID / Código en selectores interactivos de frm_salterios.html: resolución inmediata de códigos canónicos y alias mientras se visualiza el texto descriptivo.\n• Ciclo Litúrgico de 4 Semanas del Salterio en Tiempo Ordinario: herencia inteligente de salmos, antífonas e himnos base (semanas 5, 9, 13... a Salterio 1) manteniendo lecturas de oficio y oración propias de cada semana.\n• Actualización del gestor de Himnos (himno.html) con selectores de semana y día y autocompletado de ID canónico.\n• Conmutador de lecturas de Oficio de Lectura para años pares (II) e impares (I)."
+                    detalles: "• Actualización a versión 1.0.06.\n• Selector interactivo de semanas, días y horas litúrgicas al tocar 'Semana X • Día' en la cinta superior de salterios.html para todos los tiempos litúrgicos, Santos, Solemnidades y Fiestas.\n• Resolución y visualización canónica del Cántico de Simeón (Lc_2,_29-32) en Completas y en el Constructor de Salterios (frm_salterios.html).\n• Base de datos completa de Preces de Vísperas (Salterio de 4 semanas y Semana 5) con intercesión por los difuntos e invitación al Padre Nuestro.\n• Fidelidad exacta de saltos de línea y espacios entre párrafos en lecturas del Oficio entre el Constructor y salterios.html."
                 };
                 await window.firebaseAPI.guardarActualizacionFirestore(vActual);
                 console.log(`🔥 [Firebase] Versión v${appVersion} registrada exitosamente en Firestore.`);

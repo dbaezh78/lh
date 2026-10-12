@@ -2767,13 +2767,14 @@ en favor de Abraham y su descendencia por siempre.
 Gloria al Padre, y al Hijo, y al Espíritu Santo.
 Como era en el principio, ahora y siempre, por los siglos de los siglos. Amén.`;
 
-// CÁNTICO DE SIMEÓN (Nunc Dimittis - Lc 2, 29-32)
-const nunc_dimittist = "Cántico de Simeón (Nunc Dimittis) - Lc 2, 29-32";
+// CÁNTICO DE SIMEÓN (Lc 2, 29-32)
+const nunc_dimittist = "CÁNTICO DE SIMEÓN Lc 2, 29-32";
 const nunc_dimittis = `Ahora, Señor, según tu promesa,
-puedes dejar a tu siervo irse en paz.
+puedes dejar a tu siervo irse en paz,
 
-Porque mis ojos han visto a tu Salvador,
-a quien has presentado ante todos los pueblos:
+porque mis ojos han visto a tu Salvador,
+a quien has presentado ante todos los pueblos
+
 luz para alumbrar a las naciones
 y gloria de tu pueblo Israel.
 
@@ -2881,6 +2882,7 @@ function obtenerPadreNuestro() {
         ['cantico_ap19', typeof ap_19_1_7t !== 'undefined' ? ap_19_1_7t : '', typeof ap_19_1_7 !== 'undefined' ? ap_19_1_7 : '', 'cantico_nt'],
         ['ap_19_1_2_5_7', typeof ap_19_1_7t !== 'undefined' ? ap_19_1_7t : '', typeof ap_19_1_7 !== 'undefined' ? ap_19_1_7 : '', 'cantico_nt'],
         ['magnificat', typeof magnificatt !== 'undefined' ? magnificatt : '', typeof magnificat !== 'undefined' ? magnificat : '', 'cantico_evangelico'],
+        ['Lc_2,_29-32', typeof nunc_dimittist !== 'undefined' ? nunc_dimittist : '', typeof nunc_dimittis !== 'undefined' ? nunc_dimittis : '', 'cantico_evangelico'],
         ['nunc_dimittis', typeof nunc_dimittist !== 'undefined' ? nunc_dimittist : '', typeof nunc_dimittis !== 'undefined' ? nunc_dimittis : '', 'cantico_evangelico']
     ];
 
@@ -2927,7 +2929,7 @@ function obtenerPadreNuestro() {
         obtener: (id) => {
             if (!id) return null;
             const cleanId = String(id).trim();
-            const cleanNorm = cleanId.toLowerCase().replace(/[\s\-_]/g, '');
+            const cleanNorm = cleanId.toLowerCase().replace(/[\s\-_,.]/g, '');
 
             // Equivalencias directas entre salmos canónicos e IDs de invitatorio del formulario
             const equivalencias = {
@@ -2945,7 +2947,8 @@ function obtenerPadreNuestro() {
                 'canticozacarias': ['cantico_zacarias', 'canticoZacarias'],
                 'magnificat': ['magnificat', 'magnifica'],
                 'magnifica': ['magnificat', 'magnifica'],
-                'nuncdimittis': ['nunc_dimittis', 'simeon']
+                'nuncdimittis': ['Lc_2,_29-32', 'nunc_dimittis', 'simeon'],
+                'lc22932': ['Lc_2,_29-32', 'nunc_dimittis', 'simeon']
             };
             const clavesABuscar = equivalencias[cleanNorm] || [cleanId];
 
@@ -2953,8 +2956,8 @@ function obtenerPadreNuestro() {
             const cache = obtenerDesdeCache();
             if (cache.length > 0) {
                 for (const clave of clavesABuscar) {
-                    const cNorm = clave.toLowerCase().replace(/[\s\-_]/g, '');
-                    const exacto = cache.find(s => s && (s.id === clave || (s.id && s.id.toLowerCase().replace(/[\s\-_]/g, '') === cNorm)));
+                    const cNorm = clave.toLowerCase().replace(/[\s\-_,.]/g, '');
+                    const exacto = cache.find(s => s && (s.id === clave || (s.id && s.id.toLowerCase().replace(/[\s\-_,.]/g, '') === cNorm)));
                     if (exacto) return exacto;
                 }
             }
@@ -2967,8 +2970,8 @@ function obtenerPadreNuestro() {
 
             // 3. Probar por normalización en catálogo semilla
             for (const clave of clavesABuscar) {
-                const cNorm = clave.toLowerCase().replace(/[\s\-_]/g, '');
-                const enCatalogo = catalogo.find(s => s && s.id && s.id.toLowerCase().replace(/[\s\-_]/g, '') === cNorm);
+                const cNorm = clave.toLowerCase().replace(/[\s\-_,.]/g, '');
+                const enCatalogo = catalogo.find(s => s && s.id && s.id.toLowerCase().replace(/[\s\-_,.]/g, '') === cNorm);
                 if (enCatalogo) return enCatalogo;
             }
 

@@ -537,7 +537,7 @@ export function resolverSalmoLiturgico(id, titGuardado, txtGuardado, idFallback 
             if (raw) {
                 const list = JSON.parse(raw);
                 if (Array.isArray(list)) {
-                    const cleanId = String(id || idFallback || '').toLowerCase().replace(/[\s\-_]/g, '');
+                    const cleanId = String(id || idFallback || '').toLowerCase().replace(/[\s\-_,.]/g, '');
                     const eqMap = {
                         'salmo94': ['invitatorio1', 'salmo94'],
                         'invitatorio1': ['salmo94', 'invitatorio1'],
@@ -546,19 +546,21 @@ export function resolverSalmoLiturgico(id, titGuardado, txtGuardado, idFallback 
                         'salmo66': ['invitatorio3', 'salmo66'],
                         'invitatorio3': ['salmo66', 'invitatorio3'],
                         'salmo23': ['invitatorio4', 'salmo23'],
-                        'invitatorio4': ['salmo23', 'invitatorio4']
+                        'invitatorio4': ['salmo23', 'invitatorio4'],
+                        'nuncdimittis': ['Lc_2,_29-32', 'nunc_dimittis'],
+                        'lc22932': ['Lc_2,_29-32', 'nunc_dimittis']
                     };
                     const candidatos = eqMap[cleanId] || [cleanId];
                     for (const cand of candidatos) {
-                        const candNorm = cand.toLowerCase().replace(/[\s\-_]/g, '');
-                        sObj = list.find(s => s && (s.id === cand || String(s.id).toLowerCase().replace(/[\s\-_]/g, '') === candNorm));
+                        const candNorm = cand.toLowerCase().replace(/[\s\-_,.]/g, '');
+                        sObj = list.find(s => s && (s.id === cand || String(s.id).toLowerCase().replace(/[\s\-_,.]/g, '') === candNorm));
                         if (sObj) break;
                     }
                     if (!sObj && titGuardado) {
                         const m = String(titGuardado).match(/salmo\s*(\d+[a-zA-Z]?)/i);
                         if (m) {
                             const cleanNum = `salmo${m[1]}`.toLowerCase();
-                            sObj = list.find(s => s && String(s.id).toLowerCase().replace(/[\s\-_]/g, '') === cleanNum);
+                            sObj = list.find(s => s && String(s.id).toLowerCase().replace(/[\s\-_,.]/g, '') === cleanNum);
                         }
                     }
                 }
@@ -932,13 +934,57 @@ function montarOActualizarVista(params, datos) {
         const diaActivo = datos?.dia || dia || 'domingo';
         const ldb = (typeof window !== 'undefined' && window.LecturasDB) || LecturasDB;
 
-        // Asegurar que exista la 1ª lectura bíblica si no viene en los datos guardados
-        if (!datos.lecturasOficio?.primera || !datos.lecturasOficio.primera.texto) {
+        if (!datos.lecturasOficio) datos.lecturasOficio = {};
+
+        // 1. Verificar si existe una lectura guardada específicamente para este ciclo (Par o Impar)
+        const guardadaPorCiclo = esPar ? datos.lecturasOficio.primeraPar : datos.lecturasOficio.primeraImpar;
+        const primeraActual = datos.lecturasOficio.primera;
+        const primeraCoincideCiclo = primeraActual && (primeraActual.texto || primeraActual.id) &&
+            (primeraActual.esPar === undefined || Boolean(primeraActual.esPar) === Boolean(esPar));
+
+        const baseGuardada = (guardadaPorCiclo && (guardadaPorCiclo.texto || guardadaPorCiclo.id))
+            ? guardadaPorCiclo
+            : (primeraCoincideCiclo ? primeraActual : null);
+
+        if (baseGuardada) {
+            const catItem = (baseGuardada.id && ldb && typeof ldb.obtenerPorId === 'function')
+                ? ldb.obtenerPorId(baseGuardada.id)
+                : null;
+            const respObj = baseGuardada.responsorio || {};
+            const rCita = baseGuardada.respCita || respObj.ref || catItem?.respCita || '';
+            const r1 = baseGuardada.respR1 || respObj.r1 || catItem?.respR1 || '';
+            const rV = baseGuardada.respV || respObj.v || catItem?.respV || '';
+            const r2 = baseGuardada.respR2 || respObj.r2 || catItem?.respR2 || r1 || '';
+
+            datos.lecturasOficio.primera = {
+                ...baseGuardada,
+                id: baseGuardada.id || catItem?.id || null,
+                etiqueta: '1ra Lectura',
+                audioUrl: baseGuardada.audioUrl || urlLectura1,
+                esPar: esPar,
+                titulo: baseGuardada.epigrafeTipo || baseGuardada.titulo || catItem?.epigrafeTipo || 'PRIMERA LECTURA',
+                epigrafeTipo: baseGuardada.epigrafeTipo || baseGuardada.titulo || catItem?.epigrafeTipo || 'PRIMERA LECTURA',
+                cita: baseGuardada.cita || catItem?.cita || '',
+                subtitulo: baseGuardada.descripcion || baseGuardada.subtitulo || catItem?.descripcion || '',
+                descripcion: baseGuardada.descripcion || baseGuardada.subtitulo || catItem?.descripcion || '',
+                texto: baseGuardada.texto || catItem?.texto || '',
+                respCita: rCita,
+                respR1: r1,
+                respV: rV,
+                respR2: r2,
+                responsorio: {
+                    ref: rCita,
+                    r1: r1,
+                    v: rV,
+                    r2: r2
+                }
+            };
+        } else {
+            // Fallback al catálogo por defecto para el ciclo activo
             const l1Data = (ldb && typeof ldb.obtenerLectura1 === 'function')
                 ? ldb.obtenerLectura1(tiempoActivo, semanaActiva, diaActivo, esPar)
                 : null;
             if (l1Data) {
-                if (!datos.lecturasOficio) datos.lecturasOficio = {};
                 datos.lecturasOficio.primera = {
                     id: l1Data.id,
                     etiqueta: '1ra Lectura',
@@ -962,8 +1008,6 @@ function montarOActualizarVista(params, datos) {
                     }
                 };
             }
-        } else if (datos.lecturasOficio.primera && !datos.lecturasOficio.primera.audioUrl) {
-            datos.lecturasOficio.primera.audioUrl = urlLectura1;
         }
 
         // Asegurar también que exista la 2ª lectura patrística
@@ -1007,83 +1051,111 @@ function montarOActualizarVista(params, datos) {
     }
 }
 
+let ultimoDocIdSolicitado = null;
+
 async function cargarYRenderizarHora(params) {
     const { tiempo, semana, dia, libro, fecha, santo, codigoCompleto } = params;
     const docId = codigoCompleto || (tiempo === 'santos' 
         ? `santo_${(fecha || '01_01').replace('/', '_')}_${libro}`
         : `${tiempo}_semana_${semana}_${dia}_${libro}`);
 
+    ultimoDocIdSolicitado = docId;
+
     // =====================================================================
     // FASE 1: RENDERIZADO INSTANTÁNEO LOCAL (0 ms)
     // Busca primero en memoria local (LocalStorage) bajo todos los IDs equivalentes.
-    // Si no existe, ensambla de inmediato canónicamente y persiste en LocalStorage.
+    // Si no existe, ensambla de inmediato en memoria sin contaminar LocalStorage.
     // =====================================================================
     let datosLocales = obtenerHoraLocalSincrona(docId, libro);
 
     if (datosLocales && (datosLocales.salmodia?.salmo1Texto || datosLocales.lecturasOficio || datosLocales.himno?.texto)) {
+        datosLocales.id = docId;
+        datosLocales.codigo = docId;
         montarOActualizarVista(params, datosLocales);
         console.log(`⚡ [Local First 0ms] Hora '${docId}' cargada desde LocalStorage.`);
     } else {
-        // Ensamblar inmediatamente en memoria usando la base canónica
-        const datosDefecto = ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo);
-        guardarHoraEnLocalStorage(docId, datosDefecto);
+        // Ensamblar inmediatamente en memoria usando la base canónica (sin guardar en LocalStorage antes de consultar Firebase)
+        const datosDefecto = ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo, docId);
+        datosDefecto.id = docId;
+        datosDefecto.codigo = docId;
+        datosDefecto.origenCarga = 'canonico';
         montarOActualizarVista(params, datosDefecto);
-        console.log(`⚡ [Local First 0ms] Hora '${docId}' ensamblada y persistida de inmediato en LocalStorage.`);
+        console.log(`⚡ [Local First 0ms] Hora '${docId}' ensamblada en memoria mientras se consulta Firebase.`);
     }
 
     // =====================================================================
-    // FASE 2: SINCRONIZACIÓN ASÍNCRONA CON FIREBASE (EN SEGUNDO PLANO)
-    // Si la copia local no proviene de Firebase, consultar Firestore en segundo plano
-    // sin bloquear la interfaz. Si existe una versión personalizada en la nube, se
-    // sincroniza con LocalStorage y se actualiza la vista.
+    // FASE 2: SINCRONIZACIÓN ASÍNCRONA CON FIREBASE (SIEMPRE EN SEGUNDO PLANO)
+    // Consulta siempre Firestore en segundo plano sin bloquear la interfaz.
+    // Si existe documento guardado en Firebase, actualiza LocalStorage y la vista.
     // =====================================================================
-    if (!datosLocales || datosLocales.origenCarga !== 'firebase') {
-        (async () => {
-            try {
-                const fbData = await consultarHoraEnFirebase(docId, params);
-                if (fbData) {
-                    const normalizado = normalizarObjetoLiturgico(fbData, docId, params, ensamblarHoraPorDefecto);
-                    normalizado.origenCarga = 'firebase';
+    (async () => {
+        try {
+            const fbData = await consultarHoraEnFirebase(docId, params);
+            if (fbData) {
+                const normalizado = normalizarObjetoLiturgico(fbData, docId, params, ensamblarHoraPorDefecto);
+                normalizado.id = docId;
+                normalizado.codigo = docId;
+                normalizado.origenCarga = fbData._esFallbackCiclo ? 'ciclo_firebase' : 'firebase';
+                if (!fbData._esFallbackCiclo) {
                     guardarHoraEnLocalStorage(docId, normalizado);
-                    // Actualizar vista si el usuario sigue en la misma hora
-                    if (horaActualDatos && (horaActualDatos.id === docId || horaActualDatos.codigo === docId)) {
-                        montarOActualizarVista(params, normalizado);
-                        console.log(`☁️ [Firebase Sync] Documento '${docId}' sincronizado desde Firebase y actualizado en vista.`);
-                    }
                 }
-            } catch (errSync) {
-                console.warn(`[Firebase Sync] Aviso sincronizando '${docId}':`, errSync);
+                // Actualizar vista si el usuario sigue en la misma hora solicitada
+                if (ultimoDocIdSolicitado === docId) {
+                    montarOActualizarVista(params, normalizado);
+                    console.log(`☁️ [Firebase Sync] Documento '${docId}' sincronizado desde Firebase y actualizado en vista.`);
+                }
             }
-        })();
-    }
+        } catch (errSync) {
+            console.warn(`[Firebase Sync] Aviso sincronizando '${docId}':`, errSync);
+        }
+    })();
 }
 
 // Ensamblar estructura limpia usando los salmos y antífonas disponibles
-function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
+function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo, docId = null) {
     const cfg = LIBROS_CONFIG[libro] || LIBROS_CONFIG.laudes;
     const salmosDB = window.SalmosDB;
     const gloria = salmosDB ? salmosDB.obtenerGloriaPatri(tiempo === 'pascua') : '';
+    const numSemana = parseInt(String(semana || 1).replace(/[^0-9]/g, ''), 10) || 1;
+    const semCiclo = (tiempo === 'ordinario' && numSemana > 0) ? (((numSemana - 1) % 4) + 1) : numSemana;
 
-    // Buscar antífonas de la base de datos de antífonas
-    const antInvObj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'invitatoria')[0] 
-                   || AntifonasDB.filtrar('ordinario', 1, dia, libro, 'invitatoria')[0]
-                   || AntifonasDB.filtrar(tiempo, semana, dia, 'laudes', 'invitatoria')[0]
-                   || AntifonasDB.filtrar('ordinario', 1, dia, 'laudes', 'invitatoria')[0]
+    const filtrarSinBautismo = (lista) => {
+        if (!Array.isArray(lista)) return [];
+        if (tiempo !== 'ordinario') return lista;
+        return lista.filter(item => {
+            const idStr = String(item?.id || '').toLowerCase();
+            const varStr = String(item?.varName || '').toLowerCase();
+            return !idStr.includes('bautismo') && !varStr.includes('bautismo');
+        });
+    };
+
+    // Buscar antífonas de la base de datos de antífonas respetando el ciclo de 4 semanas y excluyendo Bautismo en Tiempo Ordinario
+    const antInvObj = filtrarSinBautismo(AntifonasDB.filtrar(tiempo, numSemana, dia, libro, 'invitatoria'))[0]
+                   || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, libro, 'invitatoria'))[0]
+                   || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, numSemana, dia, 'laudes', 'invitatoria'))[0]
+                   || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, 'laudes', 'invitatoria'))[0]
+                   || filtrarSinBautismo(AntifonasDB.filtrar('ordinario', semCiclo, dia, 'laudes', 'invitatoria'))[0]
+                   || filtrarSinBautismo(AntifonasDB.filtrar('ordinario', 1, dia, 'laudes', 'invitatoria'))[0]
                    || { texto: 'Venid, adoremos al Señor, porque él es nuestro Dios.' };
 
-    const ant1Obj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'salmodia_1')[0] 
-                 || AntifonasDB.filtrar('ordinario', 1, dia, libro, 'salmodia_1')[0]
-                 || AntifonasDB.filtrar(tiempo, semana, dia, 'laudes', 'salmodia_1')[0]
+    const ant1Obj = filtrarSinBautismo(AntifonasDB.filtrar(tiempo, numSemana, dia, libro, 'salmodia_1'))[0]
+                 || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, libro, 'salmodia_1'))[0]
+                 || filtrarSinBautismo(AntifonasDB.filtrar('ordinario', semCiclo, dia, libro, 'salmodia_1'))[0]
+                 || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, 'laudes', 'salmodia_1'))[0]
                  || { texto: 'Día tras día te bendeciré, Señor.' };
-    const ant2Obj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'salmodia_2')[0] 
-                 || AntifonasDB.filtrar('ordinario', 1, dia, libro, 'salmodia_2')[0]
-                 || AntifonasDB.filtrar(tiempo, semana, dia, 'laudes', 'salmodia_2')[0]
+    const ant2Obj = filtrarSinBautismo(AntifonasDB.filtrar(tiempo, numSemana, dia, libro, 'salmodia_2'))[0]
+                 || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, libro, 'salmodia_2'))[0]
+                 || filtrarSinBautismo(AntifonasDB.filtrar('ordinario', semCiclo, dia, libro, 'salmodia_2'))[0]
+                 || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, 'laudes', 'salmodia_2'))[0]
                  || { texto: 'Canten al Señor un cántico nuevo.' };
-    const ant3Obj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'salmodia_3')[0] 
-                 || AntifonasDB.filtrar('ordinario', 1, dia, libro, 'salmodia_3')[0]
-                 || AntifonasDB.filtrar(tiempo, semana, dia, 'laudes', 'salmodia_3')[0]
+    const ant3Obj = filtrarSinBautismo(AntifonasDB.filtrar(tiempo, numSemana, dia, libro, 'salmodia_3'))[0]
+                 || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, libro, 'salmodia_3'))[0]
+                 || filtrarSinBautismo(AntifonasDB.filtrar('ordinario', semCiclo, dia, libro, 'salmodia_3'))[0]
+                 || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, 'laudes', 'salmodia_3'))[0]
                  || { texto: 'Grandes y maravillosas son tus obras, Señor.' };
-    const antEvObj = AntifonasDB.filtrar(tiempo, semana, dia, libro, 'evangelico')[0] || { texto: 'Se presentó Jesús en medio de sus discípulos y les dijo: Paz a vosotros.' };
+    const antEvObj = filtrarSinBautismo(AntifonasDB.filtrar(tiempo, numSemana, dia, libro, 'evangelico'))[0]
+                  || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, libro, 'evangelico'))[0]
+                  || { texto: 'Se presentó Jesús en medio de sus discípulos y les dijo: Paz a vosotros.' };
 
     // Determinar salmos según el libro
     let salmo1 = null;
@@ -1106,25 +1178,31 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
     const audioLectura1 = esPar ? rutaOficio.lecturaPar : rutaOficio.lecturaImpar;
     const audioLectura2 = rutaOficio.segundaLectura;
 
-    // Buscar himno en el catálogo de himnos
+    // Buscar himno en el catálogo de himnos (excluyendo hbautismoOF y Te Deum htos01doof como himno inicial de Oficio Ordinario)
+    const filtrarHimnosIniciales = (lista) => {
+        return filtrarSinBautismo(lista).filter(h => {
+            const v = String(h?.varName || h?.id || '').toLowerCase();
+            return v !== 'htos01doof' && !v.endsWith('_htos01doof');
+        });
+    };
+
     const himnoObj = (HimnosDB && typeof HimnosDB.filtrar === 'function')
-        ? (HimnosDB.filtrar(tiempo, semana, dia, libro)[0] 
-           || (libro === 'oficio' ? HimnosDB.obtenerPorId('hbautismoOF') : null)
-           || HimnosDB.filtrar(tiempo, semana, dia, 'laudes')[0]
-           || HimnosDB.filtrar('ordinario', 1, dia, libro)[0])
+        ? (filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, numSemana, dia, libro))[0]
+           || filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, semCiclo, dia, libro))[0]
+           || filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, 1, dia, libro))[0]
+           || filtrarHimnosIniciales(HimnosDB.filtrar('ordinario', 1, dia, libro))[0]
+           || filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, semCiclo, dia, 'laudes'))[0]
+           || filtrarHimnosIniciales(HimnosDB.filtrar('ordinario', 1, dia, 'laudes'))[0])
         : null;
 
     const himnoFinal = himnoObj ? {
         id: himnoObj.id || himnoObj.varName,
         titulo: himnoObj.titulo || 'HIMNO',
         texto: himnoObj.texto || ''
-    } : (libro === 'oficio' ? {
-        titulo: 'HIMNO: HOY DOS EXTREMOS SE HAN VISTO',
-        texto: `Hoy dos extremos se han visto,\r\ncuales nunca se verán:\r\nCristo arrodillado a Juan,\r\ny Juan bautizando a Cristo.\r\n\r\nEl mar y abismo profundo\r\nde la pureza infinita,\r\nque las inmundicias quita\r\ny los pecados del mundo,\r\n\r\nhoy del Bautista se ha visto\r\nser lavado en el Jordán;\r\nCristo arrodillado a Juan,\r\ny Juan bautizando a Cristo.\r\n\r\nBautiza la voz al Verbo,\r\nel criado al Criador;\r\nved qué humildad de Señor\r\ny qué autoridad de siervo.\r\n\r\nFavor otra vez no visto\r\nentre los hijos de Adán,\r\nCristo arrodillado a Juan,\r\ny Juan bautizando a Cristo. Amén.`
     } : {
         titulo: 'HIMNO: ERES LA LUZ Y SIEMBRAS CLARIDADES.',
         texto: `Eres la luz y siembras claridades,\neres amor y siembras armonía\ndesde tu eternidad de eternidades.\n\nPor tu roja frescura de alegría,\nla tierra se estremece de rocío,\nHijo eterno del Padre y de María.\n\nEntro en tus esplendores, Cristo, ciego;\nmientras corre la vida paso a paso,\npongo mis horas grises en tu brazo,\ny a ti, Señor, mi corazón entrego. Amén.`
-    });
+    };
 
     return {
         tiempo,
@@ -1133,6 +1211,7 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
         fecha,
         santo,
         libro,
+        origenCarga: 'canonico',
         titulo: cfg.nombre,
         subtitulo: cfg.subtitulo,
         invitatorio: {
@@ -1322,14 +1401,21 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
                 }
             };
         })(),
-        canticoEvangelico: {
-            tipo: libro === 'visperas' ? 'Magníficat' : (libro === 'completas' ? 'Nunc Dimittis' : 'Benedictus'),
-            antifona: antEvObj.texto,
-            titulo: libro === 'visperas' 
-                ? 'Cántico de María. ALEGRÍA DEL ALMA EN EL SEÑOR Lc 1, 46-55' 
-                : (libro === 'completas' ? 'CÁNTICO DE SIMEÓN Lc 2, 29-32' : 'Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR Lc 1, 68-79'),
-            texto: (salmosDB && salmosDB.obtener('canticoZacarias')) ? salmosDB.obtener('canticoZacarias').texto : ''
-        },
+        canticoEvangelico: (() => {
+            const cantIdDef = libro === 'visperas' ? 'magnificat' : (libro === 'completas' ? 'Lc_2,_29-32' : 'canticoZacarias');
+            const cantObjDef = salmosDB ? salmosDB.obtener(cantIdDef) : null;
+            return {
+                id: cantIdDef,
+                tipo: libro === 'visperas' ? 'Magníficat' : (libro === 'completas' ? 'Nunc Dimittis' : 'Benedictus'),
+                antifona: antEvObj.texto,
+                titulo: (cantObjDef && cantObjDef.titulo)
+                    ? cantObjDef.titulo.replace(/\s{2,}/g, ' ').trim()
+                    : (libro === 'visperas' 
+                        ? 'Cántico de María. ALEGRÍA DEL ALMA EN EL SEÑOR Lc 1, 46-55' 
+                        : (libro === 'completas' ? 'CÁNTICO DE SIMEÓN Lc 2, 29-32' : 'Cántico de Zacarías. EL MESÍAS Y SU PRECURSOR Lc 1, 68-79')),
+                texto: (cantObjDef && cantObjDef.texto) ? cantObjDef.texto : ''
+            };
+        })(),
         preces: (() => {
             const canonP = (PrecesDB && typeof PrecesDB.obtener === 'function')
                 ? (PrecesDB.obtener(null, tiempo, semana, dia, libro) || PrecesDB.obtenerRecomendada(tiempo, semana, dia, libro))
@@ -1374,8 +1460,8 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo) {
             v: libro === 'oficio' || libro === 'tercia' || libro === 'sexta' || libro === 'nona' ? 'Bendigamos al Señor.' : 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.',
             r: libro === 'oficio' || libro === 'tercia' || libro === 'sexta' || libro === 'nona' ? 'Demos gracias a Dios.' : 'Amén.'
         },
-        id: (tiempo === 'santos' ? `santo_${(fecha || '01_01').replace('/', '_')}_${libro}` : `${tiempo}_semana_${semana}_${dia}_${libro}`),
-        codigo: (tiempo === 'santos' ? `santo_${(fecha || '01_01').replace('/', '_')}_${libro}` : `${tiempo}_semana_${semana}_${dia}_${libro}`)
+        id: docId || (tiempo === 'santos' ? `santo_${(fecha || '01_01').replace('/', '_')}_${libro}` : `${tiempo}_semana_${semana}_${dia}_${libro}`),
+        codigo: docId || (tiempo === 'santos' ? `santo_${(fecha || '01_01').replace('/', '_')}_${libro}` : `${tiempo}_semana_${semana}_${dia}_${libro}`)
     };
 }
 
@@ -1793,12 +1879,19 @@ function renderizarCuerpoLiturgico(d) {
     if (d.canticoEvangelico && !om.cantico && (d.libro === 'laudes' || d.libro === 'visperas' || d.libro === 'vispera' || d.libro === 'completas')) {
         const omitirAntCant_E = Boolean(om.antifonaCantico || om.antifonaCantico_E || om.antCant_E);
         const omitirAntCant_S = Boolean(om.antifonaCantico || om.antifonaCantico_S || om.antCant_S);
-        const ceInfo = resolverSalmoLiturgico(d.canticoEvangelico.id || d.canticoEvangelico.tipo, d.canticoEvangelico.titulo, d.canticoEvangelico.texto);
+        const idCantRaw = d.canticoEvangelico.id || ((d.canticoEvangelico.tipo && !['Magníficat', 'Nunc Dimittis', 'Benedictus'].includes(d.canticoEvangelico.tipo)) ? d.canticoEvangelico.tipo : null);
+        const fallbackCantId = d.libro === 'completas' ? 'Lc_2,_29-32' : ((d.libro === 'visperas' || d.libro === 'vispera') ? 'magnificat' : 'canticoZacarias');
+        const ceInfo = resolverSalmoLiturgico(idCantRaw || fallbackCantId, d.canticoEvangelico.titulo, d.canticoEvangelico.texto, fallbackCantId);
+        const ceTitulo = (ceInfo.titulo || '').replace(/\s{2,}/g, ' ').trim();
+        let ceTexto = ceInfo.texto || '';
+        if (ceTexto && !/gloria al padre/i.test(ceTexto) && window.SalmosDB && typeof window.SalmosDB.asegurarGloria === 'function') {
+            ceTexto = window.SalmosDB.asegurarGloria(ceTexto, false);
+        }
         html += `
             <div class="salterio-seccion-header">CÁNTICO EVANGÉLICO</div>
             ${!omitirAntCant_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
-            <div class="salmo-titulo-rubrica">${ceInfo.titulo}</div>
-            <div class="texto-estrofas-salmo">${formatearTextoSalmo(ceInfo.texto)}</div>
+            <div class="salmo-titulo-rubrica">${ceTitulo}</div>
+            <div class="texto-estrofas-salmo">${formatearTextoSalmo(ceTexto)}</div>
             ${!omitirAntCant_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
         `;
     }
@@ -1806,17 +1899,26 @@ function renderizarCuerpoLiturgico(d) {
     // 10. PRECES
     if (d.preces && !om.preces && (d.libro === 'laudes' || d.libro === 'visperas' || d.libro === 'vispera')) {
         let precesObj = d.preces;
+        const esVisperasHora = (d.libro === 'visperas' || d.libro === 'vispera');
+        const idPreces = String(precesObj.id || precesObj.varName || '');
+        const esPrecesDeOtraHora = Boolean(
+            (esVisperasHora && (precesObj.libro === 'laudes' || /^(tos\d+la|bautismola)/i.test(idPreces))) ||
+            (!esVisperasHora && (precesObj.libro === 'visperas' || precesObj.libro === 'vispera' || /^(tos\d+vi|tos\d+[a-z]{2}vi)/i.test(idPreces)))
+        );
+
         const canon = (PrecesDB && typeof PrecesDB.obtener === 'function') 
-            ? PrecesDB.obtener(precesObj.id || d.codigo || d.id, d.tiempo, d.semana, d.dia, d.libro)
+            ? PrecesDB.obtener(esPrecesDeOtraHora ? (d.codigo || d.id) : (precesObj.id || d.codigo || d.id), d.tiempo, d.semana, d.dia, d.libro)
             : null;
 
         const introRaw = precesObj.intro || '';
         const respRaw = precesObj.respuesta || '';
         const intsRaw = Array.isArray(precesObj.intenciones) ? precesObj.intenciones : [];
 
-        const esCorrupta = (introRaw.length > 110 || introRaw.includes('Cristo Jesús, que')) ||
-                           (respRaw === "Confirma, Señor, lo que has realizado en nosotros." && (d.dia !== 'sabado' || (d.libro !== 'visperas' && d.libro !== 'vispera'))) ||
-                           (intsRaw.some(i => String(i).includes('dígnate sostener nuestra fe')));
+        const esCorrupta = esPrecesDeOtraHora ||
+                           (introRaw.includes('\n\n') || introRaw.length > 350) ||
+                           (respRaw === "Confirma, Señor, lo que has realizado en nosotros." && (d.dia !== 'viernes' || !esVisperasHora)) ||
+                           (intsRaw.some(i => String(i).includes('dígnate sostener nuestra fe'))) ||
+                           (esVisperasHora && canon && Array.isArray(canon.intenciones) && intsRaw.length === 5 && canon.intenciones.length === 4 && (!precesObj.concl || !precesObj.concl.includes('\n\n')));
 
         if (canon && (esCorrupta || intsRaw.length <= 1)) {
             precesObj = { ...canon };
@@ -1869,7 +1971,7 @@ function renderizarCuerpoLiturgico(d) {
     }
 
     // 11. PADRE NUESTRO DESPLEGABLE EN TEXTO PLANO (Solo en Laudes y Vísperas si hay preces)
-    if (libroKey !== 'oficio' && !om.preces && (libroKey === 'laudes' || libroKey === 'visperas')) {
+    if (libroKey !== 'oficio' && !om.preces && (libroKey === 'laudes' || libroKey === 'visperas' || libroKey === 'vispera')) {
         const padreNuestroTexto = window.SalmosDB ? window.SalmosDB.obtenerPadreNuestro() : `Padre nuestro, que estás en el cielo,\nsantificado sea tu Nombre;\nvenga a nosotros tu reino;\nhágase tu voluntad en la tierra como en el cielo.\nDanos hoy nuestro pan de cada día;\nperdona nuestras ofensas,\ncomo también nosotros perdonamos a los que nos ofenden;\nno nos dejes caer en la tentación,\ny líbranos del mal. \nAmen`;
 
         html += `
@@ -1956,11 +2058,8 @@ function inicializarEventosInteractivos() {
 
         console.log(`🔄 [Oficio] Cambiando ciclo de 1ª Lectura a: ${esPar ? 'Año II (Par)' : 'Año I (Impar)'}`);
 
-        // 1. Obtener la 1ª lectura correspondiente al nuevo ciclo
+        // 1. Obtener la 1ª lectura correspondiente al nuevo ciclo (priorizando la guardada en Firebase para ese ciclo)
         const ldb = (typeof window !== 'undefined' && window.LecturasDB) || LecturasDB;
-        const l1Data = (ldb && typeof ldb.obtenerLectura1 === 'function')
-            ? ldb.obtenerLectura1(tiempoAct, semanaAct, diaAct, esPar)
-            : null;
 
         const rutasOficio = construirRutaOficioLectura({
             tiempo: tiempoAct,
@@ -1977,29 +2076,68 @@ function inicializarEventosInteractivos() {
             horaActualDatos.lecturasOficio = {};
         }
 
-        if (l1Data) {
+        const guardadaPorCiclo = esPar ? horaActualDatos.lecturasOficio.primeraPar : horaActualDatos.lecturasOficio.primeraImpar;
+        if (guardadaPorCiclo && (guardadaPorCiclo.texto || guardadaPorCiclo.id)) {
+            const catItem = (guardadaPorCiclo.id && ldb && typeof ldb.obtenerPorId === 'function')
+                ? ldb.obtenerPorId(guardadaPorCiclo.id)
+                : null;
+            const respObj = guardadaPorCiclo.responsorio || {};
+            const rCita = guardadaPorCiclo.respCita || respObj.ref || catItem?.respCita || '';
+            const r1 = guardadaPorCiclo.respR1 || respObj.r1 || catItem?.respR1 || '';
+            const rV = guardadaPorCiclo.respV || respObj.v || catItem?.respV || '';
+            const r2 = guardadaPorCiclo.respR2 || respObj.r2 || catItem?.respR2 || r1 || '';
+
             horaActualDatos.lecturasOficio.primera = {
-                id: l1Data.id,
+                ...guardadaPorCiclo,
+                id: guardadaPorCiclo.id || catItem?.id || null,
                 etiqueta: '1ra Lectura',
-                audioUrl: l1Data.audioUrl || nuevoAudioL1,
+                audioUrl: guardadaPorCiclo.audioUrl || nuevoAudioL1,
                 esPar: esPar,
-                titulo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
-                epigrafeTipo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
-                cita: l1Data.cita,
-                subtitulo: l1Data.descripcion,
-                descripcion: l1Data.descripcion,
-                texto: l1Data.texto,
-                respCita: l1Data.respCita,
-                respR1: l1Data.respR1,
-                respV: l1Data.respV,
-                respR2: l1Data.respR2,
+                titulo: guardadaPorCiclo.epigrafeTipo || guardadaPorCiclo.titulo || catItem?.epigrafeTipo || 'PRIMERA LECTURA',
+                epigrafeTipo: guardadaPorCiclo.epigrafeTipo || guardadaPorCiclo.titulo || catItem?.epigrafeTipo || 'PRIMERA LECTURA',
+                cita: guardadaPorCiclo.cita || catItem?.cita || '',
+                subtitulo: guardadaPorCiclo.descripcion || guardadaPorCiclo.subtitulo || catItem?.descripcion || '',
+                descripcion: guardadaPorCiclo.descripcion || guardadaPorCiclo.subtitulo || catItem?.descripcion || '',
+                texto: guardadaPorCiclo.texto || catItem?.texto || '',
+                respCita: rCita,
+                respR1: r1,
+                respV: rV,
+                respR2: r2,
                 responsorio: {
-                    ref: l1Data.respCita,
-                    r1: l1Data.respR1,
-                    v: l1Data.respV,
-                    r2: l1Data.respR2
+                    ref: rCita,
+                    r1: r1,
+                    v: rV,
+                    r2: r2
                 }
             };
+        } else {
+            const l1Data = (ldb && typeof ldb.obtenerLectura1 === 'function')
+                ? ldb.obtenerLectura1(tiempoAct, semanaAct, diaAct, esPar)
+                : null;
+            if (l1Data) {
+                horaActualDatos.lecturasOficio.primera = {
+                    id: l1Data.id,
+                    etiqueta: '1ra Lectura',
+                    audioUrl: l1Data.audioUrl || nuevoAudioL1,
+                    esPar: esPar,
+                    titulo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
+                    epigrafeTipo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
+                    cita: l1Data.cita,
+                    subtitulo: l1Data.descripcion,
+                    descripcion: l1Data.descripcion,
+                    texto: l1Data.texto,
+                    respCita: l1Data.respCita,
+                    respR1: l1Data.respR1,
+                    respV: l1Data.respV,
+                    respR2: l1Data.respR2,
+                    responsorio: {
+                        ref: l1Data.respCita,
+                        r1: l1Data.respR1,
+                        v: l1Data.respV,
+                        r2: l1Data.respR2
+                    }
+                };
+            }
         }
 
         // Persistir en LocalStorage para mantener sincronizada la copia offline
