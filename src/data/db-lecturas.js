@@ -248,9 +248,9 @@ Y lo que Salomón decía, en otro orden de cosas, a vosotros os cuadra admirable
         epigrafeTipo: "PRIMERA LECTURA",
         cita: "Del libro del Génesis 9, 1-19",
         descripcion: "EL PACTO DE DIOS CON NOÉ Y SU DESCENDENCIA",
-        texto: "Dios bendijo a Noé y a sus hijos, diciéndoles:\n«Creced, multiplicaos y llenad la tierra. Todos los animales de la tierra os temerán y respetarán: aves del cielo, reptiles del suelo, peces del mar\nestán en vuestro poder. Todo lo que vive y se mueve os servirá de alimento: os lo entrego lo mismo que los vegetales. Pero no comáis carne con sangre, que es su vida. Pediré cuentas de vuestra sangre y vida, se las\npediré a cualquier animal; y al hombre le pediré cuentas de la vida de su hermano. Si uno derrama la sangre de un hombre, otro derramará la suya; porque Dios hizo al hombre a su imagen. Vosotros, creced y multiplicaos,\nmoveos por la tierra y dominadla.»\nDios dijo a Noé y a sus hijos:\n«Yo hago un pacto con vosotros y con vuestros descendientes, con todos los animales que os acompañaron, aves, ganado y fieras, con todos\nlos que salieron del arca y ahora viven en la tierra. Hago un pacto con vosotros: El diluvio no volverá a destruir la vida ni habrá otro diluvio que devaste la tierra.»\nY Dios añadió:\n«Ésta\nes la señal del pacto que hago con vosotros y con todo lo que vive con vosotros, para todas las edades: Pondré mi arco en el cielo, como señal de mi pacto con la tierra. Cuando traiga nubes sobre la tierra,\naparecerá en las nubes el arco y recordaré mi pacto con vosotros y con todos los animales, y el diluvio no volverá a destruir los vivientes. Saldrá el arco en las nubes y, al verlo, recordaré mi pacto\nperpetuo: Pacto de Dios con los animales, con lo que vive en la tierra.»\nDios dijo a Noé:\n«Ésta es la señal del pacto que hago con todo lo que vive en la tierra.»\nLos hijos de Noé\nque salieron del arca fueron: Sem, Cam y Jafet; Cam es el padre de Canaán. Son los tres hijos de Noé que se propagaron por toda la tierra.",
+        texto: "Dios bendijo a Noé y a sus hijos, diciéndoles:\n\n«Creced, multiplicaos y llenad la tierra. Todos los animales de la tierra os temerán y respetarán: aves del cielo, reptiles del suelo, peces del mar están en vuestro poder. Todo lo que vive y se mueve os servirá de alimento: os lo entrego lo mismo que los vegetales. Pero no comáis carne con sangre, que es su vida. Pediré cuentas de vuestra sangre y vida, se las pediré a cualquier animal; y al hombre le pediré cuentas de la vida de su hermano. Si uno derrama la sangre de un hombre, otro derramará la suya; porque Dios hizo al hombre a su imagen. Vosotros, creced y multiplicaos, moveos por la tierra y dominadla.»\n\nDios dijo a Noé y a sus hijos:\n\n«Yo hago un pacto con vosotros y con vuestros descendientes, con todos los animales que os acompañaron, aves, ganado y fieras, con todos los que salieron del arca y ahora viven en la tierra. Hago un pacto con vosotros: El diluvio no volverá a destruir la vida ni habrá otro diluvio que devaste la tierra.»\n\nY Dios añadió:\n\n«Ésta es la señal del pacto que hago con vosotros y con todo lo que vive con vosotros, para todas las edades: Pondré mi arco en el cielo, como señal de mi pacto con la tierra. Cuando traiga nubes sobre la tierra, aparecerá en las nubes el arco y recordaré mi pacto con vosotros y con todos los animales, y el diluvio no volverá a destruir los vivientes. Saldrá el arco en las nubes y, al verlo, recordaré mi pacto perpetuo: Pacto de Dios con los animales, con lo que vive en la tierra.»\n\nDios dijo a Noé:\n\n«Ésta es la señal del pacto que hago con todo lo que vive en la tierra.»\nLos hijos de Noé que salieron del arca fueron: Sem, Cam y Jafet; Cam es el padre de Canaán. Son los tres hijos de Noé que se propagaron por toda la tierra.",
         respCita: "Is 54, 9-10",
-        respR1: "Me sucede como en tiempo de Noé: Juré que las aguas del diluvio no volverían a cubrir la tierra; así juro no airarme contra ti; * mi alianza de paz no\nvacilará.",
+        respR1: "Me sucede como en tiempo de Noé: Juré que las aguas del diluvio no volverían a cubrir la tierra; así juro no airarme contra ti; * mi alianza de paz no vacilará.",
         respV: "Aunque se retiren los montes y vacilen las colinas, no se retirará de ti mi misericordia.",
         respR2: "Mi alianza de paz no vacilará.",
         audioUrl: "https://to.resucito.do/s02/domingo/lectura2.mp3"
@@ -639,30 +639,33 @@ Y lo que Salomón decía, en otro orden de cosas, a vosotros os cuadra admirable
 
 export class LecturasDB {
     static getCatalogo() {
-        const catalogo = [...CATALOGO_LECTURAS_SEED];
+        const mapa = new Map(CATALOGO_LECTURAS_SEED.map(x => [x.id, { ...x }]));
         if (typeof localStorage !== 'undefined') {
             const cache = localStorage.getItem('lh_lecturas_cache');
             if (cache) {
                 try {
                     const parsed = JSON.parse(cache);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        const seedIds = new Set(catalogo.map(x => x.id));
                         for (const item of parsed) {
-                            if (!seedIds.has(item.id)) {
-                                catalogo.push(item);
+                            if (item && item.id) {
+                                mapa.set(item.id, { ...(mapa.get(item.id) || {}), ...item });
                             }
                         }
                     }
                 } catch (e) {}
             }
         }
-        return catalogo;
+        return Array.from(mapa.values());
     }
 
     static obtener(id) {
         if (!id) return null;
         const catalogo = this.getCatalogo();
         return catalogo.find(item => item.id === id) || null;
+    }
+
+    static obtenerPorId(id) {
+        return this.obtener(id);
     }
 
     static obtenerLectura1(tiempo = 'ordinario', semana = '1', dia = 'domingo', anioPar = true) {

@@ -45,7 +45,7 @@ import { CATALOGO_ECOMPLETAS_SEED, CompletasDB } from '../data/db-ecompletas.js'
 import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 import { generarHitosLiturgicos } from './form_etiempo.js';
 import { inicializarSearchableSantoSelect } from './searchable-santo.js';
-import { formatearTextoSalmo } from './salterios.js';
+import { formatearTextoSalmo, limpiarSaltosDeLineaLectura } from './salterios.js';
 
 export const TEXTO_TEDUEM_CANONICO = `A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
 A ti, eterno Padre, te venera toda la creación.
@@ -3122,7 +3122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (previewLec1Epigrafe) previewLec1Epigrafe.textContent = l1Obj.epigrafeTipo || 'PRIMERA LECTURA';
                     if (previewLec1Cita) previewLec1Cita.textContent = l1Obj.cita || '';
                     if (previewLec1Desc) previewLec1Desc.textContent = l1Obj.descripcion || l1Obj.subtitulo || '';
-                    if (previewLec1Texto) previewLec1Texto.textContent = l1Obj.texto || '';
+                    if (previewLec1Texto) previewLec1Texto.textContent = limpiarSaltosDeLineaLectura(l1Obj.texto || '');
                     const r1_1 = l1Obj.respR1 || l1Obj.responsorio?.r1 || '';
                     const r2_1 = l1Obj.respR2 || l1Obj.responsorio?.r2 || '';
                     if (previewLec1RespCita) previewLec1RespCita.textContent = l1Obj.respCita || l1Obj.responsorio?.ref || '';
@@ -3157,7 +3157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (previewLec2Epigrafe) previewLec2Epigrafe.textContent = l2Obj.epigrafeTipo || 'SEGUNDA LECTURA';
                     if (previewLec2Cita) previewLec2Cita.textContent = l2Obj.cita || '';
                     if (previewLec2Desc) previewLec2Desc.textContent = l2Obj.descripcion || l2Obj.subtitulo || '';
-                    if (previewLec2Texto) previewLec2Texto.textContent = l2Obj.texto || '';
+                    if (previewLec2Texto) previewLec2Texto.textContent = limpiarSaltosDeLineaLectura(l2Obj.texto || '');
                     const r1_2 = l2Obj.respR1 || l2Obj.responsorio?.r1 || '';
                     const r2_2 = l2Obj.respR2 || l2Obj.responsorio?.r2 || '';
                     if (previewLec2RespCita) previewLec2RespCita.textContent = l2Obj.respCita || l2Obj.responsorio?.ref || '';
@@ -4467,11 +4467,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (l1Raw) {
                 if (selLectura1Oficio && l1Raw.id) selLectura1Oficio.value = l1Raw.id;
                 const l1Vivo = l1Raw.id ? cacheTodasLasLecturasOficio.find(x => x.id === l1Raw.id) : null;
-                const l1 = l1Vivo ? { ...l1Raw, ...l1Vivo } : l1Raw;
+                const l1 = l1Vivo ? { ...l1Vivo, ...l1Raw } : l1Raw;
                 if (previewLec1Epigrafe) previewLec1Epigrafe.textContent = l1.titulo || l1.epigrafeTipo || 'PRIMERA LECTURA';
                 if (previewLec1Cita) previewLec1Cita.textContent = l1.cita || '';
                 if (previewLec1Desc) previewLec1Desc.textContent = l1.descripcion || l1.subtitulo || '';
-                if (previewLec1Texto) previewLec1Texto.textContent = l1.texto || '';
+                if (previewLec1Texto) previewLec1Texto.textContent = limpiarSaltosDeLineaLectura(l1.texto || '');
                 const r1_1 = l1.respR1 || l1.responsorio?.r1 || '';
                 const r2_1 = l1.respR2 || l1.responsorio?.r2 || '';
                 if (previewLec1RespCita) previewLec1RespCita.textContent = l1.respCita || l1.responsorio?.ref || '';
@@ -4487,11 +4487,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (l2Raw) {
                 if (selLectura2Oficio && l2Raw.id) selLectura2Oficio.value = l2Raw.id;
                 const l2Vivo = l2Raw.id ? cacheTodasLasLecturasOficio.find(x => x.id === l2Raw.id) : null;
-                const l2 = l2Vivo ? { ...l2Raw, ...l2Vivo } : l2Raw;
+                const l2 = l2Vivo ? { ...l2Vivo, ...l2Raw } : l2Raw;
                 if (previewLec2Epigrafe) previewLec2Epigrafe.textContent = l2.titulo || l2.epigrafeTipo || 'SEGUNDA LECTURA';
                 if (previewLec2Cita) previewLec2Cita.textContent = l2.cita || '';
                 if (previewLec2Desc) previewLec2Desc.textContent = l2.descripcion || l2.subtitulo || '';
-                if (previewLec2Texto) previewLec2Texto.textContent = l2.texto || '';
+                if (previewLec2Texto) previewLec2Texto.textContent = limpiarSaltosDeLineaLectura(l2.texto || '');
                 const r1_2 = l2.respR1 || l2.responsorio?.r1 || '';
                 const r2_2 = l2.respR2 || l2.responsorio?.r2 || '';
                 if (previewLec2RespCita) previewLec2RespCita.textContent = l2.respCita || l2.responsorio?.ref || '';

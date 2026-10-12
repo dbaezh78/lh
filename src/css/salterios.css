@@ -248,7 +248,7 @@ body.pagina-salterios {
     text-align: justify;
     text-justify: inter-word;
     white-space: pre-line;
-    line-height: 1.65;
+    line-height: 1.4;
     margin: 14px 0 18px 0;
     font-size: calc(var(--size) * var(--font-zoom));
 }

@@ -267,6 +267,15 @@ export function resolverTextoCelebracion(params, datos) {
 }
 
 /**
+ * Normaliza saltos de línea en textos de lecturas respetando fielmente el formato
+ * definido en el editor/formulario (saltos simples y párrafos con línea en blanco).
+ */
+export function limpiarSaltosDeLineaLectura(texto) {
+    if (!texto || typeof texto !== 'string') return '';
+    return texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+}
+
+/**
  * Formatea el primer verso (R1) del responsorio de lectura del Oficio:
  * Asegura la presencia del asterisco rojo (*) y el estribillo complementario (r2).
  */
@@ -274,7 +283,7 @@ export function formatearResponsorioR1(r1, r2) {
     const textoR1 = (r1 || '').trim();
     const textoR2 = (r2 || '').trim();
     if (!textoR1 && !textoR2) return '';
-    const asteriscoHtml = '<span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; margin: 0 4px; font-size: 1.15em;">*</span>';
+    const asteriscoHtml = '<span class="asterisco-rojo" style="color: #ff0000; font-weight: 100; margin: 0 4px; font-size: 1.15em;">*</span>';
     if (!textoR1) return textoR2 ? `${asteriscoHtml} ${textoR2}` : '';
     if (textoR1.includes('*')) {
         return textoR1.replace(/\*/g, asteriscoHtml);
@@ -322,7 +331,7 @@ export function formatearTextoSalmo(texto) {
             .replace(/(^|\n)R\.\s*/g, '$1<span class="rubrica-vr" style="color: #ff0000; font-weight: normal;">R.</span> ')
             .replace(/(^|\n)V\.\s*/g, '$1<span class="rubrica-vr" style="color: #ff0000; font-weight: normal;">V.</span> ')
             // 3. Asterisco litúrgico
-            .replace(/\s\*\s/g, ' <span class="asterisco-rojo" style="color: #ff0000; font-weight: bold; margin: 0 4px; font-size: 1.15em;">*</span> ');
+            .replace(/\s\*\s/g, ' <span class="asterisco-rojo" style="color: #ff0000; font-weight: 100; margin: 0 4px; font-size: 1.15em;">*</span> ');
 
         return estrofa;
     });
@@ -332,6 +341,7 @@ export function formatearTextoSalmo(texto) {
 
 if (typeof window !== 'undefined') {
     window.formatearTextoSalmo = formatearTextoSalmo;
+    window.limpiarSaltosDeLineaLectura = limpiarSaltosDeLineaLectura;
 }
 
 // Configuración de libros e información fija
@@ -922,33 +932,38 @@ function montarOActualizarVista(params, datos) {
         const diaActivo = datos?.dia || dia || 'domingo';
         const ldb = (typeof window !== 'undefined' && window.LecturasDB) || LecturasDB;
 
-        const l1Data = (ldb && typeof ldb.obtenerLectura1 === 'function')
-            ? ldb.obtenerLectura1(tiempoActivo, semanaActiva, diaActivo, esPar)
-            : null;
-        if (l1Data) {
-            if (!datos.lecturasOficio) datos.lecturasOficio = {};
-            datos.lecturasOficio.primera = {
-                id: l1Data.id,
-                etiqueta: '1ra Lectura',
-                audioUrl: l1Data.audioUrl || urlLectura1,
-                esPar: esPar,
-                titulo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
-                epigrafeTipo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
-                cita: l1Data.cita,
-                subtitulo: l1Data.descripcion,
-                descripcion: l1Data.descripcion,
-                texto: l1Data.texto,
-                respCita: l1Data.respCita,
-                respR1: l1Data.respR1,
-                respV: l1Data.respV,
-                respR2: l1Data.respR2,
-                responsorio: {
-                    ref: l1Data.respCita,
-                    r1: l1Data.respR1,
-                    v: l1Data.respV,
-                    r2: l1Data.respR2
-                }
-            };
+        // Asegurar que exista la 1ª lectura bíblica si no viene en los datos guardados
+        if (!datos.lecturasOficio?.primera || !datos.lecturasOficio.primera.texto) {
+            const l1Data = (ldb && typeof ldb.obtenerLectura1 === 'function')
+                ? ldb.obtenerLectura1(tiempoActivo, semanaActiva, diaActivo, esPar)
+                : null;
+            if (l1Data) {
+                if (!datos.lecturasOficio) datos.lecturasOficio = {};
+                datos.lecturasOficio.primera = {
+                    id: l1Data.id,
+                    etiqueta: '1ra Lectura',
+                    audioUrl: l1Data.audioUrl || urlLectura1,
+                    esPar: esPar,
+                    titulo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
+                    epigrafeTipo: l1Data.epigrafeTipo || 'PRIMERA LECTURA',
+                    cita: l1Data.cita,
+                    subtitulo: l1Data.descripcion,
+                    descripcion: l1Data.descripcion,
+                    texto: l1Data.texto,
+                    respCita: l1Data.respCita,
+                    respR1: l1Data.respR1,
+                    respV: l1Data.respV,
+                    respR2: l1Data.respR2,
+                    responsorio: {
+                        ref: l1Data.respCita,
+                        r1: l1Data.respR1,
+                        v: l1Data.respV,
+                        r2: l1Data.respR2
+                    }
+                };
+            }
+        } else if (datos.lecturasOficio.primera && !datos.lecturasOficio.primera.audioUrl) {
+            datos.lecturasOficio.primera.audioUrl = urlLectura1;
         }
 
         // Asegurar también que exista la 2ª lectura patrística
@@ -1437,7 +1452,7 @@ function renderizarCuerpoLiturgico(d) {
     } else if (libroKey === 'completas') {
         html += `
             <h1 class="salterio-libro-titulo" style="color: #ff0000; font-weight: 700; font-size: calc(2.1rem * var(--font-zoom)); text-transform: uppercase; margin-bottom: 4px;">${tituloLibro}</h1>
-            <div class="salterio-libro-subtitulo" style="color: #ff0000 !important; font-weight: bold !important; font-style: italic; text-transform: uppercase; font-size: 1.15rem; margin: 0 0 24px 0;">${subtituloLibro}</div>
+            <div class="salterio-libro-subtitulo" style="color: #ff0000 !important; font-weight: 100; font-style: italic; text-transform: uppercase; font-size: 1.15rem; margin: 0 0 24px 0;">${subtituloLibro}</div>
         `;
     } else {
         html += `
@@ -1506,9 +1521,9 @@ function renderizarCuerpoLiturgico(d) {
             rInvocacion = `${rInvocacion.replace(/\.?$/, '')}. Aleluya.`;
         }
         html += `
-            <div class="salterio-seccion-header" style="color: #ff0000; font-weight: bold; margin-bottom: 12px;">INVOCACIÓN INICIAL</div>
-            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">V.</span> <span class="texto-vr">${d.invocacionInicial?.v || 'Dios mío, ven en mi auxilio'}</span></div>
-            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">R.</span> <span class="texto-vr">${rInvocacion}</span></div>
+            <div class="salterio-seccion-header" style="color: #ff0000; font-weight: 100; margin-bottom: 12px;">INVOCACIÓN INICIAL</div>
+            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000; font-weight: 100;">V.</span> <span class="texto-vr">${d.invocacionInicial?.v || 'Dios mío, ven en mi auxilio'}</span></div>
+            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000; font-weight: 100;">R.</span> <span class="texto-vr">${rInvocacion}</span></div>
         `;
     }
 
@@ -1522,13 +1537,13 @@ function renderizarCuerpoLiturgico(d) {
         const rExamen = ex.r || 'Amén.';
 
         html += `
-            <div class="salterio-seccion-header" style="color: #ff0000; font-weight: bold; margin-top: 22px; margin-bottom: 12px; font-size: 1.15rem; letter-spacing: 0.5px;">${titExamen}</div>
+            <div class="salterio-seccion-header" style="color: #ff0000; font-weight: 100; margin-top: 22px; margin-bottom: 12px; font-size: calc(1.12 * var(--size) * var(--font-zoom)); letter-spacing: 0.5px;">${titExamen}</div>
             <div class="texto-examen-conciencia" style="margin-bottom: 14px;">
                 <p class="monicion-examen" style="margin-bottom: 14px; text-align: justify; line-height: 1.45;">${monicionExamen}</p>
                 <div class="confesion-estrofas" style="white-space: pre-line; margin-bottom: 16px; line-height: 1.4;">${confesionExamen}</div>
             </div>
-            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">V.</span> <span class="texto-vr">${vExamen}</span></div>
-            <div class="linea-vr" style="margin-bottom: 22px;"><span class="rubrica-vr" style="color: #ff0000; font-weight: bold;">R.</span> <span class="texto-vr">${rExamen}</span></div>
+            <div class="linea-vr"><span class="rubrica-vr" style="color: #ff0000; font-weight: 100;">V.</span> <span class="texto-vr">${vExamen}</span></div>
+            <div class="linea-vr" style="margin-bottom: 22px;"><span class="rubrica-vr" style="color: #ff0000; font-weight: 100;">R.</span> <span class="texto-vr">${rExamen}</span></div>
         `;
     }
 
@@ -1613,7 +1628,7 @@ function renderizarCuerpoLiturgico(d) {
             const l1Vivo = (l1Raw.id && LecturasDB && typeof LecturasDB.obtenerPorId === 'function')
                 ? LecturasDB.obtenerPorId(l1Raw.id)
                 : null;
-            const l1 = l1Vivo ? { ...l1Raw, ...l1Vivo } : l1Raw;
+            const l1 = l1Vivo ? { ...l1Raw, ...l1Vivo, audioUrl: l1Vivo.audioUrl || l1Raw.audioUrl || '' } : l1Raw;
             const resp1Obj = l1.responsorio || {};
             const r1Raw = l1.respR1 || resp1Obj.r1 || '';
             const v1Txt = l1.respV || resp1Obj.v || '';
@@ -1625,8 +1640,8 @@ function renderizarCuerpoLiturgico(d) {
                 <div class="lectura-oficio-contenedor" style="margin-top: 26px;">
                     <div class="salterio-seccion-header">${l1.epigrafeTipo || l1.titulo || 'PRIMERA LECTURA'}</div>
                     <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000; white-space: pre-line;">${(l1.cita || '').replace(/\\n/g, '<br>')}</div>
-                    <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l1.descripcion || l1.subtitulo || ''}</div>
-                    <div class="texto-lectura-justificado" style="white-space: pre-line;">${l1.texto || ''}</div>
+                    <div class="lectura-subtitulo-rubrica" style="font-weight: 100; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l1.descripcion || l1.subtitulo || ''}</div>
+                    <div class="texto-lectura-justificado" style="white-space: pre-line;">${limpiarSaltosDeLineaLectura(l1.texto || '')}</div>
                     ${(r1Raw || r2Txt) ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
                             <div class="salterio-seccion-header">
@@ -1647,7 +1662,7 @@ function renderizarCuerpoLiturgico(d) {
             const l2Vivo = (l2Raw.id && LecturasDB && typeof LecturasDB.obtenerPorId === 'function')
                 ? LecturasDB.obtenerPorId(l2Raw.id)
                 : null;
-            const l2 = l2Vivo ? { ...l2Raw, ...l2Vivo } : l2Raw;
+            const l2 = l2Vivo ? { ...l2Raw, ...l2Vivo, audioUrl: l2Vivo.audioUrl || l2Raw.audioUrl || '' } : l2Raw;
             const resp2Obj = l2.responsorio || {};
             const r1Raw2 = l2.respR1 || resp2Obj.r1 || '';
             const v2Txt = l2.respV || resp2Obj.v || '';
@@ -1659,8 +1674,8 @@ function renderizarCuerpoLiturgico(d) {
                 <div class="lectura-oficio-contenedor" style="margin-top: 28px;">
                     <div class="salterio-seccion-header">${l2.epigrafeTipo || l2.titulo || 'SEGUNDA LECTURA'}</div>
                     <div class="lectura-cita-rubrica" style="font-weight: 500; margin-bottom: 4px; color: #000000; white-space: pre-line;">${(l2.cita || '').replace(/\\n/g, '<br>')}</div>
-                    <div class="lectura-subtitulo-rubrica" style="font-weight: bold; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l2.descripcion || l2.subtitulo || ''}</div>
-                    <div class="texto-lectura-justificado" style="white-space: pre-line;">${l2.texto || ''}</div>
+                    <div class="lectura-subtitulo-rubrica" style="font-weight: 100; text-transform: uppercase; margin-bottom: 12px; color: #ff0000;">${l2.descripcion || l2.subtitulo || ''}</div>
+                    <div class="texto-lectura-justificado" style="white-space: pre-line;">${limpiarSaltosDeLineaLectura(l2.texto || '')}</div>
                     ${(r1Raw2 || r2Txt2) ? `
                         <div class="responsorio-lectura-caja" style="margin-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
                             <div class="salterio-seccion-header">
