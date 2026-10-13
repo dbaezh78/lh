@@ -630,9 +630,9 @@ export class CintaLiturgica {
 
                     <!-- Barra de Progreso y Tiempos con Scrubber Amarillo -->
                     <div class="cinta-barra-progreso-box">
-                        <span class="cinta-tiempo-num" id="cinta-tiempo-actual">0:00</span>
+                        <span class="cinta-tiempo-num" id="cinta-tiempo-actual" title="Doble clic o dos toques para descargar el audio">0:00</span>
                         <input type="range" class="cinta-slider-progreso" id="cinta-slider-progreso" min="0" max="100" value="0">
-                        <span class="cinta-tiempo-num" id="cinta-tiempo-total">0:00</span>
+                        <span class="cinta-tiempo-num" id="cinta-tiempo-total" title="Doble clic o dos toques para descargar el audio">0:00</span>
                     </div>
                 </div>
 
@@ -788,6 +788,7 @@ export class CintaLiturgica {
                 if (iconPlay) iconPlay.textContent = 'play_arrow';
                 if (slider) slider.value = 0;
                 if (tActual) tActual.textContent = '0:00';
+                document.documentElement.style.setProperty('--progreso-reproduccion', '0%');
             }
         });
 
@@ -796,6 +797,7 @@ export class CintaLiturgica {
                 if (!isNaN(this.audio.duration) && this.audio.duration > 0) {
                     const porcentaje = (this.audio.currentTime / this.audio.duration) * 100;
                     if (slider) slider.value = porcentaje;
+                    document.documentElement.style.setProperty('--progreso-reproduccion', `${porcentaje.toFixed(1)}%`);
                     if (tActual) tActual.textContent = this.formatearTiempo(this.audio.currentTime);
                     if (tTotal) tTotal.textContent = this.formatearTiempo(this.audio.duration);
                 }
@@ -818,9 +820,153 @@ export class CintaLiturgica {
                 } else {
                     if (!isNaN(this.audio.duration) && this.audio.duration > 0) {
                         this.audio.currentTime = (slider.value / 100) * this.audio.duration;
+                        document.documentElement.style.setProperty('--progreso-reproduccion', `${Number(slider.value).toFixed(1)}%`);
                     }
                 }
             });
+        }
+
+        // Doble clic o dos toques en el reloj de inicio o final para descargar el audio activo
+        const vincularDescargaReloj = (elem) => {
+            if (!elem) return;
+            let ultimoToque = 0;
+            const dispararDescarga = (e) => {
+                if (this._descargaEnCurso) return;
+                if (e && e.preventDefault) e.preventDefault();
+                if (e && e.stopPropagation) e.stopPropagation();
+                this.descargarAudioActual();
+            };
+            const manejarToque = (e) => {
+                const ahora = Date.now();
+                const diff = ahora - ultimoToque;
+                if (diff > 0 && diff < 380) {
+                    ultimoToque = 0;
+                    dispararDescarga(e);
+                } else {
+                    ultimoToque = ahora;
+                }
+            };
+            elem.addEventListener('dblclick', (e) => {
+                ultimoToque = 0;
+                dispararDescarga(e);
+            });
+            elem.addEventListener('click', manejarToque);
+            elem.addEventListener('touchend', manejarToque);
+        };
+
+        vincularDescargaReloj(tActual);
+        vincularDescargaReloj(tTotal);
+    }
+
+    async descargarAudioActual() {
+        if (this._descargaEnCurso) return;
+        this._descargaEnCurso = true;
+
+        const tActual = document.getElementById('cinta-tiempo-actual');
+        const tTotal = document.getElementById('cinta-tiempo-total');
+        if (tActual) tActual.classList.add('descargando-audio');
+        if (tTotal) tTotal.classList.add('descargando-audio');
+
+        const limpiarEstadoDescarga = () => {
+            this._descargaEnCurso = false;
+            if (tActual) tActual.classList.remove('descargando-audio');
+            if (tTotal) tTotal.classList.remove('descargando-audio');
+        };
+
+        const slugLimpio = (str) => String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        const tSlug = slugLimpio(this.opciones?.tiempoSlug || this.opciones?.tiempo || 'liturgia');
+        const semStr = this.opciones?.semana ? `s${String(this.opciones.semana).padStart(2, '0')}` : '';
+        const dSlug = slugLimpio(this.opciones?.diaSlug || this.opciones?.dia || 'dia');
+        const modoSlug = slugLimpio(this.modoActivo === 'hora' ? (this.opciones?.libro || 'hora') : this.modoActivo);
+        const nombreArchivo = [modoSlug, tSlug, semStr, dSlug].filter(Boolean).join('_') + '.mp3';
+
+        const dispararDescargaBlob = (blob, filename) => {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+            }, 1500);
+        };
+
+        try {
+            // 1. Intentar descargar el archivo MP3 directo del modo activo (o del reproductor si está cargado)
+            const urlCandidata = (this.modoActivo !== 'hora')
+                ? (this.audios[this.modoActivo] || this.audio?.src)
+                : (this.audios.hora || '');
+
+            if (urlCandidata) {
+                try {
+                    const res = await fetch(urlCandidata);
+                    const cType = (res.headers.get('content-type') || '').toLowerCase();
+                    if (res.ok && !cType.includes('text/html')) {
+                        const blob = await res.blob();
+                        dispararDescargaBlob(blob, nombreArchivo);
+                        limpiarEstadoDescarga();
+                        return;
+                    }
+                } catch (_) {
+                    if (this.modoActivo !== 'hora') {
+                        const a = document.createElement('a');
+                        a.href = urlCandidata;
+                        a.download = nombreArchivo;
+                        a.target = '_blank';
+                        a.rel = 'noopener';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        limpiarEstadoDescarga();
+                        return;
+                    }
+                }
+            }
+
+            // 2. Si el modo es 'hora' (TTS) y no existe archivo MP3 pregrabado en el servidor, sintetizar MP3 desde el texto litúrgico
+            if (this.modoActivo === 'hora') {
+                if (!this.ttsState.fullText || this.ttsState.chunks.length === 0) {
+                    this.prepararTTS();
+                }
+                const chunks = (this.ttsState.chunks || []).map(c => c.text).filter(Boolean);
+                if (chunks.length > 0) {
+                    const buffers = [];
+                    for (let i = 0; i < chunks.length; i++) {
+                        const textoFrag = chunks[i].slice(0, 190);
+                        const ttsUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://audio1.spanishdict.com/audio?lang=es&text=${encodeURIComponent(textoFrag)}`)}`;
+                        const r = await fetch(ttsUrl);
+                        if (r.ok) {
+                            const buf = await r.arrayBuffer();
+                            if (buf && buf.byteLength > 0) buffers.push(buf);
+                        }
+                    }
+                    if (buffers.length > 0) {
+                        const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
+                        dispararDescargaBlob(mp3Blob, nombreArchivo);
+                        limpiarEstadoDescarga();
+                        return;
+                    }
+                }
+            }
+
+            // 3. Respaldo final: si hay otro audio MP3 colocado en this.audio.src o en evangelio
+            const urlRespaldo = this.audio?.src || this.audios.evangelio || this.audios.lectura1 || this.audios.lectura2;
+            if (urlRespaldo) {
+                const res = await fetch(urlRespaldo);
+                if (res.ok && !(res.headers.get('content-type') || '').toLowerCase().includes('text/html')) {
+                    const blob = await res.blob();
+                    dispararDescargaBlob(blob, nombreArchivo);
+                    limpiarEstadoDescarga();
+                    return;
+                }
+            }
+        } catch (err) {
+            console.warn('Error al descargar audio desde la cinta:', err);
+        } finally {
+            limpiarEstadoDescarga();
         }
     }
 

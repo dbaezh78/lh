@@ -340,6 +340,13 @@ function cargarPortada() {
     const codigoSantoCompletas = obtenerIdHoraSanto('completas', 'co');
 
     app.innerHTML = `
+        <!-- Barra de Progreso Superior (Evangelio y Santo) -->
+        <div class="portada-barra-progreso-top" id="portada-barra-progreso-top">
+            <span class="portada-tiempo-num" id="portada-tiempo-actual" title="Doble clic o dos toques para descargar el audio">0:00</span>
+            <input type="range" class="portada-slider-progreso" id="portada-slider-progreso" min="0" max="100" step="0.1" value="0">
+            <span class="portada-tiempo-num" id="portada-tiempo-total" title="Doble clic o dos toques para descargar el audio">0:00</span>
+        </div>
+
         <div class="background-overlay"></div>
         
         <div class="portada-container">
@@ -1263,16 +1270,267 @@ function vincularEventos() {
             contenedor.classList.add('desplegado');
         });
     });
+
+    vincularEventosBarraProgresoPortada();
 }
 
 // Arrancar la aplicación
 cargarPortada();
 
 // =========================================================
-// REPRODUCTOR DEL EVANGELIO DEL DÍA (PORTADA)
+// BARRA DE PROGRESO SUPERIOR Y REPRODUCTOR DE PORTADA
 // =========================================================
 let audioEvangelioGlobal = null;
 let evangelioEstaReproduciendo = false;
+window.modoAudioPortadaActivo = null; // 'evangelio' | 'santo'
+let _descargandoAudioPortada = false;
+
+export function formatearTiempoPortada(segundos) {
+    if (!segundos || isNaN(segundos) || !isFinite(segundos) || segundos < 0) return '0:00';
+    const mins = Math.floor(segundos / 60);
+    const secs = Math.floor(segundos % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+window.formatearTiempoPortada = formatearTiempoPortada;
+
+export function mostrarBarraProgresoPortada(modo) {
+    window.modoAudioPortadaActivo = modo;
+    const barraTop = document.getElementById('portada-barra-progreso-top');
+    if (barraTop) {
+        barraTop.style.display = 'flex';
+    }
+}
+window.mostrarBarraProgresoPortada = mostrarBarraProgresoPortada;
+
+export function actualizarBarraProgresoPortada(actualSegs, totalSegs, pctOverride = null) {
+    const barraTop = document.getElementById('portada-barra-progreso-top');
+    const elActual = document.getElementById('portada-tiempo-actual');
+    const elTotal = document.getElementById('portada-tiempo-total');
+    const slider = document.getElementById('portada-slider-progreso');
+
+    if (barraTop && barraTop.style.display === 'none') {
+        barraTop.style.display = 'flex';
+    }
+    if (elActual) {
+        elActual.textContent = formatearTiempoPortada(actualSegs);
+    }
+    if (elTotal && totalSegs > 0 && isFinite(totalSegs)) {
+        elTotal.textContent = formatearTiempoPortada(totalSegs);
+    }
+    if (slider) {
+        let pct = pctOverride !== null ? pctOverride : (totalSegs > 0 ? (actualSegs / totalSegs) * 100 : 0);
+        pct = Math.min(100, Math.max(0, pct));
+        slider.value = pct;
+        slider.style.setProperty('--progreso-portada', `${pct}%`);
+    }
+}
+window.actualizarBarraProgresoPortada = actualizarBarraProgresoPortada;
+
+function vincularEventosBarraProgresoPortada() {
+    const slider = document.getElementById('portada-slider-progreso');
+    const tiempoActualEl = document.getElementById('portada-tiempo-actual');
+    const tiempoTotalEl = document.getElementById('portada-tiempo-total');
+
+    if (slider) {
+        slider.addEventListener('input', () => {
+            const val = parseFloat(slider.value) || 0;
+            slider.style.setProperty('--progreso-portada', `${val}%`);
+            if (window.modoAudioPortadaActivo === 'evangelio' && audioEvangelioGlobal && audioEvangelioGlobal.duration) {
+                const nuevoTiempo = (val / 100) * audioEvangelioGlobal.duration;
+                audioEvangelioGlobal.currentTime = nuevoTiempo;
+                if (tiempoActualEl) tiempoActualEl.textContent = formatearTiempoPortada(nuevoTiempo);
+            } else if (window.modoAudioPortadaActivo === 'santo' && typeof window.seekSantoPortadaPorFraccion === 'function') {
+                window.seekSantoPortadaPorFraccion(val / 100);
+            }
+        });
+    }
+
+    const vincularDobleToqueRelojPortada = (el) => {
+        if (!el || el.dataset.dobleToqueVinculado === '1') return;
+        el.dataset.dobleToqueVinculado = '1';
+        let ultimoToqueTs = 0;
+
+        el.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            ultimoToqueTs = 0;
+            descargarAudioPortadaActual();
+        });
+
+        el.addEventListener('touchend', (e) => {
+            const ahora = Date.now();
+            if (ahora - ultimoToqueTs > 40 && ahora - ultimoToqueTs < 380) {
+                e.preventDefault();
+                e.stopPropagation();
+                ultimoToqueTs = 0;
+                descargarAudioPortadaActual();
+            } else {
+                ultimoToqueTs = ahora;
+            }
+        }, { passive: false });
+
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const ahora = Date.now();
+            if (ahora - ultimoToqueTs > 40 && ahora - ultimoToqueTs < 380) {
+                e.preventDefault();
+                ultimoToqueTs = 0;
+                descargarAudioPortadaActual();
+            } else {
+                ultimoToqueTs = ahora;
+            }
+        });
+    };
+
+    vincularDobleToqueRelojPortada(tiempoActualEl);
+    vincularDobleToqueRelojPortada(tiempoTotalEl);
+}
+
+export async function descargarAudioPortadaActual() {
+    if (_descargandoAudioPortada) return;
+
+    const elActual = document.getElementById('portada-tiempo-actual');
+    const elTotal = document.getElementById('portada-tiempo-total');
+    const textoOrigActual = elActual ? elActual.textContent : '0:00';
+
+    const activarIndicador = (msg) => {
+        _descargandoAudioPortada = true;
+        if (elActual) {
+            elActual.classList.add('descargando-audio');
+            if (msg) elActual.textContent = msg;
+        }
+        if (elTotal) elTotal.classList.add('descargando-audio');
+    };
+
+    const restaurarIndicador = () => {
+        _descargandoAudioPortada = false;
+        if (elActual) {
+            elActual.classList.remove('descargando-audio');
+            if (elActual.textContent.includes('%') || elActual.textContent === '...') {
+                elActual.textContent = textoOrigActual;
+            }
+        }
+        if (elTotal) elTotal.classList.remove('descargando-audio');
+    };
+
+    const hoy = new Date();
+    const fechaArchivo = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    const modo = window.modoAudioPortadaActivo || (window.reproduciendoSantoPortada ? 'santo' : 'evangelio');
+
+    try {
+        if (modo === 'evangelio') {
+            const url = (audioEvangelioGlobal && audioEvangelioGlobal.src) ? audioEvangelioGlobal.src : resolverUrlEvangelioHoy();
+            if (!url) {
+                alert('No hay audio del Evangelio disponible para descargar.');
+                return;
+            }
+            activarIndicador('...');
+            const nombreArchivo = `evangelio-${fechaArchivo}.mp3`;
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const blob = await res.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = nombreArchivo;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 8000);
+            } catch (_) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nombreArchivo;
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } finally {
+                restaurarIndicador();
+            }
+            return;
+        }
+
+        // Modo 'santo' -> sintetizar MP3 a partir de las frases de lectura del santo
+        const state = window.currentSpeechState;
+        let textos = [];
+        if (state && Array.isArray(state.chunks) && state.chunks.length > 0) {
+            textos = state.chunks.map(c => c.text).filter(Boolean);
+        } else if (state && state.fullText) {
+            textos = [state.fullText];
+        }
+
+        if (textos.length === 0) {
+            alert('No hay lectura del santo activa para descargar.');
+            return;
+        }
+
+        activarIndicador('0%');
+
+        const fragmentos = [];
+        let acum = '';
+        for (const t of textos) {
+            const limpio = String(t).replace(/\s+/g, ' ').trim();
+            if (!limpio) continue;
+            if ((acum + ' ' + limpio).trim().length <= 180) {
+                acum = (acum + ' ' + limpio).trim();
+            } else {
+                if (acum) fragmentos.push(acum);
+                if (limpio.length <= 180) {
+                    acum = limpio;
+                } else {
+                    const partes = limpio.match(/.{1,175}(\s|$)/g) || [limpio];
+                    for (const p of partes) {
+                        if (p.trim()) fragmentos.push(p.trim());
+                    }
+                    acum = '';
+                }
+            }
+        }
+        if (acum) fragmentos.push(acum);
+
+        const buffers = [];
+        for (let i = 0; i < fragmentos.length; i++) {
+            const pct = Math.round(((i + 1) / fragmentos.length) * 100);
+            if (elActual) elActual.textContent = `${pct}%`;
+            const txtEnc = encodeURIComponent(fragmentos[i]);
+            const ttsTarget = `https://audio1.spanishdict.com/audio?lang=es&text=${txtEnc}`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(ttsTarget)}`;
+            const r = await fetch(proxyUrl);
+            if (r.ok) {
+                const buf = await r.arrayBuffer();
+                if (buf && buf.byteLength > 0) buffers.push(buf);
+            }
+        }
+
+        if (buffers.length === 0) {
+            throw new Error('No se pudo sintetizar el archivo MP3 del santo.');
+        }
+
+        const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
+        const blobUrl = URL.createObjectURL(mp3Blob);
+        const slugSanto = (window.santoActualDetalle?.nombre || 'santo')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `${slugSanto || 'santo'}-${fechaArchivo}.mp3`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    } catch (err) {
+        console.error('Error al descargar audio de portada:', err);
+        alert('No se pudo completar la descarga del audio en este momento.');
+    } finally {
+        restaurarIndicador();
+    }
+}
+window.descargarAudioPortadaActual = descargarAudioPortadaActual;
 
 export function pausarEvangelioPortada() {
     if (audioEvangelioGlobal && !audioEvangelioGlobal.paused) {
@@ -1351,11 +1609,22 @@ export function toggleReproducirEvangelioPortada() {
     if (!audioEvangelioGlobal) {
         audioEvangelioGlobal = new Audio();
 
+        audioEvangelioGlobal.addEventListener('loadedmetadata', () => {
+            if (window.modoAudioPortadaActivo === 'evangelio' && audioEvangelioGlobal.duration) {
+                actualizarBarraProgresoPortada(audioEvangelioGlobal.currentTime || 0, audioEvangelioGlobal.duration);
+            }
+        });
+
         audioEvangelioGlobal.addEventListener('timeupdate', () => {
-            if (audioEvangelioGlobal.duration && ringBar) {
+            if (audioEvangelioGlobal.duration) {
                 const progreso = audioEvangelioGlobal.currentTime / audioEvangelioGlobal.duration;
-                const offset = 84.82 * (1 - progreso);
-                ringBar.style.strokeDashoffset = offset;
+                if (ringBar) {
+                    const offset = 84.82 * (1 - progreso);
+                    ringBar.style.strokeDashoffset = offset;
+                }
+                if (window.modoAudioPortadaActivo === 'evangelio') {
+                    actualizarBarraProgresoPortada(audioEvangelioGlobal.currentTime, audioEvangelioGlobal.duration);
+                }
             }
         });
 
@@ -1364,9 +1633,23 @@ export function toggleReproducirEvangelioPortada() {
             if (btnEvangelio) btnEvangelio.classList.remove('reproduciendo', 'speaking');
             if (iconoEvangelio) iconoEvangelio.textContent = 'play_arrow';
             if (ringBar) ringBar.style.strokeDashoffset = '84.82';
+            if (window.modoAudioPortadaActivo === 'evangelio') {
+                actualizarBarraProgresoPortada(0, audioEvangelioGlobal.duration || 0, 0);
+            }
         });
 
         audioEvangelioGlobal.addEventListener('error', (e) => {
+            // Si en domingo no existe domingo-a/b/c.mp3, probar fallback con domingo.mp3
+            if (audioEvangelioGlobal.src && /domingo-[abc]\.mp3$/i.test(audioEvangelioGlobal.src)) {
+                const fallbackUrl = audioEvangelioGlobal.src.replace(/domingo-[abc]\.mp3$/i, 'domingo.mp3');
+                audioEvangelioGlobal.src = fallbackUrl;
+                audioEvangelioGlobal.play().then(() => {
+                    evangelioEstaReproduciendo = true;
+                    if (btnEvangelio) btnEvangelio.classList.add('reproduciendo', 'speaking');
+                    if (iconoEvangelio) iconoEvangelio.textContent = 'pause';
+                }).catch(() => {});
+                return;
+            }
             console.error("Error al cargar audio del evangelio:", e);
             evangelioEstaReproduciendo = false;
             if (btnEvangelio) btnEvangelio.classList.remove('reproduciendo', 'speaking');
@@ -1382,8 +1665,13 @@ export function toggleReproducirEvangelioPortada() {
         if (iconoEvangelio) iconoEvangelio.textContent = 'play_arrow';
     } else {
         // Pausar audio del santo si estuviera activo
-        if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
-            window.speechSynthesis.cancel();
+        if (typeof window !== 'undefined') {
+            if (typeof window.pausarLecturaSantoVoz === 'function') {
+                window.pausarLecturaSantoVoz();
+            } else if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+            window.reproduciendoSantoPortada = false;
             const btnSanto = document.getElementById('btn-tts-portada-santo');
             const iconoSanto = document.getElementById('icono-tts-portada');
             if (btnSanto) btnSanto.classList.remove('speaking', 'cargando-tts');
@@ -1396,8 +1684,16 @@ export function toggleReproducirEvangelioPortada() {
             return;
         }
 
-        if (audioEvangelioGlobal.src !== urlEvangelio) {
+        mostrarBarraProgresoPortada('evangelio');
+
+        if (audioEvangelioGlobal.src !== urlEvangelio && !audioEvangelioGlobal.src.endsWith('domingo.mp3')) {
             audioEvangelioGlobal.src = urlEvangelio;
+        } else if (!audioEvangelioGlobal.src) {
+            audioEvangelioGlobal.src = urlEvangelio;
+        }
+
+        if (audioEvangelioGlobal.duration && isFinite(audioEvangelioGlobal.duration)) {
+            actualizarBarraProgresoPortada(audioEvangelioGlobal.currentTime || 0, audioEvangelioGlobal.duration);
         }
 
         audioEvangelioGlobal.play().then(() => {
@@ -1406,7 +1702,6 @@ export function toggleReproducirEvangelioPortada() {
             if (iconoEvangelio) iconoEvangelio.textContent = 'pause';
         }).catch(err => {
             console.error("Error reproduciendo audio del evangelio:", err);
-            alert("No se pudo iniciar la reproducción del Evangelio.");
         });
     }
 }

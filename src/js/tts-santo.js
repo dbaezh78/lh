@@ -379,6 +379,9 @@ export function toggleLeerSantoPortada(santoParam) {
             pausarLecturaSantoVoz();
             return;
         } else if (currentSpeechState.currentCharIndex > 0) {
+            if (typeof window.mostrarBarraProgresoPortada === 'function') {
+                window.mostrarBarraProgresoPortada('santo');
+            }
             reproducirVoz();
             return;
         }
@@ -391,6 +394,14 @@ export function toggleLeerSantoPortada(santoParam) {
     detenerLecturaSantoVoz();
     window.reproduciendoSantoPortada = true;
     prepararBarraProgresoSanto(s);
+    if (typeof window !== 'undefined') {
+        if (typeof window.mostrarBarraProgresoPortada === 'function') {
+            window.mostrarBarraProgresoPortada('santo');
+        }
+        if (typeof window.actualizarBarraProgresoPortada === 'function') {
+            window.actualizarBarraProgresoPortada(0, currentSpeechState.totalDurationSecs || 30, 0);
+        }
+    }
     reproducirVoz();
 }
 
@@ -497,6 +508,10 @@ function reproducirChunkActual() {
             currentSpeechState.currentCharIndex = absChar;
             const percent = Math.min(100, Math.max(0, (absChar / currentSpeechState.fullText.length) * 100));
             if (bar) bar.style.width = percent + '%';
+            if (window.reproduciendoSantoPortada && typeof window.actualizarBarraProgresoPortada === 'function') {
+                const totalS = currentSpeechState.totalDurationSecs || 30;
+                window.actualizarBarraProgresoPortada((percent / 100) * totalS, totalS, percent);
+            }
         }
     };
 
@@ -524,6 +539,10 @@ function reproducirChunkActual() {
             const fraction = Math.min(1, elapsed / chunkDurationMs);
             const currentTotalPercent = Math.min(99.5, startPercent + (fraction * chunkTotalPercent));
             if (bar) bar.style.width = currentTotalPercent + '%';
+            if (window.reproduciendoSantoPortada && typeof window.actualizarBarraProgresoPortada === 'function') {
+                const totalS = currentSpeechState.totalDurationSecs || 30;
+                window.actualizarBarraProgresoPortada((currentTotalPercent / 100) * totalS, totalS, currentTotalPercent);
+            }
         }, 100);
     };
 
@@ -531,9 +550,13 @@ function reproducirChunkActual() {
         limpiarTemporizadores();
         if (currentSpeechState.isSpeaking) {
             currentSpeechState.currentCharIndex = chunk.end;
-            if (bar && currentSpeechState.fullText) {
+            if (currentSpeechState.fullText) {
                 const percent = Math.min(100, (chunk.end / currentSpeechState.fullText.length) * 100);
-                bar.style.width = percent + '%';
+                if (bar) bar.style.width = percent + '%';
+                if (window.reproduciendoSantoPortada && typeof window.actualizarBarraProgresoPortada === 'function') {
+                    const totalS = currentSpeechState.totalDurationSecs || 30;
+                    window.actualizarBarraProgresoPortada((percent / 100) * totalS, totalS, percent);
+                }
             }
             currentSpeechState.currentChunkIndex++;
             if (currentSpeechState.currentChunkIndex < currentSpeechState.chunks.length) {
@@ -567,6 +590,7 @@ function reproducirChunkActual() {
  */
 function finalizarLecturaCompleta() {
     limpiarTemporizadores();
+    const estabaEnPortada = typeof window !== 'undefined' && window.reproduciendoSantoPortada;
     currentSpeechState.isSpeaking = false;
     currentSpeechState.currentCharIndex = 0;
     currentSpeechState.currentChunkIndex = 0;
@@ -578,12 +602,68 @@ function finalizarLecturaCompleta() {
     resetearAnimacionCargaCircular();
     const bar = document.getElementById('santo-speech-progress-bar');
     if (bar) bar.style.width = '100%';
+    if (estabaEnPortada && typeof window.actualizarBarraProgresoPortada === 'function') {
+        const totalS = currentSpeechState.totalDurationSecs || 30;
+        window.actualizarBarraProgresoPortada(totalS, totalS, 100);
+    }
     setTimeout(() => {
         if (!currentSpeechState.isSpeaking && currentSpeechState.currentCharIndex === 0) {
             if (bar) bar.style.width = '0%';
+            if (estabaEnPortada && typeof window.actualizarBarraProgresoPortada === 'function') {
+                const totalS = currentSpeechState.totalDurationSecs || 30;
+                window.actualizarBarraProgresoPortada(0, totalS, 0);
+            }
         }
     }, 700);
     actualizarEstadoIconoVoz(false);
+}
+
+/**
+ * Adelanta o retrocede la lectura del santo desde la barra superior de portada según una fracción (0 a 1)
+ */
+export function seekSantoPortadaPorFraccion(ratioInput) {
+    prepararTextoCompleto();
+    if (!currentSpeechState.fullText) return;
+
+    const ratio = Math.min(1, Math.max(0, ratioInput));
+    let targetChar = Math.floor(ratio * currentSpeechState.fullText.length);
+
+    if (targetChar > 0 && targetChar < currentSpeechState.fullText.length) {
+        const prevSpace = currentSpeechState.fullText.lastIndexOf(' ', targetChar);
+        if (prevSpace !== -1 && targetChar - prevSpace < 25) {
+            targetChar = prevSpace + 1;
+        }
+    }
+
+    currentSpeechState.currentCharIndex = targetChar;
+    const newPercent = (targetChar / currentSpeechState.fullText.length) * 100;
+    const bar = document.getElementById('santo-speech-progress-bar');
+    if (bar) bar.style.width = newPercent + '%';
+
+    if (typeof window !== 'undefined' && typeof window.actualizarBarraProgresoPortada === 'function') {
+        const totalS = currentSpeechState.totalDurationSecs || 30;
+        window.actualizarBarraProgresoPortada((newPercent / 100) * totalS, totalS, newPercent);
+    }
+
+    if (currentSpeechState.chunks && currentSpeechState.chunks.length > 0) {
+        let chunkIndex = currentSpeechState.chunks.findIndex(c => targetChar < c.end);
+        if (chunkIndex === -1) chunkIndex = currentSpeechState.chunks.length - 1;
+        currentSpeechState.currentChunkIndex = Math.max(0, chunkIndex);
+    }
+
+    const wasSpeaking = currentSpeechState.isSpeaking;
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+    limpiarTemporizadores();
+    resetearAnimacionCargaCircular();
+
+    if (wasSpeaking) {
+        reproducirVoz();
+    } else {
+        currentSpeechState.isSpeaking = false;
+        actualizarEstadoIconoVoz(false);
+    }
 }
 
 /**
@@ -723,6 +803,9 @@ export function prepararTextoCompleto() {
         currentSpeechState.currentChunkIndex = 0;
         currentSpeechState.currentCharIndex = 0;
     }
+    const words = (currentSpeechState.fullText || '').split(/\s+/).filter(Boolean).length;
+    const rate = obtenerRateConfigurado();
+    currentSpeechState.totalDurationSecs = Math.max(5, Math.round((words / (135 * rate)) * 60));
 }
 
 /**
@@ -1094,6 +1177,7 @@ export function actualizarEstadoIconoVoz(hablando) {
 
 // Asignación en el objeto window para compatibilidad directa con onclick en HTML
 if (typeof window !== 'undefined') {
+    window.currentSpeechState = currentSpeechState;
     window.toggleLeerSantoVoz = toggleLeerSantoVoz;
     window.toggleLeerSantoVozFila = toggleLeerSantoVozFila;
     window.toggleLeerSantoPortada = toggleLeerSantoPortada;
@@ -1101,6 +1185,7 @@ if (typeof window !== 'undefined') {
     window.detenerLecturaSantoVoz = detenerLecturaSantoVoz;
     window.prepararBarraProgresoSanto = prepararBarraProgresoSanto;
     window.seekToClientX = seekToClientX;
+    window.seekSantoPortadaPorFraccion = seekSantoPortadaPorFraccion;
     window.actualizarEstadoIconoVoz = actualizarEstadoIconoVoz;
     window.asegurarAnilloCircularTTS = asegurarAnilloCircularTTS;
     window.fijarProgresoCircular = fijarProgresoCircular;

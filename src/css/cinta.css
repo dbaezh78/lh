@@ -550,6 +550,31 @@ color: red !important;
     font-variant-numeric: tabular-nums;
     min-width: 28px;
     font-family: monospace, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 1px 3px;
+    border-radius: 4px;
+    transition: color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+}
+
+.cinta-tiempo-num:hover {
+    color: #fbbf24;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.cinta-tiempo-num:active {
+    transform: scale(0.92);
+}
+
+.cinta-tiempo-num.descargando-audio {
+    color: #22c55e !important;
+    animation: pulsoDescargaReloj 0.8s ease-in-out infinite;
+}
+
+@keyframes pulsoDescargaReloj {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
 }
 
 .cinta-slider-progreso {
@@ -855,7 +880,7 @@ color: red !important;
     transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.25s ease, padding 0.25s ease;
     margin: 0 auto;
     width: 100%;
-    max-width: 340px;
+    max-width: fit-content;/*340px*/
     box-sizing: border-box;
 }
 
@@ -871,12 +896,13 @@ color: red !important;
 .cinta-selector-semanas .sub-acordeon-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 6px;
+    gap: 12px; /*6px*/
     padding: 6px 2px;
 }
 
 .cinta-selector-semanas .btn-sub-semana {
     height: 42px;
+    width: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1029,8 +1055,10 @@ color: red !important;
 /* 2. Horizontal para los Santos (meses del año) */
 .cinta-selector-semanas .sub-acordeon-h {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    flex-wrap: wrap; /*nowrap*/
+    width: fit-content;
+    max-width: 100%;
+    gap: 4px;
     justify-content: center;
     padding: 6px 2px;
 }
@@ -1080,6 +1108,8 @@ color: red !important;
     grid-template-columns: repeat(7, 1fr);
     gap: 6px;
     padding: 6px 2px;
+    width: fit-content;
+    align-self: center;
 }
 
 .cinta-selector-semanas .btn-santo-dia-activo {

@@ -291,6 +291,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     autor: "dbaezh78@gmail.com",
                     ultimaModificacion: new Date().toISOString()
                 };
+                const semillav7 = {
+                    id: "v_1_0_07",
+                    version: "1.0.07",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.07.\n• Selector de Ciclo 1ª Lectura (Año Par / Año Impar) en Oficio de Lectura dentro del Constructor de Salterios (frm_salterios.html) y visualización dinámica en salterios.html.\n• Descarga directa de audio (MP3 de lecturas/evangelio o síntesis MP3 de la hora litúrgica) al hacer doble clic o dos toques en el reloj de inicio o final en salterios.html.\n• Nueva barra de progreso superior en la portada (index.html) al reproducir el Evangelio del día o la vida del Santo, con reloj de inicio/final y descarga de audio con doble clic o dos toques.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav1);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav2);
@@ -298,7 +306,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav4);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav5);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav6);
-                    actualizacionesMemoria = [semillav6, semillav5, semillav4, semillav3, semillav2, semillav1];
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav7);
+                    actualizacionesMemoria = [semillav7, semillav6, semillav5, semillav4, semillav3, semillav2, semillav1];
                     renderListaActualizaciones(actualizacionesMemoria);
                     return;
                 } catch (e) {
@@ -389,6 +398,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(v6);
                     listaActualizada.unshift(v6);
+                } catch (e) {}
+            }
+
+            // Registrar automáticamente v1.0.07 si no existe
+            const tieneV7 = listaActualizada.some(d => d.version === "1.0.07" || d.id === "v_1_0_07");
+            if (!tieneV7 && window.firebaseAPI?.guardarActualizacionFirestore) {
+                const v7 = {
+                    id: "v_1_0_07",
+                    version: "1.0.07",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.07.\n• Selector de Ciclo 1ª Lectura (Año Par / Año Impar) en Oficio de Lectura dentro del Constructor de Salterios (frm_salterios.html) y visualización dinámica en salterios.html.\n• Descarga directa de audio (MP3 de lecturas/evangelio o síntesis MP3 de la hora litúrgica) al hacer doble clic o dos toques en el reloj de inicio o final en salterios.html.\n• Nueva barra de progreso superior en la portada (index.html) al reproducir el Evangelio del día o la vida del Santo, con reloj de inicio/final y descarga de audio con doble clic o dos toques.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                try {
+                    await window.firebaseAPI.guardarActualizacionFirestore(v7);
+                    listaActualizada.unshift(v7);
                 } catch (e) {}
             }
 
