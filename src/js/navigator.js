@@ -30,7 +30,7 @@
     // 3. Crear el HTML de la navegación 
     // Añadimos 'style="visibility: hidden"' para evitar el parpadeo sin estilos
 // 3. Crear el HTML de la navegación 
-    window.APP_VERSION = '1.0.07';
+    window.APP_VERSION = '1.0.08';
     const appVersion = window.APP_VERSION;
 
     // Función universal para mostrar ventana modal de archivos actualizándose
@@ -271,7 +271,8 @@
         }
 
         try {
-            localStorage.setItem('lh_last_updated_version', appVersion);
+            const verToSave = window._latestRemoteVersion || appVersion;
+            localStorage.setItem('lh_last_updated_version', verToSave);
             localStorage.setItem('lh_app_up_to_date', 'true');
         } catch (e) {}
 
@@ -628,6 +629,8 @@
             }
             if (iconAct) {
                 iconAct.className = 'account-update-halo-ring';
+                iconAct.innerText = '';
+                iconAct.style.cssText = '';
                 iconAct.title = `¡Nueva versión disponible v${window._latestRemoteVersion}!`;
             }
             return;
@@ -653,6 +656,7 @@
                 iconAct.className = 'material-symbols-outlined';
                 iconAct.style.cssText = 'font-size: 20px; color: #00e676; margin-right: 4px;';
                 iconAct.innerText = 'refresh';
+                iconAct.title = 'La aplicación está actualizada';
             }
         } else {
             btnAct.classList.add('has-update-ready');
@@ -666,6 +670,12 @@
                 pillAct.style.background = '#ffd700';
                 pillAct.style.color = '#121212';
                 pillAct.style.border = 'none';
+            }
+            if (iconAct) {
+                iconAct.className = 'account-update-halo-ring';
+                iconAct.innerText = '';
+                iconAct.style.cssText = '';
+                iconAct.title = 'Actualización disponible';
             }
         }
     }

@@ -1355,11 +1355,46 @@ export const CATALOGO_ANTIFONAS_SEED = [
   }
 ];
 
+import { CATALOGO_ANTIFONAS_CANTICO_SEED } from './db-cantico-evangelico.js';
+
+// Integrar antífonas evangélicas asegurando propiedad tipo y ciclo
+if (Array.isArray(CATALOGO_ANTIFONAS_CANTICO_SEED)) {
+    const idsExistentes = new Set(CATALOGO_ANTIFONAS_SEED.map(a => a.id));
+    CATALOGO_ANTIFONAS_CANTICO_SEED.forEach(a => {
+        if (!a || !a.id || idsExistentes.has(a.id)) return;
+        idsExistentes.add(a.id);
+        CATALOGO_ANTIFONAS_SEED.push({
+            id: a.id,
+            varName: a.varName || a.id,
+            tiempo: a.tiempo,
+            semana: a.semana,
+            dia: a.dia,
+            libro: a.libro || 'laudes',
+            tipo: 'evangelico',
+            ciclo: a.ciclo || null,
+            texto: a.texto
+        });
+    });
+}
+
 export const AntifonasDB = {
-    lista: CATALOGO_ANTIFONAS_SEED,
-    obtenerPorId: (id) => CATALOGO_ANTIFONAS_SEED.find(a => a.id === id),
-    filtrar: (tiempo, semana, dia, libro, tipo) => {
-        return CATALOGO_ANTIFONAS_SEED.filter(a => {
+    get lista() {
+        if (typeof localStorage !== 'undefined') {
+            try {
+                const cache = localStorage.getItem('lh_antifonas_cache');
+                if (cache) {
+                    const parsed = JSON.parse(cache);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch (_) {}
+        }
+        return CATALOGO_ANTIFONAS_SEED;
+    },
+    obtenerPorId: function(id) {
+        return this.lista.find(a => a.id === id);
+    },
+    filtrar: function(tiempo, semana, dia, libro, tipo, ciclo = null) {
+        return this.lista.filter(a => {
             if (tiempo && a.tiempo !== tiempo) return false;
             if (semana !== undefined && semana !== null && semana !== '') {
                 const sBusq = parseInt(String(semana).replace(/[^0-9]/g, ''), 10);
@@ -1369,6 +1404,7 @@ export const AntifonasDB = {
             if (dia && a.dia !== dia) return false;
             if (libro && libro !== 'general' && a.libro !== libro && a.libro !== 'general') return false;
             if (tipo && a.tipo !== tipo) return false;
+            if (ciclo && a.ciclo && a.ciclo !== ciclo) return false;
             return true;
         });
     }

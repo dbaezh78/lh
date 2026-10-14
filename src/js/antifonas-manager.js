@@ -360,7 +360,7 @@ async function cargarDatos() {
 }
 
 // Buscar antífona existente en memoria/catálogo
-function buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo) {
+function buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo, ciclo = null) {
     if (!listaAntifonas || listaAntifonas.length === 0) return null;
     const norm = (s) => (s || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 
@@ -371,9 +371,10 @@ function buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo)
             if (a.tiempo !== 'santos') return false;
             const libroMatch = (a.libro === libro) || (libro === 'general') || (a.libro === 'general');
             const tipoMatch = a.tipo === tipo;
+            const cicloMatch = !ciclo || a.ciclo === ciclo;
             const santoMatch = santoNorm && (norm(a.santo).includes(santoNorm) || santoNorm.includes(norm(a.santo)) || norm(a.id).includes(santoNorm));
             const fechaMatch = fechaNorm && (a.fecha === fechaNorm || (a.id && a.id.includes(fechaNorm.replace('/', '_'))));
-            return libroMatch && tipoMatch && (santoMatch || fechaMatch);
+            return libroMatch && tipoMatch && cicloMatch && (santoMatch || fechaMatch);
         });
     } else {
         return listaAntifonas.find(a => {
@@ -382,7 +383,8 @@ function buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo)
             const diaMatch = (!dia && !a.dia) || (norm(a.dia) === norm(dia));
             const libroMatch = a.libro === libro;
             const tipoMatch = a.tipo === tipo;
-            return semMatch && diaMatch && libroMatch && tipoMatch;
+            const cicloMatch = !ciclo || a.ciclo === ciclo;
+            return semMatch && diaMatch && libroMatch && tipoMatch && cicloMatch;
         });
     }
 }
@@ -403,19 +405,54 @@ function manejarCambioParametros() {
     const libro = document.getElementById('form-libro')?.value || 'laudes';
     const tipo = document.getElementById('form-tipo')?.value || 'invitatoria';
 
-    const antifonaExistente = buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo);
+    const esEvangelicoDomingo = (tipo === 'evangelico' && dia === 'domingo');
+    const boxSimple = document.getElementById('box-antifona-texto-simple');
+    const boxCiclos = document.getElementById('box-antifona-ciclos-domingo');
     const txtArea = document.getElementById('form-texto');
+    const txtCicloA = document.getElementById('form-texto-ciclo-a');
+    const txtCicloB = document.getElementById('form-texto-ciclo-b');
+    const txtCicloC = document.getElementById('form-texto-ciclo-c');
     const btnSubmit = document.querySelector('#form-antifona button[type="submit"]');
 
-    if (antifonaExistente) {
-        editandoId = antifonaExistente.id;
-        if (txtArea) txtArea.value = antifonaExistente.texto || '';
-        if (btnSubmit) btnSubmit.innerHTML = '<span class="material-symbols-outlined">update</span> Actualizar Antífona';
-        mostrarBannerEstado(`📖 Antífona existente cargada (${antifonaExistente.libro} • ${formatearTipo(antifonaExistente.tipo)}).`, 'info');
+    if (esEvangelicoDomingo) {
+        if (boxSimple) boxSimple.style.display = 'none';
+        if (boxCiclos) boxCiclos.style.display = 'block';
+        if (txtArea) txtArea.required = false;
+
+        const antA = buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo, 'A');
+        const antB = buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo, 'B');
+        const antC = buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo, 'C');
+
+        if (txtCicloA) txtCicloA.value = antA?.texto || '';
+        if (txtCicloB) txtCicloB.value = antB?.texto || '';
+        if (txtCicloC) txtCicloC.value = antC?.texto || '';
+
+        const hayAlguna = Boolean(antA || antB || antC);
+        if (btnSubmit) {
+            btnSubmit.innerHTML = hayAlguna
+                ? '<span class="material-symbols-outlined">update</span> Actualizar Antífonas (A, B, C)'
+                : '<span class="material-symbols-outlined">save</span> Guardar Antífonas (A, B, C)';
+        }
+        if (hayAlguna) {
+            mostrarBannerEstado(`📖 Antífonas de Cántico Evangélico por Ciclo (A, B, C) cargadas para Domingo.`, 'info');
+        }
     } else {
-        editandoId = null;
-        if (txtArea) txtArea.value = '';
-        if (btnSubmit) btnSubmit.innerHTML = '<span class="material-symbols-outlined">save</span> Guardar Antífona';
+        if (boxSimple) boxSimple.style.display = 'block';
+        if (boxCiclos) boxCiclos.style.display = 'none';
+        if (txtArea) txtArea.required = true;
+
+        const antifonaExistente = buscarAntifonaExistente(tiempo, semana, dia, fecha, santo, libro, tipo);
+
+        if (antifonaExistente) {
+            editandoId = antifonaExistente.id;
+            if (txtArea) txtArea.value = antifonaExistente.texto || '';
+            if (btnSubmit) btnSubmit.innerHTML = '<span class="material-symbols-outlined">update</span> Actualizar Antífona';
+            mostrarBannerEstado(`📖 Antífona existente cargada (${antifonaExistente.libro} • ${formatearTipo(antifonaExistente.tipo)}).`, 'info');
+        } else {
+            editandoId = null;
+            if (txtArea) txtArea.value = '';
+            if (btnSubmit) btnSubmit.innerHTML = '<span class="material-symbols-outlined">save</span> Guardar Antífona';
+        }
     }
 }
 
@@ -443,7 +480,7 @@ function configurarEventos() {
         manejarCambioParametros();
     });
 
-    // Botón "+ Aleluya."
+    // Botón "+ Aleluya." estándar
     document.getElementById('btn-add-aleluya')?.addEventListener('click', () => {
         const txt = document.getElementById('form-texto');
         if (txt) {
@@ -451,8 +488,20 @@ function configurarEventos() {
         }
     });
 
+    // Botones "+ Aleluya." para cada ciclo
+    document.querySelectorAll('.btn-aleluya-ciclo').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                targetEl.value = targetEl.value.trim().replace(/\.*$/, '') + '. Aleluya.';
+            }
+        });
+    });
+
     // Filtros de búsqueda en la lista
     document.getElementById('filtro-buscar')?.addEventListener('input', renderizarLista);
+    document.getElementById('filtro-ciclo')?.addEventListener('change', renderizarLista);
     document.getElementById('filtro-tiempo')?.addEventListener('change', renderizarLista);
     document.getElementById('filtro-libro')?.addEventListener('change', renderizarLista);
     document.getElementById('filtro-tipo')?.addEventListener('change', renderizarLista);
@@ -542,8 +591,72 @@ async function guardarAntifona() {
         : null;
     const libro = document.getElementById('form-libro').value;
     const tipo = document.getElementById('form-tipo').value;
-    const texto = document.getElementById('form-texto').value.trim();
 
+    const esEvangelicoDomingo = (tipo === 'evangelico' && dia === 'domingo');
+
+    // Caso exclusivo: Cántico Evangélico en Domingos con campos para Ciclo A, B y C
+    if (esEvangelicoDomingo) {
+        const textoA = document.getElementById('form-texto-ciclo-a')?.value.trim() || '';
+        const textoB = document.getElementById('form-texto-ciclo-b')?.value.trim() || '';
+        const textoC = document.getElementById('form-texto-ciclo-c')?.value.trim() || '';
+
+        if (!textoA && !textoB && !textoC) {
+            alert('Por favor escribe al menos una antífona para el Ciclo A, B o C.');
+            return;
+        }
+
+        mostrarBannerEstado('Guardando antífonas de ciclos dominicales en Firebase...', 'info');
+        const ciclosAGuardar = [
+            { letra: 'A', texto: textoA },
+            { letra: 'B', texto: textoB },
+            { letra: 'C', texto: textoC }
+        ].filter(c => Boolean(c.texto));
+
+        for (const c of ciclosAGuardar) {
+            const semNum = semana || 0;
+            const docId = `ant_ev_${tiempo}_s${semNum}_dom_${libro}_ciclo_${c.letra.toLowerCase()}`;
+            const payload = {
+                id: docId,
+                varName: `${tiempo}s${semNum}${libro}do_cE_${c.letra}`,
+                tiempo,
+                semana,
+                dia: 'domingo',
+                libro,
+                tipo: 'evangelico',
+                ciclo: c.letra,
+                texto: c.texto,
+                ultimaActualizacion: new Date().toISOString()
+            };
+
+            if (window.firebaseAPI && window.firebaseAPI.guardarAntifonaFirestore) {
+                try {
+                    await window.firebaseAPI.guardarAntifonaFirestore(payload);
+                } catch (e) {
+                    console.warn(`Error guardando Ciclo ${c.letra} en Firestore:`, e);
+                }
+            }
+
+            const idx = listaAntifonas.findIndex(a => 
+                a.id === docId || 
+                (a.tiempo === tiempo && Number(a.semana) === Number(semana) && a.dia === 'domingo' && a.libro === libro && a.tipo === 'evangelico' && a.ciclo === c.letra)
+            );
+            if (idx >= 0) {
+                listaAntifonas[idx] = payload;
+            } else {
+                listaAntifonas.unshift(payload);
+            }
+        }
+
+        localStorage.setItem('lh_antifonas_cache', JSON.stringify(listaAntifonas));
+        mostrarBannerEstado(`✅ Se guardaron las antífonas dominicales (${ciclosAGuardar.map(c => 'Ciclo ' + c.letra).join(', ')}) correctamente.`, 'exito');
+        recordarParametros();
+        renderizarLista();
+        manejarCambioParametros();
+        return;
+    }
+
+    // Caso estándar (campo de texto simple)
+    const texto = document.getElementById('form-texto').value.trim();
     if (!texto) {
         alert('Por favor escribe el texto de la antífona.');
         return;
@@ -599,7 +712,14 @@ async function guardarAntifona() {
 
 function limpiarFormulario(preservarParametros = true) {
     editandoId = null;
-    document.getElementById('form-texto').value = '';
+    const txt = document.getElementById('form-texto');
+    if (txt) txt.value = '';
+    const txtA = document.getElementById('form-texto-ciclo-a');
+    if (txtA) txtA.value = '';
+    const txtB = document.getElementById('form-texto-ciclo-b');
+    if (txtB) txtB.value = '';
+    const txtC = document.getElementById('form-texto-ciclo-c');
+    if (txtC) txtC.value = '';
 
     if (!preservarParametros) {
         const inpFecha = document.getElementById('form-fecha');
@@ -623,15 +743,18 @@ function renderizarLista() {
     const fTiempo = document.getElementById('filtro-tiempo')?.value || '';
     const fLibro = document.getElementById('filtro-libro')?.value || '';
     const fTipo = document.getElementById('filtro-tipo')?.value || '';
+    const fCiclo = document.getElementById('filtro-ciclo')?.value || '';
 
     const filtradas = listaAntifonas.filter(item => {
         if (fTiempo && item.tiempo !== fTiempo) return false;
         if (fLibro && item.libro !== fLibro) return false;
         if (fTipo && item.tipo !== fTipo) return false;
+        if (fCiclo && item.ciclo !== fCiclo) return false;
         if (query) {
             const txt = (item.texto || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const santo = (item.santo || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const id = (item.id || '').toLowerCase();
+            const cicloTxt = item.ciclo ? `ciclo ${item.ciclo.toLowerCase()}` : '';
 
             let dateMatch = false;
             const rawFecha = item.fechaCelebracion || item.fecha || '';
@@ -647,7 +770,7 @@ function renderizarLista() {
                 dateMatch = variantes.some(v => v.includes(query) || query.includes(v));
             }
 
-            if (!txt.includes(query) && !santo.includes(query) && !id.includes(query) && !dateMatch) return false;
+            if (!txt.includes(query) && !santo.includes(query) && !id.includes(query) && !cicloTxt.includes(query) && !dateMatch) return false;
         }
         return true;
     });
@@ -663,6 +786,7 @@ function renderizarLista() {
         const semanaTxt = item.semana ? `Semana ${item.semana}` : '';
         const diaTxt = item.dia ? capitalizar(item.dia) : (item.tiempo === 'santos' ? (item.fecha || '') : '');
         const santoTxt = (item.tiempo === 'santos' && item.santo) ? `• 😇 ${item.santo}` : '';
+        const cicloBadge = item.ciclo ? `<span class="badge badge-ciclo">Ciclo ${item.ciclo}</span>` : '';
         
         return `
             <div class="antifona-card-item" data-id="${item.id}">
@@ -672,6 +796,7 @@ function renderizarLista() {
                     ${diaTxt ? `<span class="badge badge-dia">${diaTxt}</span>` : ''}
                     <span class="badge badge-libro">${item.libro}</span>
                     <span class="badge badge-tipo">${formatearTipo(item.tipo)}</span>
+                    ${cicloBadge}
                     ${santoTxt ? `<span style="font-size: 0.8rem; color: #fbbf24; font-weight: 600;">${santoTxt}</span>` : ''}
                 </div>
                 <div class="antifona-texto-cuerpo">

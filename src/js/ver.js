@@ -299,6 +299,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     autor: "dbaezh78@gmail.com",
                     ultimaModificacion: new Date().toISOString()
                 };
+                const semillav8 = {
+                    id: "v_1_0_08",
+                    version: "1.0.08",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.08.\n• Cántico Evangélico Dominical con resolución y precarga automática de antífona según el ciclo correspondiente al año en curso (2026 = A, 2027 = B, 2028 = C...).\n• En antifonas.html: soporte completo para registrar y sincronizar antífonas de Ciclo A, Ciclo B y Ciclo C en Cántico Evangélico Dominical.\n• Optimización visual del botón 'Actualizar App' en la barra de navegación y panel de cuenta.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav1);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav2);
@@ -307,7 +315,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav5);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav6);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav7);
-                    actualizacionesMemoria = [semillav7, semillav6, semillav5, semillav4, semillav3, semillav2, semillav1];
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav8);
+                    actualizacionesMemoria = [semillav8, semillav7, semillav6, semillav5, semillav4, semillav3, semillav2, semillav1];
                     renderListaActualizaciones(actualizacionesMemoria);
                     return;
                 } catch (e) {
@@ -415,6 +424,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(v7);
                     listaActualizada.unshift(v7);
+                } catch (e) {}
+            }
+
+            // Registrar automáticamente v1.0.08 si no existe
+            const tieneV8 = listaActualizada.some(d => d.version === "1.0.08" || d.id === "v_1_0_08");
+            if (!tieneV8 && window.firebaseAPI?.guardarActualizacionFirestore) {
+                const v8 = {
+                    id: "v_1_0_08",
+                    version: "1.0.08",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.08.\n• Cántico Evangélico Dominical con resolución y precarga automática de antífona según el ciclo correspondiente al año en curso (2026 = A, 2027 = B, 2028 = C...).\n• En antifonas.html: soporte completo para registrar y sincronizar antífonas de Ciclo A, Ciclo B y Ciclo C en Cántico Evangélico Dominical.\n• Optimización visual del botón 'Actualizar App' en la barra de navegación y panel de cuenta.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                try {
+                    await window.firebaseAPI.guardarActualizacionFirestore(v8);
+                    listaActualizada.unshift(v8);
                 } catch (e) {}
             }
 

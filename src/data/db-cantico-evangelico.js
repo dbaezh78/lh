@@ -2725,6 +2725,24 @@ export function obtenerTodasLasAntifonasCantico() {
     if (!Array.isArray(list) || list.length === 0) {
         list = [...CATALOGO_ANTIFONAS_CANTICO_SEED];
     }
+    // Sincronizar también con antífonas evangélicas del catálogo general en caché
+    if (typeof localStorage !== 'undefined') {
+        try {
+            const cacheGeneral = localStorage.getItem('lh_antifonas_cache');
+            if (cacheGeneral) {
+                const parsedGen = JSON.parse(cacheGeneral);
+                if (Array.isArray(parsedGen)) {
+                    parsedGen.forEach(item => {
+                        if (!item) return;
+                        const esEv = (item.tipo === 'evangelico' || item.tipo === 'cantico_evangelico' || (item.id && item.id.includes('evangelico')));
+                        if (esEv && !list.some(x => x.id === item.id || (x.texto === item.texto && x.ciclo === item.ciclo))) {
+                            list.push(item);
+                        }
+                    });
+                }
+            }
+        } catch (e) {}
+    }
     return list;
 }
 
@@ -2735,14 +2753,32 @@ export function obtenerAntifonaCanticoRecomendada(tiempo, semana, dia, libro = '
     const list = obtenerTodasLasAntifonasCantico();
     const semNum = parseInt(String(semana).replace(/[^0-9]/g, ''), 10) || 1;
     const semCiclo = ((semNum - 1) % 4) + 1;
+    const libroNorm = (libro || 'laudes').toLowerCase().replace(/s$/, '');
 
     // 1. Caso especial Domingo
     if (dia === 'domingo') {
         if (tiempo === 'navidad' || (tiempo === 'ordinario' && semNum === 1)) {
-            const m = list.find(a => a.varName === 'bautismo_cE' || a.id.includes('bautismo'));
+            const mCiclo = list.find(a => 
+                (a.varName === `bautismo_cE_${ciclo}` || a.id === `bautismo_cE_${ciclo}` || (a.id.includes('bautismo') && a.ciclo === ciclo)) &&
+                (!a.libro || a.libro.toLowerCase().replace(/s$/, '') === libroNorm)
+            );
+            if (mCiclo) return mCiclo;
+            const m = list.find(a => 
+                (a.varName === 'bautismo_cE' || a.id.includes('bautismo')) &&
+                (!a.libro || a.libro.toLowerCase().replace(/s$/, '') === libroNorm)
+            );
             if (m) return m;
         }
         let matchDom = list.find(a => 
+            a.tiempo === tiempo && 
+            a.dia === 'domingo' && 
+            Number(a.semana) === semNum && 
+            (!a.ciclo || a.ciclo === ciclo) &&
+            (!a.libro || a.libro.toLowerCase().replace(/s$/, '') === libroNorm)
+        );
+        if (matchDom) return matchDom;
+
+        matchDom = list.find(a => 
             a.tiempo === tiempo && 
             a.dia === 'domingo' && 
             Number(a.semana) === semNum && 
@@ -2753,7 +2789,17 @@ export function obtenerAntifonaCanticoRecomendada(tiempo, semana, dia, libro = '
         matchDom = list.find(a => 
             a.tiempo === tiempo && 
             a.dia === 'domingo' && 
-            Number(a.semana) === semCiclo
+            Number(a.semana) === semCiclo &&
+            (!a.ciclo || a.ciclo === ciclo) &&
+            (!a.libro || a.libro.toLowerCase().replace(/s$/, '') === libroNorm)
+        );
+        if (matchDom) return matchDom;
+
+        matchDom = list.find(a => 
+            a.tiempo === tiempo && 
+            a.dia === 'domingo' && 
+            Number(a.semana) === semCiclo &&
+            (!a.ciclo || a.ciclo === ciclo)
         );
         if (matchDom) return matchDom;
     }

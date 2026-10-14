@@ -10,6 +10,7 @@ import { ResponsoriosDB } from '../data/db-responsorios.js';
 import { LecturasDB } from '../data/db-lecturas.js';
 import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 import { construirRutaOficioLectura } from './oficiodelectura.js';
+import { obtenerCicloDominical } from './datos.js';
 import { 
     obtenerLiturgiaHora, 
     obtenerHoraLocalSincrona, 
@@ -272,7 +273,11 @@ export function resolverTextoCelebracion(params, datos) {
  */
 export function limpiarSaltosDeLineaLectura(texto) {
     if (!texto || typeof texto !== 'string') return '';
-    return texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+    const norm = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+    if (norm.includes('\n\n')) {
+        return norm.split(/\n\s*\n/).map(p => p.split('\n').map(l => l.trim()).filter(Boolean).join(' ')).join('\n\n');
+    }
+    return norm;
 }
 
 /**
@@ -967,7 +972,7 @@ function montarOActualizarVista(params, datos) {
                 cita: baseGuardada.cita || catItem?.cita || '',
                 subtitulo: baseGuardada.descripcion || baseGuardada.subtitulo || catItem?.descripcion || '',
                 descripcion: baseGuardada.descripcion || baseGuardada.subtitulo || catItem?.descripcion || '',
-                texto: baseGuardada.texto || catItem?.texto || '',
+                texto: catItem?.texto || baseGuardada.texto || '',
                 respCita: rCita,
                 respR1: r1,
                 respV: rV,
@@ -1153,7 +1158,10 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo, docId
                  || filtrarSinBautismo(AntifonasDB.filtrar('ordinario', semCiclo, dia, libro, 'salmodia_3'))[0]
                  || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, 'laudes', 'salmodia_3'))[0]
                  || { texto: 'Grandes y maravillosas son tus obras, Señor.' };
-    const antEvObj = filtrarSinBautismo(AntifonasDB.filtrar(tiempo, numSemana, dia, libro, 'evangelico'))[0]
+    const cicloDominical = (dia === 'domingo') ? obtenerCicloDominical(new Date().getFullYear()) : null;
+    const antEvObj = (dia === 'domingo' && cicloDominical && filtrarSinBautismo(AntifonasDB.filtrar(tiempo, numSemana, dia, libro, 'evangelico', cicloDominical))[0])
+                  || (dia === 'domingo' && cicloDominical && filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, libro, 'evangelico', cicloDominical))[0])
+                  || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, numSemana, dia, libro, 'evangelico'))[0]
                   || filtrarSinBautismo(AntifonasDB.filtrar(tiempo, semCiclo, dia, libro, 'evangelico'))[0]
                   || { texto: 'Se presentó Jesús en medio de sus discípulos y les dijo: Paz a vosotros.' };
 
@@ -1887,12 +1895,29 @@ function renderizarCuerpoLiturgico(d) {
         if (ceTexto && !/gloria al padre/i.test(ceTexto) && window.SalmosDB && typeof window.SalmosDB.asegurarGloria === 'function') {
             ceTexto = window.SalmosDB.asegurarGloria(ceTexto, false);
         }
+        // Resolución dinámica de antífona para Domingos según Ciclo (A, B, C)
+        let antEvangelicoTexto = d.canticoEvangelico.antifonaTexto || d.canticoEvangelico.antifona || '';
+        if (d.dia === 'domingo') {
+            const cicloActual = obtenerCicloDominical(new Date().getFullYear());
+            if (d.canticoEvangelico.antifonasCiclo && d.canticoEvangelico.antifonasCiclo[cicloActual]) {
+                antEvangelicoTexto = d.canticoEvangelico.antifonasCiclo[cicloActual];
+            } else if (d.canticoEvangelico.ciclo === cicloActual && antEvangelicoTexto) {
+                // Coincide con el ciclo activo guardado
+            } else if (typeof AntifonasDB !== 'undefined' && AntifonasDB.filtrar) {
+                const numSem = parseInt(String(d.semana).replace(/[^0-9]/g, ''), 10) || 1;
+                const matchCiclo = AntifonasDB.filtrar(d.tiempo, numSem, 'domingo', d.libro, 'evangelico', cicloActual);
+                if (matchCiclo && matchCiclo.length > 0 && matchCiclo[0].texto) {
+                    antEvangelicoTexto = matchCiclo[0].texto;
+                }
+            }
+        }
+
         html += `
             <div class="salterio-seccion-header">CÁNTICO EVANGÉLICO</div>
-            ${!omitirAntCant_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
+            ${!omitirAntCant_E ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${antEvangelicoTexto}</div>` : ''}
             <div class="salmo-titulo-rubrica">${ceTitulo}</div>
             <div class="texto-estrofas-salmo">${formatearTextoSalmo(ceTexto)}</div>
-            ${!omitirAntCant_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.canticoEvangelico.antifona}</div>` : ''}
+            ${!omitirAntCant_S ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${antEvangelicoTexto}</div>` : ''}
         `;
     }
 
@@ -2098,7 +2123,7 @@ function inicializarEventosInteractivos() {
                 cita: guardadaPorCiclo.cita || catItem?.cita || '',
                 subtitulo: guardadaPorCiclo.descripcion || guardadaPorCiclo.subtitulo || catItem?.descripcion || '',
                 descripcion: guardadaPorCiclo.descripcion || guardadaPorCiclo.subtitulo || catItem?.descripcion || '',
-                texto: guardadaPorCiclo.texto || catItem?.texto || '',
+                texto: catItem?.texto || guardadaPorCiclo.texto || '',
                 respCita: rCita,
                 respR1: r1,
                 respV: rV,

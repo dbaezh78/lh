@@ -9,143 +9,143 @@ const bautismo_cE_C = bautismo_cE
 
 // TIEMPO ORDINARIO
 
-const tos1LAdo_cE_A = bautismo_cE
-const tos1LAdo_cE_B = bautismo_cE
-const tos1LAdo_cE_C = bautismo_cE
+const tos01dola_cE_A = bautismo_cE
+const tos01dola_cE_B = bautismo_cE
+const tos01dola_cE_C = bautismo_cE
 
-const tos2LAdo_cE_A = "El Espíritu Santo bajó del cielo como una paloma y se posó sobre Jesús.";
-const tos2LAdo_cE_B = "«Maestro, ¿dónde vives?» Jesús les contestó: «Venid y lo veréis.»"; 
-const tos2LAdo_cE_C = "Jesús, a petición de María, su madre, cambió el agua en el vino de la nueva Alianza.";
+const tos02dola_cE_A = "El Espíritu Santo bajó del cielo como una paloma y se posó sobre Jesús.";
+const tos02dola_cE_B = "«Maestro, ¿dónde vives?» Jesús les contestó: «Venid y lo veréis.»"; 
+const tos02dola_cE_C = "Jesús, a petición de María, su madre, cambió el agua en el vino de la nueva Alianza.";
 
-const tos3LAdo_cE_A = "«Arrepentíos —dice el Señor—, porque se acerca el reino de Dios.»";
-const tos3LAdo_cE_B = "«Convertíos y creed la Buena Noticia», dice el Señor"; 
-const tos3LAdo_cE_C = "El Espíritu del Señor está sobre mí, me envío a evangelizar a los pobres.";
+const tos03dola_cE_A = "«Arrepentíos —dice el Señor—, porque se acerca el reino de Dios.»";
+const tos03dola_cE_B = "«Convertíos y creed la Buena Noticia», dice el Señor"; 
+const tos03dola_cE_C = "El Espíritu del Señor está sobre mí, me envío a evangelizar a los pobres.";
 
-const tos4LAdo_cE_A = "Dichosos los limpios de corazón, porque ellos verán a Dios."
-const tos4LAdo_cE_B = "Jesús de Nazaret, el Santo de Dios, ha visitado a su pueblo y lo ha redimido."
-const tos4LAdo_cE_C = "Jesús, hablando en Nazaret, donde se había criado, dijo: «Tened por cierto que ningún profeta es bien recibido en su patria.»"
+const tos04dola_cE_A = "Dichosos los limpios de corazón, porque ellos verán a Dios."
+const tos04dola_cE_B = "Jesús de Nazaret, el Santo de Dios, ha visitado a su pueblo y lo ha redimido."
+const tos04dola_cE_C = "Jesús, hablando en Nazaret, donde se había criado, dijo: «Tened por cierto que ningún profeta es bien recibido en su patria.»"
 
-const tos5LAdo_cE_A = "Vosotros sois la luz del mundo; alumbre vuestra luz a los hombres para que, viendo vuestras buenas obras, den gloria a vuestro Padre celestial."
-const tos5LAdo_cE_B = "Se levantó Jesús muy de mañana y fue a un lugar solitario, donde se puso a hacer oración."
-const tos5LAdo_cE_C = "Maestro, toda la noche hemos estado trabajando y no hemos recogido nada, pero, ya que tú lo mandas, voy a echar la red."
+const tos05dola_cE_A = "Vosotros sois la luz del mundo; alumbre vuestra luz a los hombres para que, viendo vuestras buenas obras, den gloria a vuestro Padre celestial."
+const tos05dola_cE_B = "Se levantó Jesús muy de mañana y fue a un lugar solitario, donde se puso a hacer oración."
+const tos05dola_cE_C = "Maestro, toda la noche hemos estado trabajando y no hemos recogido nada, pero, ya que tú lo mandas, voy a echar la red."
 
-const tos6LAdo_cE_A = "Si al llevar tu ofrenda al altar no estás en paz con el hermano, ve primero a reconciliarte con él; luego, presenta tu ofrenda."
-const tos6LAdo_cE_B = "«Señor, si tú quieres, puedes curarme.» Respondió Jesús: «Quiero, queda limpio.»"
-const tos6LAdo_cE_C = "Dichosos los que ahora lloráis, porque reiréis."
+const tos06dola_cE_A = "Si al llevar tu ofrenda al altar no estás en paz con el hermano, ve primero a reconciliarte con él; luego, presenta tu ofrenda."
+const tos06dola_cE_B = "«Señor, si tú quieres, puedes curarme.» Respondió Jesús: «Quiero, queda limpio.»"
+const tos06dola_cE_C = "Dichosos los que ahora lloráis, porque reiréis."
 
-const tos7LAdo_cE_A = "Dios, vuestro Padre, hace salir su sol sobre malos y buenos."
-const tos7LAdo_cE_B = "El Hijo del hombre tiene poder en la tierra para perdonar los pecados. Aleluya."
-const tos7LAdo_cE_C = "«Como queréis que los demás hagan con vosotros, hacedlo igualmente con ellos», dice el Señor."
+const tos07dola_cE_A = "Dios, vuestro Padre, hace salir su sol sobre malos y buenos."
+const tos07dola_cE_B = "El Hijo del hombre tiene poder en la tierra para perdonar los pecados. Aleluya."
+const tos07dola_cE_C = "«Como queréis que los demás hagan con vosotros, hacedlo igualmente con ellos», dice el Señor."
 
-const tos8LAdo_cE_A = "No podéis servir a Dios y al dinero; Dios es el único Señor."
-const tos8LAdo_cE_B = "Cristo, Esposo y Señor de la Iglesia, quédate siempre con nosotros."
-const tos8LAdo_cE_C = "Un árbol bueno no puede dar frutos malos, ni un árbol malo puede dar frutos buenos."
+const tos08dola_cE_A = "No podéis servir a Dios y al dinero; Dios es el único Señor."
+const tos08dola_cE_B = "Cristo, Esposo y Señor de la Iglesia, quédate siempre con nosotros."
+const tos08dola_cE_C = "Un árbol bueno no puede dar frutos malos, ni un árbol malo puede dar frutos buenos."
 
-const tos9LAdo_cE_A = "Todo el que escucha éstas mis palabras las pone por obra será como el varón inteligente, que construyó su casa sobre roca."
-const tos9LAdo_cE_B = "Jesús dice: «El Hijo del hombre es dueño también del sábado.»"
-const tos9LAdo_cE_C = "«Ni siquiera en Israel he encontrado una fe tan grande», dice el Señor."
+const tos09dola_cE_A = "Todo el que escucha éstas mis palabras las pone por obra será como el varón inteligente, que construyó su casa sobre roca."
+const tos09dola_cE_B = "Jesús dice: «El Hijo del hombre es dueño también del sábado.»"
+const tos09dola_cE_C = "«Ni siquiera en Israel he encontrado una fe tan grande», dice el Señor."
 
-const tos10LAdo_cE_A = "Yo quiero misericordia y no sacrificios, pues no he venido a llamar a los justos, sino a los pecadores."
-const tos10LAdo_cE_B = "El que hace la voluntad de Dios es mi hermano y mi hermana y mi madre."
-const tos10LAdo_cE_C = "Un gran profeta ha surgido entre nosotros: Dios ha visitado a su pueblo."
+const tos10dola_cE_A = "Yo quiero misericordia y no sacrificios, pues no he venido a llamar a los justos, sino a los pecadores."
+const tos10dola_cE_B = "El que hace la voluntad de Dios es mi hermano y mi hermana y mi madre."
+const tos10dola_cE_C = "Un gran profeta ha surgido entre nosotros: Dios ha visitado a su pueblo."
 
-const tos11LAdo_cE_A = "Señor, envía más trabajadores a tu mies."
-const tos11LAdo_cE_B = "Sucede con el reino de Dios como con un hombre que siembra la semilla en la tierra. Ya duerma, ya vele todo el día, el grano germina y va creciendo."
-const tos11LAdo_cE_C = "Mujer, quedan perdonados tus pecados, porque has amado mucho."
+const tos11dola_cE_A = "Señor, envía más trabajadores a tu mies."
+const tos11dola_cE_B = "Sucede con el reino de Dios como con un hombre que siembra la semilla en la tierra. Ya duerma, ya vele todo el día, el grano germina y va creciendo."
+const tos11dola_cE_C = "Mujer, quedan perdonados tus pecados, porque has amado mucho."
 
-const tos12LAdo_cE_A = "«Lo que os confío al oído, pregonadlo de lo alto de los terrados», dice el Señor."
-const tos12LAdo_cE_B = "Se levantó el Señor e increpó al viento y al mar; y sobrevino gran bonanza."
-const tos12LAdo_cE_C = "El Hijo del hombre tiene que sufrir mucho: tiene que ser condenado y muerto, pero al tercer día resucitará."
+const tos12dola_cE_A = "«Lo que os confío al oído, pregonadlo de lo alto de los terrados», dice el Señor."
+const tos12dola_cE_B = "Se levantó el Señor e increpó al viento y al mar; y sobrevino gran bonanza."
+const tos12dola_cE_C = "El Hijo del hombre tiene que sufrir mucho: tiene que ser condenado y muerto, pero al tercer día resucitará."
 
-const tos13LAdo_cE_A = "«El que no toma su cruz y sigue en pos de mí no es digno de mí», dice el Señor."
-const tos13LAdo_cE_B = "Hija mía, tu fe te ha curado; vete en paz."
-const tos13LAdo_cE_C = "Las raposas tienen sus cuevas, y los pájaros del cielo sus nidos; pero el Hijo del hombre no tiene donde reclinar su cabeza."
+const tos13dola_cE_A = "«El que no toma su cruz y sigue en pos de mí no es digno de mí», dice el Señor."
+const tos13dola_cE_B = "Hija mía, tu fe te ha curado; vete en paz."
+const tos13dola_cE_C = "Las raposas tienen sus cuevas, y los pájaros del cielo sus nidos; pero el Hijo del hombre no tiene donde reclinar su cabeza."
 
-const tos14LAdo_cE_A = "Yo te bendigo, oh Padre, Señor del cielo y de la tierra, porque has ocultado estas cosas a los sabios y prudentes y las has descubierto a los pequeños."
-const tos14LAdo_cE_B = "Muchos quedaban admirados de Cristo y se preguntaban: «¿De dónde le viene tanta sabiduría?»"
-const tos14LAdo_cE_C = "En cualquier casa donde entréis, decid: «paz sea en esta casa»; y que vuestra paz los inunde."
+const tos14dola_cE_A = "Yo te bendigo, oh Padre, Señor del cielo y de la tierra, porque has ocultado estas cosas a los sabios y prudentes y las has descubierto a los pequeños."
+const tos14dola_cE_B = "Muchos quedaban admirados de Cristo y se preguntaban: «¿De dónde le viene tanta sabiduría?»"
+const tos14dola_cE_C = "En cualquier casa donde entréis, decid: «paz sea en esta casa»; y que vuestra paz los inunde."
 
-const tos15LAdo_cE_A = "La semilla es la palabra de Dios, el sembrado es Cristo; todo el que lo escuche vivirá eternamente."
-const tos15LAdo_cE_B = "Enviados por el Señor, los discípulos arrojaban a los demonios, ungían con aceite a muchos enfermos y los sanaban."
-const tos15LAdo_cE_C = "El buen samaritano se acercó al herido y él curó las llagas."
+const tos15dola_cE_A = "La semilla es la palabra de Dios, el sembrado es Cristo; todo el que lo escuche vivirá eternamente."
+const tos15dola_cE_B = "Enviados por el Señor, los discípulos arrojaban a los demonios, ungían con aceite a muchos enfermos y los sanaban."
+const tos15dola_cE_C = "El buen samaritano se acercó al herido y él curó las llagas."
 
-const tos16LAdo_cE_A = "El reino de los cielos se parece a la levadura que una mujer mezcla en tres medidas de harina, hasta que se fermenta toda la masa."
-const tos16LAdo_cE_B = "Volvieron a reunirse los apóstoles con Jesús y le refirieron todo lo que habían hecho y enseñado."
-const tos16LAdo_cE_C = "Una hermana de Marta, llamada María, sentada a los pies del Señor, escuchaba sus palabras."
+const tos16dola_cE_A = "El reino de los cielos se parece a la levadura que una mujer mezcla en tres medidas de harina, hasta que se fermenta toda la masa."
+const tos16dola_cE_B = "Volvieron a reunirse los apóstoles con Jesús y le refirieron todo lo que habían hecho y enseñado."
+const tos16dola_cE_C = "Una hermana de Marta, llamada María, sentada a los pies del Señor, escuchaba sus palabras."
 
-const tos17LAdo_cE_A = "Sucede con el reino de los cielos como con una red que se echa en el mar; una vez llena, separan los peces buenos y tiran los malos."
-const tos17LAdo_cE_B = "Un muchacho ofreció cinco panes de cebada y dos peces. Jesús dijo la acción de gracias y los repartió, dándoles cuanto querían."
-const tos17LAdo_cE_C = "Si vosotros, siendo malos como sois, sabéis dar cosas buenas a vuestros hijos, ¿con cuánta mayor razón dará vuestro Padre desde el cielo el Espíritu Santo a quienes se lo pidan?"
+const tos17dola_cE_A = "Sucede con el reino de los cielos como con una red que se echa en el mar; una vez llena, separan los peces buenos y tiran los malos."
+const tos17dola_cE_B = "Un muchacho ofreció cinco panes de cebada y dos peces. Jesús dijo la acción de gracias y los repartió, dándoles cuanto querían."
+const tos17dola_cE_C = "Si vosotros, siendo malos como sois, sabéis dar cosas buenas a vuestros hijos, ¿con cuánta mayor razón dará vuestro Padre desde el cielo el Espíritu Santo a quienes se lo pidan?"
 
-const tos18LAdo_cE_A = "Jesús multiplicó los panes, y comieron todos hasta quedar satisfechos."
-const tos18LAdo_cE_B = "Yo soy el pan de vida; el que venga a mí no tendrá más hambre, y el que crea en mí jamás tendrá sed."
-const tos18LAdo_cE_C = "Si habéis sido resucitados con Cristo, buscad las cosas de arriba. Aleluya"
+const tos18dola_cE_A = "Jesús multiplicó los panes, y comieron todos hasta quedar satisfechos."
+const tos18dola_cE_B = "Yo soy el pan de vida; el que venga a mí no tendrá más hambre, y el que crea en mí jamás tendrá sed."
+const tos18dola_cE_C = "Si habéis sido resucitados con Cristo, buscad las cosas de arriba. Aleluya"
 
-const tos19LAdo_cE_A = "De madrugada, Jesús, caminando por encima del mar, vino hacia sus discípulos y les dijo: «Tened valor, que soy yo; no tengáis miedo.»"
-const tos19LAdo_cE_B = "El pan que yo voy a dar es mi carne ofrecida por la vida del mundo."
-const tos19LAdo_cE_C = "Donde esté tu tesoro, allí estará tu corazón."
+const tos19dola_cE_A = "De madrugada, Jesús, caminando por encima del mar, vino hacia sus discípulos y les dijo: «Tened valor, que soy yo; no tengáis miedo.»"
+const tos19dola_cE_B = "El pan que yo voy a dar es mi carne ofrecida por la vida del mundo."
+const tos19dola_cE_C = "Donde esté tu tesoro, allí estará tu corazón."
 
-const tos20LAdo_cE_A = "Dios encerró a todos los hombres en la desobediencia, a fin de hacer misericordia con todos."
-const tos20LAdo_cE_B = "El que come mi carne y bebe mi sangre permanece en mí, y yo en él."
-const tos20LAdo_cE_C = "Jesús quiso recibir el bautismo del sufrimiento y beber el cáliz de la pasión."
+const tos20dola_cE_A = "Dios encerró a todos los hombres en la desobediencia, a fin de hacer misericordia con todos."
+const tos20dola_cE_B = "El que come mi carne y bebe mi sangre permanece en mí, y yo en él."
+const tos20dola_cE_C = "Jesús quiso recibir el bautismo del sufrimiento y beber el cáliz de la pasión."
 
-const tos21LAdo_cE_A = "«Tú eres el Mesías, el Hijo del Dios vivo.» «Bienaventurado eres tú, Simón: mi Padre te lo ha revelado.»"
-const tos21LAdo_cE_B = "El Espíritu es el que da vida; la carne no vale nada. Las palabras que acabo de deciros son espíritu y vida."
-const tos21LAdo_cE_C = "Procurad entrar por la puerta estrecha —dice el Señor—; es la puerta de la vida."
+const tos21dola_cE_A = "«Tú eres el Mesías, el Hijo del Dios vivo.» «Bienaventurado eres tú, Simón: mi Padre te lo ha revelado.»"
+const tos21dola_cE_B = "El Espíritu es el que da vida; la carne no vale nada. Las palabras que acabo de deciros son espíritu y vida."
+const tos21dola_cE_C = "Procurad entrar por la puerta estrecha —dice el Señor—; es la puerta de la vida."
 
-const tos22LAdo_cE_A = "Presentad vuestros cuerpos como hostia viva, santa, agradable a Dios; éste es vuestro culto razonable."
-const tos22LAdo_cE_B = "Recibid con docilidad la Palabra de Dios que ha sido sembrada en vosotros, y que tiene poder para salvar vuestras almas."
-const tos22LAdo_cE_C = "Invita a tu mesa a los pobres que no tienen con qué pagarte; porque Dios te lo recompensará en la resurrección de los justos."
+const tos22dola_cE_A = "Presentad vuestros cuerpos como hostia viva, santa, agradable a Dios; éste es vuestro culto razonable."
+const tos22dola_cE_B = "Recibid con docilidad la Palabra de Dios que ha sido sembrada en vosotros, y que tiene poder para salvar vuestras almas."
+const tos22dola_cE_C = "Invita a tu mesa a los pobres que no tienen con qué pagarte; porque Dios te lo recompensará en la resurrección de los justos."
 
-const tos23LAdo_cE_A = "El único deber vuestro ha de ser amaros los unos a los otros. porque quien ama al prójimo ya ha cumplido la ley."
-const tos23LAdo_cE_B = "Abre, Señor, nuestro corazón para que comprendamos tus palabras; abre nuestros labios y proclamaremos tu alabanza."
-const tos23LAdo_cE_C = "Dice el Señor: El que no renuncia a todos sus bienes no puede ser discípulo mío."
+const tos23dola_cE_A = "El único deber vuestro ha de ser amaros los unos a los otros. porque quien ama al prójimo ya ha cumplido la ley."
+const tos23dola_cE_B = "Abre, Señor, nuestro corazón para que comprendamos tus palabras; abre nuestros labios y proclamaremos tu alabanza."
+const tos23dola_cE_C = "Dice el Señor: El que no renuncia a todos sus bienes no puede ser discípulo mío."
 
-const tos24LAdo_cE_A = "El Padre celestial os perdonará, si vosotros perdonáis de corazón a vuestro hermano."
-const tos24LAdo_cE_B = "El que quiera venir en pos de mí, renúnciese a sí mismo, tome su cruz y sígame."
-const tos24LAdo_cE_C = "Sentencia verdadera y digna de universal adhesión es ésta: Cristo Jesús vino al mundo para salvar a los pecadores. Aleluya."
+const tos24dola_cE_A = "El Padre celestial os perdonará, si vosotros perdonáis de corazón a vuestro hermano."
+const tos24dola_cE_B = "El que quiera venir en pos de mí, renúnciese a sí mismo, tome su cruz y sígame."
+const tos24dola_cE_C = "Sentencia verdadera y digna de universal adhesión es ésta: Cristo Jesús vino al mundo para salvar a los pecadores. Aleluya."
 
-const tos25LAdo_cE_A = "El rico hacendado sale muy de mañana a contratar jornaleros para su viña."
-const tos25LAdo_cE_B = "El Hijo del hombre tenía que sufrir y resucitar para salvar al mundo."
-const tos25LAdo_cE_C = "Sed fieles en lo poco, y Dios os confiará las riquezas verdaderas."
+const tos25dola_cE_A = "El rico hacendado sale muy de mañana a contratar jornaleros para su viña."
+const tos25dola_cE_B = "El Hijo del hombre tenía que sufrir y resucitar para salvar al mundo."
+const tos25dola_cE_C = "Sed fieles en lo poco, y Dios os confiará las riquezas verdaderas."
 
-const tos26LAdo_cE_A = "Todo el que hace la voluntad del Padre es verdadero hijo de Dios. Aleluya."
-const tos26LAdo_cE_B = "«El que no está contra nosotros está a nuestro favor», dice el Señor."
-const tos26LAdo_cE_C = "Dichosos los pobres de espíritu, porque de ellos es el reino de los cielos."
+const tos26dola_cE_A = "Todo el que hace la voluntad del Padre es verdadero hijo de Dios. Aleluya."
+const tos26dola_cE_B = "«El que no está contra nosotros está a nuestro favor», dice el Señor."
+const tos26dola_cE_C = "Dichosos los pobres de espíritu, porque de ellos es el reino de los cielos."
 
-const tos27LAdo_cE_A = "La piedra que rechazaron los constructores vino a convertirse en piedra angular para el nuevo templo de Dios."
-const tos27LAdo_cE_B = "Quien no recibe la doctrina del reino de Dios con las disposiciones de un niño no puede entrar en la casa del Padre."
-const tos27LAdo_cE_C = "Conserva el precioso depósito de la fe, bajo la acción del Espíritu Santo que mora en nosotros. Aleluya."
+const tos27dola_cE_A = "La piedra que rechazaron los constructores vino a convertirse en piedra angular para el nuevo templo de Dios."
+const tos27dola_cE_B = "Quien no recibe la doctrina del reino de Dios con las disposiciones de un niño no puede entrar en la casa del Padre."
+const tos27dola_cE_C = "Conserva el precioso depósito de la fe, bajo la acción del Espíritu Santo que mora en nosotros. Aleluya."
 
-const tos28LAdo_cE_A = "Salid a las encrucijadas, y a todos cuantos encontréis invitadlos a las bodas."
-const tos28LAdo_cE_B = "Invoqué y vino a mí un espíritu de sabiduría; todos los bienes me vinieron con ella."
-const tos28LAdo_cE_C = "Si tenemos constancia en el sufrir, reinaremos con Cristo; si le somos infieles, él permanece fiel."
+const tos28dola_cE_A = "Salid a las encrucijadas, y a todos cuantos encontréis invitadlos a las bodas."
+const tos28dola_cE_B = "Invoqué y vino a mí un espíritu de sabiduría; todos los bienes me vinieron con ella."
+const tos28dola_cE_C = "Si tenemos constancia en el sufrir, reinaremos con Cristo; si le somos infieles, él permanece fiel."
 
-const tos29LAdo_cE_A = "Jesús, maestro, tú enseñas con veracidad la manera de vivir según Dios. Aleluya."
-const tos29LAdo_cE_B = "El que quiera ser el mayor, que sea vuestro servidor; y el que quiera ser el primero, que sea esclavo de todos."
-const tos29LAdo_cE_C = "Dios hará justicia a sus elegidos que claman a él día y noche."
+const tos29dola_cE_A = "Jesús, maestro, tú enseñas con veracidad la manera de vivir según Dios. Aleluya."
+const tos29dola_cE_B = "El que quiera ser el mayor, que sea vuestro servidor; y el que quiera ser el primero, que sea esclavo de todos."
+const tos29dola_cE_C = "Dios hará justicia a sus elegidos que claman a él día y noche."
 
-const tos30LAdo_cE_A = "Amarás al prójimo como a ti mismo."
-const tos30LAdo_cE_B = "¡Hijo de David, ten compasión de mí! ¡Señor, que vea!"
-const tos30LAdo_cE_C = "El publicano, quedándose a cierta distancia y sin levantar los ojos, se daba golpes de pecho e iba repitiendo: « ¡Dios mío, ten compasión de mí, que soy un pecador!»"
+const tos30dola_cE_A = "Amarás al prójimo como a ti mismo."
+const tos30dola_cE_B = "¡Hijo de David, ten compasión de mí! ¡Señor, que vea!"
+const tos30dola_cE_C = "El publicano, quedándose a cierta distancia y sin levantar los ojos, se daba golpes de pecho e iba repitiendo: « ¡Dios mío, ten compasión de mí, que soy un pecador!»"
 
-const tos31LAdo_cE_A = "Uno solo es vuestro Padre: el Dios de cielo y tierra."
-const tos31LAdo_cE_B = "Amar al prójimo como a sí mismo vale más que todos los holocaustos y sacrificios."
-const tos31LAdo_cE_C = "Zaqueo, muy contento, recibió a Jesús en su casa. A esta casa hoy ha llegado la salvación."
+const tos31dola_cE_A = "Uno solo es vuestro Padre: el Dios de cielo y tierra."
+const tos31dola_cE_B = "Amar al prójimo como a sí mismo vale más que todos los holocaustos y sacrificios."
+const tos31dola_cE_C = "Zaqueo, muy contento, recibió a Jesús en su casa. A esta casa hoy ha llegado la salvación."
 
-const tos32LAdo_cE_A = "Saldremos al encuentro del Señor, y así estaremos siempre con él."
-const tos32LAdo_cE_B = "Nos tienen como gente triste, aunque estamos siempre alegres; por mendigos, cuando enriquecemos a muchos; o por gente que nada tiene, cuando en realidad todo lo poseemos: poseemos al Señor del cielo y tierra."
-const tos32LAdo_cE_C = "El que alcance a ser digno de tener parte en el otro mundo es hijo de la resurrección e hijo de Dios."
+const tos32dola_cE_A = "Saldremos al encuentro del Señor, y así estaremos siempre con él."
+const tos32dola_cE_B = "Nos tienen como gente triste, aunque estamos siempre alegres; por mendigos, cuando enriquecemos a muchos; o por gente que nada tiene, cuando en realidad todo lo poseemos: poseemos al Señor del cielo y tierra."
+const tos32dola_cE_C = "El que alcance a ser digno de tener parte en el otro mundo es hijo de la resurrección e hijo de Dios."
 
-const tos33LAdo_cE_A = "Nosotros somos hijos de la luz e hijos del día; por eso, estemos alerta en espera del Señor."
-const tos33LAdo_cE_B = "Los justos brillarán como el fulgor del firmamento por toda la eternidad."
-const tos33LAdo_cE_C = "Por mi causa os perseguirán; eso os dará ocasión de profesar vuestra fe: yo os daré palabras y sabiduría a las que no podrá hacer frente ningún adversario vuestro."
+const tos33dola_cE_A = "Nosotros somos hijos de la luz e hijos del día; por eso, estemos alerta en espera del Señor."
+const tos33dola_cE_B = "Los justos brillarán como el fulgor del firmamento por toda la eternidad."
+const tos33dola_cE_C = "Por mi causa os perseguirán; eso os dará ocasión de profesar vuestra fe: yo os daré palabras y sabiduría a las que no podrá hacer frente ningún adversario vuestro."
 
 const CristoRey = "El primogénito de entre los muertos y príncipe de los reyes de la tierra nos ha convertido en un reino para Dios, su Padre. Aleluya."
 
-const tos34LAdo_cE_A = CristoRey;
-const tos34LAdo_cE_B = CristoRey;
-const tos34LAdo_cE_C = CristoRey;
+const tos34dola_cE_A = CristoRey;
+const tos34dola_cE_B = CristoRey;
+const tos34dola_cE_C = CristoRey;
 
 // TIEMPO ADVIENTO
 //Laudes: Benedictus, ant.: SEMANA 01
@@ -195,11 +195,11 @@ const tcsbcLA = "Atesorad tesoros en el cielo, donde no hay polilla ni carcoma q
 
 // SEMANA I TIEMPO DE CUARESMA
 // DOMINGO
-const tcs1LAdo_cE_A = "No sólo de pan vive el hombre, sino de toda palabra, que sale de la boca de Dios."
-const tcs1LAdo_cE_B = "Jesús se marchó a Galilea a proclamar el Evangelio de Dios. Decía: «Se ha cumplido el plazo, está cerca el reino de Dios: convertíos y creed en el Evangelio.»"
-const tcs1LAdo_cE_C = "Todo aquel tiempo Jesús estuvo sin comer, y al final sintió hambre."
+const tcs1dola_cE_A = "No sólo de pan vive el hombre, sino de toda palabra, que sale de la boca de Dios."
+const tcs1dola_cE_B = "Jesús se marchó a Galilea a proclamar el Evangelio de Dios. Decía: «Se ha cumplido el plazo, está cerca el reino de Dios: convertíos y creed en el Evangelio.»"
+const tcs1dola_cE_C = "Todo aquel tiempo Jesús estuvo sin comer, y al final sintió hambre."
 
-const tcs1LAdo = "Jesús fue llevado al desierto por el Espíritu para ser tentado por el diablo; y, después de ayunar cuarenta días con sus cuarenta noches, al fin sintió hambre."
+const tcs1dola = "Jesús fue llevado al desierto por el Espíritu para ser tentado por el diablo; y, después de ayunar cuarenta días con sus cuarenta noches, al fin sintió hambre."
 const tcs1LAlu = "Venid, benditos de mi Padre, a tomar posesión del reino que está preparado para vosotros desde la creación del mundo."
 const tcs1LAma = "Señor, enséñanos a orar, como enseñó Juan a sus discípulos."
 const tcs1LAmi = "Esta raza es una raza perversa: pide una señal, pero no se le dará otra señal que la de Jonás."
@@ -208,11 +208,11 @@ const tcs1LAvi = "Si vuestra virtud no es superior a la de los escribas y farise
 const tcs1LAsb = "Amad a vuestros enemigos y rogad por los que os persiguen; así seréis hijos de vuestro Padre celestial”, dice el Señor."
 
 // SEMANA II TIEMPO DE CUARESMA
-const tcs2LAdo_cE_A = "Una voz desde la nube decía: «Este es mi Hijo, el amado, mi predilecto. Escuchadla.»"
-const tcs2LAdo_cE_B = "Pedro le dijo a Jesús: «Maestro, ¡qué bien se está aquí! Vamos a hacer tres tiendas, una para ti, otra para Moisés y otra para Elías.»"
-const tcs2LAdo_cE_C = "Por medio del Evangelio, nuestro Salvador Jesucristo destruyó la muerte y sacó a la luz la vida inmortal."
+const tcs2dola_cE_A = "Una voz desde la nube decía: «Este es mi Hijo, el amado, mi predilecto. Escuchadla.»"
+const tcs2dola_cE_B = "Pedro le dijo a Jesús: «Maestro, ¡qué bien se está aquí! Vamos a hacer tres tiendas, una para ti, otra para Moisés y otra para Elías.»"
+const tcs2dola_cE_C = "Por medio del Evangelio, nuestro Salvador Jesucristo destruyó la muerte y sacó a la luz la vida inmortal."
 
-const tcs2LAdo = "Por medio del Evangelio, nuestro Salvador Jesucristo destruyó la muerte y sacó a la luz la vida inmortal."
+const tcs2dola = "Por medio del Evangelio, nuestro Salvador Jesucristo destruyó la muerte y sacó a la luz la vida inmortal."
 const tcs2LAlu = "«Sed misericordiosos, como es misericordioso vuestro Padre», dice el Señor."
 const tcs2LAma = "Uno solo es vuestro maestro, Cristo el Señor, que está, en los cielos."
 const tcs2LAmi = "El Hijo del hombre no ha venido a ser servido, sino a servir y a entregar su vida como rescate de una multitud."
@@ -222,13 +222,13 @@ const tcs2LAsb = " Padre mío, he pecado contra el cielo y contra ti; ya no mere
 
 // SEMANA III TIEMPO DE CUARESMA
 // OPC1
-const tcs3LAdo_cE_A = "Dios es espíritu, y los que le dan culto deben hacerlo en espíritu y verdad."
-const tcs3LAdo_cE_B = "“Destruid este templo —dice el Señor— y yo lo levantaré en tres días”. Él hablaba del templo de su cuerpo."
-const tcs3LAdo_cE_C = "El Señor Dios de vuestros padres me envía a vosotros."
+const tcs3dola_cE_A = "Dios es espíritu, y los que le dan culto deben hacerlo en espíritu y verdad."
+const tcs3dola_cE_B = "“Destruid este templo —dice el Señor— y yo lo levantaré en tres días”. Él hablaba del templo de su cuerpo."
+const tcs3dola_cE_C = "El Señor Dios de vuestros padres me envía a vosotros."
 // OPC2
-const tcs3LAdo_cE_A2 = "Se acerca la hora, ya está aquí, en que los que quieran dar culto verdadero adorarán al Padre en espíritu y verdad, porque el Padre desea que le den culto así."
-const tcs3LAdo_cE_B2 = "«Destruid este templo —dice el Señor—, y en tres días lo levantaré.» Él hablaba del templo de su cuerpo."
-const tcs3LAdo_cE_C2 = "Justificados por la fe, estamos en paz con Dios por medio de nuestro Señor Jesucristo."
+const tcs3dola_cE_A2 = "Se acerca la hora, ya está aquí, en que los que quieran dar culto verdadero adorarán al Padre en espíritu y verdad, porque el Padre desea que le den culto así."
+const tcs3dola_cE_B2 = "«Destruid este templo —dice el Señor—, y en tres días lo levantaré.» Él hablaba del templo de su cuerpo."
+const tcs3dola_cE_C2 = "Justificados por la fe, estamos en paz con Dios por medio de nuestro Señor Jesucristo."
 // DIAS DE LA SEMANA
 const tcs3LAlu = "Tened por cierto que ningún profeta es bien recibido en su patria."
 const tcs3LAma = "“Yo te digo, Pedro: No has de perdonar hasta siete veces, sino hasta setenta veces siete”, dice el Señor."
@@ -239,13 +239,13 @@ const tcs3LAsb = "El publicano, quedándose a cierta distancia, no se atrevía n
 
 // SEMANA IV TIEMPO DE CUARESMA
 //OPC1
-const tcs4LAdo_cE_A = "Jamás se oyó decir que nadie, a no ser Cristo, el Hijo de Dios, abriera los ojos a un ciego de nacimiento."
-const tcs4LAdo_cE_B = "Dios, por el gran amor con que nos amó, estando nosotros muertos por los pecados, nos ha hecho vivir con Cristo."
-const tcs4LAdo_cE_C = "Padre, he pecado contra ti; ya no merezco llamarme hijo tuyo. "
+const tcs4dola_cE_A = "Jamás se oyó decir que nadie, a no ser Cristo, el Hijo de Dios, abriera los ojos a un ciego de nacimiento."
+const tcs4dola_cE_B = "Dios, por el gran amor con que nos amó, estando nosotros muertos por los pecados, nos ha hecho vivir con Cristo."
+const tcs4dola_cE_C = "Padre, he pecado contra ti; ya no merezco llamarme hijo tuyo. "
 //OPC2
-const tcs4LAdo_cE_A2 = "Ese hombre que se llama Jesús hizo barro y me lo untó en los ojos; fui, me lavé y ahora veo."
-const tcs4LAdo_cE_B2 = "Tanto amó Dios al mundo que entregó a su Hijo único para que no perezca ninguno de los que ere en él, sino que tengan vida eterna."
-const tcs4LAdo_cE_C2 = "Sacad en seguida el mejor traje y vestidlo; ponedle un anillo en la mano y sandalias en los pies; porque este hijo mío estaba muerto y ha revivido; estaba perdido, y lo hemos encontrado."
+const tcs4dola_cE_A2 = "Ese hombre que se llama Jesús hizo barro y me lo untó en los ojos; fui, me lavé y ahora veo."
+const tcs4dola_cE_B2 = "Tanto amó Dios al mundo que entregó a su Hijo único para que no perezca ninguno de los que ere en él, sino que tengan vida eterna."
+const tcs4dola_cE_C2 = "Sacad en seguida el mejor traje y vestidlo; ponedle un anillo en la mano y sandalias en los pies; porque este hijo mío estaba muerto y ha revivido; estaba perdido, y lo hemos encontrado."
 
 // DIAS DE LA SEMANA
 const tcs4LAlu = "Había un funcionario de la corte que tenía un hijo enfermo en Cafarnaúm; y, habiéndose enterado de que Jesús había vuelto a Galilea, le pidió que bajase a curar a su hijo"
@@ -257,13 +257,13 @@ const tcs4LAsb = "Jamás hombre alguno ha hablado como éste."
 
 // SEMANA V TIEMPO DE CUARESMA
 //OPC1
-const tcs5LAdo_cE_A = "Lázaro, nuestro amigo, está dormido: voy a despertarlo."
-const tcs5LAdo_cE_B = "Haré con vosotros una alianza nueva: yo seré vuestro Dios, y vosotros seréis mi pueblo."
-const tcs5LAdo_cE_C = "No penséis en lo antiguo: mirad que realizo algo nuevo."
+const tcs5dola_cE_A = "Lázaro, nuestro amigo, está dormido: voy a despertarlo."
+const tcs5dola_cE_B = "Haré con vosotros una alianza nueva: yo seré vuestro Dios, y vosotros seréis mi pueblo."
+const tcs5dola_cE_C = "No penséis en lo antiguo: mirad que realizo algo nuevo."
 // OPC2
-const tcs5LAdo_cE_A2 = "Yo soy la resurrección y la vida: el que cree en mí, aunque haya muerto, vivirá; y el que está vivo y cree en mí, no morirá para siempre."
-const tcs5LAdo_cE_B2 = "El que quiera servirme, que me siga, y donde esté yo, allí también estará mi servidor."
-const tcs5LAdo_cE_C2 = "Al oírlo, se fueron escabullendo uno a uno, empezando por los más viejos, Y quedó solo Jesús, con la mujer, en medio."
+const tcs5dola_cE_A2 = "Yo soy la resurrección y la vida: el que cree en mí, aunque haya muerto, vivirá; y el que está vivo y cree en mí, no morirá para siempre."
+const tcs5dola_cE_B2 = "El que quiera servirme, que me siga, y donde esté yo, allí también estará mi servidor."
+const tcs5dola_cE_C2 = "Al oírlo, se fueron escabullendo uno a uno, empezando por los más viejos, Y quedó solo Jesús, con la mujer, en medio."
 
 // DIAS DE LA SEMANA
 const tcs5LAlu = "“El que me sigue no camina en tinieblas, sino que tendrá la luz de la vida”, dice el Señor"
@@ -275,11 +275,11 @@ const tcs5LAsb = "Jesús murió para reunir a los hijos de Dios dispersos"
 
 // SEMANA DOMINGO DE RAMOS TIEMPO CUARESMA
 // OPC1
-const tcs6LAdo_cE = "Aclamemos con palmas de victoria al Señor que viene, y salgamos a su encuentro con himnos y cantos, dándole gloria y diciendo: «Bendito eres, Señor.»"
+const tcs6dola_cE = "Aclamemos con palmas de victoria al Señor que viene, y salgamos a su encuentro con himnos y cantos, dándole gloria y diciendo: «Bendito eres, Señor.»"
 // OPC2
-const tcs6LAdo_cE_A = "Aclamemos con palmas de victoria al Señor que viene, y salgamos a su encuentro con himnos y cantos, dándole gloria y diciendo: «Bendito eres, Señor.»"
-const tcs6LAdo_cE_B = "Los que iban delante y detrás gritaban: «Hosanna, bendito el que viene en nombre del Señor. Bendito el reino que llega, el de nuestro padre David.»"
-const tcs6LAdo_cE_C = "La masa de los discípulos, entusiasmados, se pusieron a alabar a Dios a gritos, diciendo: «¡Bendito el que viene como rey, en nombre del Señor! Paz en el cielo y gloria en lo alto.»"
+const tcs6dola_cE_A = "Aclamemos con palmas de victoria al Señor que viene, y salgamos a su encuentro con himnos y cantos, dándole gloria y diciendo: «Bendito eres, Señor.»"
+const tcs6dola_cE_B = "Los que iban delante y detrás gritaban: «Hosanna, bendito el que viene en nombre del Señor. Bendito el reino que llega, el de nuestro padre David.»"
+const tcs6dola_cE_C = "La masa de los discípulos, entusiasmados, se pusieron a alabar a Dios a gritos, diciendo: «¡Bendito el que viene como rey, en nombre del Señor! Paz en el cielo y gloria en lo alto.»"
 
 // DIAS DE LA SEMANA SANTA
 const tcssLAlu = "Padre justo, si es verdad que el mundo no te ha conocido, yo sí te he conocido y sé que tú me has enviado."
@@ -290,7 +290,7 @@ const tcssLAvi = "Fijaron encima de su cabeza un letrero indicando el motivo de 
 const tcssLAsb = "Salvador del mundo, sálvanos; tú que con tu cruz y con tu sangre nos redimiste, socórrenos, Dios nuestro."
 
 // TIEMPO PASCUAL DOMINGO DE RESURECCIÓN LAUDES DOMINGO - CANTO EVANGELICO
-const tpdrLAdo_cE = "Muy temprano, el primer día de la semana, al salir el sol, fueron al sepulcro. Aleluya."
+const tpdrdola_cE = "Muy temprano, el primer día de la semana, al salir el sol, fueron al sepulcro. Aleluya."
 
 // SEMANA DE LA OCTAVA DE PASCUA
 const tp8vLAlu = "Id en seguida a decir a sus discípulos: «Ha resucitado el Señor de entre los muertos.» Aleluya"
@@ -301,7 +301,7 @@ const tp8vLAvi = "Ésta fue la tercera vez que se apareció Jesús a los discíp
 const tp8vLAsb = "Después de su resurrección, que tuvo lugar a la mañana del primer día de la semana, Jesús se apareció primero a María Magdalena, de la que había arrojado siete demonios. Aleluya."
 
 // SEMANA II DEL TIEMPO PASCUAL DOMINGO
-const tps2LAdo = "Trae tu mano y métela en mi costado; y no seas incrédulo, sino fiel. Aleluya."
+const tps2dola = "Trae tu mano y métela en mi costado; y no seas incrédulo, sino fiel. Aleluya."
 // SEMANA II DEL TIEMPO PASCUAL - DIA DE SEMANA
 const tps2LAlu = "Os digo con toda verdad: el que no nace de arriba no podrá entrar en el reino de Dios. Aleluya"
 const tps2LAma = "Yo soy el alfa y la omega, el primero y el último; yo soy el vástago y la descendencia de David, el lucero radiante de la mañana. Aleluya."
@@ -312,13 +312,13 @@ const tps2LAsb = "La paz sea con vosotros, soy yo; aleluya; no tengáis miedo. A
 
 // SEMANA III DEL TIEMPO PASCUAL DOMINGO
 //OPC1
-const tps3LAdo_cE_A = "El Mesías tenía que morir, y resucitar de entre los muertos al tercer día, Aleluya."
-const tps3LAdo_cE_B = "Se presentó Jesús en medio de sus discípulos y les dijo: «La paz sea con vosotros.» Aleluya."
-const tps3LAdo_cE_C = "Ninguno de los discípulos se atrevía a preguntar a Jesús quién era, sabiendo que era el Señor. Aleluya."
+const tps3dola_cE_A = "El Mesías tenía que morir, y resucitar de entre los muertos al tercer día, Aleluya."
+const tps3dola_cE_B = "Se presentó Jesús en medio de sus discípulos y les dijo: «La paz sea con vosotros.» Aleluya."
+const tps3dola_cE_C = "Ninguno de los discípulos se atrevía a preguntar a Jesús quién era, sabiendo que era el Señor. Aleluya."
 //OPC2
-const tps3LAdo_cE_A2 = "Era necesario que el Mesías padeciera y resucitara de entre los muertos al tercer día. Aleluya."
-const tps3LAdo_cE_B2 = "Mirad mis manos y mis pies: soy yo. Palpadme y ved. Aleluya."
-const tps3LAdo_cE_C2 = "Jesús se acerca, toma el pan y se lo da, y lo mismo el pescado. Ésta fue la tercera vez que Jesús se apareció a los discípulos, después de resucitar de entre los muertos. Aleluya."
+const tps3dola_cE_A2 = "Era necesario que el Mesías padeciera y resucitara de entre los muertos al tercer día. Aleluya."
+const tps3dola_cE_B2 = "Mirad mis manos y mis pies: soy yo. Palpadme y ved. Aleluya."
+const tps3dola_cE_C2 = "Jesús se acerca, toma el pan y se lo da, y lo mismo el pescado. Ésta fue la tercera vez que Jesús se apareció a los discípulos, después de resucitar de entre los muertos. Aleluya."
 
 // SEMANA III DEL TIEMPO PASCUAL - DIA DE SEMANA
 const tps3LAlu = "Trabajad por conseguir no el alimento perecedero, sino el alimento que permanece y da vida eterna. Aleluya."
@@ -330,11 +330,11 @@ const tps3LAsb = "Dijo Simón Pedro: «Señor, ¿a quién vamos a ir? Tú tienes
 
 // SEMANA IV DEL TIEMPO PASCUAL DOMINGO
 //OPC1
-const tps4LAdo_cE = "Yo soy el Pastor de las ovejas; yo soy el camino, la verdad y la vida; yo soy el buen Pastor, y conozco a mis ovejas y ellas me conocen a mí. Aleluya."
+const tps4dola_cE = "Yo soy el Pastor de las ovejas; yo soy el camino, la verdad y la vida; yo soy el buen Pastor, y conozco a mis ovejas y ellas me conocen a mí. Aleluya."
 //OPC2
-const tps4LAdo_cE_A2 = "«Yo soy la puerta —dice el Señor—: quien entre por mí se salvará y encontrará pastos.» Aleluya."
-const tps4LAdo_cE_B2 = "Yo soy el Pastor de las ovejas; yo soy el camino, la verdad, y la vida. Yo soy el buen Pastor, que conozco a mis ovejas, y las mías me conocen. Aleluya."
-const tps4LAdo_cE_C2 = "Yo doy la vida eterna a mis ovejas; no perecerán para siempre, y nadie las arrebatará de mi mano. Aleluya."
+const tps4dola_cE_A2 = "«Yo soy la puerta —dice el Señor—: quien entre por mí se salvará y encontrará pastos.» Aleluya."
+const tps4dola_cE_B2 = "Yo soy el Pastor de las ovejas; yo soy el camino, la verdad, y la vida. Yo soy el buen Pastor, que conozco a mis ovejas, y las mías me conocen. Aleluya."
+const tps4dola_cE_C2 = "Yo doy la vida eterna a mis ovejas; no perecerán para siempre, y nadie las arrebatará de mi mano. Aleluya."
 
 // SEMANA III DEL TIEMPO PASCUAL - DIA DE SEMANA
 const tps4LAlu = "Yo soy el buen Pastor, que apaciento a mis ovejas y doy mi vida por ellas. Aleluya"

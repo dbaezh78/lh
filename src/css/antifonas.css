@@ -331,6 +331,20 @@ body {
 .badge-libro { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
 .badge-tipo { background: rgba(208, 18, 18, 0.2); color: #f87171; border: 1px solid rgba(208, 18, 18, 0.3); }
 .badge-dia { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.badge-ciclo { background: rgba(168, 85, 247, 0.25); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); font-weight: 800; }
+
+.badge-ciclo-letra {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #9333ea;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    margin-right: 6px;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+}
 
 .antifona-texto-cuerpo {
     font-size: 1.05rem;

@@ -1,12 +1,11 @@
 {
-  "latestVersion": "1.0.06",
+  "latestVersion": "1.0.08",
   "minVersion": "1.0.01",
-  "updateTitle": "Nueva Versión Disponible (v1.0.06)",
-  "updateMessage": "Selector interactivo de semanas y santos en la cinta superior, preces completas de Vísperas, Cántico de Simeón en Completas y fidelidad de formato en lecturas.",
+  "updateTitle": "Nueva Versión Disponible (v1.0.08)",
+  "updateMessage": "Soporte completo de Ciclos Dominicales (A, B, C) en Antífonas de Cántico Evangélico y Salterios.",
   "releaseNotes": [
-    "Selector desplegable de semanas, días y horas litúrgicas al tocar 'Semana X • Día' en la cinta superior de salterios.html para todos los tiempos litúrgicos, Santos, Solemnidades y Fiestas.",
-    "Resolución y visualización canónica del Cántico de Simeón (Lc_2,_29-32) en Completas y en el Constructor de Salterios (frm_salterios.html).",
-    "Base de datos completa de Preces de Vísperas (Salterio de 4 semanas y Semana 5) con intercesión por los difuntos e invitación al Padre Nuestro.",
-    "Fidelidad exacta de saltos de línea y espacios entre párrafos en lecturas del Oficio entre el Constructor y salterios.html."
+    "Selector de Ciclos Dominicales (A, B, C) al inicio de Parámetros Litúrgicos en el Constructor de Salterios (frm_salterios.html) con cálculo automático por año (2026 = A, 2027 = B, 2028 = C...).",
+    "Gestor de Antífonas (antifonas.html) actualizado para Cántico Evangélico en Domingos: tres campos independientes para registrar y actualizar simultáneamente las antífonas de Ciclo A, Ciclo B y Ciclo C.",
+    "Resolución y visualización dinámica en salterios.html de la antífona de Cántico Evangélico para Domingos según el ciclo litúrgico correspondiente al año en curso."
   ]
 }

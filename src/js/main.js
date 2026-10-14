@@ -1349,6 +1349,7 @@ function vincularEventosBarraProgresoPortada() {
         if (!el || el.dataset.dobleToqueVinculado === '1') return;
         el.dataset.dobleToqueVinculado = '1';
         let ultimoToqueTs = 0;
+        let ultimoTouchActionTs = 0;
 
         el.addEventListener('dblclick', (e) => {
             e.preventDefault();
@@ -1358,6 +1359,7 @@ function vincularEventosBarraProgresoPortada() {
         });
 
         el.addEventListener('touchend', (e) => {
+            ultimoTouchActionTs = Date.now();
             const ahora = Date.now();
             if (ahora - ultimoToqueTs > 40 && ahora - ultimoToqueTs < 380) {
                 e.preventDefault();
@@ -1371,6 +1373,7 @@ function vincularEventosBarraProgresoPortada() {
 
         el.addEventListener('click', (e) => {
             e.stopPropagation();
+            if (Date.now() - ultimoTouchActionTs < 450) return;
             const ahora = Date.now();
             if (ahora - ultimoToqueTs > 40 && ahora - ultimoToqueTs < 380) {
                 e.preventDefault();

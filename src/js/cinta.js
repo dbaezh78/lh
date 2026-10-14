@@ -515,6 +515,15 @@ export class CintaLiturgica {
         return `<span class="lbl-semana-larga">Semana</span><span class="lbl-semana-corta">SEM</span> ${numSemana} • ${dia}`;
     }
 
+    formatearTextoTiempo(tiempo) {
+        const t = (tiempo || 'Tiempo Ordinario').toString().trim();
+        const tUpper = t.toUpperCase();
+        if (tUpper === 'TIEMPO ORDINARIO' || t.toLowerCase() === 'ordinario') {
+            return `<span class="lbl-tiempo-largo">TIEMPO ORDINARIO</span><span class="lbl-tiempo-corto">T.ORDINARIO</span>`;
+        }
+        return tUpper;
+    }
+
     render() {
         if (!this.contenedor) return;
 
@@ -567,13 +576,21 @@ export class CintaLiturgica {
                 <div class="cinta-fila-sup">
                     <div class="cinta-sup-izq">
                         <button type="button" class="cinta-badge-tiempo tiempo-${slugTiempo}" id="btn-toggle-tiempo" title="Toca para ocultar o mostrar el reproductor y las horas">
-                            ${tiempo.toUpperCase()}
+                            ${this.formatearTextoTiempo(tiempo)}
                         </button>
                         <span class="cinta-texto-metadatos" id="cinta-texto-metadatos" title="Toca para seleccionar semana o celebración">${this.formatearTextoMetadatos(semana, dia)}</span>
                         <div class="cinta-zoom-controles">
                             <button type="button" class="cinta-btn-zoom" id="btn-zoom-menos" title="Disminuir tamaño de letra">−</button>
                             <button type="button" class="cinta-btn-zoom" id="btn-zoom-mas" title="Aumentar tamaño de letra">+</button>
                             <span class="cinta-zoom-valor" id="cinta-zoom-valor" title="Doble clic para restablecer tamaño (16px)">${Math.round(this.fontZoom * 16)}px</span>
+                        </div>
+                        <div class="cinta-scroll-controles">
+                            <button type="button" class="cinta-btn-scroll" id="btn-scroll-arriba" title="Ir hasta arriba" aria-label="Ir hasta arriba">
+                                <span class="material-symbols-outlined">arrow_upward</span>
+                            </button>
+                            <button type="button" class="cinta-btn-scroll" id="btn-scroll-abajo" title="Ir hasta el final" aria-label="Ir hasta el final">
+                                <span class="material-symbols-outlined">arrow_downward</span>
+                            </button>
                         </div>
                     </div>
 
@@ -732,6 +749,37 @@ export class CintaLiturgica {
             });
         }
 
+        // 2c. Botones de Scroll Rápido (Ir hasta arriba / Ir hasta el final)
+        const btnScrollArriba = document.getElementById('btn-scroll-arriba');
+        if (btnScrollArriba) {
+            btnScrollArriba.addEventListener('click', (e) => {
+                e.preventDefault();
+                try {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } catch (_) {
+                    window.scrollTo(0, 0);
+                }
+            });
+        }
+
+        const btnScrollAbajo = document.getElementById('btn-scroll-abajo');
+        if (btnScrollAbajo) {
+            btnScrollAbajo.addEventListener('click', (e) => {
+                e.preventDefault();
+                const scrollTotal = Math.max(
+                    document.body ? document.body.scrollHeight : 0,
+                    document.documentElement ? document.documentElement.scrollHeight : 0,
+                    document.body ? document.body.offsetHeight : 0,
+                    document.documentElement ? document.documentElement.offsetHeight : 0
+                );
+                try {
+                    window.scrollTo({ top: scrollTotal, behavior: 'smooth' });
+                } catch (_) {
+                    window.scrollTo(0, scrollTotal);
+                }
+            });
+        }
+
         // 3. Menú Desplegable de la Iglesia
         const btnIglesia = document.getElementById('btn-iglesia-selector');
         const menuAudios = document.getElementById('cinta-menu-audios');
@@ -830,6 +878,7 @@ export class CintaLiturgica {
         const vincularDescargaReloj = (elem) => {
             if (!elem) return;
             let ultimoToque = 0;
+            let ultimoTouchAction = 0;
             const dispararDescarga = (e) => {
                 if (this._descargaEnCurso) return;
                 if (e && e.preventDefault) e.preventDefault();
@@ -839,7 +888,7 @@ export class CintaLiturgica {
             const manejarToque = (e) => {
                 const ahora = Date.now();
                 const diff = ahora - ultimoToque;
-                if (diff > 0 && diff < 380) {
+                if (diff > 40 && diff < 380) {
                     ultimoToque = 0;
                     dispararDescarga(e);
                 } else {
@@ -850,8 +899,14 @@ export class CintaLiturgica {
                 ultimoToque = 0;
                 dispararDescarga(e);
             });
-            elem.addEventListener('click', manejarToque);
-            elem.addEventListener('touchend', manejarToque);
+            elem.addEventListener('touchend', (e) => {
+                ultimoTouchAction = Date.now();
+                manejarToque(e);
+            });
+            elem.addEventListener('click', (e) => {
+                if (Date.now() - ultimoTouchAction < 450) return;
+                manejarToque(e);
+            });
         };
 
         vincularDescargaReloj(tActual);
@@ -1896,7 +1951,7 @@ export class CintaLiturgica {
         const txtMetadatos = document.getElementById('cinta-texto-metadatos');
 
         if (btnTiempo) {
-            btnTiempo.textContent = (tiempo || 'Tiempo Ordinario').toUpperCase();
+            btnTiempo.innerHTML = this.formatearTextoTiempo(tiempo || this.opciones.tiempo || 'Tiempo Ordinario');
             const slug = (tiempoSlug || this.opciones.tiempoSlug || 'ordinario').toLowerCase();
             btnTiempo.className = `cinta-badge-tiempo tiempo-${slug}`;
         }

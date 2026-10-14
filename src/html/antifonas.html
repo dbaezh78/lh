@@ -181,11 +181,43 @@
                         </div>
                     </div>
 
-                    <div class="campo-grupo">
+                    <!-- Campo simple para días de semana o antífonas generales -->
+                    <div id="box-antifona-texto-simple" class="campo-grupo">
                         <label for="form-texto">Texto de la Antífona:</label>
                         <textarea id="form-texto" placeholder="Escribe el texto de la antífona..." required></textarea>
                         <div class="quick-toolbar-texto">
                             <button type="button" id="btn-add-aleluya" class="btn-mini">+ Aleluya.</button>
+                        </div>
+                    </div>
+
+                    <!-- Campos exclusivos para Cántico Evangélico en Domingos (Ciclos A, B y C) -->
+                    <div id="box-antifona-ciclos-domingo" style="display: none;">
+                        <div class="campo-grupo">
+                            <label for="form-texto-ciclo-a">
+                                <span class="badge-ciclo-letra">Ciclo A</span> Antífona Cántico Evangélico:
+                            </label>
+                            <textarea id="form-texto-ciclo-a" placeholder="Escribe la antífona del Ciclo A para este domingo..."></textarea>
+                            <div class="quick-toolbar-texto">
+                                <button type="button" class="btn-mini btn-aleluya-ciclo" data-target="form-texto-ciclo-a">+ Aleluya.</button>
+                            </div>
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="form-texto-ciclo-b">
+                                <span class="badge-ciclo-letra">Ciclo B</span> Antífona Cántico Evangélico:
+                            </label>
+                            <textarea id="form-texto-ciclo-b" placeholder="Escribe la antífona del Ciclo B para este domingo..."></textarea>
+                            <div class="quick-toolbar-texto">
+                                <button type="button" class="btn-mini btn-aleluya-ciclo" data-target="form-texto-ciclo-b">+ Aleluya.</button>
+                            </div>
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="form-texto-ciclo-c">
+                                <span class="badge-ciclo-letra">Ciclo C</span> Antífona Cántico Evangélico:
+                            </label>
+                            <textarea id="form-texto-ciclo-c" placeholder="Escribe la antífona del Ciclo C para este domingo..."></textarea>
+                            <div class="quick-toolbar-texto">
+                                <button type="button" class="btn-mini btn-aleluya-ciclo" data-target="form-texto-ciclo-c">+ Aleluya.</button>
+                            </div>
                         </div>
                     </div>
 
@@ -236,6 +268,12 @@
                             <option value="salmodia_3">Salmodia 3</option>
                             <option value="evangelico">Cántico Evangélico</option>
                         </select>
+                        <select id="filtro-ciclo">
+                            <option value="">Todos los Ciclos</option>
+                            <option value="A">Ciclo A</option>
+                            <option value="B">Ciclo B</option>
+                            <option value="C">Ciclo C</option>
+                        </select>
                     </div>
                 </div>
 
@@ -254,9 +292,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="../data/db-antifonas.js?v=1790604000" type="module"></script>
-    <script src="../js/firebase-config.js?v=1790604000" type="module"></script>
-    <script src="../js/antifonas-manager.js?v=1790604000" type="module"></script>
-    <script src="../js/navigator.js?v=1790604000"></script>
+    <script src="../data/db-antifonas.js?v=1.0.08" type="module"></script>
+    <script src="../js/firebase-config.js?v=1.0.08" type="module"></script>
+    <script src="../js/antifonas-manager.js?v=1.0.08" type="module"></script>
+    <script src="../js/navigator.js?v=1.0.08"></script>
 </body>
 </html>

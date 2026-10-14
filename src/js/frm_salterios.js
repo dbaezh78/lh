@@ -47,6 +47,7 @@ import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 import { generarHitosLiturgicos } from './form_etiempo.js';
 import { inicializarSearchableSantoSelect } from './searchable-santo.js';
 import { formatearTextoSalmo, limpiarSaltosDeLineaLectura } from './salterios.js';
+import { obtenerCicloDominical } from './datos.js';
 
 export const TEXTO_TEDUEM_CANONICO = `A ti, oh Dios, te alabamos, a ti, Señor, te reconocemos.
 A ti, eterno Padre, te venera toda la creación.
@@ -526,7 +527,8 @@ export function obtenerCatalogoCompletoAntifonas() {
     if (Array.isArray(baseCantico)) {
         baseCantico.forEach(a => {
             const txt = (a.texto || '').trim();
-            if (txt) mapa.set(txt, { ...a, texto: txt });
+            const key = (a.id || a.varName) ? `${a.id || a.varName}___${txt}` : `${txt}___${a.ciclo || ''}`;
+            if (txt) mapa.set(key, { ...a, texto: txt, ciclo: a.ciclo || null });
         });
     }
 
@@ -535,8 +537,9 @@ export function obtenerCatalogoCompletoAntifonas() {
         todas.forEach(a => {
             if (a) {
                 const txt = (a.texto || '').trim();
-                if (txt && !mapa.has(txt)) {
-                    mapa.set(txt, {
+                const key = (a.id || a.varName) ? `${a.id || a.varName}___${txt}` : `${txt}___${a.ciclo || ''}`;
+                if (txt && !mapa.has(key)) {
+                    mapa.set(key, {
                         id: a.id || a.varName || txt,
                         varName: a.varName || a.id,
                         texto: txt,
@@ -545,7 +548,8 @@ export function obtenerCatalogoCompletoAntifonas() {
                         semana: a.semana,
                         dia: a.dia,
                         libro: a.libro,
-                        santo: a.santo
+                        santo: a.santo,
+                        ciclo: a.ciclo || null
                     });
                 }
             }
@@ -1870,14 +1874,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             const textoLimpio = (item.texto || '').trim();
             if (!textoLimpio) return;
 
-            if (vistos.has(textoLimpio)) return;
-            vistos.add(textoLimpio);
+            const claveUnica = (item.id || item.varName || '') + '___' + textoLimpio + (item.ciclo ? `___${item.ciclo}` : '');
+            if (vistos.has(claveUnica)) return;
+            vistos.add(claveUnica);
 
             const opt = document.createElement('option');
             opt.value = item.id || item.varName || textoLimpio;
             opt.setAttribute('data-id', item.id || item.varName || '');
             opt.setAttribute('data-texto', textoLimpio);
-            opt.textContent = textoLimpio;
+            if (item.ciclo) {
+                opt.setAttribute('data-ciclo', item.ciclo);
+                opt.textContent = `[Ciclo ${item.ciclo}] ${textoLimpio}`;
+            } else {
+                opt.textContent = textoLimpio;
+            }
             selAntifonaCantico.appendChild(opt);
         });
 
@@ -3498,19 +3508,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Antífona del Cántico Evangélico
         if (selAntifonaCantico && txtAntifonaCantico) {
+            const cicloVal = (diaVal === 'domingo') ? obtenerCicloDominical(new Date().getFullYear()) : 'A';
             if (forzarRecomendado || !selAntifonaCantico.value) {
-                const antRecom = obtenerAntifonaCanticoRecomendada(tiempoVal, semanaVal, diaVal, libroVal);
+                const antRecom = obtenerAntifonaCanticoRecomendada(tiempoVal, semanaVal, diaVal, libroVal, cicloVal);
                 if (antRecom) {
-                    if (Array.from(selAntifonaCantico.options).some(o => o.value === antRecom.id || o.value === antRecom.varName || o.getAttribute('data-texto') === antRecom.texto)) {
-                        const m = Array.from(selAntifonaCantico.options).find(o => o.value === antRecom.id || o.value === antRecom.varName || o.getAttribute('data-texto') === antRecom.texto);
-                        if (m) selAntifonaCantico.value = m.value;
+                    const matchConCiclo = Array.from(selAntifonaCantico.options).find(o => 
+                        (o.getAttribute('data-ciclo') === cicloVal && (o.value === antRecom.id || o.value === antRecom.varName || o.getAttribute('data-texto') === antRecom.texto))
+                    );
+                    const matchGeneral = Array.from(selAntifonaCantico.options).find(o => 
+                        (o.value === antRecom.id || o.value === antRecom.varName || o.getAttribute('data-texto') === antRecom.texto)
+                    );
+                    const m = matchConCiclo || matchGeneral;
+
+                    if (m) {
+                        selAntifonaCantico.value = m.value;
                     } else {
                         const opt = document.createElement('option');
                         opt.value = antRecom.id || antRecom.varName || antRecom.texto;
+                        opt.setAttribute('data-id', antRecom.id || antRecom.varName || '');
                         opt.setAttribute('data-texto', antRecom.texto);
-                        opt.textContent = antRecom.texto;
+                        if (antRecom.ciclo) {
+                            opt.setAttribute('data-ciclo', antRecom.ciclo);
+                            opt.textContent = `[Ciclo ${antRecom.ciclo}] ${antRecom.texto}`;
+                        } else {
+                            opt.textContent = antRecom.texto;
+                        }
                         selAntifonaCantico.appendChild(opt);
                         selAntifonaCantico.value = opt.value;
+                    }
+                    if (typeof selAntifonaCantico._actualizarCustomSelect === 'function') {
+                        selAntifonaCantico._actualizarCustomSelect();
                     }
                     txtAntifonaCantico.textContent = antRecom.texto;
                     if (txtAntifonaCanticoFin) txtAntifonaCanticoFin.textContent = antRecom.texto;
@@ -3986,6 +4013,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (seccionCanticoEvangelicoPreview) seccionCanticoEvangelicoPreview.style.display = esOficio ? 'none' : 'block';
         if (seccionPrecesPreview) seccionPrecesPreview.style.display = esOficio ? 'none' : 'block';
 
+
         // 1. ANTÍFONA
         const inv = datos.invitatorio || datos.salmoInvitatorio || {};
         const antId = inv.antifonaId || datos.antifonaId || null;
@@ -4321,16 +4349,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 8. CÁNTICO EVANGÉLICO
         const ceData = datos.canticoEvangelico || datos.cEvan_Conclusion || {};
-        const antCEId = ceData.antifonaId || ceData.antifona || ceData.cEvangelicoAnt || null;
-        const antCETexto = ceData.antifonaTexto || ceData.antifona || ceData.cEvangelicoAnt || null;
+        let antCEId = ceData.antifonaId || ceData.antifona || ceData.cEvangelicoAnt || null;
+        let antCETexto = ceData.antifonaTexto || ceData.antifona || ceData.cEvangelicoAnt || null;
+
+        const diaActualDoc = datos.dia || (selDia ? selDia.value : 'domingo');
+        const cicloActualSel = (diaActualDoc === 'domingo') ? obtenerCicloDominical(new Date().getFullYear()) : 'A';
+        if (diaActualDoc === 'domingo' && ceData.antifonasCiclo && ceData.antifonasCiclo[cicloActualSel]) {
+            antCETexto = ceData.antifonasCiclo[cicloActualSel];
+            antCEId = antCETexto;
+        }
 
         if (selAntifonaCantico && (antCEId || antCETexto)) {
             const matched = seleccionarOpcion(selAntifonaCantico, antCEId, antCETexto);
             if (!matched && antCETexto) {
                 const opt = document.createElement('option');
                 opt.value = antCEId || antCETexto;
+                opt.setAttribute('data-id', antCEId || '');
                 opt.setAttribute('data-texto', antCETexto);
-                opt.textContent = antCETexto;
+                if (ceData.ciclo || cicloActualSel) {
+                    opt.setAttribute('data-ciclo', ceData.ciclo || cicloActualSel);
+                    opt.textContent = `[Ciclo ${ceData.ciclo || cicloActualSel}] ${antCETexto}`;
+                } else {
+                    opt.textContent = antCETexto;
+                }
                 selAntifonaCantico.appendChild(opt);
                 selAntifonaCantico.value = opt.value;
             }
@@ -5292,6 +5333,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
+        const cicloVal = (diaVal === 'domingo') ? obtenerCicloDominical(new Date().getFullYear()) : 'A';
+        const antifonasDelDomingo = {};
+        if (diaVal === 'domingo') {
+            ['A', 'B', 'C'].forEach(letra => {
+                const match = (typeof AntifonasDB !== 'undefined' && AntifonasDB.filtrar)
+                    ? AntifonasDB.filtrar(tiempoVal, semanaVal, diaVal, libroVal, 'evangelico', letra)[0]
+                    : null;
+                if (match && match.texto) {
+                    antifonasDelDomingo[letra] = match.texto;
+                }
+            });
+            if (antCETexto) {
+                antifonasDelDomingo[cicloVal] = antCETexto;
+            }
+        }
+
         const payloadBase = {
             id: idCodigo,
             codigo: idCodigo,
@@ -5308,6 +5365,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             libro: libroVal,
             libroCodigo: infoLibro.codigo,
             libroNombre: infoLibro.nombre,
+            ciclo: cicloVal,
             versiculo: versiculoOficio,
             lecturasOficio: lecturasOficio,
             himnoTeDeum: himnoTeDeum,
@@ -5390,9 +5448,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             canticoEvangelico: {
                 id: cantId,
                 tipo: cantId,
+                ciclo: cicloVal,
                 antifonaId: antCEId,
                 antifona: antCETexto,
                 antifonaTexto: antCETexto,
+                antifonasCiclo: (diaVal === 'domingo') ? antifonasDelDomingo : {},
                 titulo: (cantCita && !cantNombre.toLowerCase().includes(cantCita.toLowerCase())) ? `${cantNombre} ${cantCita}`.trim() : cantNombre.trim(),
                 cita: cantCita,
                 texto: cantTexto
@@ -5426,6 +5486,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Compatibilidad con la estructura canónica tradicional cEvan_Conclusion
             cEvan_Conclusion: {
                 cEvangelicoAnt: antCETexto,
+                ciclo: cicloVal,
+                antifonasCiclo: (diaVal === 'domingo') ? antifonasDelDomingo : {},
                 canticoZacariast: `${cantNombre}    ${cantCita}`.trim(),
                 canticoZacarias: cantTexto,
                 preces1: precesTexto || (pObjSel ? pObjSel.textoCompleto : ''),
@@ -5893,6 +5955,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         recordarParametrosActuales();
     });
     selDia.addEventListener('change', () => {
+        cargarYPoblarSelectAntifonasCantico();
         actualizarCodigoCombinado(true);
         recordarParametrosActuales();
     });
@@ -5935,19 +5998,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rawUltimos = localStorage.getItem('lh_frm_salterios_ultimos_parametros');
         if (rawUltimos) {
             const params = JSON.parse(rawUltimos);
-            if (params && params.tiempo && selTiempo) {
-                selTiempo.value = params.tiempo;
-                actualizarOpcionesSemanas(false);
-                if (params.semana && selSemana) {
-                    selSemana.value = params.semana;
-                }
-                if (params.tiempo === 'santos') {
-                    poblarSelectorDiasOSantos(params.dia || null);
-                } else if (params.dia && selDia) {
-                    selDia.value = params.dia;
-                }
-                if (params.libro && selLibro) {
-                    selLibro.value = params.libro;
+            if (params) {
+                if (params.tiempo && selTiempo) {
+                    selTiempo.value = params.tiempo;
+                    actualizarOpcionesSemanas(false);
+                    if (params.semana && selSemana) {
+                        selSemana.value = params.semana;
+                    }
+                    if (params.tiempo === 'santos') {
+                        poblarSelectorDiasOSantos(params.dia || null);
+                    } else if (params.dia && selDia) {
+                        selDia.value = params.dia;
+                    }
+                    if (params.libro && selLibro) {
+                        selLibro.value = params.libro;
+                    }
                 }
             }
         }

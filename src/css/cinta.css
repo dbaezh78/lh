@@ -145,6 +145,14 @@
     display: none;
 }
 
+.lbl-tiempo-largo {
+    display: inline;
+}
+
+.lbl-tiempo-corto {
+    display: none;
+}
+
 /* Controles de Zoom (+ y -) */
 .cinta-zoom-controles {
     display: inline-flex;
@@ -196,6 +204,46 @@
 }
 
 .cinta-zoom-valor:active {
+    transform: scale(0.92);
+}
+
+/* Controles de Scroll Rápido (Ir hasta arriba / Ir hasta el final) */
+.cinta-scroll-controles {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+.cinta-btn-scroll {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 0 3px;
+    line-height: 1;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.cinta-btn-scroll .material-symbols-outlined {
+    font-size: 20px;
+    color: #ffffff;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.cinta-btn-scroll:hover .material-symbols-outlined {
+    color: #fbbf24;
+    transform: scale(1.2);
+}
+
+.cinta-btn-scroll:active .material-symbols-outlined {
     transform: scale(0.92);
 }
 
@@ -809,6 +857,15 @@ color: red !important;
         display: inline !important;
     }
 
+    /* En equipos menores o iguales a 411px muestra T.ORDINARIO en vez de TIEMPO ORDINARIO */
+    .lbl-tiempo-largo {
+        display: none !important;
+    }
+
+    .lbl-tiempo-corto {
+        display: inline !important;
+    }
+
     .cinta-zoom-controles {
         gap: 0 !important;
         margin-left: 1px;
@@ -824,6 +881,20 @@ color: red !important;
         font-size: 10px;
         margin-left: 1px;
         min-width: 22px;
+    }
+
+    .cinta-scroll-controles {
+        gap: 0 !important;
+        margin-left: 2px;
+        flex-shrink: 0;
+    }
+
+    .cinta-btn-scroll {
+        padding: 0 1px;
+    }
+
+    .cinta-btn-scroll .material-symbols-outlined {
+        font-size: 18px;
     }
 }
 
@@ -844,6 +915,19 @@ color: red !important;
     .cinta-zoom-controles {
         gap: 0 !important;
         margin-left: 0;
+    }
+
+    .cinta-scroll-controles {
+        gap: 0 !important;
+        margin-left: 1px;
+    }
+
+    .cinta-btn-scroll {
+        padding: 0 1px;
+    }
+
+    .cinta-btn-scroll .material-symbols-outlined {
+        font-size: 16px;
     }
 
     .cinta-badge-tiempo {
