@@ -149,32 +149,32 @@ const tos34dola_cE_C = CristoRey;
 
 // TIEMPO ADVIENTO
 //Laudes: Benedictus, ant.: SEMANA 01
-const tas1LAdm_cE = "El Espíritu Santo descenderá sobre ti, María; no temas, concebirás en tu seno al Hijo de Dios. Aleluya."
-const tas1LAdm_cE_A = "Si supiera el dueño de casa a qué hora de la noche viene el ladrón, estaría en vela y no dejaría abrir un boquete en su casa."
-const tas1LAdm_cE_B = "Velad, pues no sabéis cuándo vendrá el dueño de la casa, si al atardecer, o a medianoche, o al canto del gallo, o al amanecer."
-const tas1LAdm_cE_C = "Levantaos, alzad la cabeza: se acerca vuestra liberación."
+const tas1dola_cE = "El Espíritu Santo descenderá sobre ti, María; no temas, concebirás en tu seno al Hijo de Dios. Aleluya."
+const tas1dola_cE_A = "Si supiera el dueño de casa a qué hora de la noche viene el ladrón, estaría en vela y no dejaría abrir un boquete en su casa."
+const tas1dola_cE_B = "Velad, pues no sabéis cuándo vendrá el dueño de la casa, si al atardecer, o a medianoche, o al canto del gallo, o al amanecer."
+const tas1dola_cE_C = "Levantaos, alzad la cabeza: se acerca vuestra liberación."
 
 //Laudes: Benedictus, ant.: SEMANA 2
-const tas2LAdm = "Mira, yo envío a mi Mensajero para que prepare mi camino delante de ti."
-const tas2LAdm_cE_A = "Una voz grita en el desierto: «Preparad el camino del Señor, allanad sus senderos.»"
-const tas2LAdm_cE_B = "Juan bautizaba en el desierto; predicaba que se convirtieran y se bautizaran, para que se les perdonasen los pecados."
-const tas2LAdm_cE_C = "Vino la palabra de Dios sobre Juan, hijo de Zacarías, en el desierto, y predicaba un bautismo de conversión para perdón de los pecados."
+const tas2dola = "Mira, yo envío a mi Mensajero para que prepare mi camino delante de ti."
+const tas2dola_cE_A = "Una voz grita en el desierto: «Preparad el camino del Señor, allanad sus senderos.»"
+const tas2dola_cE_B = "Juan bautizaba en el desierto; predicaba que se convirtieran y se bautizaran, para que se les perdonasen los pecados."
+const tas2dola_cE_C = "Vino la palabra de Dios sobre Juan, hijo de Zacarías, en el desierto, y predicaba un bautismo de conversión para perdón de los pecados."
 
 //Laudes: Benedictus, ant.: SEMANA 3
-const tas3LAdm_cE_A = "Juan, habiendo oído en la cárcel las obras de Cristo, le mandó a preguntar por medio de dos de sus discípulos: «¿Eres tú el que ha de venir, o tenemos que esperar a otro?»"
-const tas3LAdm_cE_B = "Juan dijo: «Yo soy la voz que grita en el desierto: “Allanad el camino del Señor.”»"
-const tas3LAdm_cE_C = "Juan dijo a todos: «Yo os bautizo con agua; pero viene el que puede más que yo. Él os bautizará con Espíritu Santo y fuego.»"
+const tas3dola_cE_A = "Juan, habiendo oído en la cárcel las obras de Cristo, le mandó a preguntar por medio de dos de sus discípulos: «¿Eres tú el que ha de venir, o tenemos que esperar a otro?»"
+const tas3dola_cE_B = "Juan dijo: «Yo soy la voz que grita en el desierto: “Allanad el camino del Señor.”»"
+const tas3dola_cE_C = "Juan dijo a todos: «Yo os bautizo con agua; pero viene el que puede más que yo. Él os bautizará con Espíritu Santo y fuego.»"
 
 //Laudes: Benedictus, ant.: SEMANA 4
 //A no ser que tenga que decirse la antífona No temáis (21 de diciembre) o la antífona Se ha cumplido (23 de diciembre).
-const tas4LAdm_cE_A = "José, hijo de David, no tengas reparo en llevarte a María, tu mujer, porque la criatura que hay en ella viene del Espíritu Santo. Aleluya."
-const tas4LAdm_cE_B = "El ángel Gabriel fue enviado por Dios a la Virgen María, desposada con José, de la estirpe de David; la virgen se llamaba María. Aleluya."
-const tas4LAdm_cE_C = "María se puso en camino y fue aprisa a la montaña, a un pueblo de Judá; entró en casa de Zacarías y saludó a Isabel."
+const tas4dola_cE_A = "José, hijo de David, no tengas reparo en llevarte a María, tu mujer, porque la criatura que hay en ella viene del Espíritu Santo. Aleluya."
+const tas4dola_cE_B = "El ángel Gabriel fue enviado por Dios a la Virgen María, desposada con José, de la estirpe de David; la virgen se llamaba María. Aleluya."
+const tas4dola_cE_C = "María se puso en camino y fue aprisa a la montaña, a un pueblo de Judá; entró en casa de Zacarías y saludó a Isabel."
 
 //La Sagrada Familia: Jesús, María y José
-const tas5LAdm_cE_A = "El ángel del Señor se apareció en sueños a José en Egipto y le dijo: «Levántate, coge al niño y a su madre y vuélvete a Israel; ya han muerto los que atentaban contra la vida del niño.»"
-const tas5LAdm_cE_B = "El padre y la madre de Jesús estaban admirados por lo que se decía del niño. Aleluya."
-const tas5LAdm_cE_C = "«Hijo, ¿por qué nos has tratado así? Mira que tu padre y yo te buscábamos angustiados.» «¿Por qué me buscabais? ¿No sabíais que yo debía estar en la casa de mi Padre?»"
+const tas5dola_cE_A = "El ángel del Señor se apareció en sueños a José en Egipto y le dijo: «Levántate, coge al niño y a su madre y vuélvete a Israel; ya han muerto los que atentaban contra la vida del niño.»"
+const tas5dola_cE_B = "El padre y la madre de Jesús estaban admirados por lo que se decía del niño. Aleluya."
+const tas5dola_cE_C = "«Hijo, ¿por qué nos has tratado así? Mira que tu padre y yo te buscábamos angustiados.» «¿Por qué me buscabais? ¿No sabíais que yo debía estar en la casa de mi Padre?»"
 
 
 /************************************** */
@@ -199,61 +199,61 @@ const tcs1dola_cE_A = "No sólo de pan vive el hombre, sino de toda palabra, que
 const tcs1dola_cE_B = "Jesús se marchó a Galilea a proclamar el Evangelio de Dios. Decía: «Se ha cumplido el plazo, está cerca el reino de Dios: convertíos y creed en el Evangelio.»"
 const tcs1dola_cE_C = "Todo aquel tiempo Jesús estuvo sin comer, y al final sintió hambre."
 
-const tcs1dola = "Jesús fue llevado al desierto por el Espíritu para ser tentado por el diablo; y, después de ayunar cuarenta días con sus cuarenta noches, al fin sintió hambre."
-const tcs1LAlu = "Venid, benditos de mi Padre, a tomar posesión del reino que está preparado para vosotros desde la creación del mundo."
-const tcs1LAma = "Señor, enséñanos a orar, como enseñó Juan a sus discípulos."
-const tcs1LAmi = "Esta raza es una raza perversa: pide una señal, pero no se le dará otra señal que la de Jonás."
-const tcs1LAju = "Si vosotros, siendo malos como sois, sabéis dar cosas buenas a vuestros hijos, ¡con cuánta mayor razón las dará vuestro Padre celestial al que se las pida!"
-const tcs1LAvi = "Si vuestra virtud no es superior a la de los escribas y fariseos, no entraréis en el reino de los cielos."
-const tcs1LAsb = "Amad a vuestros enemigos y rogad por los que os persiguen; así seréis hijos de vuestro Padre celestial”, dice el Señor."
+const tcs01dola = "Jesús fue llevado al desierto por el Espíritu para ser tentado por el diablo; y, después de ayunar cuarenta días con sus cuarenta noches, al fin sintió hambre."
+const tcs01lula = "Venid, benditos de mi Padre, a tomar posesión del reino que está preparado para vosotros desde la creación del mundo."
+const tcs01mala = "Señor, enséñanos a orar, como enseñó Juan a sus discípulos."
+const tcs01mila = "Esta raza es una raza perversa: pide una señal, pero no se le dará otra señal que la de Jonás."
+const tcs01jula = "Si vosotros, siendo malos como sois, sabéis dar cosas buenas a vuestros hijos, ¡con cuánta mayor razón las dará vuestro Padre celestial al que se las pida!"
+const tcs01vila = "Si vuestra virtud no es superior a la de los escribas y fariseos, no entraréis en el reino de los cielos."
+const tcs01sbla = "Amad a vuestros enemigos y rogad por los que os persiguen; así seréis hijos de vuestro Padre celestial”, dice el Señor."
 
 // SEMANA II TIEMPO DE CUARESMA
-const tcs2dola_cE_A = "Una voz desde la nube decía: «Este es mi Hijo, el amado, mi predilecto. Escuchadla.»"
-const tcs2dola_cE_B = "Pedro le dijo a Jesús: «Maestro, ¡qué bien se está aquí! Vamos a hacer tres tiendas, una para ti, otra para Moisés y otra para Elías.»"
-const tcs2dola_cE_C = "Por medio del Evangelio, nuestro Salvador Jesucristo destruyó la muerte y sacó a la luz la vida inmortal."
+const tcs02dola_cE_A = "Una voz desde la nube decía: «Este es mi Hijo, el amado, mi predilecto. Escuchadla.»"
+const tcs02dola_cE_B = "Pedro le dijo a Jesús: «Maestro, ¡qué bien se está aquí! Vamos a hacer tres tiendas, una para ti, otra para Moisés y otra para Elías.»"
+const tcs02dola_cE_C = "Por medio del Evangelio, nuestro Salvador Jesucristo destruyó la muerte y sacó a la luz la vida inmortal."
 
-const tcs2dola = "Por medio del Evangelio, nuestro Salvador Jesucristo destruyó la muerte y sacó a la luz la vida inmortal."
-const tcs2LAlu = "«Sed misericordiosos, como es misericordioso vuestro Padre», dice el Señor."
-const tcs2LAma = "Uno solo es vuestro maestro, Cristo el Señor, que está, en los cielos."
-const tcs2LAmi = "El Hijo del hombre no ha venido a ser servido, sino a servir y a entregar su vida como rescate de una multitud."
-const tcs2LAju = "Hijo mío, acuérdate de que ya recibiste tus bienes en la vida; Lázaro, en cambio, recibió males."
-const tcs2LAvi = "Dará una muerte afrentosa a esos malvados y arrendará la viña a otros viñadores, que le paguen la renta a su tiempo."
-const tcs2LAsb = " Padre mío, he pecado contra el cielo y contra ti; ya no merezco ser llamado hijo tuyo, trátame como a uno de tus jornaleros."
+const tcs02dola = "Por medio del Evangelio, nuestro Salvador Jesucristo destruyó la muerte y sacó a la luz la vida inmortal."
+const tcs02lula = "«Sed misericordiosos, como es misericordioso vuestro Padre», dice el Señor."
+const tcs02mala = "Uno solo es vuestro maestro, Cristo el Señor, que está, en los cielos."
+const tcs02mila = "El Hijo del hombre no ha venido a ser servido, sino a servir y a entregar su vida como rescate de una multitud."
+const tcs02jula = "Hijo mío, acuérdate de que ya recibiste tus bienes en la vida; Lázaro, en cambio, recibió males."
+const tcs02vila = "Dará una muerte afrentosa a esos malvados y arrendará la viña a otros viñadores, que le paguen la renta a su tiempo."
+const tcs02sala = " Padre mío, he pecado contra el cielo y contra ti; ya no merezco ser llamado hijo tuyo, trátame como a uno de tus jornaleros."
 
 // SEMANA III TIEMPO DE CUARESMA
 // OPC1
-const tcs3dola_cE_A = "Dios es espíritu, y los que le dan culto deben hacerlo en espíritu y verdad."
-const tcs3dola_cE_B = "“Destruid este templo —dice el Señor— y yo lo levantaré en tres días”. Él hablaba del templo de su cuerpo."
-const tcs3dola_cE_C = "El Señor Dios de vuestros padres me envía a vosotros."
+const tcs03dola_cE_A = "Dios es espíritu, y los que le dan culto deben hacerlo en espíritu y verdad."
+const tcs03dola_cE_B = "“Destruid este templo —dice el Señor— y yo lo levantaré en tres días”. Él hablaba del templo de su cuerpo."
+const tcs03dola_cE_C = "El Señor Dios de vuestros padres me envía a vosotros."
 // OPC2
-const tcs3dola_cE_A2 = "Se acerca la hora, ya está aquí, en que los que quieran dar culto verdadero adorarán al Padre en espíritu y verdad, porque el Padre desea que le den culto así."
-const tcs3dola_cE_B2 = "«Destruid este templo —dice el Señor—, y en tres días lo levantaré.» Él hablaba del templo de su cuerpo."
-const tcs3dola_cE_C2 = "Justificados por la fe, estamos en paz con Dios por medio de nuestro Señor Jesucristo."
+const tcs03dola_cE_A2 = "Se acerca la hora, ya está aquí, en que los que quieran dar culto verdadero adorarán al Padre en espíritu y verdad, porque el Padre desea que le den culto así."
+const tcs03dola_cE_B2 = "«Destruid este templo —dice el Señor—, y en tres días lo levantaré.» Él hablaba del templo de su cuerpo."
+const tcs03dola_cE_C2 = "Justificados por la fe, estamos en paz con Dios por medio de nuestro Señor Jesucristo."
 // DIAS DE LA SEMANA
-const tcs3LAlu = "Tened por cierto que ningún profeta es bien recibido en su patria."
-const tcs3LAma = "“Yo te digo, Pedro: No has de perdonar hasta siete veces, sino hasta setenta veces siete”, dice el Señor."
-const tcs3LAmi = "“No penséis que he venido a abolir la ley o los profetas; no he venido a abolirlos, sino a darles plenitud”, dice el Señor."
-const tcs3LAju = "“Si yo arrojo los demonios por el poder de Dios es señal de que ha llegado a vosotros el reino de Dios”, dice el Señor."
-const tcs3LAvi = "Uno de los escribas se acercó a Jesús para preguntarle cuál era el primero de todos los mandamientos. Jesús le respondió: “Amarás al Señor, tu Dios, con todo tu corazón.”"
-const tcs3LAsb = "El publicano, quedándose a cierta distancia, no se atrevía ni siquiera a levantar los ojos al cielo; y se daba golpes de pecho, mientras decía: “¡Dios mío, ten compasión de mí, que soy un pecador!”"
+const tcs03LAlu = "Tened por cierto que ningún profeta es bien recibido en su patria."
+const tcs03LAma = "“Yo te digo, Pedro: No has de perdonar hasta siete veces, sino hasta setenta veces siete”, dice el Señor."
+const tcs03LAmi = "“No penséis que he venido a abolir la ley o los profetas; no he venido a abolirlos, sino a darles plenitud”, dice el Señor."
+const tcs03LAju = "“Si yo arrojo los demonios por el poder de Dios es señal de que ha llegado a vosotros el reino de Dios”, dice el Señor."
+const tcs03LAvi = "Uno de los escribas se acercó a Jesús para preguntarle cuál era el primero de todos los mandamientos. Jesús le respondió: “Amarás al Señor, tu Dios, con todo tu corazón.”"
+const tcs03LAsb = "El publicano, quedándose a cierta distancia, no se atrevía ni siquiera a levantar los ojos al cielo; y se daba golpes de pecho, mientras decía: “¡Dios mío, ten compasión de mí, que soy un pecador!”"
 
 // SEMANA IV TIEMPO DE CUARESMA
 //OPC1
-const tcs4dola_cE_A = "Jamás se oyó decir que nadie, a no ser Cristo, el Hijo de Dios, abriera los ojos a un ciego de nacimiento."
-const tcs4dola_cE_B = "Dios, por el gran amor con que nos amó, estando nosotros muertos por los pecados, nos ha hecho vivir con Cristo."
-const tcs4dola_cE_C = "Padre, he pecado contra ti; ya no merezco llamarme hijo tuyo. "
+const tcs04dola_cE_A = "Jamás se oyó decir que nadie, a no ser Cristo, el Hijo de Dios, abriera los ojos a un ciego de nacimiento."
+const tcs04dola_cE_B = "Dios, por el gran amor con que nos amó, estando nosotros muertos por los pecados, nos ha hecho vivir con Cristo."
+const tcs04dola_cE_C = "Padre, he pecado contra ti; ya no merezco llamarme hijo tuyo. "
 //OPC2
-const tcs4dola_cE_A2 = "Ese hombre que se llama Jesús hizo barro y me lo untó en los ojos; fui, me lavé y ahora veo."
-const tcs4dola_cE_B2 = "Tanto amó Dios al mundo que entregó a su Hijo único para que no perezca ninguno de los que ere en él, sino que tengan vida eterna."
-const tcs4dola_cE_C2 = "Sacad en seguida el mejor traje y vestidlo; ponedle un anillo en la mano y sandalias en los pies; porque este hijo mío estaba muerto y ha revivido; estaba perdido, y lo hemos encontrado."
+const tcs04dola_cE_A2 = "Ese hombre que se llama Jesús hizo barro y me lo untó en los ojos; fui, me lavé y ahora veo."
+const tcs04dola_cE_B2 = "Tanto amó Dios al mundo que entregó a su Hijo único para que no perezca ninguno de los que ere en él, sino que tengan vida eterna."
+const tcs04dola_cE_C2 = "Sacad en seguida el mejor traje y vestidlo; ponedle un anillo en la mano y sandalias en los pies; porque este hijo mío estaba muerto y ha revivido; estaba perdido, y lo hemos encontrado."
 
 // DIAS DE LA SEMANA
-const tcs4LAlu = "Había un funcionario de la corte que tenía un hijo enfermo en Cafarnaúm; y, habiéndose enterado de que Jesús había vuelto a Galilea, le pidió que bajase a curar a su hijo"
-const tcs4LAma = "El que me curó me dijo: “Toma tu camilla y vete en paz.”"
-const tcs4LAmi = "“El que escucha mi palabra y cree en aquel que me ha enviado tiene vida eterna”, dice el Señor."
-const tcs4LAju = "“No es que yo quiera invocar a mi favor declaración alguna, prestada por los hombres; si aduzco ésta, es mirando por vuestra salvación”, dice el Señor."
-const tcs4LAvi = "“¡Vosotros me conocéis y sabéis de dónde soy!; pero yo no he venido por cuenta propia, sino que me ha enviado mi Padre”, dice el Señor."
-const tcs4LAsb = "Jamás hombre alguno ha hablado como éste."
+const tcs04LAlu = "Había un funcionario de la corte que tenía un hijo enfermo en Cafarnaúm; y, habiéndose enterado de que Jesús había vuelto a Galilea, le pidió que bajase a curar a su hijo"
+const tcs04LAma = "El que me curó me dijo: “Toma tu camilla y vete en paz.”"
+const tcs04LAmi = "“El que escucha mi palabra y cree en aquel que me ha enviado tiene vida eterna”, dice el Señor."
+const tcs04LAju = "“No es que yo quiera invocar a mi favor declaración alguna, prestada por los hombres; si aduzco ésta, es mirando por vuestra salvación”, dice el Señor."
+const tcs04LAvi = "“¡Vosotros me conocéis y sabéis de dónde soy!; pero yo no he venido por cuenta propia, sino que me ha enviado mi Padre”, dice el Señor."
+const tcs04LAsb = "Jamás hombre alguno ha hablado como éste."
 
 // SEMANA V TIEMPO DE CUARESMA
 //OPC1
