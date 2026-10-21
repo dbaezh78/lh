@@ -1,0 +1,988 @@
+/* horas_configuradas.css — Estilos para el Monitor de Horas Litúrgicas Configuradas y Faltantes */
+
+:root {
+    --color-fondo: #0f172a;
+    --color-superficie: #1e293b;
+    --color-superficie-hover: #334155;
+    --color-borde: #334155;
+    --color-texto: #f8fafc;
+    --color-texto-muted: #94a3b8;
+    
+    --color-verde: #10b981;
+    --color-verde-bg: rgba(16, 185, 129, 0.12);
+    --color-verde-borde: rgba(16, 185, 129, 0.35);
+
+    --color-naranja: #f59e0b;
+    --color-naranja-bg: rgba(245, 158, 11, 0.12);
+    --color-naranja-borde: rgba(245, 158, 11, 0.35);
+
+    --color-azul: #0284c7;
+    --color-azul-bg: rgba(2, 132, 199, 0.12);
+    --color-azul-borde: rgba(2, 132, 199, 0.35);
+
+    --color-rojo: #ef4444;
+    --color-rojo-bg: rgba(239, 68, 68, 0.12);
+
+    --color-morado: #8b5cf6;
+    --color-morado-bg: rgba(139, 92, 246, 0.12);
+
+    --fuente-principal: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --fuente-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --sombra-card: 0 4px 14px rgba(0, 0, 0, 0.3);
+    --radio-card: 14px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--color-fondo);
+    color: var(--color-texto);
+    font-family: var(--fuente-principal);
+    min-height: 100vh;
+    padding-bottom: 80px;
+}
+
+.contenedor-principal {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+/* ============================================================
+   CABECERA
+   ============================================================ */
+.header-horas {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.titulo-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.titulo-box h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+.titulo-box h1 .material-symbols-outlined {
+    font-size: 2.2rem;
+    color: var(--color-verde);
+}
+
+.titulo-box p {
+    margin: 0;
+    color: var(--color-texto-muted);
+    font-size: 0.95rem;
+}
+
+.header-acciones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--color-borde);
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-header:hover {
+    background: var(--color-superficie-hover);
+    transform: translateY(-1px);
+}
+
+.btn-header.primario {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #059669;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.btn-header.primario:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.btn-header .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ============================================================
+   TARJETAS DE RESUMEN / KPIS
+   ============================================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-card);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--sombra-card);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-icon-wrapper .material-symbols-outlined {
+    font-size: 26px;
+}
+
+.stat-data {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--color-texto-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+    font-family: var(--fuente-mono);
+}
+
+.stat-subtext {
+    font-size: 0.75rem;
+    color: var(--color-texto-muted);
+}
+
+/* Barra de progreso global */
+.barra-progreso-box {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-card);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--sombra-card);
+}
+
+.barra-progreso-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.barra-progreso-track {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.barra-progreso-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #8b5cf6 100%);
+    border-radius: 6px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+/* ============================================================
+   SELECTOR DE ALCANCE LITÚRGICO (TABS)
+   ============================================================ */
+.alcance-tabs-container {
+    margin-bottom: 20px;
+}
+
+.alcance-label {
+    font-size: 0.85rem;
+    color: var(--color-texto-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.alcance-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+}
+
+.alcance-tab {
+    padding: 10px 16px;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    color: var(--color-texto-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.alcance-tab:hover {
+    background: var(--color-superficie-hover);
+    color: var(--color-texto);
+}
+
+.alcance-tab.activo {
+    background: #ffffff;
+    color: #0f172a;
+    border-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+    font-weight: 700;
+}
+
+.alcance-tab.activo .badge-tab {
+    background: #0f172a;
+    color: #ffffff;
+}
+
+.badge-tab {
+    font-size: 0.72rem;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-texto-muted);
+    font-family: var(--fuente-mono);
+}
+
+/* ============================================================
+   BARRA DE FILTROS Y CONTROLES
+   ============================================================ */
+.panel-filtros {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-card);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--sombra-card);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.filtros-fila-superior {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.buscador-box {
+    position: relative;
+    flex: 1;
+    min-width: 260px;
+}
+
+.buscador-box .material-symbols-outlined {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-texto-muted);
+    pointer-events: none;
+    font-size: 20px;
+}
+
+.buscador-input {
+    width: 100%;
+    padding: 10px 14px 10px 42px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 0.92rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.buscador-input:focus {
+    border-color: var(--color-verde);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+    background: rgba(15, 23, 42, 0.9);
+}
+
+.btn-limpiar-busqueda {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-texto-muted);
+    cursor: pointer;
+    font-size: 16px;
+    display: none;
+}
+
+/* Filtros Pills de Estado */
+.pills-estado {
+    display: flex;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--color-borde);
+}
+
+.pill-estado-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--color-texto-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.pill-estado-btn:hover {
+    color: var(--color-texto);
+}
+
+.pill-estado-btn.activo {
+    background: var(--color-superficie);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.pill-estado-btn.activo.configuradas {
+    background: var(--color-verde-bg);
+    color: var(--color-verde);
+    border: 1px solid var(--color-verde-borde);
+}
+
+.pill-estado-btn.activo.faltantes {
+    background: var(--color-naranja-bg);
+    color: var(--color-naranja);
+    border: 1px solid var(--color-naranja-borde);
+}
+
+.pill-count {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    font-family: var(--fuente-mono);
+    font-size: 0.72rem;
+}
+
+/* Vistas: Matriz / Tarjetas / Lista */
+.selector-vistas {
+    display: flex;
+    gap: 4px;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--color-borde);
+}
+
+.btn-vista {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--color-texto-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-vista.activo {
+    background: var(--color-superficie);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.btn-vista .material-symbols-outlined {
+    font-size: 20px;
+}
+
+/* Fila Inferior de Selectores */
+.filtros-fila-selectores {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filtro-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filtro-item label {
+    font-size: 0.8rem;
+    color: var(--color-texto-muted);
+    font-weight: 600;
+}
+
+.filtro-select {
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--color-borde);
+    color: #ffffff;
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.filtro-select:focus {
+    border-color: var(--color-verde);
+}
+
+.btn-accion-rapida {
+    margin-left: auto;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid var(--color-naranja-borde);
+    color: var(--color-naranja);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-accion-rapida:hover {
+    background: rgba(245, 158, 11, 0.25);
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   VISTA 1: MATRIZ SEMANAL (TABLA)
+   ============================================================ */
+.matriz-semana-wrapper {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-card);
+    margin-bottom: 24px;
+    overflow: hidden;
+    box-shadow: var(--sombra-card);
+}
+
+.matriz-semana-header {
+    background: rgba(15, 23, 42, 0.7);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--color-borde);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.matriz-semana-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.matriz-semana-progreso {
+    font-size: 0.85rem;
+    font-family: var(--fuente-mono);
+    color: var(--color-texto-muted);
+}
+
+.matriz-tabla-scroll {
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.matriz-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+
+.matriz-tabla th, .matriz-tabla td {
+    padding: 10px 12px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.matriz-tabla th {
+    background: rgba(15, 23, 42, 0.4);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-texto-muted);
+    font-weight: 700;
+}
+
+.matriz-tabla th.col-dia {
+    text-align: left;
+    width: 130px;
+    background: rgba(15, 23, 42, 0.6);
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+
+.matriz-tabla td.celda-dia {
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.88rem;
+    background: rgba(15, 23, 42, 0.6);
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    color: #ffffff;
+}
+
+.celda-hora {
+    vertical-align: middle;
+}
+
+/* Chips de hora dentro de la celda de la matriz */
+.chip-hora {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.chip-hora:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.chip-hora.configurada {
+    background: var(--color-verde-bg);
+    border-color: var(--color-verde-borde);
+    color: var(--color-verde);
+}
+
+.chip-hora.faltante {
+    background: rgba(245, 158, 11, 0.06);
+    border-color: rgba(245, 158, 11, 0.25);
+    border-style: dashed;
+    color: var(--color-naranja);
+}
+
+.chip-hora-codigo {
+    font-family: var(--fuente-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.chip-hora-estado {
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+.chip-hora-acciones {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.btn-mini-accion {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.btn-mini-accion.ver {
+    background: rgba(2, 132, 199, 0.25);
+    color: #38bdf8;
+}
+
+.btn-mini-accion.editar {
+    background: rgba(16, 185, 129, 0.25);
+    color: #34d399;
+}
+
+.btn-mini-accion.crear {
+    background: rgba(245, 158, 11, 0.25);
+    color: #fbbf24;
+}
+
+/* ============================================================
+   VISTA 2: TARJETAS (GRID)
+   ============================================================ */
+.grid-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.card-hora {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-card);
+    padding: 16px;
+    box-shadow: var(--sombra-card);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.card-hora:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.card-hora.configurada {
+    border-left: 4px solid var(--color-verde);
+}
+
+.card-hora.faltante {
+    border-left: 4px solid var(--color-naranja);
+    border-style: dashed;
+}
+
+.card-header-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.codigo-badge {
+    font-family: var(--fuente-mono);
+    font-size: 0.92rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.8);
+    color: #ffffff;
+    border: 1px solid var(--color-borde);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-copiar-mini {
+    background: none;
+    border: none;
+    color: var(--color-texto-muted);
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.btn-copiar-mini:hover {
+    color: #ffffff;
+}
+
+.estado-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-transform: uppercase;
+}
+
+.estado-pill.configurada {
+    background: var(--color-verde-bg);
+    color: var(--color-verde);
+    border: 1px solid var(--color-verde-borde);
+}
+
+.estado-pill.faltante {
+    background: var(--color-naranja-bg);
+    color: var(--color-naranja);
+    border: 1px solid var(--color-naranja-borde);
+}
+
+.card-cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hora-nombre {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hora-detalles {
+    font-size: 0.82rem;
+    color: var(--color-texto-muted);
+}
+
+.hora-titulo-guardado {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #cbd5e1;
+    background: rgba(15, 23, 42, 0.4);
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-top: 4px;
+    line-height: 1.3;
+}
+
+.card-acciones {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.btn-card {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-card.ver {
+    background: rgba(2, 132, 199, 0.2);
+    color: #38bdf8;
+    border: 1px solid rgba(2, 132, 199, 0.35);
+}
+
+.btn-card.ver:hover {
+    background: rgba(2, 132, 199, 0.35);
+}
+
+.btn-card.configurar {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35);
+}
+
+.btn-card.configurar:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.btn-card.editar {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.btn-card.editar:hover {
+    background: rgba(16, 185, 129, 0.35);
+}
+
+/* ============================================================
+   VISTA 3: LISTA COMPACTA
+   ============================================================ */
+.tabla-lista-wrapper {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-card);
+    overflow: hidden;
+    box-shadow: var(--sombra-card);
+    margin-bottom: 24px;
+}
+
+.tabla-lista {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-lista th, .tabla-lista td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tabla-lista th {
+    background: rgba(15, 23, 42, 0.7);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-texto-muted);
+}
+
+.tabla-lista tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Estados Vacíos y Carga */
+.estado-cargando, .estado-vacio {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--color-texto-muted);
+    background: var(--color-superficie);
+    border-radius: var(--radio-card);
+    border: 1px dashed var(--color-borde);
+}
+
+.spin-loader {
+    animation: spin 1.2s linear infinite;
+    display: inline-block;
+    font-size: 36px;
+    color: var(--color-verde);
+    margin-bottom: 12px;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* Toast de notificación */
+.toast-notif {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1e293b;
+    border: 1px solid var(--color-verde);
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 99999;
+}
+
+.toast-notif.visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN (PANTALLAS MENORES A 411PX Y MÓVILES)
+   ============================================================ */
+@media (max-width: 600px) {
+    .contenedor-principal {
+        padding: 16px 12px;
+    }
+    .titulo-box h1 {
+        font-size: 1.4rem;
+    }
+    .header-horas {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .header-acciones {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .stat-value {
+        font-size: 1.4rem;
+    }
+    .filtros-fila-superior {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .pills-estado {
+        overflow-x: auto;
+    }
+}

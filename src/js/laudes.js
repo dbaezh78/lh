@@ -1,6 +1,13 @@
 import { dbLaudes } from '../data/db-laudes.js';
 import { obtenerLiturgiaHora, normalizarObjetoLiturgico } from '../firebase/descarga_liturgia_de_las_horas.js';
 
+function formatearRubricaN(texto = '') {
+    if (!texto || typeof texto !== 'string') return texto;
+    return texto
+        .replace(/\bN:\./g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N.</span>')
+        .replace(/\bN:(?!\w)/g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N</span>');
+}
+
 // Esta función se encarga de "armar" el HTML con los colores correctos
 function generarTemplateLaudes(datos) {
     const audio = construirUrlLiturgica(datos);
@@ -160,7 +167,7 @@ export async function renderizarLaudes(idBusqueda) {
     }
 
     // Inyectamos el HTML generado por el template
-    contenedor.innerHTML = generarTemplateLaudes(datos);
+    contenedor.innerHTML = formatearRubricaN(generarTemplateLaudes(datos));
 
     // LÓGICA DE ENCADENAMIENTO DE AUDIOS
     const a1 = document.getElementById('audio1');

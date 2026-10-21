@@ -581,6 +581,21 @@ function actualizarTituloSugerido() {
     }
 }
 
+function escapeHtml(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function formatearRubricaN(texto = '') {
+    if (!texto || typeof texto !== 'string') return texto;
+    return texto
+        .replace(/\bN:\./g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N.</span>')
+        .replace(/\bN:(?!\w)/g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N</span>');
+}
+
 // Actualizar la vista previa en el pergamino litúrgico
 function actualizarLivePreview() {
     const idVal = document.getElementById('form-id')?.value.trim() || 'Oración';
@@ -594,12 +609,12 @@ function actualizarLivePreview() {
     if (pTitulo) pTitulo.textContent = 'ORACIÓN';
 
     const pTexto = document.getElementById('preview-texto');
-    if (pTexto) pTexto.textContent = textoVal;
+    if (pTexto) pTexto.innerHTML = formatearRubricaN(escapeHtml(textoVal));
 
     const pConcl = document.getElementById('preview-conclusion');
     if (pConcl) {
         if (conclusionVal) {
-            pConcl.textContent = conclusionVal;
+            pConcl.innerHTML = formatearRubricaN(escapeHtml(conclusionVal));
             pConcl.style.display = 'block';
         } else {
             pConcl.style.display = 'none';

@@ -605,6 +605,21 @@ function configurarEventos() {
     });
 }
 
+function escapeHtml(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function formatearRubricaN(texto = '') {
+    if (!texto || typeof texto !== 'string') return texto;
+    return texto
+        .replace(/\bN:\./g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N.</span>')
+        .replace(/\bN:(?!\w)/g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N</span>');
+}
+
 // Actualizar la vista previa en el pergamino litúrgico
 function actualizarLivePreview() {
     const idVal = document.getElementById('form-id')?.value.trim() || 'Preces';
@@ -622,27 +637,27 @@ function actualizarLivePreview() {
     if (pTitulo) pTitulo.textContent = 'PRECES';
 
     const pIntro = document.getElementById('preview-intro');
-    if (pIntro) pIntro.textContent = introVal;
+    if (pIntro) pIntro.innerHTML = formatearRubricaN(escapeHtml(introVal));
 
     const pResp = document.getElementById('preview-respuesta');
-    if (pResp) pResp.textContent = respVal;
+    if (pResp) pResp.innerHTML = formatearRubricaN(escapeHtml(respVal));
 
     const pIntenciones = document.getElementById('preview-intenciones');
     if (pIntenciones) {
         const estrofas = intencionesVal.split(/\n\s*\n/).filter(Boolean);
         pIntenciones.innerHTML = estrofas.map(est => `
-            <div class="preview-intencion-item">${est.replace(/\n/g, '<br>')}</div>
+            <div class="preview-intencion-item">${formatearRubricaN(escapeHtml(est)).replace(/\n/g, '<br>')}</div>
         `).join('');
     }
 
     const pLibre = document.getElementById('preview-libre');
-    if (pLibre) pLibre.textContent = libreVal;
+    if (pLibre) pLibre.innerHTML = formatearRubricaN(escapeHtml(libreVal));
 
     const pConcl = document.getElementById('preview-concl');
     if (pConcl) {
         const parrafos = conclVal.split(/\n\s*\n/).filter(Boolean);
         if (parrafos.length > 0) {
-            pConcl.innerHTML = parrafos.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+            pConcl.innerHTML = parrafos.map(p => `<p>${formatearRubricaN(escapeHtml(p)).replace(/\n/g, '<br>')}</p>`).join('');
         } else {
             pConcl.innerHTML = '';
         }

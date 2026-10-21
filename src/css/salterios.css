@@ -544,3 +544,8 @@ body.pagina-salterios {
     color: #ff0000; 
     margin-left: 8px;
 }
+/* Rúbrica para sustitución de nombres litúrgicos (N. / N) */
+.rubrica-n {
+    color: var(--salterio-rubrica, #ff0000) !important;
+    font-weight: inherit;
+}

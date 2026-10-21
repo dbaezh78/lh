@@ -116,6 +116,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     configurarEventos();
     renderizarLista();
     manejarCambioParametros();
+
+    if (window._antifonaTextoInicialURL) {
+        const txt = window._antifonaTextoInicialURL;
+        const txtArea = document.getElementById('form-texto');
+        const txtCicloA = document.getElementById('form-texto-ciclo-a');
+        const boxCiclos = document.getElementById('box-antifona-ciclos-domingo');
+        const filtro = document.getElementById('filtro-buscar');
+
+        if (boxCiclos && boxCiclos.style.display !== 'none') {
+            if (txtCicloA && !txtCicloA.value) txtCicloA.value = txt;
+        } else if (txtArea) {
+            if (!txtArea.value) txtArea.value = txt;
+        }
+        if (filtro) {
+            filtro.value = txt;
+            renderizarLista();
+        }
+        mostrarBannerEstado(`➕ Parámetros y búsqueda transferidos desde Salterios: «${txt.length > 50 ? txt.substring(0, 50) + '...' : txt}»`, 'info');
+    }
 });
 
 // Guardar y restaurar parámetros litúrgicos seleccionados
@@ -140,9 +159,26 @@ function recordarParametros() {
 
 function restaurarParametros() {
     try {
-        const raw = localStorage.getItem('lh_antifonas_ultimos_parametros') || localStorage.getItem('lh_parametros_liturgicos_compartidos');
-        if (!raw) return;
-        const p = JSON.parse(raw);
+        let p = null;
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasUrlParams = urlParams.has('tiempo') || urlParams.has('semana') || urlParams.has('dia') || urlParams.has('tipo') || urlParams.has('texto') || urlParams.has('busqueda') || urlParams.has('santo');
+
+        if (hasUrlParams) {
+            p = {
+                tiempo: urlParams.get('tiempo'),
+                semana: urlParams.get('semana'),
+                dia: urlParams.get('dia'),
+                libro: urlParams.get('libro'),
+                tipo: urlParams.get('tipo'),
+                santoId: urlParams.get('santo'),
+                santoNombre: urlParams.get('santoNombre') || urlParams.get('santo'),
+                fechaCeleb: urlParams.get('fecha'),
+                texto: urlParams.get('texto') || urlParams.get('busqueda')
+            };
+        } else {
+            const raw = localStorage.getItem('lh_antifonas_ultimos_parametros') || localStorage.getItem('lh_parametros_liturgicos_compartidos');
+            if (raw) p = JSON.parse(raw);
+        }
         if (!p) return;
 
         const selTiempo = document.getElementById('form-tiempo');
@@ -152,8 +188,11 @@ function restaurarParametros() {
         }
         const selSemana = document.getElementById('form-semana');
         if (selSemana && p.semana) {
+            const semNum = String(p.semana).replace(/\D/g, '');
             if (Array.from(selSemana.options).some(o => o.value === String(p.semana))) {
                 selSemana.value = String(p.semana);
+            } else if (semNum && Array.from(selSemana.options).some(o => o.value === semNum)) {
+                selSemana.value = semNum;
             }
         }
         const selDia = document.getElementById('form-dia');
@@ -180,7 +219,7 @@ function restaurarParametros() {
             const inpSanto = document.getElementById('form-santo');
             if (inpSanto) inpSanto.value = '';
             const inpFecha = document.getElementById('form-fecha');
-            if (inpFecha) inpFecha.value = '';
+            if (inpFecha && p.fechaCeleb) inpFecha.value = p.fechaCeleb;
             const selSanto = document.getElementById('form-santo-select');
             if (selSanto) selSanto.value = '';
         }
@@ -195,6 +234,9 @@ function restaurarParametros() {
             if (Array.from(selTipo.options).some(o => o.value === p.tipo)) {
                 selTipo.value = p.tipo;
             }
+        }
+        if (p.texto) {
+            window._antifonaTextoInicialURL = p.texto;
         }
     } catch (_) {}
 }
@@ -800,7 +842,7 @@ function renderizarLista() {
                     ${santoTxt ? `<span style="font-size: 0.8rem; color: #fbbf24; font-weight: 600;">${santoTxt}</span>` : ''}
                 </div>
                 <div class="antifona-texto-cuerpo">
-                    "${item.texto}"
+                    "${formatearRubricaN(escapeHtml(item.texto))}"
                 </div>
                 <div class="antifona-acciones">
                     <button class="btn-accion-icono" onclick="copiarTexto('${escapeAttr(item.texto)}')" title="Copiar texto">
@@ -905,6 +947,21 @@ function formatearTipo(tipo) {
         virgen: 'Virgen María'
     };
     return map[tipo] || tipo;
+}
+
+function escapeHtml(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function formatearRubricaN(texto = '') {
+    if (!texto || typeof texto !== 'string') return texto;
+    return texto
+        .replace(/\bN:\./g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N.</span>')
+        .replace(/\bN:(?!\w)/g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N</span>');
 }
 
 function escapeAttr(str) {

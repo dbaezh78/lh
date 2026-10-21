@@ -17,8 +17,35 @@ const GLORIA_PATRI = "Gloria al Padre, y al Hijo, y al Espíritu Santo.\nComo er
 document.addEventListener('DOMContentLoaded', async () => {
     configurarEventos();
     await cargarDatos();
+    restaurarParametrosDesdeURL();
     renderizarLista();
 });
+
+function restaurarParametrosDesdeURL() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tipo = urlParams.get('tipo');
+        const texto = urlParams.get('texto') || urlParams.get('busqueda') || '';
+        const titulo = urlParams.get('titulo') || '';
+
+        if (tipo && document.getElementById('form-tipo')) {
+            if (Array.from(document.getElementById('form-tipo').options).some(o => o.value === tipo)) {
+                document.getElementById('form-tipo').value = tipo;
+            }
+        }
+        if (texto) {
+            const txtArea = document.getElementById('form-texto');
+            if (txtArea && !txtArea.value) txtArea.value = texto;
+            const inpTit = document.getElementById('form-titulo');
+            if (inpTit && !inpTit.value) inpTit.value = titulo || texto;
+            const filtro = document.getElementById('filtro-buscar');
+            if (filtro) {
+                filtro.value = texto;
+            }
+            mostrarBannerEstado(`➕ Parámetros transferidos desde Salterios: «${texto.length > 40 ? texto.substring(0, 40) + '...' : texto}»`, 'info');
+        }
+    } catch (_) {}
+}
 
 // Mostrar notificaciones dinámicas
 function mostrarBannerEstado(mensaje, tipo = 'info') {

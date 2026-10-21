@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horas Litúrgicas — Configuradas y Faltantes | Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/navigator.css">
+    <link rel="stylesheet" href="../css/horas_configuradas.css">
+</head>
+<body>
+
+    <div class="contenedor-principal">
+        <!-- Cabecera -->
+        <header class="header-horas">
+            <div class="titulo-box">
+                <h1>
+                    <span class="material-symbols-outlined">checklist</span>
+                    Horas Litúrgicas: Configuradas y Faltantes
+                </h1>
+                <p>Monitor integral de cobertura litúrgica, códigos canónicos y estado de sincronización en Firestore y LocalStorage</p>
+            </div>
+            <div class="header-acciones">
+                <button id="btn-sincronizar" class="btn-header" title="Consultar Firestore y LocalStorage para actualizar el estado">
+                    <span class="material-symbols-outlined">sync</span> Sincronizar
+                </button>
+                <a href="frm_salterios.html" class="btn-header primario" title="Ir al Constructor de Salterios">
+                    <span class="material-symbols-outlined">edit_note</span> Constructor
+                </a>
+                <a href="/salterios.html" class="btn-header" title="Abrir visor del Salterio">
+                    <span class="material-symbols-outlined">menu_book</span> Salterio
+                </a>
+                <a href="../../index.html" class="btn-header" title="Volver al Inicio">
+                    <span class="material-symbols-outlined">home</span> Inicio
+                </a>
+            </div>
+        </header>
+
+        <!-- Tarjetas de Resumen / KPIs -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+                    <span class="material-symbols-outlined">dataset</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Total en Alcance</span>
+                    <strong class="stat-value" id="stat-total" style="color: #60a5fa;">0</strong>
+                    <span class="stat-subtext" id="stat-sub-alcance">Salterio 4 semanas</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: var(--color-verde-bg); color: var(--color-verde);">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Configuradas</span>
+                    <strong class="stat-value" id="stat-configuradas" style="color: var(--color-verde);">0</strong>
+                    <span class="stat-subtext" id="stat-sub-configuradas">0% del alcance</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: var(--color-naranja-bg); color: var(--color-naranja);">
+                    <span class="material-symbols-outlined">pending</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Faltantes</span>
+                    <strong class="stat-value" id="stat-faltantes" style="color: var(--color-naranja);">0</strong>
+                    <span class="stat-subtext" id="stat-sub-faltantes">0% por configurar</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
+                    <span class="material-symbols-outlined">trending_up</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Cobertura</span>
+                    <strong class="stat-value" id="stat-porcentaje" style="color: #a78bfa;">0%</strong>
+                    <span class="stat-subtext" id="stat-sub-porcentaje">Completadas</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de Progreso Global -->
+        <div class="barra-progreso-box">
+            <div class="barra-progreso-header">
+                <span>Progreso de Configuración Litúrgica</span>
+                <span id="texto-progreso" style="color: var(--color-verde); font-family: var(--fuente-mono);">0 / 0 (0%)</span>
+            </div>
+            <div class="barra-progreso-track">
+                <div class="barra-progreso-fill" id="barra-progreso-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- Pestañas de Alcance Litúrgico -->
+        <div class="alcance-tabs-container">
+            <div class="alcance-label">
+                <span class="material-symbols-outlined" style="font-size: 16px;">calendar_month</span>
+                Alcance Litúrgico
+            </div>
+            <div class="alcance-tabs" id="alcance-tabs">
+                <button class="alcance-tab activo" data-alcance="salterio4">
+                    <span>⭐ Salterio 4 Semanas</span>
+                    <span class="badge-tab">196</span>
+                </button>
+                <button class="alcance-tab" data-alcance="ordinario">
+                    <span>Tiempo Ordinario (34 Sem)</span>
+                    <span class="badge-tab">1666</span>
+                </button>
+                <button class="alcance-tab" data-alcance="adviento">
+                    <span>Adviento (4 Sem)</span>
+                    <span class="badge-tab">196</span>
+                </button>
+                <button class="alcance-tab" data-alcance="navidad">
+                    <span>Navidad (2 Sem)</span>
+                    <span class="badge-tab">98</span>
+                </button>
+                <button class="alcance-tab" data-alcance="cuaresma">
+                    <span>Cuaresma (7 Sem)</span>
+                    <span class="badge-tab">343</span>
+                </button>
+                <button class="alcance-tab" data-alcance="pascua">
+                    <span>Pascua (7 Sem)</span>
+                    <span class="badge-tab">343</span>
+                </button>
+                <button class="alcance-tab" data-alcance="santos">
+                    <span>Santos y Fiestas</span>
+                    <span class="badge-tab">Común/Propio</span>
+                </button>
+                <button class="alcance-tab" data-alcance="todos">
+                    <span>Todo el Año</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel de Filtros y Controles -->
+        <div class="panel-filtros">
+            <!-- Fila Superior: Buscador, Filtros de Estado y Vistas -->
+            <div class="filtros-fila-superior">
+                <div class="buscador-box">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" id="input-buscador" class="buscador-input" placeholder="Buscar por código (ej. tos01dola), día o nombre de hora..." spellcheck="false" autocomplete="off">
+                    <button id="btn-limpiar-busqueda" class="btn-limpiar-busqueda" title="Limpiar búsqueda">✕</button>
+                </div>
+
+                <!-- Pills de Estado -->
+                <div class="pills-estado">
+                    <button class="pill-estado-btn activo" data-estado="todos">
+                        <span>Todas</span>
+                        <span class="pill-count" id="count-todos">0</span>
+                    </button>
+                    <button class="pill-estado-btn configuradas" data-estado="configuradas">
+                        <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span>
+                        <span>Configuradas</span>
+                        <span class="pill-count" id="count-configuradas">0</span>
+                    </button>
+                    <button class="pill-estado-btn faltantes" data-estado="faltantes">
+                        <span class="material-symbols-outlined" style="font-size: 14px;">pending</span>
+                        <span>Faltantes</span>
+                        <span class="pill-count" id="count-faltantes">0</span>
+                    </button>
+                </div>
+
+                <!-- Selector de Vista -->
+                <div class="selector-vistas">
+                    <button class="btn-vista activo" data-vista="matriz" title="Vista Matriz Semanal (Calendario Día x Hora)">
+                        <span class="material-symbols-outlined">grid_view</span>
+                    </button>
+                    <button class="btn-vista" data-vista="tarjetas" title="Vista Tarjetas (Grid)">
+                        <span class="material-symbols-outlined">view_module</span>
+                    </button>
+                    <button class="btn-vista" data-vista="lista" title="Vista Lista Compacta">
+                        <span class="material-symbols-outlined">format_list_bulleted</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fila Inferior: Filtros específicos (Semana, Día, Hora) y Acción Rápida -->
+            <div class="filtros-fila-selectores">
+                <div class="filtro-item">
+                    <label for="filtro-semana">Semana:</label>
+                    <select id="filtro-semana" class="filtro-select">
+                        <option value="todas">Todas las semanas</option>
+                    </select>
+                </div>
+
+                <div class="filtro-item">
+                    <label for="filtro-dia">Día:</label>
+                    <select id="filtro-dia" class="filtro-select">
+                        <option value="todos">Todos los días</option>
+                        <option value="domingo">Domingo (do)</option>
+                        <option value="lunes">Lunes (lu)</option>
+                        <option value="martes">Martes (ma)</option>
+                        <option value="miercoles">Miércoles (mi)</option>
+                        <option value="jueves">Jueves (ju)</option>
+                        <option value="viernes">Viernes (vi)</option>
+                        <option value="sabado">Sábado (sa)</option>
+                    </select>
+                </div>
+
+                <div class="filtro-item">
+                    <label for="filtro-hora">Hora:</label>
+                    <select id="filtro-hora" class="filtro-select">
+                        <option value="todas">Todas las horas</option>
+                        <option value="oficio">Oficio de Lectura (of)</option>
+                        <option value="laudes">Laudes (la)</option>
+                        <option value="tercia">Hora Tercia (te)</option>
+                        <option value="sexta">Hora Sexta (se)</option>
+                        <option value="nona">Hora Nona (no)</option>
+                        <option value="vispera">Vísperas (vi)</option>
+                        <option value="completas">Completas (co)</option>
+                    </select>
+                </div>
+
+                <button id="btn-copiar-faltantes" class="btn-accion-rapida" title="Copiar al portapapeles todos los códigos faltantes filtrados">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+                    <span>Copiar Códigos Faltantes</span>
+                </button>
+
+                <button id="btn-descargar-informe" class="btn-header" style="padding: 7px 12px; font-size: 0.82rem;" title="Exportar informe JSON">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
+                    <span>Informe JSON</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenedor Principal de Resultados / Vistas -->
+        <main id="contenedor-resultados">
+            <div class="estado-cargando">
+                <span class="material-symbols-outlined spin-loader">sync</span>
+                <p>Cargando horas litúrgicas y sincronizando con Firestore...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast de Notificación -->
+    <div id="toast-notif" class="toast-notif">
+        <span class="material-symbols-outlined" style="color: var(--color-verde);">check_circle</span>
+        <span id="toast-mensaje">Operación realizada con éxito</span>
+    </div>
+
+    <!-- Scripts y Módulos -->
+    <script src="../js/firebase-config.js" type="module"></script>
+    <script src="../js/accesscontrol.js" type="module"></script>
+    <script src="../js/navigator.js"></script>
+    <script src="../js/horas_configuradas.js" type="module"></script>
+</body>
+</html>

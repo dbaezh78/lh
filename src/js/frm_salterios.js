@@ -18,6 +18,7 @@
 import { 
     normalizarObjetoLiturgico,
     obtenerIdsEquivalentes,
+    decodificarCodigoLiturgico,
     guardarHoraEnLocalStorage,
     esEntradaLocalContaminada,
     TEXTO_SALMO_62_CANONICO,
@@ -1182,6 +1183,110 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================================
     // SELECTOR PERSONALIZADO COMPACTO CON BUSCADOR INTEGRADO (ESTILO IMAGEN 1 / SANTO)
     // =========================================================================
+    function escapeHtml(str) {
+        if (!str || typeof str !== 'string') return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function formatearRubricaN(texto = '') {
+        if (!texto || typeof texto !== 'string') return texto;
+        return texto
+            .replace(/\bN:\./g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N.</span>')
+            .replace(/\bN:(?!\w)/g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N</span>');
+    }
+
+    // Mapa de correspondencia entre selectores litúrgicos y sus formularios de gestión
+    const MAPA_FORMULARIOS_SELECT = {
+        selectAntifonaInvitatorio: { archivo: 'antifonas.html', nombre: 'Antífonas', tipo: 'invitatoria', libro: 'invitatorio' },
+        selectAntifona1: { archivo: 'antifonas.html', nombre: 'Antífonas', tipo: 'salmodia_1' },
+        selectAntifona2: { archivo: 'antifonas.html', nombre: 'Antífonas', tipo: 'salmodia_2' },
+        selectAntifona3: { archivo: 'antifonas.html', nombre: 'Antífonas', tipo: 'salmodia_3' },
+        selectAntifonaCantico: { archivo: 'antifonas.html', nombre: 'Antífonas', tipo: 'evangelico' },
+        selectHimno: { archivo: 'himno.html', nombre: 'Himnos', tipo: 'himno' },
+        selectTeDeumOficio: { archivo: 'himno.html', nombre: 'Himnos (Te Deum)', tipo: 'himno', libro: 'oficio' },
+        selectSalmoInvitatorio: { archivo: 'salmos.html', nombre: 'Salmos', tipo: 'invitatorio' },
+        selectSalmo1: { archivo: 'salmos.html', nombre: 'Salmos', tipo: 'salmo' },
+        selectSalmo2: { archivo: 'salmos.html', nombre: 'Salmos', tipo: 'salmo' },
+        selectSalmo3: { archivo: 'salmos.html', nombre: 'Salmos', tipo: 'salmo' },
+        selectCantico: { archivo: 'salmos.html', nombre: 'Salmos / Cánticos', tipo: 'cantico' },
+        selectLecturaBreve: { archivo: 'lecturabreve.html', nombre: 'Lectura Breve', tipo: 'lecturabreve' },
+        selectResponsorioOficio: { archivo: 'responsorio.html', nombre: 'Responsorios', tipo: 'responsorio', libro: 'oficio' },
+        selectLectura1Oficio: { archivo: 'lectura.html', nombre: 'Lecturas de Oficio', tipo: 'primera', libro: 'oficio' },
+        selectLectura2Oficio: { archivo: 'lectura.html', nombre: 'Lecturas de Oficio', tipo: 'segunda', libro: 'oficio' },
+        selectPreces: { archivo: 'preces.html', nombre: 'Preces', tipo: 'preces' },
+        selectOracion: { archivo: 'oracion.html', nombre: 'Oraciones', tipo: 'oracion' },
+        selectExamenConciencia: { archivo: 'ecompletas.html', nombre: 'Completas', tipo: 'examen', libro: 'completas' },
+        selectBendicionCompletas: { archivo: 'ecompletas.html', nombre: 'Completas', tipo: 'bendicion', libro: 'completas' }
+    };
+
+    function construirUrlFormularioParaSelect(selectId, textoBusqueda = '') {
+        const info = MAPA_FORMULARIOS_SELECT[selectId];
+        if (!info) return null;
+
+        const params = new URLSearchParams();
+        const selTiempo = document.getElementById('selectTiempo');
+        const selSemana = document.getElementById('selectSemana');
+        const selDia = document.getElementById('selectDia');
+        const selLibro = document.getElementById('selectLibro');
+
+        const tiempoVal = selTiempo ? selTiempo.value : 'ordinario';
+        params.set('tiempo', tiempoVal);
+
+        if (selSemana && selSemana.value) {
+            const semNum = String(selSemana.value).replace(/\D/g, '') || selSemana.value;
+            params.set('semana', semNum);
+        }
+
+        if (selDia && selDia.value) {
+            if (tiempoVal === 'santos') {
+                params.set('santo', selDia.value);
+                const opt = selDia.selectedOptions[0];
+                const sNom = opt ? (opt.getAttribute('data-nombre') || opt.textContent) : '';
+                if (sNom) params.set('santoNombre', sNom);
+                const sFec = opt ? opt.getAttribute('data-fecha') : '';
+                if (sFec) params.set('fecha', sFec);
+            } else {
+                params.set('dia', selDia.value);
+            }
+        }
+
+        let libroVal = info.libro || (selLibro ? selLibro.value : 'laudes');
+        if (libroVal === 'vispera') libroVal = 'visperas';
+        params.set('libro', libroVal);
+
+        if (info.tipo) {
+            params.set('tipo', info.tipo);
+        }
+
+        const txt = (textoBusqueda || '').trim();
+        if (txt) {
+            params.set('texto', txt);
+            params.set('busqueda', txt);
+        }
+
+        try {
+            const payloadLit = {
+                tiempo: tiempoVal,
+                semana: selSemana ? String(selSemana.value).replace(/\D/g, '') : '1',
+                dia: (selDia && tiempoVal !== 'santos') ? selDia.value : 'domingo',
+                santoId: (selDia && tiempoVal === 'santos') ? selDia.value : '',
+                santoNombre: (selDia && tiempoVal === 'santos') ? (selDia.selectedOptions[0]?.getAttribute('data-nombre') || '') : '',
+                libro: libroVal,
+                tipo: info.tipo || '',
+                texto: txt
+            };
+            localStorage.setItem('lh_parametros_liturgicos_compartidos', JSON.stringify(payloadLit));
+        } catch (_) {}
+
+        return {
+            url: `${info.archivo}?${params.toString()}`,
+            nombre: info.nombre
+        };
+    }
+
     function crearCustomSelectBuscador(selectElement, placeholder = 'Buscar...') {
         if (!selectElement) return null;
         if (selectElement._customSelectContainer) {
@@ -1343,10 +1448,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!sinResultados) {
                     sinResultados = document.createElement('li');
                     sinResultados.className = 'custom-select-opcion sin-resultados';
+                    sinResultados.addEventListener('click', (e) => e.stopPropagation());
                     ul.appendChild(sinResultados);
                 }
-                sinResultados.textContent = `No se encontraron resultados para "${searchInput.value.trim()}"`;
-                sinResultados.style.display = 'block';
+                const textoBusqueda = searchInput.value.trim();
+                sinResultados.innerHTML = '';
+
+                const textoSpan = document.createElement('span');
+                textoSpan.className = 'sin-res-texto';
+                textoSpan.textContent = `No se encontraron resultados para "${textoBusqueda}"`;
+                sinResultados.appendChild(textoSpan);
+
+                const infoForm = construirUrlFormularioParaSelect(selectElement.id, textoBusqueda);
+                if (infoForm) {
+                    const btnCrear = document.createElement('button');
+                    btnCrear.type = 'button';
+                    btnCrear.className = 'btn-crear-en-formulario';
+                    btnCrear.title = `Abrir formulario de ${infoForm.nombre} en una nueva ventana`;
+                    btnCrear.setAttribute('aria-label', `Abrir formulario de ${infoForm.nombre}`);
+                    btnCrear.innerHTML = '<span class="material-symbols-outlined">add_circle</span>';
+
+                    btnCrear.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        window.open(infoForm.url, '_blank');
+                    });
+
+                    sinResultados.appendChild(btnCrear);
+                }
+                sinResultados.style.display = 'flex';
             } else if (sinResultados) {
                 sinResultados.style.display = 'none';
             }
@@ -1367,6 +1497,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             if (!estaAbierto) {
+                if (selectElement.id === 'selectResponsorioOficio') {
+                    const cacheFresco = obtenerTodosLosResponsoriosDesdeCatalogo();
+                    if (cacheFresco.length !== cacheTodosLosResponsorios.length || !cacheTodosLosResponsorios.some(r => r.id === 'tos04doof_resp')) {
+                        cargarYPoblarSelectResponsorios(selectElement.value);
+                    }
+                }
+                sincronizarOpciones();
                 dropdown.classList.add('abierto');
                 trigger.classList.add('activo');
                 container.classList.add('dropdown-activo');
@@ -1395,6 +1532,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const primerVisible = ul.querySelector('.custom-select-opcion:not(.sin-resultados):not([style*="display: none"])');
                 if (primerVisible) {
                     primerVisible.click();
+                } else {
+                    const btnCrear = ul.querySelector('.btn-crear-en-formulario');
+                    if (btnCrear) {
+                        btnCrear.click();
+                    }
                 }
             }
         });
@@ -2108,7 +2250,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             opt.setAttribute('data-v', item.v || '');
             opt.setAttribute('data-r', item.r || '');
             opt.setAttribute('data-texto', `${item.v || ''} ${item.r || ''}`);
-            opt.textContent = `V. ${item.v ? item.v.slice(0, 45) : ''}... / R. ${item.r ? item.r.slice(0, 30) : ''}`;
+            opt.setAttribute('data-titulo', item.titulo || '');
+            const vTexto = (item.v || '').trim();
+            const rTexto = (item.r || '').trim();
+            const vCorto = vTexto.length > 55 ? vTexto.slice(0, 52) + '...' : vTexto;
+            const rCorto = rTexto.length > 40 ? rTexto.slice(0, 37) + '...' : rTexto;
+            opt.textContent = `V. ${vCorto} / R. ${rCorto}`;
             selResponsorioOficio.appendChild(opt);
         });
 
@@ -2119,6 +2266,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (recom) targetVal = recom.id || recom.varName;
         }
         ordenarOpcionesAZ(selResponsorioOficio, targetVal);
+        if (typeof selResponsorioOficio._actualizarCustomSelect === 'function') {
+            selResponsorioOficio._actualizarCustomSelect();
+        }
         if (selResponsorioOficio._reaplicarFiltro) selResponsorioOficio._reaplicarFiltro();
     }
 
@@ -2520,9 +2670,40 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } catch (errSalmos) {
                     console.warn("Fallo sincronización Firestore salmos:", errSalmos);
                 }
+
+                // 5. Responsorios Litúrgicos (responsorios)
+                try {
+                    const snapResp = await getDocs(collection(window.firebaseAPI.db, "responsorios"));
+                    if (!snapResp.empty) {
+                        const desdeFbResp = [];
+                        snapResp.forEach(d => desdeFbResp.push({ id: d.id, ...d.data() }));
+                        if (desdeFbResp.length > 0) {
+                            const todosResp = obtenerTodosLosResponsoriosDesdeCatalogo();
+                            const mapaResp = new Map();
+                            todosResp.forEach(x => {
+                                if (x && (x.id || x.varName)) {
+                                    mapaResp.set(String(x.id || x.varName).toLowerCase(), x);
+                                }
+                            });
+                            desdeFbResp.forEach(x => {
+                                if (x && (x.id || x.varName)) {
+                                    mapaResp.set(String(x.id || x.varName).toLowerCase(), x);
+                                }
+                            });
+                            const combinadosResp = Array.from(mapaResp.values());
+                            localStorage.setItem('lh_responsorios_cache', JSON.stringify(combinadosResp));
+                            cacheTodosLosResponsorios = combinadosResp;
+                            const valRespActual = selResponsorioOficio ? selResponsorioOficio.value : null;
+                            cargarYPoblarSelectResponsorios(valRespActual);
+                            actualizarInvitatorioPreview(false);
+                        }
+                    }
+                } catch (errResp) {
+                    console.warn("Fallo sincronización Firestore responsorios:", errResp);
+                }
             }
         } catch (e) {
-            console.warn("Fallo sincronización Firestore lecturas/himnos/salmos:", e);
+            console.warn("Fallo sincronización Firestore lecturas/himnos/salmos/responsorios:", e);
         }
     }
 
@@ -3200,15 +3381,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (forzarRecomendado || !selResponsorioOficio.value) {
                     const respRecom = ResponsoriosDB.obtenerRecomendado(tiempoVal, semanaVal, diaVal, libroVal);
                     if (respRecom) {
-                        if (!Array.from(selResponsorioOficio.options).some(o => o.value === respRecom.id || o.value === respRecom.varName)) {
+                        const rId = respRecom.id || respRecom.varName;
+                        if (!Array.from(selResponsorioOficio.options).some(o => o.value === rId)) {
                             const opt = document.createElement('option');
-                            opt.value = respRecom.id;
-                            opt.setAttribute('data-v', respRecom.v);
-                            opt.setAttribute('data-r', respRecom.r);
-                            opt.textContent = `V. ${respRecom.v ? respRecom.v.slice(0, 45) : ''}... / R. ${respRecom.r ? respRecom.r.slice(0, 30) : ''}`;
+                            opt.value = rId;
+                            opt.setAttribute('data-id', rId);
+                            opt.setAttribute('data-v', respRecom.v || '');
+                            opt.setAttribute('data-r', respRecom.r || '');
+                            opt.setAttribute('data-texto', `${respRecom.v || ''} ${respRecom.r || ''}`);
+                            opt.setAttribute('data-titulo', respRecom.titulo || '');
+                            const vTexto = (respRecom.v || '').trim();
+                            const rTexto = (respRecom.r || '').trim();
+                            const vCorto = vTexto.length > 55 ? vTexto.slice(0, 52) + '...' : vTexto;
+                            const rCorto = rTexto.length > 40 ? rTexto.slice(0, 37) + '...' : rTexto;
+                            opt.textContent = `V. ${vCorto} / R. ${rCorto}`;
                             selResponsorioOficio.appendChild(opt);
+                            ordenarOpcionesAZ(selResponsorioOficio, rId);
+                        } else {
+                            selResponsorioOficio.value = rId;
+                            if (typeof selResponsorioOficio._actualizarCustomSelect === 'function') {
+                                selResponsorioOficio._actualizarCustomSelect();
+                            }
                         }
-                        selResponsorioOficio.value = respRecom.id;
                     }
                 }
 
@@ -3607,10 +3801,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const ints = Array.isArray(precesObj.intenciones) ? precesObj.intenciones.join('\n\n') : (precesObj.intenciones || '');
                     textoMostrar = `${intro}\n\n${resp}\n\n${ints}`;
                 }
-                previewTextoPreces.textContent = textoMostrar;
+                previewTextoPreces.dataset.rawText = textoMostrar;
+                previewTextoPreces.innerHTML = formatearRubricaN(escapeHtml(textoMostrar));
             }
             if (previewIntroPadreNuestro && precesObj) {
-                previewIntroPadreNuestro.textContent = precesObj.concl || 'Terminemos nuestra oración con la plegaria que Cristo nos enseñó:';
+                const conclTxt = precesObj.concl || 'Terminemos nuestra oración con la plegaria que Cristo nos enseñó:';
+                previewIntroPadreNuestro.dataset.rawText = conclTxt;
+                previewIntroPadreNuestro.innerHTML = formatearRubricaN(escapeHtml(conclTxt));
             }
         }
 
@@ -3637,13 +3834,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (previewTituloOracion) previewTituloOracion.textContent = 'ORACIÓN';
             if (previewTextoOracion && oracionObj) {
-                previewTextoOracion.textContent = oracionObj.textoCompleto || oracionObj.texto || '';
+                const oracTexto = oracionObj.textoCompleto || oracionObj.texto || '';
+                previewTextoOracion.dataset.rawText = oracTexto;
+                previewTextoOracion.innerHTML = formatearRubricaN(escapeHtml(oracTexto));
             }
         } else {
             const oracionTextoRecom = obtenerOracionRecomendada(tiempoVal, semanaVal, diaVal, libroVal);
             if (previewTituloOracion) previewTituloOracion.textContent = 'ORACIÓN';
             if (previewTextoOracion) {
-                previewTextoOracion.textContent = oracionTextoRecom || '';
+                previewTextoOracion.dataset.rawText = oracionTextoRecom || '';
+                previewTextoOracion.innerHTML = formatearRubricaN(escapeHtml(oracionTextoRecom || ''));
             }
         }
 
@@ -4564,10 +4764,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (previewTituloPreces) previewTituloPreces.textContent = 'PRECES';
         if (previewTextoPreces && precesTextoGuardado) {
-            previewTextoPreces.textContent = precesTextoGuardado;
+            previewTextoPreces.dataset.rawText = precesTextoGuardado;
+            previewTextoPreces.innerHTML = formatearRubricaN(escapeHtml(precesTextoGuardado));
         }
         if (previewIntroPadreNuestro && precesConclGuardado) {
-            previewIntroPadreNuestro.textContent = precesConclGuardado;
+            previewIntroPadreNuestro.dataset.rawText = precesConclGuardado;
+            previewIntroPadreNuestro.innerHTML = formatearRubricaN(escapeHtml(precesConclGuardado));
         }
 
         // 10. ORACIÓN
@@ -4619,7 +4821,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (previewTituloOracion) previewTituloOracion.textContent = 'ORACIÓN';
         if (previewTextoOracion && oracionTextoGuardado) {
-            previewTextoOracion.textContent = oracionTextoGuardado;
+            previewTextoOracion.dataset.rawText = oracionTextoGuardado;
+            previewTextoOracion.innerHTML = formatearRubricaN(escapeHtml(oracionTextoGuardado));
         }
 
         // 11. CONCLUSIÓN
@@ -5215,9 +5418,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cantCita = (previewCitaCantico ? previewCitaCantico.textContent.trim() : 'Lc 1, 68-79');
         const cantTexto = (previewTextoCantico ? previewTextoCantico.textContent.trim() : TEXTO_CANTICO_ZACARIAS_CANONICO);
 
-        const precesTexto = (previewTextoPreces ? previewTextoPreces.textContent.trim() : '');
-        const precesIntroPadre = (previewIntroPadreNuestro ? previewIntroPadreNuestro.textContent.trim() : 'Terminemos nuestra oración con la plegaria que Cristo nos enseñó:');
-        const oracionTexto = (previewTextoOracion ? previewTextoOracion.textContent.trim() : '');
+        const precesTexto = (previewTextoPreces?.dataset?.rawText || (previewTextoPreces ? previewTextoPreces.textContent.trim() : ''));
+        const precesIntroPadre = (previewIntroPadreNuestro?.dataset?.rawText || (previewIntroPadreNuestro ? previewIntroPadreNuestro.textContent.trim() : 'Terminemos nuestra oración con la plegaria que Cristo nos enseñó:'));
+        const oracionTexto = (previewTextoOracion?.dataset?.rawText || (previewTextoOracion ? previewTextoOracion.textContent.trim() : ''));
         const conclusionV = (previewConclusionV ? previewConclusionV.textContent.trim() : 'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna.');
         const conclusionR = (previewConclusionR ? previewConclusionR.textContent.trim() : 'Amén.');
 
@@ -5943,6 +6146,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Eventos de cambio en los selectores principales
     selTiempo.addEventListener('change', () => {
         actualizarOpcionesSemanas(false);
+        if (selLibro.value === 'oficio') {
+            cargarYPoblarSelectResponsorios();
+        }
         actualizarCodigoCombinado(true);
         recordarParametrosActuales();
     });
@@ -5951,11 +6157,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (selTiempo.value === 'santos') {
             poblarSelectorDiasOSantos();
         }
+        if (selLibro.value === 'oficio') {
+            cargarYPoblarSelectResponsorios();
+        }
         actualizarCodigoCombinado(true);
         recordarParametrosActuales();
     });
     selDia.addEventListener('change', () => {
         cargarYPoblarSelectAntifonasCantico();
+        if (selLibro.value === 'oficio') {
+            cargarYPoblarSelectResponsorios();
+        }
         actualizarCodigoCombinado(true);
         recordarParametrosActuales();
     });
@@ -5966,6 +6178,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         cargarYPoblarSelectBendicionCompletas();
         actualizarCodigoCombinado(true);
         recordarParametrosActuales();
+    });
+
+    // Sincronización en vivo entre pestañas/ventanas para catálogo de responsorios
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'lh_responsorios_cache') {
+            const valActual = selResponsorioOficio ? selResponsorioOficio.value : null;
+            cargarYPoblarSelectResponsorios(valActual);
+            actualizarInvitatorioPreview(false);
+        }
+    });
+    window.addEventListener('focus', () => {
+        const valActual = selResponsorioOficio ? selResponsorioOficio.value : null;
+        cargarYPoblarSelectResponsorios(valActual);
     });
 
     // Inicialización al arrancar
@@ -5993,31 +6218,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     configurarTodosLosCustomSelects();
 
-    // Restaurar los últimos parámetros litúrgicos seleccionados por el usuario
+    // Restaurar parámetros litúrgicos: Priorizar parámetros de URL (ej. ?codigo=tos01dola o ?tiempo=ordinario...)
     try {
-        const rawUltimos = localStorage.getItem('lh_frm_salterios_ultimos_parametros');
-        if (rawUltimos) {
-            const params = JSON.parse(rawUltimos);
-            if (params) {
-                if (params.tiempo && selTiempo) {
-                    selTiempo.value = params.tiempo;
-                    actualizarOpcionesSemanas(false);
-                    if (params.semana && selSemana) {
-                        selSemana.value = params.semana;
-                    }
-                    if (params.tiempo === 'santos') {
-                        poblarSelectorDiasOSantos(params.dia || null);
-                    } else if (params.dia && selDia) {
-                        selDia.value = params.dia;
-                    }
-                    if (params.libro && selLibro) {
-                        selLibro.value = params.libro;
-                    }
+        let params = null;
+        const urlParams = new URLSearchParams(window.location.search);
+        const pCodigo = urlParams.get('codigo') || urlParams.get('id');
+
+        if (pCodigo) {
+            const dec = (typeof decodificarCodigoLiturgico === 'function') ? decodificarCodigoLiturgico(pCodigo) : null;
+            if (dec) {
+                const sPad = `s${String(dec.semana).padStart(2, '0')}`;
+                params = {
+                    tiempo: dec.tiempo,
+                    semana: sPad,
+                    dia: dec.dia,
+                    libro: dec.libro
+                };
+            }
+        } else if (urlParams.has('tiempo')) {
+            const sRaw = urlParams.get('semana') || 's01';
+            const mS = sRaw.match(/^s?(\d+)$/i);
+            const sPad = mS ? `s${mS[1].padStart(2, '0')}` : sRaw;
+            params = {
+                tiempo: urlParams.get('tiempo'),
+                semana: sPad,
+                dia: urlParams.get('dia') || 'domingo',
+                libro: urlParams.get('libro') || urlParams.get('hora') || 'laudes'
+            };
+        }
+
+        if (!params) {
+            const rawUltimos = localStorage.getItem('lh_frm_salterios_ultimos_parametros');
+            if (rawUltimos) {
+                params = JSON.parse(rawUltimos);
+            }
+        }
+
+        if (params) {
+            if (params.tiempo && selTiempo) {
+                selTiempo.value = params.tiempo;
+                actualizarOpcionesSemanas(false);
+                if (params.semana && selSemana) {
+                    selSemana.value = params.semana;
+                }
+                if (params.tiempo === 'santos') {
+                    poblarSelectorDiasOSantos(params.dia || null);
+                } else if (params.dia && selDia) {
+                    selDia.value = params.dia;
+                }
+                if (params.libro && selLibro) {
+                    selLibro.value = params.libro;
                 }
             }
         }
     } catch (e) {
-        console.warn("Aviso al restaurar últimos parámetros:", e);
+        console.warn("Aviso al restaurar parámetros:", e);
     }
 
     actualizarCodigoCombinado(true);

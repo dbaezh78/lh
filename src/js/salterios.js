@@ -306,6 +306,22 @@ export function formatearResponsorioR1(r1, r2) {
  * - Detecta y resalta las respuestas (R. y V.) con la clase rubrica-vr (#ff0000 sin negrita / normal).
  * - Convierte asteriscos en asterisco rojo.
  */
+/**
+ * Formatea rúbricas para nombres litúrgicos en oraciones, preces y textos:
+ * - "N:." se muestra como "N." en color rojo.
+ * - "N:" se muestra como "N" en color rojo sin punto.
+ */
+export function formatearRubricaN(texto = '') {
+    if (!texto || typeof texto !== 'string') return texto;
+    return texto
+        .replace(/\bN:\./g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N.</span>')
+        .replace(/\bN:(?!\w)/g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N</span>');
+}
+
+if (typeof window !== 'undefined') {
+    window.formatearRubricaN = formatearRubricaN;
+}
+
 export function formatearTextoSalmo(texto) {
     if (!texto || typeof texto !== 'string') return '';
 
@@ -912,7 +928,7 @@ function montarOActualizarVista(params, datos) {
     });
 
     const urlEvangelio = construirUrlEvangelio(tiempo, semana, dia);
-    const urlAudioHora = datos.audioLibro || construirUrlAudioHora(tiempo, semana, dia, libro);
+    const urlAudioHora = datos.audioLibro || construirUrlAudioHora(tiempo, semana, dia, libro, esPar);
     const urlLectura1 = esPar ? rutasOficio.lecturaPar : rutasOficio.lecturaImpar;
     const urlLectura2 = rutasOficio.segundaLectura;
 
@@ -2047,7 +2063,7 @@ function renderizarCuerpoLiturgico(d) {
         `;
     }
 
-    contenedor.innerHTML = html;
+    contenedor.innerHTML = formatearRubricaN(html);
 }
 
 // =========================================================================
@@ -2353,8 +2369,25 @@ function construirUrlEvangelio(tiempo, semana, dia) {
     return `https://ev.resucito.do/to/${semana}/${diaRuta}.mp3`;
 }
 
-function construirUrlAudioHora(tiempo, semana, dia, libro) {
-    return `https://to.resucito.do/s${semana}/${dia}/${libro}.mp3`;
+function construirUrlAudioHora(tiempo, semana, dia, libro, esPar = null) {
+    const tSlug = String(tiempo || 'ordinario').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let subdominio = 'to';
+    if (tSlug.includes('adviento') || tSlug === 'ta') subdominio = 'ta';
+    else if (tSlug.includes('navidad') || tSlug === 'tn') subdominio = 'tn';
+    else if (tSlug.includes('cuaresma') || tSlug === 'tc') subdominio = 'tc';
+    else if (tSlug.includes('pascua') || tSlug === 'tp') subdominio = 'tp';
+
+    const numSem = String(semana || '1').replace(/\D/g, '') || '1';
+    const semPadded = `s${numSem.padStart(2, '0')}`;
+    const diaNorm = String(dia || 'domingo').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+
+    let archivo = `${String(libro || 'laudes').toLowerCase()}.mp3`;
+    if (libro === 'oficio') {
+        const parActual = (esPar !== null) ? esPar : (new Date().getFullYear() % 2 === 0);
+        archivo = parActual ? 'oficio2.mp3' : 'oficio1.mp3';
+    }
+
+    return `https://${subdominio}.resucito.do/${semPadded}/${diaNorm}/${archivo}`;
 }
 
 function capitalizar(str) {

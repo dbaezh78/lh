@@ -84,6 +84,19 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         r: "¿A quién temeré?"
     },
 
+    // TIEMPO ORDINARIO - SEMANA 4
+    {
+        id: "tos04doof_resp",
+        varName: "tos04doof_resp",
+        titulo: "Responsorio de la Salmodia - Domingo Semana 4 (Ordinario)",
+        tiempo: "ordinario",
+        semana: "4",
+        dia: "domingo",
+        libro: "oficio",
+        v: "La palabra de Dios es viva y eficaz.",
+        r: "Más penetrante que espada de doble filo."
+    },
+
     // TIEMPO ORDINARIO - HORA TERCIA (SALTERIO)
     {
         id: "tos01dote_resp",

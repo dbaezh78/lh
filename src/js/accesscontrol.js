@@ -142,6 +142,7 @@ export const PERMISSIONS = {
   // 14. FORMULARIO (Menú y Submódulos de Formulario)
   PAGE_FORMULARIO: "page_formulario",
   PAGE_FRM_SALTERIOS: "page_frm_salterios",
+  PAGE_HORAS_CONFIGURADAS: "page_horas_configuradas",
   FRM_SALTERIOS_GUARDAR: "frm_salterios_guardar",
   FRM_SALTERIOS_COPIAR: "frm_salterios_copiar",
   PAGE_FRM_SALMOS: "page_frm_salmos",
@@ -382,6 +383,7 @@ export const PERMISSION_TREE = [
         label: "Formulario Salterios",
         children: [
           { key: "page_frm_salterios", label: "Ver página" },
+          { key: "page_horas_configuradas", label: "Ver Horas Configuradas y Faltantes" },
           { key: "frm_salterios_guardar", label: "Guardar en Firebase" },
           { key: "frm_salterios_copiar", label: "Copiar código" }
         ]
@@ -613,6 +615,7 @@ export function esPermisoFormulario(p) {
   if (!p) return false;
   return (
     p === "page_formulario" ||
+    p === "page_horas_configuradas" ||
     p === "page_cambio_liturgico" ||
     p === "page_santos_iglesia" ||
     p === "page_registro_santo" ||

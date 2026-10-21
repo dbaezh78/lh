@@ -235,8 +235,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     await cargarDatos();
     renderizarLista();
     manejarCambioParametros();
+    restaurarParametrosDesdeURL();
     actualizarLivePreview();
 });
+
+function restaurarParametrosDesdeURL() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tiempo = urlParams.get('tiempo');
+        const semana = urlParams.get('semana');
+        const dia = urlParams.get('dia');
+        const libro = urlParams.get('libro');
+        const texto = urlParams.get('texto') || urlParams.get('busqueda') || '';
+
+        if (tiempo && document.getElementById('form-tiempo')) {
+            document.getElementById('form-tiempo').value = tiempo;
+            actualizarModoTiempo();
+        }
+        if (semana && document.getElementById('form-semana')) {
+            const selSem = document.getElementById('form-semana');
+            const semNum = String(semana).replace(/\D/g, '') || semana;
+            const optMatch = Array.from(selSem.options).find(o => o.value === semana || o.value === semNum || o.value === `s${semNum.padStart(2, '0')}`);
+            if (optMatch) selSem.value = optMatch.value;
+        }
+        if (dia && document.getElementById('form-dia')) {
+            document.getElementById('form-dia').value = dia;
+        }
+        if (libro && document.getElementById('form-libro')) {
+            let lVal = libro === 'vispera' ? 'visperas' : libro;
+            const optLib = Array.from(document.getElementById('form-libro').options).find(o => o.value === lVal || o.value === libro);
+            if (optLib) document.getElementById('form-libro').value = optLib.value;
+        }
+        if (texto) {
+            const inpV = document.getElementById('form-v');
+            if (inpV && !inpV.value) inpV.value = texto;
+            const filtro = document.getElementById('filtro-busqueda');
+            if (filtro) filtro.value = texto;
+            mostrarBannerEstado(`➕ Parámetros transferidos desde Salterios: «${texto.length > 40 ? texto.substring(0, 40) + '...' : texto}»`, 'info');
+        }
+        autogenerarIdYTitulo();
+    } catch (_) {}
+}
 
 // Mostrar notificaciones en la interfaz
 function mostrarBannerEstado(mensaje, tipo = 'info') {
@@ -276,50 +315,59 @@ function migrarIdsResponsorios(items) {
 async function cargarDatos() {
     mostrarBannerEstado('Cargando catálogo de responsorios...', 'info');
 
-    // 1. Probar desde Firestore
+    const mapa = new Map();
+    // 1. Cargar semillas canónicas base
+    if (Array.isArray(CATALOGO_RESPONSORIOS_SEED)) {
+        CATALOGO_RESPONSORIOS_SEED.forEach(r => {
+            if (r && (r.id || r.varName)) mapa.set((r.id || r.varName).toLowerCase(), r);
+        });
+    }
+
+    // 2. Probar desde Firestore
+    let cargadoDesdeFb = false;
     try {
         if (window.firebaseAPI && window.firebaseAPI.db) {
             const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
             const snap = await getDocs(collection(window.firebaseAPI.db, "responsorios"));
             if (!snap.empty) {
-                const desdeFb = [];
-                snap.forEach(d => desdeFb.push({ id: d.id, ...d.data() }));
-                if (desdeFb.length >= 3) {
-                    listaResponsorios = migrarIdsResponsorios(desdeFb);
-                    localStorage.setItem('lh_responsorios_cache', JSON.stringify(listaResponsorios));
-                    mostrarBannerEstado(`✅ Se cargaron ${listaResponsorios.length} responsorios desde Firebase Firestore.`, 'exito');
-                    return;
-                }
+                snap.forEach(d => {
+                    const data = { id: d.id, ...d.data() };
+                    if (data.id || data.varName) {
+                        mapa.set((data.id || data.varName).toLowerCase(), data);
+                    }
+                });
+                cargadoDesdeFb = true;
             }
         }
     } catch (e) {
         console.warn('Fallo al conectar con Firestore para responsorios:', e);
     }
 
-    // 2. Probar caché local
+    // 3. Probar caché local (para recuperar ediciones offline o adicionales)
     const cacheLocal = localStorage.getItem('lh_responsorios_cache');
     if (cacheLocal) {
         try {
             const parsed = JSON.parse(cacheLocal);
-            if (Array.isArray(parsed) && parsed.length >= 3) {
-                listaResponsorios = migrarIdsResponsorios(parsed);
-                localStorage.setItem('lh_responsorios_cache', JSON.stringify(listaResponsorios));
-                mostrarBannerEstado(`📂 Cargados ${listaResponsorios.length} responsorios desde la caché local.`, 'alerta');
-                return;
+            if (Array.isArray(parsed)) {
+                parsed.forEach(r => {
+                    if (r && (r.id || r.varName)) {
+                        mapa.set((r.id || r.varName).toLowerCase(), r);
+                    }
+                });
             }
         } catch (e) {}
     }
 
-    // 3. Fallback a semilla canónica
-    if (Array.isArray(CATALOGO_RESPONSORIOS_SEED) && CATALOGO_RESPONSORIOS_SEED.length > 0) {
-        listaResponsorios = migrarIdsResponsorios([...CATALOGO_RESPONSORIOS_SEED]);
-        localStorage.setItem('lh_responsorios_cache', JSON.stringify(listaResponsorios));
-        mostrarBannerEstado(`✨ Cargados los ${listaResponsorios.length} responsorios canónicos desde el catálogo base.`, 'exito');
-        return;
-    }
+    listaResponsorios = migrarIdsResponsorios(Array.from(mapa.values()));
+    localStorage.setItem('lh_responsorios_cache', JSON.stringify(listaResponsorios));
 
-    listaResponsorios = [];
-    mostrarBannerEstado('No hay responsorios registrados. Agrega uno nuevo con el formulario.', 'alerta');
+    if (cargadoDesdeFb) {
+        mostrarBannerEstado(`✅ Se cargaron ${listaResponsorios.length} responsorios (sincronizados con Firebase Firestore).`, 'exito');
+    } else if (listaResponsorios.length > 0) {
+        mostrarBannerEstado(`📂 Se cargaron ${listaResponsorios.length} responsorios desde catálogo y caché local.`, 'exito');
+    } else {
+        mostrarBannerEstado('No hay responsorios registrados. Agrega uno nuevo con el formulario.', 'alerta');
+    }
 }
 
 // Configuración de eventos

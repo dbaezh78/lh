@@ -180,3 +180,8 @@ body {
 .ant {
     min-width: max-content;
 }
+/* Rúbrica para sustitución de nombres litúrgicos (N. / N) */
+.rubrica-n {
+    color: var(--salterio-rubrica, #ff0000) !important;
+    font-weight: inherit;
+}

@@ -700,6 +700,35 @@ color: red !important;
     }
 }
 
+/* Toast Flotante Informativo para Fallback TTS */
+.cinta-toast-fallback {
+    position: fixed;
+    top: 75px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    border: 1.5px solid #38bdf8;
+    color: #f8fafc;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    z-index: 10010;
+    pointer-events: none;
+    max-width: 90vw;
+    text-align: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.cinta-toast-fallback.visible {
+    display: flex;
+    animation: slideDownToast 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Resaltado de atención pulsante para el icono de la Iglesia */
 @keyframes pulsarIglesiaAtencion {
     0% {

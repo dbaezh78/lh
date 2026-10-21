@@ -340,6 +340,8 @@ export function limpiarTextoParaVoz(texto = '') {
         .replace(/\bV\.\s*/g, '')   // Omitir V.
         .replace(/\bR\.\s*/g, '')   // Omitir R.
         .replace(/\bAnt\.\s*/gi, '') // Omitir Ant.
+        .replace(/\bN:\./g, 'N.')     // Convertir N:. a N. para voz limpia
+        .replace(/\bN:(?!\w)/g, 'N')   // Convertir N: a N para voz limpia
         .replace(/\s+/g, ' ')
         .trim();
 }
@@ -423,8 +425,11 @@ export class CintaLiturgica {
             lectura1: '',
             lectura2: ''
         };
+        // Registro de URLs de audio que devolvieron 404 o error para fallback inmediato a TTS
+        this.audiosFallidos = new Set();
+        this.fuenteActiva = null; // 'audio' | 'tts'
 
-        // Reproductor de Audio HTML5 (para Evangelio, Lectura 1 y Lectura 2)
+        // Reproductor de Audio HTML5 (para Evangelio, Lectura 1, Lectura 2 y Rezo de las Horas)
         this.audio = new Audio();
 
         // Motor de Texto a Voz (TTS) para el Rezo de las Horas (segundo icono)
@@ -822,17 +827,21 @@ export class CintaLiturgica {
             });
         }
 
-        // Eventos del Audio HTML5 (Evangelio, Lectura 1, Lectura 2)
+        // Eventos del Audio HTML5 (Evangelio, Lectura 1, Lectura 2 y Rezo de las Horas)
         this.audio.addEventListener('play', () => {
-            if (this.modoActivo !== 'hora' && iconPlay) iconPlay.textContent = 'pause';
+            if (this.fuenteActiva === 'audio' || !this.ttsState.isSpeaking) {
+                if (iconPlay) iconPlay.textContent = 'pause';
+            }
         });
 
         this.audio.addEventListener('pause', () => {
-            if (this.modoActivo !== 'hora' && iconPlay) iconPlay.textContent = 'play_arrow';
+            if (this.fuenteActiva === 'audio' || !this.ttsState.isSpeaking) {
+                if (iconPlay) iconPlay.textContent = 'play_arrow';
+            }
         });
 
         this.audio.addEventListener('ended', () => {
-            if (this.modoActivo !== 'hora') {
+            if (this.fuenteActiva === 'audio' || !this.ttsState.isSpeaking) {
                 if (iconPlay) iconPlay.textContent = 'play_arrow';
                 if (slider) slider.value = 0;
                 if (tActual) tActual.textContent = '0:00';
@@ -841,7 +850,7 @@ export class CintaLiturgica {
         });
 
         this.audio.addEventListener('timeupdate', () => {
-            if (this.modoActivo !== 'hora') {
+            if (this.fuenteActiva === 'audio' || !this.ttsState.isSpeaking) {
                 if (!isNaN(this.audio.duration) && this.audio.duration > 0) {
                     const porcentaje = (this.audio.currentTime / this.audio.duration) * 100;
                     if (slider) slider.value = porcentaje;
@@ -853,16 +862,32 @@ export class CintaLiturgica {
         });
 
         this.audio.addEventListener('loadedmetadata', () => {
-            if (this.modoActivo !== 'hora') {
+            if (this.fuenteActiva === 'audio' || !this.ttsState.isSpeaking) {
                 if (tTotal && !isNaN(this.audio.duration)) {
                     tTotal.textContent = this.formatearTiempo(this.audio.duration);
                 }
             }
         });
 
+        // Detección automática de error (404 Not Found o fallo de red): fallback inmediato a TTS
+        this.audio.addEventListener('error', (e) => {
+            const urlFallida = this.audio.src;
+            if (urlFallida) {
+                this.audiosFallidos.add(urlFallida);
+            }
+            if (this.fuenteActiva === 'audio') {
+                console.warn('[Cinta] Audio de servidor no disponible (404/red), conmutando a TTS:', urlFallida);
+                try {
+                    this.audio.removeAttribute('src');
+                    this.audio.load();
+                } catch (_) {}
+                this.ejecutarFallbackTTS(this.modoActivo);
+            }
+        });
+
         if (slider) {
             slider.addEventListener('input', () => {
-                if (this.modoActivo === 'hora') {
+                if (this.fuenteActiva === 'tts' || this.ttsState.isSpeaking || (!this.audio.src && this.modoActivo === 'hora')) {
                     // Seek en lectura de voz TTS
                     this.seekTTS((slider.value / 100));
                 } else {
@@ -928,12 +953,27 @@ export class CintaLiturgica {
             if (tTotal) tTotal.classList.remove('descargando-audio');
         };
 
-        const slugLimpio = (str) => String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-        const tSlug = slugLimpio(this.opciones?.tiempoSlug || this.opciones?.tiempo || 'liturgia');
-        const semStr = this.opciones?.semana ? `s${String(this.opciones.semana).padStart(2, '0')}` : '';
-        const dSlug = slugLimpio(this.opciones?.diaSlug || this.opciones?.dia || 'dia');
-        const modoSlug = slugLimpio(this.modoActivo === 'hora' ? (this.opciones?.libro || 'hora') : this.modoActivo);
-        const nombreArchivo = [modoSlug, tSlug, semStr, dSlug].filter(Boolean).join('_') + '.mp3';
+        let nombreArchivo = 'audio.mp3';
+        if (this.modoActivo === 'hora') {
+            const libroNom = String(this.opciones?.libro || 'hora').toLowerCase();
+            if (libroNom === 'oficio') {
+                nombreArchivo = (this.cicloAnio === 'par') ? 'oficio2.mp3' : 'oficio1.mp3';
+            } else {
+                nombreArchivo = `${libroNom}.mp3`;
+            }
+        } else if (this.modoActivo === 'lectura1') {
+            nombreArchivo = (this.cicloAnio === 'par') ? 'lectura2.mp3' : 'lectura1.mp3';
+        } else if (this.modoActivo === 'lectura2') {
+            nombreArchivo = 'lecturas.mp3';
+        } else if (this.modoActivo === 'evangelio') {
+            const dNorm = String(this.opciones?.diaSlug || this.opciones?.dia || 'domingo').toLowerCase();
+            if (dNorm === 'domingo') {
+                const ciclo = String(this.opciones?.ciclo || 'a').toLowerCase();
+                nombreArchivo = `domingo-${ciclo}.mp3`;
+            } else {
+                nombreArchivo = `${dNorm}.mp3`;
+            }
+        }
 
         const dispararDescargaBlob = (blob, filename) => {
             const blobUrl = URL.createObjectURL(blob);
@@ -950,20 +990,23 @@ export class CintaLiturgica {
         };
 
         try {
-            // 1. Intentar descargar el archivo MP3 directo del modo activo (o del reproductor si está cargado)
+            // 1. Intentar descargar el archivo MP3 del servidor si existe
             const urlCandidata = (this.modoActivo !== 'hora')
                 ? (this.audios[this.modoActivo] || this.audio?.src)
                 : (this.audios.hora || '');
 
-            if (urlCandidata) {
+            if (urlCandidata && !this.audiosFallidos.has(urlCandidata)) {
                 try {
                     const res = await fetch(urlCandidata);
                     const cType = (res.headers.get('content-type') || '').toLowerCase();
                     if (res.ok && !cType.includes('text/html')) {
                         const blob = await res.blob();
                         dispararDescargaBlob(blob, nombreArchivo);
+                        this.mostrarToastAviso('Audio descargado exitosamente.');
                         limpiarEstadoDescarga();
                         return;
+                    } else if (res.status === 404) {
+                        this.audiosFallidos.add(urlCandidata);
                     }
                 } catch (_) {
                     if (this.modoActivo !== 'hora') {
@@ -981,77 +1024,313 @@ export class CintaLiturgica {
                 }
             }
 
-            // 2. Si el modo es 'hora' (TTS) y no existe archivo MP3 pregrabado en el servidor, sintetizar MP3 desde el texto litúrgico
-            if (this.modoActivo === 'hora') {
-                if (!this.ttsState.fullText || this.ttsState.chunks.length === 0) {
+            // 2. Si no existe archivo MP3 pregrabado en el servidor (404), preparar texto litúrgico
+            if (!this.ttsState.fullText || this.ttsState.chunks.length === 0) {
+                if (this.modoActivo === 'hora') {
                     this.prepararTTS();
+                } else {
+                    const txt = this.obtenerTextoParaModo(this.modoActivo);
+                    if (txt) this.prepararTTSConTexto(txt);
                 }
-                const chunks = (this.ttsState.chunks || []).map(c => c.text).filter(Boolean);
-                if (chunks.length > 0) {
-                    const buffers = [];
-                    for (let i = 0; i < chunks.length; i++) {
-                        const textoFrag = chunks[i].slice(0, 190);
-                        const ttsUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://audio1.spanishdict.com/audio?lang=es&text=${encodeURIComponent(textoFrag)}`)}`;
-                        const r = await fetch(ttsUrl);
-                        if (r.ok) {
-                            const buf = await r.arrayBuffer();
-                            if (buf && buf.byteLength > 0) buffers.push(buf);
+            }
+
+            // 2.1 Síntesis MP3 mediante Puter.js (con soporte nativo CORS para navegador)
+            if (this.ttsState.fullText && typeof window !== 'undefined') {
+                try {
+                    if (!window.puter) {
+                        await new Promise((res, rej) => {
+                            const s = document.createElement('script');
+                            s.src = 'https://js.puter.com/v2/';
+                            s.onload = res;
+                            s.onerror = rej;
+                            setTimeout(() => rej(new Error('Timeout Puter')), 4000);
+                            document.head.appendChild(s);
+                        });
+                    }
+                    if (window.puter?.ai?.txt2speech) {
+                        const chunksGrandes = [];
+                        let acum = '';
+                        const partesTxt = this.ttsState.chunks || [];
+                        for (const c of partesTxt) {
+                            if ((acum.length + c.text.length) > 950) {
+                                if (acum) chunksGrandes.push(acum.trim());
+                                acum = c.text + ' ';
+                            } else {
+                                acum += c.text + ' ';
+                            }
+                        }
+                        if (acum.trim()) chunksGrandes.push(acum.trim());
+
+                        const buffers = [];
+                        for (let idx = 0; idx < chunksGrandes.length; idx++) {
+                            const parte = chunksGrandes[idx];
+                            const pct = Math.round(((idx + 1) / chunksGrandes.length) * 100);
+                            if (tActual) tActual.textContent = `${pct}%`;
+
+                            let audioEl = null;
+                            try {
+                                audioEl = await window.puter.ai.txt2speech(parte, 'es-ES');
+                            } catch (_) {
+                                try {
+                                    audioEl = await window.puter.ai.txt2speech(parte, { language: 'es-ES' });
+                                } catch (_) {
+                                    audioEl = await window.puter.ai.txt2speech(parte);
+                                }
+                            }
+
+                            if (audioEl && audioEl.src) {
+                                let buf = null;
+                                if (audioEl.src.startsWith('data:')) {
+                                    const base64Data = audioEl.src.split(',')[1];
+                                    const binaryString = atob(base64Data);
+                                    const len = binaryString.length;
+                                    const bytes = new Uint8Array(len);
+                                    for (let b = 0; b < len; b++) {
+                                        bytes[b] = binaryString.charCodeAt(b);
+                                    }
+                                    buf = bytes.buffer;
+                                } else {
+                                    const r = await fetch(audioEl.src);
+                                    if (r.ok) {
+                                        buf = await r.arrayBuffer();
+                                    }
+                                }
+                                if (buf && buf.byteLength > 0) buffers.push(buf);
+                            }
+
+                            if (idx < chunksGrandes.length - 1) {
+                                await new Promise(r => setTimeout(r, 120));
+                            }
+                        }
+
+                        if (buffers.length > 0) {
+                            const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
+                            dispararDescargaBlob(mp3Blob, nombreArchivo);
+                            this.mostrarToastAviso(`¡${nombreArchivo} generado y descargado con éxito!`);
+                            limpiarEstadoDescarga();
+                            return;
                         }
                     }
-                    if (buffers.length > 0) {
-                        const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
-                        dispararDescargaBlob(mp3Blob, nombreArchivo);
-                        limpiarEstadoDescarga();
-                        return;
-                    }
+                } catch (errPuter) {
+                    console.warn('[Cinta] Síntesis MP3 no disponible en este momento:', errPuter);
                 }
+            }
+
+            // 2.3 Respaldo limpio y seguro: Exportar guión de locución litúrgica en texto (.txt)
+            if (this.ttsState.fullText) {
+                const modoLabel = MODOS_AUDIO[this.modoActivo]?.nombre || 'Liturgia';
+                const headerTxt = `LITURGIA DE LAS HORAS — GUIÓN DE LOCUCIÓN\nModo: ${modoLabel}\nArchivo de audio previsto: ${nombreArchivo}\nFecha de generación: ${new Date().toLocaleDateString('es-ES')}\n${'='.repeat(60)}\n\n`;
+                const textBlob = new Blob([headerTxt + this.ttsState.fullText], { type: 'text/plain;charset=utf-8' });
+                dispararDescargaBlob(textBlob, nombreArchivo.replace('.mp3', '.txt'));
+                this.mostrarToastAviso('Audio en servidor no disponible aún (404). Se descargó el guión de locución (.txt) y el reproductor lo leerá con voz al pulsar Play.', 5500);
+                limpiarEstadoDescarga();
+                return;
             }
 
             // 3. Respaldo final: si hay otro audio MP3 colocado en this.audio.src o en evangelio
             const urlRespaldo = this.audio?.src || this.audios.evangelio || this.audios.lectura1 || this.audios.lectura2;
-            if (urlRespaldo) {
-                const res = await fetch(urlRespaldo);
-                if (res.ok && !(res.headers.get('content-type') || '').toLowerCase().includes('text/html')) {
-                    const blob = await res.blob();
-                    dispararDescargaBlob(blob, nombreArchivo);
-                    limpiarEstadoDescarga();
-                    return;
-                }
+            if (urlRespaldo && !this.audiosFallidos.has(urlRespaldo)) {
+                try {
+                    const res = await fetch(urlRespaldo);
+                    if (res.ok && !(res.headers.get('content-type') || '').toLowerCase().includes('text/html')) {
+                        const blob = await res.blob();
+                        dispararDescargaBlob(blob, nombreArchivo);
+                        limpiarEstadoDescarga();
+                        return;
+                    }
+                } catch (_) {}
             }
+
+            this.mostrarToastAviso('No hay archivo de audio ni texto litúrgico disponible para este modo.');
         } catch (err) {
             console.warn('Error al descargar audio desde la cinta:', err);
+            this.mostrarToastAviso('El audio no está alojado en el servidor. El sistema lo leerá con el lector de voz.');
         } finally {
             limpiarEstadoDescarga();
         }
     }
 
+    // =========================================================================
+    // REPRODUCCIÓN INTELIGENTE HÍBRIDA (AUDIO SERVIDOR O FALLBACK A TTS)
+    // =========================================================================
+
     // Alternar Reproducción / Pausa
     togglePlay() {
-        if (this.modoActivo === 'hora') {
-            this.togglePlayTTS();
+        // 1. Si el lector TTS está hablando actualmente -> Pausar TTS
+        if (this.ttsState.isSpeaking) {
+            this.pausarTTS();
             return;
         }
 
-        // Modos con audio HTML5
-        const urlAudio = this.audios[this.modoActivo];
-        if (!urlAudio) {
-            alert(`No hay archivo de audio asignado para ${MODOS_AUDIO[this.modoActivo]?.nombre || 'este modo'}.`);
+        // 2. Si el audio HTML5 está sonando actualmente -> Pausar audio HTML5
+        if (this.audio && !this.audio.paused && this.audio.currentTime > 0) {
+            this.audio.pause();
             return;
         }
 
-        if (this.audio.src !== urlAudio) {
-            this.audio.src = urlAudio;
-            this.audio.load();
+        // 3. Si estábamos pausados en TTS (progreso > 0 o en pausa) y la fuente activa es TTS
+        if (this.fuenteActiva === 'tts' && this.ttsState.fullText && (this.ttsState.currentChunkIndex > 0 || this.ttsState.currentCharIndex > 0)) {
+            this.reproducirTTS();
+            return;
         }
 
-        if (this.audio.paused) {
+        // 4. Si estábamos pausados en HTML5 audio y la fuente activa es audio
+        if (this.fuenteActiva === 'audio' && this.audio && this.audio.src && this.audio.paused && this.audio.currentTime > 0) {
             this.detenerTTS();
             this.audio.play().catch(err => {
-                console.warn('Error al reproducir audio:', err);
+                console.warn('[Cinta] Error al reanudar audio:', err);
+                this.ejecutarFallbackTTS(this.modoActivo);
             });
-        } else {
-            this.audio.pause();
+            return;
         }
+
+        // 5. Iniciar nueva reproducción para el modo activo (usando archivo MP3 si existe o TTS si no)
+        this.iniciarReproduccionModo(this.modoActivo);
+    }
+
+    iniciarReproduccionModo(modo) {
+        const urlAudio = (modo === 'hora')
+            ? (this.audios.hora || '')
+            : (this.audios[modo] || '');
+
+        // Si tenemos un archivo de audio y no está marcado como 404 / fallido
+        if (urlAudio && !this.audiosFallidos.has(urlAudio)) {
+            this.fuenteActiva = 'audio';
+            this.detenerTTS();
+
+            if (this.audio.src !== urlAudio) {
+                this.audio.src = urlAudio;
+                this.audio.load();
+            }
+
+            this.audio.play().then(() => {
+                const sub = document.getElementById(`menu-sub-${modo}`);
+                if (sub && modo === 'hora') {
+                    const libroNom = (this.opciones?.libro || 'hora').toUpperCase();
+                    sub.textContent = `Rezo de ${libroNom}`;
+                }
+            }).catch(err => {
+                console.warn(`[Cinta] Audio no disponible en servidor para '${modo}' (${urlAudio}):`, err);
+                this.audiosFallidos.add(urlAudio);
+
+                // Si era oficio1.mp3 u oficio2.mp3 y falló, probar con oficio.mp3 antes de TTS
+                if (modo === 'hora' && /oficio[12]\.mp3$/i.test(urlAudio)) {
+                    const urlGenerica = urlAudio.replace(/oficio[12]\.mp3$/i, 'oficio.mp3');
+                    if (!this.audiosFallidos.has(urlGenerica)) {
+                        this.audio.src = urlGenerica;
+                        this.audio.load();
+                        this.audio.play().then(() => {
+                            const sub = document.getElementById(`menu-sub-${modo}`);
+                            if (sub) sub.textContent = `Rezo de OFICIO`;
+                        }).catch(() => {
+                            this.audiosFallidos.add(urlGenerica);
+                            this.ejecutarFallbackTTS(modo);
+                        });
+                        return;
+                    }
+                }
+
+                this.ejecutarFallbackTTS(modo);
+            });
+            return;
+        }
+
+        // Si no hay audio asignado o ya se confirmó que devolvió 404:
+        this.ejecutarFallbackTTS(modo);
+    }
+
+    ejecutarFallbackTTS(modo) {
+        if (this._conmutandoTTS) return;
+        this._conmutandoTTS = true;
+        setTimeout(() => { this._conmutandoTTS = false; }, 600);
+
+        this.fuenteActiva = 'tts';
+        try {
+            if (this.audio) {
+                if (!this.audio.paused) this.audio.pause();
+                this.audio.removeAttribute('src');
+                this.audio.load();
+            }
+        } catch (_) {}
+
+        if (modo === 'hora') {
+            const libroNombre = (this.opciones?.libro || 'hora').toUpperCase();
+            const sub = document.getElementById('menu-sub-hora');
+            if (sub) sub.textContent = `Lector de voz (${libroNombre})`;
+
+            this.mostrarToastAviso('Audio en servidor no disponible. Leyendo con lector de voz...');
+            this.reproducirTTS();
+            return;
+        }
+
+        // Para otros modos (evangelio, lectura1, lectura2):
+        const textoLectura = this.obtenerTextoParaModo(modo);
+        if (textoLectura) {
+            this.mostrarToastAviso(`Audio en servidor no disponible. Leyendo con lector de voz...`);
+            this.prepararTTSConTexto(textoLectura, MODOS_AUDIO[modo]?.nombre || '');
+            this.reproducirTTS();
+        } else {
+            alert(`No hay archivo de audio ni texto litúrgico disponible para ${MODOS_AUDIO[modo]?.nombre || 'este modo'}.`);
+        }
+    }
+
+    obtenerTextoParaModo(modo) {
+        const d = (typeof window !== 'undefined' && window.__salterioDataActual) ? window.__salterioDataActual : (this && this.datosLiturgia ? this.datosLiturgia : null);
+        if (modo === 'lectura1' && d?.lecturasOficio?.primera?.texto) {
+            const l1 = d.lecturasOficio.primera;
+            return `${l1.epigrafeTipo || 'Primera Lectura'} ${l1.cita || ''}. ${l1.descripcion || ''}. ${l1.texto}`;
+        }
+        if (modo === 'lectura2' && d?.lecturasOficio?.segunda?.texto) {
+            const l2 = d.lecturasOficio.segunda;
+            return `${l2.epigrafeTipo || 'Segunda Lectura'}. ${l2.cita || ''}. ${l2.descripcion || ''}. ${l2.texto}`;
+        }
+        if (modo === 'evangelio' && d?.evangelio?.texto) {
+            return `Evangelio. ${d.evangelio.cita || ''}. ${d.evangelio.texto}`;
+        }
+
+        // Fallback a LecturasDB si está disponible
+        const ldb = (typeof window !== 'undefined' && window.LecturasDB) ? window.LecturasDB : null;
+        if (ldb && Array.isArray(ldb)) {
+            const sem = String(this.opciones?.semana || '1');
+            const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'domingo').toLowerCase();
+            const esPar = this.cicloAnio === 'par';
+            if (modo === 'lectura1') {
+                const tipoBuscado = esPar ? 'lectura1_par' : 'lectura1_impar';
+                const found = ldb.find(it => it.semana == sem && it.dia == dia && it.tipo === tipoBuscado);
+                if (found && found.texto) return `${found.epigrafeTipo || 'Primera Lectura'} ${found.cita || ''}. ${found.descripcion || ''}. ${found.texto}`;
+            }
+            if (modo === 'lectura2') {
+                const found = ldb.find(it => it.semana == sem && it.dia == dia && it.tipo === 'lectura2');
+                if (found && found.texto) return `${found.epigrafeTipo || 'Segunda Lectura'}. ${found.cita || ''}. ${found.descripcion || ''}. ${found.texto}`;
+            }
+        }
+        return '';
+    }
+
+    prepararTTSConTexto(textoPlano, titulo = '') {
+        const segmentos = [];
+        if (titulo) segmentos.push({ texto: titulo });
+        segmentos.push({ texto: limpiarTextoParaVoz(textoPlano) });
+        this.prepararTTSDesdeSegmentos(segmentos);
+    }
+
+    mostrarToastAviso(mensaje, duracion = 3500) {
+        let toast = document.getElementById('cinta-toast-fallback');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'cinta-toast-fallback';
+            toast.className = 'cinta-toast-fallback';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `
+            <span class="material-symbols-outlined" style="font-size:20px;color:#38bdf8;">record_voice_over</span>
+            <span style="font-size:13.5px;font-weight:500;">${mensaje}</span>
+        `;
+        toast.classList.add('visible');
+        clearTimeout(toast._hideTimer);
+        toast._hideTimer = setTimeout(() => {
+            toast.classList.remove('visible');
+        }, duracion);
     }
 
     // =========================================================================
@@ -1182,7 +1461,7 @@ export class CintaLiturgica {
 
             // 1. INVITATORIO / INVOCACION INICIAL (Laudes y otras horas)
             if (libroNormalizado === 'laudes' && d.invitatorio && d.invitatorio.activo) {
-                segmentos.push({ texto: "Señor, ábreme los labios. Y mi boca proclamará tu alabanza." });
+                segmentos.push({ texto: "Señor, abre mis labios. Y mi boca proclamará tu alabanza." });
                 if (d.invitatorio.antifona) {
                     segmentos.push({ texto: limpiarTextoParaVoz(d.invitatorio.antifona) });
                 }
@@ -1357,6 +1636,10 @@ export class CintaLiturgica {
 
     prepararTTS() {
         const segmentos = this.construirGuionLiturgico();
+        this.prepararTTSDesdeSegmentos(segmentos);
+    }
+
+    prepararTTSDesdeSegmentos(segmentos) {
         const allChunks = [];
         let runningStart = 0;
         let resumeIdx = null;
@@ -1787,6 +2070,7 @@ export class CintaLiturgica {
         // Detener reproducciones anteriores
         this.audio.pause();
         this.detenerTTS();
+        this.fuenteActiva = null;
 
         if (slider) slider.value = 0;
         if (tActual) tActual.textContent = '0:00';
@@ -1795,21 +2079,30 @@ export class CintaLiturgica {
         document.documentElement.style.setProperty('--progreso-buffer', '0%');
         document.documentElement.style.setProperty('--progreso-reproduccion', '0%');
 
-        if (nuevoModo === 'hora') {
-            // Preparar lector de voz TTS
-            this.prepararTTS();
+        const urlCandidata = (nuevoModo === 'hora') ? (this.audios.hora || '') : (this.audios[nuevoModo] || '');
+
+        if (urlCandidata && !this.audiosFallidos.has(urlCandidata)) {
+            // Intentar cargar archivo MP3 del servidor
+            this.fuenteActiva = 'audio';
+            this.audio.src = urlCandidata;
+            this.audio.load();
             if (autoPlay) {
-                this.reproducirTTS();
+                this.audio.play().catch(() => {
+                    this.audiosFallidos.add(urlCandidata);
+                    this.ejecutarFallbackTTS(nuevoModo);
+                });
             }
         } else {
-            // Modos con archivo MP3
-            const urlNueva = this.audios[nuevoModo];
-            if (urlNueva) {
-                this.audio.src = urlNueva;
-                this.audio.load();
-                if (autoPlay) {
-                    this.audio.play().catch(e => console.warn('Error autoplay:', e));
-                }
+            // Modo TTS directo
+            this.fuenteActiva = 'tts';
+            if (nuevoModo === 'hora') {
+                this.prepararTTS();
+            } else {
+                const txt = this.obtenerTextoParaModo(nuevoModo);
+                if (txt) this.prepararTTSConTexto(txt, infoModo.nombre);
+            }
+            if (autoPlay) {
+                this.reproducirTTS();
             }
         }
     }
@@ -1832,7 +2125,7 @@ export class CintaLiturgica {
             this.audios.hora = url;
             this.subtitulos.hora = nombreLibro;
             const sub = document.getElementById('menu-sub-hora');
-            if (sub && nombreLibro) sub.textContent = `Lector de voz (${nombreLibro.toUpperCase()})`;
+            if (sub && nombreLibro) sub.textContent = nombreLibro;
         }
     }
 
@@ -1867,6 +2160,8 @@ export class CintaLiturgica {
     }
 
     cargarAudios(mapAudios = {}) {
+        this.audiosFallidos.clear();
+        this.fuenteActiva = null;
         if (mapAudios.evangelio) this.cargarEvangelio(mapAudios.evangelio, mapAudios.subEvangelio);
         if (mapAudios.hora) this.cargarAudioLibro(mapAudios.hora, mapAudios.subHora);
         if (mapAudios.lectura1) this.cargarLectura1(mapAudios.lectura1, mapAudios.subLectura1);

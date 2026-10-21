@@ -490,3 +490,9 @@ body {
     from { opacity: 0; transform: translateY(-6px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Rúbrica para sustitución de nombres litúrgicos (N. / N) */
+.rubrica-n {
+    color: var(--salterio-rubrica, #ff0000) !important;
+    font-weight: inherit;
+}

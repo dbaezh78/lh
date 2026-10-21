@@ -71,8 +71,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     configurarEventos();
     autocompletarId();
     await cargarDatos();
+    restaurarParametrosDesdeURL();
     renderizarLista();
 });
+
+// Restaurar parámetros y texto transferidos desde Formulario Salterios
+function restaurarParametrosDesdeURL() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tiempo = urlParams.get('tiempo');
+        const semana = urlParams.get('semana');
+        const dia = urlParams.get('dia');
+        const libro = urlParams.get('libro');
+        const texto = urlParams.get('texto') || urlParams.get('busqueda') || '';
+        const titulo = urlParams.get('titulo') || '';
+
+        let cambio = false;
+        if (tiempo && document.getElementById('form-tiempo')) {
+            document.getElementById('form-tiempo').value = tiempo;
+            actualizarOpcionesSemanas();
+            cambio = true;
+        }
+        if (semana && document.getElementById('form-semana')) {
+            const semNum = String(semana).replace(/\D/g, '') || '1';
+            document.getElementById('form-semana').value = semNum;
+            cambio = true;
+        }
+        if (dia && document.getElementById('form-dia')) {
+            document.getElementById('form-dia').value = dia;
+            cambio = true;
+        }
+        if (libro && document.getElementById('form-libro')) {
+            let lVal = libro === 'vispera' ? 'visperas' : libro;
+            document.getElementById('form-libro').value = lVal;
+            cambio = true;
+        }
+        if (cambio) {
+            autocompletarId();
+        }
+        if (texto) {
+            const txtArea = document.getElementById('form-texto');
+            if (txtArea && !txtArea.value) {
+                txtArea.value = texto;
+            }
+            const inpTit = document.getElementById('form-titulo');
+            if (inpTit && !inpTit.value) {
+                inpTit.value = titulo || (texto.length < 60 ? `Himno: ${texto}` : `Himno: ${texto.substring(0, 45)}...`);
+            }
+            const filtro = document.getElementById('filtro-buscar');
+            if (filtro) {
+                filtro.value = texto;
+            }
+            mostrarBannerEstado(`➕ Parámetros transferidos desde Salterios: «${texto.length > 40 ? texto.substring(0, 40) + '...' : texto}»`, 'info');
+        }
+    } catch (_) {}
+}
 
 // Actualiza las opciones del selector de semanas según el tiempo litúrgico
 function actualizarOpcionesSemanas(semanaPrevia = null) {
@@ -527,10 +580,17 @@ function renderizarLista() {
                         </button>
                     </div>
                 </div>
-                <div class="himno-card-cuerpo">${escapeHtml(h.texto || '')}</div>
+                <div class="himno-card-cuerpo">${formatearRubricaN(escapeHtml(h.texto || ''))}</div>
             </div>
         `;
     }).join('');
+}
+
+function formatearRubricaN(texto = '') {
+    if (!texto || typeof texto !== 'string') return texto;
+    return texto
+        .replace(/\bN:\./g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N.</span>')
+        .replace(/\bN:(?!\w)/g, '<span class="rubrica-n" style="color: var(--salterio-rubrica, #ff0000);">N</span>');
 }
 
 function escapeHtml(text) {

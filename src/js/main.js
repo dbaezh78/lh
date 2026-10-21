@@ -1500,10 +1500,14 @@ export async function descargarAudioPortadaActual() {
             const txtEnc = encodeURIComponent(fragmentos[i]);
             const ttsTarget = `https://audio1.spanishdict.com/audio?lang=es&text=${txtEnc}`;
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(ttsTarget)}`;
-            const r = await fetch(proxyUrl);
-            if (r.ok) {
-                const buf = await r.arrayBuffer();
-                if (buf && buf.byteLength > 0) buffers.push(buf);
+            try {
+                const r = await fetch(proxyUrl);
+                if (r && r.ok) {
+                    const buf = await r.arrayBuffer();
+                    if (buf && buf.byteLength > 0) buffers.push(buf);
+                }
+            } catch (_) {
+                break;
             }
         }
 

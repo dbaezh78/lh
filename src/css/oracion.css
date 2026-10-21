@@ -561,3 +561,9 @@ body {
     color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
 }
+
+/* Rúbrica para sustitución de nombres litúrgicos (N. / N) */
+.rubrica-n {
+    color: var(--salterio-rubrica, #ff0000) !important;
+    font-weight: inherit;
+}
