@@ -30,7 +30,7 @@
     // 3. Crear el HTML de la navegación 
     // Añadimos 'style="visibility: hidden"' para evitar el parpadeo sin estilos
 // 3. Crear el HTML de la navegación 
-    window.APP_VERSION = '1.0.08';
+    window.APP_VERSION = '1.0.11';
     const appVersion = window.APP_VERSION;
 
     // Función universal para mostrar ventana modal de archivos actualizándose

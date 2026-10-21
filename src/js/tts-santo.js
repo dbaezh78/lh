@@ -37,7 +37,12 @@ let listenersAttached = false;
 export function obtenerVozConfigurada() {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
 
-    const vozGuardada = localStorage.getItem('pref-tts-voice') || '';
+    let vozGuardada = localStorage.getItem('pref-tts-voice') || '';
+    if (vozGuardada && (vozGuardada.toLowerCase().includes('raul') || vozGuardada.toLowerCase().includes('sabina'))) {
+        try { localStorage.removeItem('pref-tts-voice'); } catch (_) {}
+        vozGuardada = '';
+    }
+
     const voices = window.speechSynthesis.getVoices() || [];
     let vozElegida = null;
 
@@ -45,17 +50,24 @@ export function obtenerVozConfigurada() {
         vozElegida = voices.find(v => 
             v.name === vozGuardada || 
             v.name.toLowerCase() === vozGuardada.toLowerCase() ||
-            (vozGuardada.includes('Raul') && v.name.includes('Raul')) ||
-            (vozGuardada.includes('Sabina') && v.name.includes('Sabina')) ||
-            (vozGuardada.includes('Estados Unidos') && v.name.includes('Estados Unidos') && v.name.includes('Google')) ||
-            (vozGuardada.startsWith('Google español') && !vozGuardada.includes('Estados Unidos') && v.name.startsWith('Google español') && !v.name.includes('Estados Unidos'))
+            (vozGuardada.includes('Estados Unidos') && v.name.includes('Estados Unidos') && v.name.toLowerCase().includes('google')) ||
+            (vozGuardada.includes('Google español') && v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('español')) ||
+            (vozGuardada.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('jorge'))
         );
     }
     if (!vozElegida) {
-        // Fallback: top 4 de preferencia o primera disponible en español
-        vozElegida = voices.find(v => v.name.includes('Raul'))
-                  || voices.find(v => v.name.includes('Sabina'))
-                  || voices.find(v => v.name.startsWith('Google español'))
+        // Prioridad Google español y Voces Naturales
+        vozElegida = voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+                  || voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('español') || (v.lang || '').toLowerCase().startsWith('es')))
+                  || voices.find(v => v.name.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('natural'))
+                  || voices.find(v => v.name.toLowerCase().includes('dalia') && v.name.toLowerCase().includes('natural'))
+                  || voices.find(v => v.name.toLowerCase().includes('google') && (v.lang || '').toLowerCase().startsWith('es'))
+                  || voices.find(v => (v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('online')) && (v.lang || '').toLowerCase().startsWith('es'))
+                  || voices.find(v => {
+                      const l = (v.lang || '').toLowerCase().replace(/_/g, '-');
+                      return (l.startsWith('es-419') || l.startsWith('es-mx') || l.startsWith('es-us')) && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina');
+                  })
+                  || voices.find(v => (v.lang || '').toLowerCase().startsWith('es') && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina'))
                   || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
     }
     return vozElegida;
@@ -65,9 +77,16 @@ export function obtenerVozConfigurada() {
  * Obtiene la velocidad configurada por el usuario en Ajustes (entre 0.5 y 2.0)
  */
 export function obtenerRateConfigurado() {
-    if (typeof window === 'undefined') return 1.3;
-    const rateGuardado = parseFloat(localStorage.getItem('pref-tts-rate') || '1.3');
-    return (!isNaN(rateGuardado) && rateGuardado >= 0.5 && rateGuardado <= 2.0) ? rateGuardado : 1.3;
+    if (typeof window === 'undefined') return 1.0;
+    const rateGuardado = localStorage.getItem('pref-tts-rate');
+    if (rateGuardado === null || rateGuardado === '1.3') {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('pref-tts-rate', '1');
+        }
+        return 1.0;
+    }
+    const r = parseFloat(rateGuardado);
+    return (!isNaN(r) && r >= 0.5 && r <= 2.0) ? r : 1.0;
 }
 
 /**
@@ -493,7 +512,7 @@ function reproducirChunkActual() {
     const rateFinal = obtenerRateConfigurado();
 
     const utterance = new SpeechSynthesisUtterance(textoChunk);
-    utterance.lang = (vozElegida && vozElegida.lang) ? vozElegida.lang : 'es-ES';
+    utterance.lang = (vozElegida && vozElegida.lang) ? vozElegida.lang : 'es-MX';
     utterance.rate = rateFinal;
     if (vozElegida) utterance.voice = vozElegida;
 

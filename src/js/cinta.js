@@ -221,7 +221,13 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 export function obtenerVozConfigurada() {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
 
-    const vozGuardada = localStorage.getItem('pref-tts-voice') || '';
+    let vozGuardada = localStorage.getItem('pref-tts-voice') || '';
+    // Purgar voces mecánicas antiguas si quedaron guardadas en localStorage
+    if (vozGuardada && (vozGuardada.toLowerCase().includes('raul') || vozGuardada.toLowerCase().includes('sabina'))) {
+        try { localStorage.removeItem('pref-tts-voice'); } catch (_) {}
+        vozGuardada = '';
+    }
+
     const voices = window.speechSynthesis.getVoices() || [];
     let vozElegida = null;
 
@@ -229,33 +235,51 @@ export function obtenerVozConfigurada() {
         vozElegida = voices.find(v => 
             v.name === vozGuardada || 
             v.name.toLowerCase() === vozGuardada.toLowerCase() ||
-            (vozGuardada.includes('Raul') && v.name.includes('Raul')) ||
-            (vozGuardada.includes('Sabina') && v.name.includes('Sabina')) ||
-            (vozGuardada.includes('Estados Unidos') && v.name.includes('Estados Unidos') && v.name.includes('Google')) ||
-            (vozGuardada.startsWith('Google español') && !vozGuardada.includes('Estados Unidos') && v.name.startsWith('Google español') && !v.name.includes('Estados Unidos'))
+            (vozGuardada.includes('Estados Unidos') && v.name.includes('Estados Unidos') && v.name.toLowerCase().includes('google')) ||
+            (vozGuardada.includes('Google español') && v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('español')) ||
+            (vozGuardada.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('jorge'))
         );
     }
     if (!vozElegida) {
-        vozElegida = voices.find(v => v.name.includes('Raul'))
-                  || voices.find(v => v.name.includes('Sabina'))
-                  || voices.find(v => v.name.startsWith('Google español'))
+        // MÁXIMA PRIORIDAD: Voces de Google y Voces Naturales Latinas
+        // 1. Google español de Estados Unidos (acento neutro latinoamericano de Google en Chrome)
+        vozElegida = voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+        // 2. Google español (voz natural nítida de Google en Chrome)
+                  || voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('español') || (v.lang || '').toLowerCase().startsWith('es')))
+        // 3. Microsoft Jorge Online (Natural) - Spanish (Mexico) (voz natural de Edge)
+                  || voices.find(v => v.name.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('natural'))
+        // 4. Microsoft Dalia Online (Natural) - Spanish (Mexico) (voz natural de Edge)
+                  || voices.find(v => v.name.toLowerCase().includes('dalia') && v.name.toLowerCase().includes('natural'))
+        // 5. Cualquier otra voz de Google en español
+                  || voices.find(v => v.name.toLowerCase().includes('google') && (v.lang || '').toLowerCase().startsWith('es'))
+        // 6. Cualquier voz natural u online en español
+                  || voices.find(v => (v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('online')) && (v.lang || '').toLowerCase().startsWith('es'))
+        // 7. Voces latinas (es-419, es-mx, es-us)
+                  || voices.find(v => {
+                      const l = (v.lang || '').toLowerCase().replace(/_/g, '-');
+                      return (l.startsWith('es-419') || l.startsWith('es-mx') || l.startsWith('es-us')) && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina');
+                  })
+        // 8. Cualquier voz en español excluyendo explícitamente Raul y Sabina
+                  || voices.find(v => (v.lang || '').toLowerCase().startsWith('es') && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina'))
+        // 9. Fallback final solo si no hay ninguna otra
                   || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
     }
     return vozElegida;
 }
 
 export function obtenerRateConfigurado(esLiturgia = true) {
-    if (typeof window === 'undefined') return 1.3;
+    if (typeof window === 'undefined') return 1.0;
     const rateGuardado = localStorage.getItem('pref-tts-rate');
-    if (rateGuardado !== null) {
-        const r = parseFloat(rateGuardado);
-        if (!isNaN(r) && r >= 0.5 && r <= 2.0 && r !== 1.2 && r !== 1.0) return r;
+    // Si no está configurado o tenía el 1.3 forzado por versiones previas, establecer 1 por defecto
+    if (rateGuardado === null || rateGuardado === '1.3') {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('pref-tts-rate', '1');
+        }
+        return 1.0;
     }
-    // Si era 1.0 o 1.2 de versiones anteriores o no está configurado, actualizar a 1.3 por defecto
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('pref-tts-rate', '1.3');
-    }
-    return 1.3;
+    const r = parseFloat(rateGuardado);
+    if (!isNaN(r) && r >= 0.5 && r <= 2.0) return r;
+    return 1.0;
 }
 
 export function resolverNombreLibroBiblico(cita = '') {
@@ -337,16 +361,64 @@ export function limpiarTextoParaVoz(texto = '') {
         .replace(/\[?\s*\(?\s*no\s+se\s+dice\s+(?:el\s+)?(?:«|"|'|“)?gloria\s+al\s+padre(?:»|"|'|”)?(?:\s|[^a-záéíóúüñ\n])*/gi, '') // Omitir "No se dice Gloria al Padre"
         .replace(/\([^\)]*\)/g, '') // Eliminar notas parentéticas
         .replace(/[*✦]/g, '')       // Eliminar asteriscos y cruces de pausa métrica
-        .replace(/\bV\.\s*/g, '')   // Omitir V.
-        .replace(/\bR\.\s*/g, '')   // Omitir R.
+        .replace(/^[℟R]\/?\.\s*/gi, '') // Omitir R. o ℟. al inicio
+        .replace(/\b[℟R]\/?\.\s*/gi, '')   // Omitir R.
+        .replace(/^[℣V]\/?\.\s*/gi, '') // Omitir V. o ℣. al inicio
+        .replace(/\b[℣V]\/?\.\s*/gi, '')   // Omitir V.
         .replace(/\bAnt\.\s*/gi, '') // Omitir Ant.
         .replace(/\bN:\./g, 'N.')     // Convertir N:. a N. para voz limpia
         .replace(/\bN:(?!\w)/g, 'N')   // Convertir N: a N para voz limpia
+        .replace(/[«»"“”]/g, '')    // Omitir comillas que puedan interferir con TTS
         .replace(/\s+/g, ' ')
         .trim();
 }
 
-export function dividirEnFrasesLectura(texto, maxLen = 170) {
+export function construirSegmentosResponsorio(r1 = '', v = '', r2 = '') {
+    const segmentos = [];
+    if (!r1 && !v && !r2) return segmentos;
+
+    let respuesta = '';
+    if (r1 && r1.includes('*')) {
+        const partes = r1.split('*');
+        respuesta = partes[1].trim();
+    } else if (r2) {
+        respuesta = r2.trim();
+    } else if (r1) {
+        respuesta = r1.trim();
+    }
+
+    const respLimpia = limpiarTextoParaVoz(respuesta).replace(/[.,;:»«"“”‘’]+$/, '').trim();
+    let r1Limpio = limpiarTextoParaVoz(r1).replace(/[.,;:»«"“”‘’]+$/, '').trim();
+    if (r1Limpio && !/[.!?]$/.test(r1Limpio)) r1Limpio += '.';
+    let vLimpio = limpiarTextoParaVoz(v).replace(/[.,;:»«"“”‘’]+$/, '').trim();
+    if (vLimpio && !/[.!?]$/.test(vLimpio)) vLimpio += '.';
+
+    segmentos.push({ texto: "Responsorio." });
+
+    if (respLimpia) {
+        segmentos.push({ texto: `Responderemos: ${respLimpia}.` });
+    }
+
+    if (r1Limpio) {
+        const r1Proclamado = r1Limpio.replace(/\s*\*\s*/g, ', ');
+        segmentos.push({ texto: r1Proclamado });
+    }
+
+    if (respLimpia) {
+        segmentos.push({ texto: `${respLimpia}.` });
+    }
+
+    if (vLimpio) {
+        segmentos.push({ texto: vLimpio });
+        if (respLimpia) {
+            segmentos.push({ texto: `${respLimpia}.` });
+        }
+    }
+
+    return segmentos;
+}
+
+export function dividirEnFrasesLectura(texto, maxLen = 140) {
     if (!texto || !texto.trim()) return [];
 
     const limpio = texto
@@ -363,11 +435,58 @@ export function dividirEnFrasesLectura(texto, maxLen = 170) {
     let curStart = 0;
     let runningIdx = 0;
 
+    const agregarTrozo = (trozo, start, end) => {
+        trozo = (trozo || '').trim();
+        if (!trozo) return;
+        if (trozo.length <= maxLen) {
+            chunks.push({ text: trozo, start: start, end: end });
+            return;
+        }
+        // Subdividir por comas, dos puntos o punto y coma
+        const subPartes = trozo.match(/[^,;:]+[,;:]*|\s+/g) || [trozo];
+        let subCur = '';
+        let subStart = start;
+        let subRunning = start;
+        for (const sp of subPartes) {
+            const spLen = sp.length;
+            if ((subCur.length + spLen) > maxLen && subCur.trim().length > 0) {
+                agregarTrozo(subCur, subStart, subStart + subCur.length);
+                subStart = subRunning;
+                subCur = sp;
+            } else {
+                if (!subCur) subStart = subRunning;
+                subCur += sp;
+            }
+            subRunning += spLen;
+        }
+        if (subCur.trim().length > 0) {
+            if (subCur.trim().length > maxLen) {
+                // Si aún supera maxLen, dividir por palabras
+                const palabras = subCur.trim().split(/\s+/);
+                let pCur = '';
+                let pStart = subStart;
+                for (const p of palabras) {
+                    if ((pCur.length + p.length + 1) > maxLen && pCur.length > 0) {
+                        chunks.push({ text: pCur.trim(), start: pStart, end: pStart + pCur.length });
+                        pStart += pCur.length + 1;
+                        pCur = p;
+                    } else {
+                        pCur += (pCur ? ' ' : '') + p;
+                    }
+                }
+                if (pCur.trim()) {
+                    chunks.push({ text: pCur.trim(), start: pStart, end: end });
+                }
+            } else {
+                chunks.push({ text: subCur.trim(), start: subStart, end: end });
+            }
+        }
+    };
+
     for (const seg of oraciones) {
         const segLen = seg.length;
         if (curChunk.length + segLen > maxLen && curChunk.trim().length > 0) {
-            const trimmed = curChunk.trim();
-            chunks.push({ text: trimmed, start: curStart, end: curStart + curChunk.length });
+            agregarTrozo(curChunk, curStart, curStart + curChunk.length);
             curStart = runningIdx;
             curChunk = seg;
         } else {
@@ -378,7 +497,7 @@ export function dividirEnFrasesLectura(texto, maxLen = 170) {
     }
 
     if (curChunk.trim().length > 0) {
-        chunks.push({ text: curChunk.trim(), start: curStart, end: limpio.length });
+        agregarTrozo(curChunk, curStart, limpio.length);
     }
 
     return chunks;
@@ -405,7 +524,7 @@ export class CintaLiturgica {
 
         // Estado del Reproductor y Modo Activo (Por defecto: Evangelio)
         this.modoActivo = 'evangelio';
-        // Ciclo de lectura para Oficio: 'par' (Año II) o 'impar' (Año I)
+        // Ciclo de lectura para Oficio: 'par' (Año II) o 'impar' (Año I) según el calendario real (2026 = Par / II)
         const anioActual = new Date().getFullYear();
         this.cicloAnio = (typeof window !== 'undefined' && window.__cicloAnioOficio)
             ? window.__cicloAnioOficio
@@ -990,41 +1109,7 @@ export class CintaLiturgica {
         };
 
         try {
-            // 1. Intentar descargar el archivo MP3 del servidor si existe
-            const urlCandidata = (this.modoActivo !== 'hora')
-                ? (this.audios[this.modoActivo] || this.audio?.src)
-                : (this.audios.hora || '');
-
-            if (urlCandidata && !this.audiosFallidos.has(urlCandidata)) {
-                try {
-                    const res = await fetch(urlCandidata);
-                    const cType = (res.headers.get('content-type') || '').toLowerCase();
-                    if (res.ok && !cType.includes('text/html')) {
-                        const blob = await res.blob();
-                        dispararDescargaBlob(blob, nombreArchivo);
-                        this.mostrarToastAviso('Audio descargado exitosamente.');
-                        limpiarEstadoDescarga();
-                        return;
-                    } else if (res.status === 404) {
-                        this.audiosFallidos.add(urlCandidata);
-                    }
-                } catch (_) {
-                    if (this.modoActivo !== 'hora') {
-                        const a = document.createElement('a');
-                        a.href = urlCandidata;
-                        a.download = nombreArchivo;
-                        a.target = '_blank';
-                        a.rel = 'noopener';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        limpiarEstadoDescarga();
-                        return;
-                    }
-                }
-            }
-
-            // 2. Si no existe archivo MP3 pregrabado en el servidor (404), preparar texto litúrgico
+            // Generar y sintetizar MP3 directamente con Google TTS mostrando porcentaje en tiempo real en el reloj
             if (!this.ttsState.fullText || this.ttsState.chunks.length === 0) {
                 if (this.modoActivo === 'hora') {
                     this.prepararTTS();
@@ -1034,98 +1119,158 @@ export class CintaLiturgica {
                 }
             }
 
-            // 2.1 Síntesis MP3 mediante Puter.js (con soporte nativo CORS para navegador)
-            if (this.ttsState.fullText && typeof window !== 'undefined') {
-                try {
-                    if (!window.puter) {
-                        await new Promise((res, rej) => {
-                            const s = document.createElement('script');
-                            s.src = 'https://js.puter.com/v2/';
-                            s.onload = res;
-                            s.onerror = rej;
-                            setTimeout(() => rej(new Error('Timeout Puter')), 4000);
-                            document.head.appendChild(s);
-                        });
-                    }
-                    if (window.puter?.ai?.txt2speech) {
-                        const chunksGrandes = [];
-                        let acum = '';
-                        const partesTxt = this.ttsState.chunks || [];
-                        for (const c of partesTxt) {
-                            if ((acum.length + c.text.length) > 950) {
-                                if (acum) chunksGrandes.push(acum.trim());
-                                acum = c.text + ' ';
-                            } else {
-                                acum += c.text + ' ';
-                            }
-                        }
-                        if (acum.trim()) chunksGrandes.push(acum.trim());
+            const textoLiturgico = this.ttsState.fullText || this.obtenerTextoParaModo(this.modoActivo) || '';
+            if (textoLiturgico && textoLiturgico.trim()) {
+                const sem = String(this.opciones?.semana || '1');
+                const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'lunes').toLowerCase();
+                const langDescarga = localStorage.getItem('pref-tts-download-voice') || 'es-US';
 
+                // Extraer fragmentos de texto para el proceso
+                let partes = (this.ttsState.chunks || []).map(c => c.text).filter(Boolean);
+                if (partes.length === 0) {
+                    partes = dividirEnFrasesLectura(textoLiturgico, 140).map(c => c.text).filter(Boolean);
+                }
+                if (partes.length === 0) partes = [textoLiturgico];
+
+                if (tActual) tActual.textContent = '0%';
+                if (tTotal) tTotal.textContent = `${partes.length} partes`;
+                this.mostrarToastAviso(`Generando ${nombreArchivo} con voz de Google...`, 3000);
+
+                // Detectar endpoint disponible: preferir HTTPS en puerto 4001 para laantillana.com, o HTTP en puerto 4000
+                const candidateBases = [
+                    'https://lh.laantillana.com:4001',
+                    'http://127.0.0.1:4000',
+                    'http://localhost:4000'
+                ];
+
+                let activeBaseUrl = null;
+                for (const base of candidateBases) {
+                    try {
+                        const ctrl = new AbortController();
+                        const tm = setTimeout(() => ctrl.abort(), 600);
+                        const r = await fetch(`${base}/status`, { signal: ctrl.signal });
+                        clearTimeout(tm);
+                        if (r.ok) { activeBaseUrl = base; break; }
+                    } catch (_) {}
+                }
+
+                // A. SÍNTESIS POR FRAGMENTOS CON PORCENTAJE EN TIEMPO REAL EN EL RELOJ
+                if (activeBaseUrl) {
+                    try {
                         const buffers = [];
-                        for (let idx = 0; idx < chunksGrandes.length; idx++) {
-                            const parte = chunksGrandes[idx];
-                            const pct = Math.round(((idx + 1) / chunksGrandes.length) * 100);
+                        for (let idx = 0; idx < partes.length; idx++) {
+                            const pct = Math.round(((idx + 1) / partes.length) * 100);
                             if (tActual) tActual.textContent = `${pct}%`;
 
-                            let audioEl = null;
-                            try {
-                                audioEl = await window.puter.ai.txt2speech(parte, 'es-ES');
-                            } catch (_) {
-                                try {
-                                    audioEl = await window.puter.ai.txt2speech(parte, { language: 'es-ES' });
-                                } catch (_) {
-                                    audioEl = await window.puter.ai.txt2speech(parte);
-                                }
-                            }
-
-                            if (audioEl && audioEl.src) {
-                                let buf = null;
-                                if (audioEl.src.startsWith('data:')) {
-                                    const base64Data = audioEl.src.split(',')[1];
-                                    const binaryString = atob(base64Data);
-                                    const len = binaryString.length;
-                                    const bytes = new Uint8Array(len);
-                                    for (let b = 0; b < len; b++) {
-                                        bytes[b] = binaryString.charCodeAt(b);
-                                    }
-                                    buf = bytes.buffer;
-                                } else {
-                                    const r = await fetch(audioEl.src);
-                                    if (r.ok) {
-                                        buf = await r.arrayBuffer();
-                                    }
-                                }
-                                if (buf && buf.byteLength > 0) buffers.push(buf);
-                            }
-
-                            if (idx < chunksGrandes.length - 1) {
-                                await new Promise(r => setTimeout(r, 120));
-                            }
+                            const parteTexto = partes[idx];
+                            const chunkUrl = `${activeBaseUrl}/api/tts-chunk?text=${encodeURIComponent(parteTexto)}&lang=${encodeURIComponent(langDescarga)}`;
+                            const resChunk = await fetch(chunkUrl);
+                            if (!resChunk.ok) throw new Error(`HTTP ${resChunk.status} en parte ${idx + 1}`);
+                            const ab = await resChunk.arrayBuffer();
+                            if (ab && ab.byteLength > 0) buffers.push(ab);
                         }
 
                         if (buffers.length > 0) {
                             const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
                             dispararDescargaBlob(mp3Blob, nombreArchivo);
-                            this.mostrarToastAviso(`¡${nombreArchivo} generado y descargado con éxito!`);
+                            this.mostrarToastAviso(`¡${nombreArchivo} generado y descargado exitosamente con voz de Google!`, 5000);
+
+                            // Guardar automáticamente en el servidor y repositorio local
+                            try {
+                                fetch(`${activeBaseUrl}/api/save-audio?filename=${encodeURIComponent(nombreArchivo)}&semana=${encodeURIComponent(sem)}&dia=${encodeURIComponent(dia)}`, {
+                                    method: 'POST',
+                                    body: mp3Blob,
+                                    headers: { 'Content-Type': 'audio/mpeg' }
+                                }).catch(() => {});
+                            } catch (_) {}
+
+                            limpiarEstadoDescarga();
+                            return;
+                        }
+                    } catch (chunkErr) {
+                        console.warn('[Cinta] Error en descarga por fragmentos, probando método por lote:', chunkErr);
+                    }
+                }
+
+                // B. FALLBACK POR LOTE CON SIMULACIÓN DE PORCENTAJE EN EL RELOJ
+                let pctSimulado = 10;
+                if (tActual) tActual.textContent = `${pctSimulado}%`;
+                const intervaloProgreso = setInterval(() => {
+                    pctSimulado = Math.min(95, pctSimulado + 5);
+                    if (tActual) tActual.textContent = `${pctSimulado}%`;
+                }, 350);
+
+                try {
+                    const fallbackUrl = (activeBaseUrl || 'http://127.0.0.1:4000') + '/api/tts';
+                    const res = await fetch(fallbackUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            text: textoLiturgico,
+                            filename: nombreArchivo,
+                            semana: sem,
+                            dia: dia,
+                            lang: langDescarga
+                        })
+                    });
+                    clearInterval(intervaloProgreso);
+
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        if (blob && blob.size > 1000) {
+                            if (tActual) tActual.textContent = '100%';
+                            dispararDescargaBlob(blob, nombreArchivo);
+                            this.mostrarToastAviso(`¡${nombreArchivo} generado y descargado exitosamente con voz de Google!`, 5000);
                             limpiarEstadoDescarga();
                             return;
                         }
                     }
-                } catch (errPuter) {
-                    console.warn('[Cinta] Síntesis MP3 no disponible en este momento:', errPuter);
+                } catch (fallbackErr) {
+                    clearInterval(intervaloProgreso);
+                    console.warn('[Cinta] Fetch por lote falló:', fallbackErr);
+                }
+
+                // C. FALLBACK FINAL POR FORMULARIO DIRECTO
+                try {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'http://127.0.0.1:4000/api/tts';
+                    form.target = '_blank';
+                    form.style.display = 'none';
+
+                    const campos = {
+                        text: textoLiturgico,
+                        filename: nombreArchivo,
+                        semana: sem,
+                        dia: dia,
+                        lang: langDescarga
+                    };
+
+                    for (const [k, v] of Object.entries(campos)) {
+                        const inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = k;
+                        inp.value = v;
+                        form.appendChild(inp);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                    setTimeout(() => {
+                        if (document.body.contains(form)) document.body.removeChild(form);
+                    }, 2500);
+
+                    this.mostrarToastAviso(`Petición enviada al generador local para descargar ${nombreArchivo}.`, 5000);
+                    limpiarEstadoDescarga();
+                    return;
+                } catch (formErr) {
+                    console.error('[Cinta] Error en formulario:', formErr);
                 }
             }
 
-            // 2.3 Respaldo limpio y seguro: Exportar guión de locución litúrgica en texto (.txt)
-            if (this.ttsState.fullText) {
-                const modoLabel = MODOS_AUDIO[this.modoActivo]?.nombre || 'Liturgia';
-                const headerTxt = `LITURGIA DE LAS HORAS — GUIÓN DE LOCUCIÓN\nModo: ${modoLabel}\nArchivo de audio previsto: ${nombreArchivo}\nFecha de generación: ${new Date().toLocaleDateString('es-ES')}\n${'='.repeat(60)}\n\n`;
-                const textBlob = new Blob([headerTxt + this.ttsState.fullText], { type: 'text/plain;charset=utf-8' });
-                dispararDescargaBlob(textBlob, nombreArchivo.replace('.mp3', '.txt'));
-                this.mostrarToastAviso('Audio en servidor no disponible aún (404). Se descargó el guión de locución (.txt) y el reproductor lo leerá con voz al pulsar Play.', 5500);
-                limpiarEstadoDescarga();
-                return;
-            }
+            this.mostrarToastAviso(`El servicio de audio local no está activo en 127.0.0.1:4000. Inicia "iniciar-servicio-audio.bat" en la carpeta del proyecto para descargar ${nombreArchivo} con voz de Google.`, 7000);
+            limpiarEstadoDescarga();
+            return;
 
             // 3. Respaldo final: si hay otro audio MP3 colocado en this.audio.src o en evangelio
             const urlRespaldo = this.audio?.src || this.audios.evangelio || this.audios.lectura1 || this.audios.lectura2;
@@ -1259,50 +1404,140 @@ export class CintaLiturgica {
             if (sub) sub.textContent = `Lector de voz (${libroNombre})`;
 
             this.mostrarToastAviso('Audio en servidor no disponible. Leyendo con lector de voz...');
+            this.prepararTTS('hora');
             this.reproducirTTS();
             return;
         }
 
         // Para otros modos (evangelio, lectura1, lectura2):
-        const textoLectura = this.obtenerTextoParaModo(modo);
-        if (textoLectura) {
+        const sub = document.getElementById(`menu-sub-${modo}`);
+        if (sub) sub.textContent = `Lector de voz (${MODOS_AUDIO[modo]?.nombre || modo})`;
+
+        const segs = this.prepararTTS(modo);
+        if (segs && segs.length > 0) {
             this.mostrarToastAviso(`Audio en servidor no disponible. Leyendo con lector de voz...`);
-            this.prepararTTSConTexto(textoLectura, MODOS_AUDIO[modo]?.nombre || '');
             this.reproducirTTS();
         } else {
             alert(`No hay archivo de audio ni texto litúrgico disponible para ${MODOS_AUDIO[modo]?.nombre || 'este modo'}.`);
         }
     }
 
-    obtenerTextoParaModo(modo) {
-        const d = (typeof window !== 'undefined' && window.__salterioDataActual) ? window.__salterioDataActual : (this && this.datosLiturgia ? this.datosLiturgia : null);
-        if (modo === 'lectura1' && d?.lecturasOficio?.primera?.texto) {
-            const l1 = d.lecturasOficio.primera;
-            return `${l1.epigrafeTipo || 'Primera Lectura'} ${l1.cita || ''}. ${l1.descripcion || ''}. ${l1.texto}`;
-        }
-        if (modo === 'lectura2' && d?.lecturasOficio?.segunda?.texto) {
-            const l2 = d.lecturasOficio.segunda;
-            return `${l2.epigrafeTipo || 'Segunda Lectura'}. ${l2.cita || ''}. ${l2.descripcion || ''}. ${l2.texto}`;
-        }
-        if (modo === 'evangelio' && d?.evangelio?.texto) {
-            return `Evangelio. ${d.evangelio.cita || ''}. ${d.evangelio.texto}`;
+    construirSegmentosParaModo(modo) {
+        if (modo === 'hora') {
+            return this.construirGuionLiturgico();
         }
 
-        // Fallback a LecturasDB si está disponible
+        const d = (typeof window !== 'undefined' && window.__salterioDataActual) ? window.__salterioDataActual : (this && this.datosLiturgia ? this.datosLiturgia : null);
         const ldb = (typeof window !== 'undefined' && window.LecturasDB) ? window.LecturasDB : null;
-        if (ldb && Array.isArray(ldb)) {
-            const sem = String(this.opciones?.semana || '1');
-            const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'domingo').toLowerCase();
-            const esPar = this.cicloAnio === 'par';
-            if (modo === 'lectura1') {
-                const tipoBuscado = esPar ? 'lectura1_par' : 'lectura1_impar';
-                const found = ldb.find(it => it.semana == sem && it.dia == dia && it.tipo === tipoBuscado);
-                if (found && found.texto) return `${found.epigrafeTipo || 'Primera Lectura'} ${found.cita || ''}. ${found.descripcion || ''}. ${found.texto}`;
+        const segmentos = [];
+
+        if (modo === 'lectura1') {
+            let l1 = d?.lecturasOficio?.primera;
+            if ((!l1 || !l1.texto) && ldb) {
+                const sem = String(this.opciones?.semana || '1');
+                const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'domingo').toLowerCase();
+                const esPar = this.cicloAnio === 'par';
+                if (typeof ldb.obtenerLectura1 === 'function') {
+                    l1 = ldb.obtenerLectura1(this.opciones?.tiempo || 'ordinario', sem, dia, esPar);
+                } else if (Array.isArray(ldb)) {
+                    const tipoBuscado = esPar ? 'lectura1_par' : 'lectura1_impar';
+                    l1 = ldb.find(it => it.semana == sem && it.dia == dia && it.tipo === tipoBuscado);
+                }
             }
-            if (modo === 'lectura2') {
-                const found = ldb.find(it => it.semana == sem && it.dia == dia && it.tipo === 'lectura2');
-                if (found && found.texto) return `${found.epigrafeTipo || 'Segunda Lectura'}. ${found.cita || ''}. ${found.descripcion || ''}. ${found.texto}`;
+
+            if (l1) {
+                // Limpiar título e introducción para omitir año par/impar
+                let cita1 = '';
+                if (l1.cita) {
+                    const cLimpia = l1.cita.replace(/\(?[Aa]ño\s+(?:par|impar|[I|V|X]+)\)?/gi, '').replace(/[\d,.\s:-]+$/g, '').trim();
+                    if (/^de\s+/i.test(cLimpia)) {
+                        cita1 = cLimpia;
+                    } else {
+                        cita1 = resolverNombreLibroBiblico(l1.cita);
+                    }
+                }
+                let desc1 = limpiarTextoParaVoz(l1.descripcion || l1.subtitulo || '');
+                desc1 = desc1.replace(/\(?[Aa]ño\s+(?:par|impar|[I|V|X]+)\)?/gi, '').replace(/\b(?:par|impar)\b/gi, '').trim();
+
+                const introLectura1 = `Primera lectura. ${cita1 ? cita1 + '.' : ''} ${desc1}`.replace(/\s+/g, ' ').trim();
+                segmentos.push({ texto: introLectura1 });
+
+                if (l1.texto) {
+                    segmentos.push({ texto: limpiarTextoParaVoz(l1.texto) });
+                }
+                // Al final de la primera lectura: "Palabra de Dios. Te alabamos, Señor."
+                segmentos.push({ texto: "Palabra de Dios. Te alabamos, Señor." });
+
+                // Responsorio de la 1ª Lectura
+                const r1 = l1.respR1 || l1.responsorio?.r1 || '';
+                const v1 = l1.respV || l1.responsorio?.v || '';
+                const r2 = l1.respR2 || l1.responsorio?.r2 || '';
+                if (r1) {
+                    segmentos.push(...construirSegmentosResponsorio(r1, v1, r2));
+                }
             }
+            return segmentos;
+        }
+
+        if (modo === 'lectura2') {
+            let l2 = d?.lecturasOficio?.segunda;
+            if ((!l2 || !l2.texto) && ldb) {
+                const sem = String(this.opciones?.semana || '1');
+                const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'domingo').toLowerCase();
+                if (typeof ldb.obtenerLectura2 === 'function') {
+                    l2 = ldb.obtenerLectura2(this.opciones?.tiempo || 'ordinario', sem, dia);
+                } else if (Array.isArray(ldb)) {
+                    l2 = ldb.find(it => it.semana == sem && it.dia == dia && it.tipo === 'lectura2');
+                }
+            }
+
+            if (l2) {
+                let cita2 = limpiarTextoParaVoz(l2.cita || '');
+                let desc2 = limpiarTextoParaVoz(l2.descripcion || l2.subtitulo || '');
+                cita2 = cita2.replace(/\(?[Aa]ño\s+(?:par|impar|[I|V|X]+)\)?/gi, '').replace(/\b(?:par|impar)\b/gi, '').trim();
+                desc2 = desc2.replace(/\(?[Aa]ño\s+(?:par|impar|[I|V|X]+)\)?/gi, '').replace(/\b(?:par|impar)\b/gi, '').trim();
+
+                const introLectura2 = `Segunda lectura. ${cita2 ? cita2 + '.' : ''} ${desc2}`.replace(/\s+/g, ' ').trim();
+                segmentos.push({ texto: introLectura2 });
+
+                if (l2.texto) {
+                    segmentos.push({ texto: limpiarTextoParaVoz(l2.texto) });
+                }
+
+                // Al terminar la segunda lectura, decir el nombre de la lectura
+                const nombreLectura2 = desc2 || cita2 || l2.titulo || '';
+                if (nombreLectura2) {
+                    segmentos.push({ texto: nombreLectura2.endsWith('.') ? nombreLectura2 : `${nombreLectura2}.` });
+                }
+
+                // Responsorio de la 2ª Lectura (sigue el mismo patrón)
+                const r1_2 = l2.respR1 || l2.responsorio?.r1 || '';
+                const v_2 = l2.respV || l2.responsorio?.v || '';
+                const r2_2 = l2.respR2 || l2.responsorio?.r2 || '';
+                if (r1_2) {
+                    segmentos.push(...construirSegmentosResponsorio(r1_2, v_2, r2_2));
+                }
+            }
+            return segmentos;
+        }
+
+        if (modo === 'evangelio') {
+            if (d?.evangelio?.texto) {
+                const citaEv = limpiarTextoParaVoz(d.evangelio.cita || '');
+                segmentos.push({ texto: `Evangelio. ${citaEv ? citaEv + '.' : ''}`.trim() });
+                segmentos.push({ texto: limpiarTextoParaVoz(d.evangelio.texto) });
+                segmentos.push({ texto: "Palabra del Señor. Gloria a ti, Señor Jesús." });
+            }
+            return segmentos;
+        }
+
+        return segmentos;
+    }
+
+    obtenerTextoParaModo(modo) {
+        const segs = this.construirSegmentosParaModo(modo);
+        if (segs && segs.length > 0) {
+            return segs.map(s => s.texto).join(' ');
         }
         return '';
     }
@@ -1381,57 +1616,10 @@ export class CintaLiturgica {
                 }
 
                 // 5. PRIMERA LECTURA (IMAGEN 4)
-                if (d.lecturasOficio && d.lecturasOficio.primera) {
-                    const l1 = d.lecturasOficio.primera;
-                    const tit1 = l1.epigrafeTipo || 'Primera lectura';
-                    const cita1 = l1.cita ? resolverNombreLibroBiblico(l1.cita) : '';
-                    segmentos.push({ texto: `${tit1} ${cita1}. ${limpiarTextoParaVoz(l1.descripcion || l1.subtitulo || '')}` });
-                    if (l1.texto) {
-                        segmentos.push({ texto: limpiarTextoParaVoz(l1.texto) });
-                    }
-                    const r1 = l1.respR1 || l1.responsorio?.r1 || '';
-                    const v1 = l1.respV || l1.responsorio?.v || '';
-                    const r2 = l1.respR2 || l1.responsorio?.r2 || '';
-                    if (r1) {
-                        segmentos.push({ texto: "Responsorio." });
-                        if (r1.includes('*')) {
-                            const partes = r1.split('*');
-                            segmentos.push({ texto: limpiarTextoParaVoz(partes[0].trim()) });
-                            segmentos.push({ texto: limpiarTextoParaVoz(partes[1].trim()) });
-                        } else {
-                            segmentos.push({ texto: limpiarTextoParaVoz(r1) });
-                            if (r2) segmentos.push({ texto: limpiarTextoParaVoz(r2) });
-                        }
-                        if (v1) segmentos.push({ texto: limpiarTextoParaVoz(v1) });
-                        if (r2) segmentos.push({ texto: limpiarTextoParaVoz(r2) });
-                    }
-                }
+                segmentos.push(...this.construirSegmentosParaModo('lectura1'));
 
                 // 6. SEGUNDA LECTURA PATRÍSTICA
-                if (d.lecturasOficio && d.lecturasOficio.segunda) {
-                    const l2 = d.lecturasOficio.segunda;
-                    const tit2 = l2.epigrafeTipo || 'Segunda lectura';
-                    segmentos.push({ texto: `${tit2}. ${limpiarTextoParaVoz(l2.cita || '')}. ${limpiarTextoParaVoz(l2.descripcion || l2.subtitulo || '')}` });
-                    if (l2.texto) {
-                        segmentos.push({ texto: limpiarTextoParaVoz(l2.texto) });
-                    }
-                    const r1_2 = l2.respR1 || l2.responsorio?.r1 || '';
-                    const v_2 = l2.respV || l2.responsorio?.v || '';
-                    const r2_2 = l2.respR2 || l2.responsorio?.r2 || '';
-                    if (r1_2) {
-                        segmentos.push({ texto: "Responsorio." });
-                        if (r1_2.includes('*')) {
-                            const partes = r1_2.split('*');
-                            segmentos.push({ texto: limpiarTextoParaVoz(partes[0].trim()) });
-                            segmentos.push({ texto: limpiarTextoParaVoz(partes[1].trim()) });
-                        } else {
-                            segmentos.push({ texto: limpiarTextoParaVoz(r1_2) });
-                            if (r2_2) segmentos.push({ texto: limpiarTextoParaVoz(r2_2) });
-                        }
-                        if (v_2) segmentos.push({ texto: limpiarTextoParaVoz(v_2) });
-                        if (r2_2) segmentos.push({ texto: limpiarTextoParaVoz(r2_2) });
-                    }
-                }
+                segmentos.push(...this.construirSegmentosParaModo('lectura2'));
 
                 // 7. HIMNO TE DEUM
                 if (d.dia === 'domingo' || d.tiempo === 'pascua' || d.tiempo === 'navidad' || d.himnoTeDeum) {
@@ -1546,11 +1734,7 @@ export class CintaLiturgica {
                 if (rb.r2) segmentos.push({ texto: limpiarTextoParaVoz(rb.r2) });
                 if (rb.v3) segmentos.push({ texto: limpiarTextoParaVoz(rb.v3) });
                 if (rb.r3) {
-                    segmentos.push({ 
-                        texto: limpiarTextoParaVoz(rb.r3),
-                        esPausaPedagogica: true,
-                        mensajePausa: "Puedes seleccionar para reproducir las lecturas y el evangelio."
-                    });
+                    segmentos.push({ texto: limpiarTextoParaVoz(rb.r3) });
                 }
             }
 
@@ -1634,9 +1818,10 @@ export class CintaLiturgica {
         return limpiarTextoParaVoz(texto);
     }
 
-    prepararTTS() {
-        const segmentos = this.construirGuionLiturgico();
+    prepararTTS(modo = this.modoActivo) {
+        const segmentos = this.construirSegmentosParaModo(modo);
         this.prepararTTSDesdeSegmentos(segmentos);
+        return segmentos;
     }
 
     prepararTTSDesdeSegmentos(segmentos) {
@@ -1787,7 +1972,7 @@ export class CintaLiturgica {
         const rateFinal = obtenerRateConfigurado(true);
 
         const utterance = new SpeechSynthesisUtterance(textoChunk);
-        utterance.lang = (vozElegida && vozElegida.lang) ? vozElegida.lang : 'es-ES';
+        utterance.lang = (vozElegida && vozElegida.lang) ? vozElegida.lang : 'es-MX';
         utterance.rate = rateFinal;
         if (vozElegida) utterance.voice = vozElegida;
 
@@ -1801,21 +1986,6 @@ export class CintaLiturgica {
         utterance.onend = () => {
             if (this.ttsState.isSpeaking) {
                 this.ttsState.currentCharIndex = chunk.end;
-
-                // Pausa pedagógica al terminar el responsorio breve
-                if (chunk.esPausaPedagogica) {
-                    this.pausarTTS();
-                    this.mostrarToastPausa(chunk.mensajePausa || "Puedes seleccionar para reproducir las lecturas y el evangelio.");
-                    if (this.ttsState.checkpointResumeIndex !== null) {
-                        this.ttsState.currentChunkIndex = this.ttsState.checkpointResumeIndex;
-                        const nextChunk = this.ttsState.chunks[this.ttsState.currentChunkIndex];
-                        if (nextChunk) this.ttsState.currentCharIndex = nextChunk.start;
-                    } else {
-                        this.ttsState.currentChunkIndex++;
-                    }
-                    return;
-                }
-
                 this.ttsState.currentChunkIndex++;
                 if (this.ttsState.currentChunkIndex < this.ttsState.chunks.length) {
                     this.reproducirChunkActualTTS();
@@ -1954,7 +2124,7 @@ export class CintaLiturgica {
 
         setTimeout(() => {
             limpiarAvisoYFlecha();
-        }, 12000);
+        }, 7000);
     }
 
     pausarTTS() {
@@ -2017,7 +2187,7 @@ export class CintaLiturgica {
                     this.ttsState.heartbeatId = null;
                 }
             }
-        }, 12000);
+        }, 7000);
     }
 
     limpiarTemporizadoresTTS() {
@@ -2095,12 +2265,7 @@ export class CintaLiturgica {
         } else {
             // Modo TTS directo
             this.fuenteActiva = 'tts';
-            if (nuevoModo === 'hora') {
-                this.prepararTTS();
-            } else {
-                const txt = this.obtenerTextoParaModo(nuevoModo);
-                if (txt) this.prepararTTSConTexto(txt, infoModo.nombre);
-            }
+            this.prepararTTS(nuevoModo);
             if (autoPlay) {
                 this.reproducirTTS();
             }

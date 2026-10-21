@@ -307,6 +307,30 @@ document.addEventListener("DOMContentLoaded", () => {
                     autor: "dbaezh78@gmail.com",
                     ultimaModificacion: new Date().toISOString()
                 };
+                const semillav9 = {
+                    id: "v_1_0_09",
+                    version: "1.0.09",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.09.\n• Locución litúrgica canónica en Oficio de Lectura: responsorios pedagógicos ('Responderemos...'), aclamación de cierre en 1ª Lectura ('Palabra de Dios. Te alabamos, Señor') y proclamación del nombre de la lectura en 2ª Lectura Patrística, omitiendo menciones de año par o impar.\n• Soporte universal para rúbricas litúrgicas: 'N:' (N roja sin dos puntos) y 'N:.' (N roja con punto final) en preces, oraciones y formularios.\n• Invocación inicial canónica en Laudes y Oficio ('Señor, abre mis labios. Y mi boca proclamará tu alabanza.').\n• Botón interactivo (+) en búsquedas sin resultados de antífonas e himnos para abrir el formulario correspondiente en una nueva ventana.\n• Nuevo formulario de control de horas configuradas y faltantes con sus códigos canónicos.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                const semillav10 = {
+                    id: "v_1_0_10",
+                    version: "1.0.10",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.10.\n• Eliminación total de Puter.js y pasarelas de pago externas: adiós definitivo a ventanas de límite de saldo o bloqueo al descargar audios.\n• Nuevo generador offline de audio litúrgico (generar-audios.bat y scripts/generar_audios.ps1) 100% gratuito e ilimitado en Windows con voz mexicana natural (es-MX: Microsoft Raul / Sabina) y codificación directa a MP3.\n• Exportación automática de guión litúrgico (.txt) canónico desde la cinta con doble clic o dos toques en el reloj.\n• Soporte drag-and-drop y por lotes para estructurar y exportar audios a la estructura de carpetas de servidor (audios_generados/s03/lunes/...).",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                const semillav11 = {
+                    id: "v_1_0_11",
+                    version: "1.0.11",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.11.\n• Descarga directa de audio MP3 (oficio2.mp3, laudes.mp3, etc.) con doble clic en el reloj de la cinta reproductora, sintetizado con la voz natural latina de Google (es-US/es-MX).\n• Servicio de audio local con guardado automático directo en el repositorio litúrgico (tordinario/s03/lunes/...) y entrega al navegador sin archivos de texto intermedios.\n• Canon litúrgico en Oficio: aclamación 'Palabra de Dios. Te alabamos, Señor' en 1ª Lectura, responsorio estructurado con 'Responderemos: [Respuesta]' y proclamación del título/nombre de la 2ª Lectura al concluir, omitiendo menciones de año par o impar.\n• Selector de ciclo/lector configurado por defecto en 1 (Año I) y velocidad de lectura canónica en 1.0 sin pausas forzadas.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav1);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav2);
@@ -316,7 +340,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav6);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav7);
                     await window.firebaseAPI.guardarActualizacionFirestore(semillav8);
-                    actualizacionesMemoria = [semillav8, semillav7, semillav6, semillav5, semillav4, semillav3, semillav2, semillav1];
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav9);
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav10);
+                    await window.firebaseAPI.guardarActualizacionFirestore(semillav11);
+                    actualizacionesMemoria = [semillav11, semillav10, semillav9, semillav8, semillav7, semillav6, semillav5, semillav4, semillav3, semillav2, semillav1];
                     renderListaActualizaciones(actualizacionesMemoria);
                     return;
                 } catch (e) {
@@ -441,6 +468,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     await window.firebaseAPI.guardarActualizacionFirestore(v8);
                     listaActualizada.unshift(v8);
+                } catch (e) {}
+            }
+
+            // Registrar automáticamente v1.0.10 si no existe
+            const tieneV10 = listaActualizada.some(d => d.version === "1.0.10" || d.id === "v_1_0_10");
+            if (!tieneV10 && window.firebaseAPI?.guardarActualizacionFirestore) {
+                const v10 = {
+                    id: "v_1_0_10",
+                    version: "1.0.10",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.10.\n• Eliminación total de Puter.js y pasarelas de pago externas: adiós definitivo a ventanas de límite de saldo o bloqueo al descargar audios.\n• Nuevo generador offline de audio litúrgico (generar-audios.bat y scripts/generar_audios.ps1) 100% gratuito e ilimitado en Windows con voz mexicana natural (es-MX: Microsoft Raul / Sabina) y codificación directa a MP3.\n• Exportación automática de guión litúrgico (.txt) canónico desde la cinta con doble clic o dos toques en el reloj.\n• Soporte drag-and-drop y por lotes para estructurar y exportar audios a la estructura de carpetas de servidor (audios_generados/s03/lunes/...).",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                try {
+                    await window.firebaseAPI.guardarActualizacionFirestore(v10);
+                    listaActualizada.unshift(v10);
+                } catch (e) {}
+            }
+
+            // Registrar automáticamente v1.0.11 si no existe
+            const tieneV11 = listaActualizada.some(d => d.version === "1.0.11" || d.id === "v_1_0_11");
+            if (!tieneV11 && window.firebaseAPI?.guardarActualizacionFirestore) {
+                const v11 = {
+                    id: "v_1_0_11",
+                    version: "1.0.11",
+                    fecha: new Date().toISOString().split("T")[0],
+                    detalles: "• Actualización a versión 1.0.11.\n• Descarga directa de audio MP3 (oficio2.mp3, oficio1.mp3, laudes.mp3, etc.) con doble clic en el reloj de la cinta reproductora, sintetizado con la voz natural latina de Google (es-US/es-MX).\n• Servicio de audio local con guardado automático directo en el repositorio litúrgico (tordinario/s03/lunes/...) y entrega al navegador sin archivos de texto intermedios.\n• Canon litúrgico en Oficio: aclamación 'Palabra de Dios. Te alabamos, Señor' en 1ª Lectura, responsorio estructurado con 'Responderemos: [Respuesta]' y proclamación del título/nombre de la 2ª Lectura al concluir, omitiendo menciones de año par o impar.\n• Selector de ciclo/lector configurado por defecto en 1 (Año I) y velocidad de lectura canónica en 1.0 sin pausas forzadas.",
+                    autor: "dbaezh78@gmail.com",
+                    ultimaModificacion: new Date().toISOString()
+                };
+                try {
+                    await window.firebaseAPI.guardarActualizacionFirestore(v11);
+                    listaActualizada.unshift(v11);
                 } catch (e) {}
             }
 

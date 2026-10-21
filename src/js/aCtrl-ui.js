@@ -617,7 +617,7 @@ function inicializarACtrlUI() {
   // Ajustar etiqueta del botón según si ya está actualizado
   function ajustarBotonActualizarACtrl() {
     if (!btnActualizar) return;
-    const currentVer = window.APP_VERSION || "1.0.06";
+    const currentVer = window.APP_VERSION || "1.0.09";
     const lastUpdated = localStorage.getItem("lh_last_updated_version");
     const isUpToDate = (lastUpdated === currentVer);
 
@@ -634,7 +634,7 @@ function inicializarACtrlUI() {
 
   if (btnActualizar) {
     btnActualizar.addEventListener("click", async () => {
-      const currentVer = window.APP_VERSION || "1.0.08";
+      const currentVer = window.APP_VERSION || "1.0.09";
       const lastUpdated = localStorage.getItem("lh_last_updated_version");
       const isUpToDate = (lastUpdated === currentVer);
       const msg = isUpToDate

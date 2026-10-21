@@ -1,11 +1,13 @@
 {
-  "latestVersion": "1.0.08",
+  "latestVersion": "1.0.11",
   "minVersion": "1.0.01",
-  "updateTitle": "Nueva Versión Disponible (v1.0.08)",
-  "updateMessage": "Soporte completo de Ciclos Dominicales (A, B, C) en Antífonas de Cántico Evangélico y Salterios.",
+  "updateTitle": "Nueva Versión Disponible (v1.0.11)",
+  "updateMessage": "Descarga directa de MP3 con Voz de Google desde el reloj, servicio de audio local sin archivos .txt y lectura canónica.",
   "releaseNotes": [
-    "Selector de Ciclos Dominicales (A, B, C) al inicio de Parámetros Litúrgicos en el Constructor de Salterios (frm_salterios.html) con cálculo automático por año (2026 = A, 2027 = B, 2028 = C...).",
-    "Gestor de Antífonas (antifonas.html) actualizado para Cántico Evangélico en Domingos: tres campos independientes para registrar y actualizar simultáneamente las antífonas de Ciclo A, Ciclo B y Ciclo C.",
-    "Resolución y visualización dinámica en salterios.html de la antífona de Cántico Evangélico para Domingos según el ciclo litúrgico correspondiente al año en curso."
+    "Descarga directa de archivos de audio MP3 (oficio2.mp3, oficio1.mp3, laudes.mp3, etc.) al hacer doble clic sobre el reloj de la cinta reproductora.",
+    "Generador y servicio de audio con Voz de Google (es-US / es-MX): adiós a voces robóticas de Windows, cortes prematuros o límites de pago.",
+    "Guardado automático de los audios MP3 directamente en las carpetas locales del repositorio litúrgico (tordinario/s03/lunes/...).",
+    "Locución litúrgica canónica: 'Palabra de Dios. Te alabamos, Señor' al final de la 1ª Lectura, responsorios ordenados con 'Responderemos: [Respuesta]' y mención del título/nombre de la 2ª Lectura sin 'año par' ni 'año impar'.",
+    "Selector de ciclo/lector configurado por defecto en 1 (Año I) y velocidad de lectura canónica en 1.0."
   ]
 }

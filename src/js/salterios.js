@@ -34,6 +34,7 @@ export function obtenerEsParActual() {
     if (typeof window !== 'undefined' && window.__cicloAnioOficio) {
         return window.__cicloAnioOficio === 'par';
     }
+    // Año litúrgico según el calendario real (2026 = Año II / par)
     return currentYear % 2 === 0;
 }
 

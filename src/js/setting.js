@@ -977,9 +977,48 @@ window.cambioEnExpandir = false;
                     tipo: 'select',
                     storageKey: 'pref-tts-voice',
                     default: 'Google español (Google)',
+                    getValue: () => {
+                        let guardada = localStorage.getItem('pref-tts-voice');
+                        if (guardada && (guardada.toLowerCase().includes('raul') || guardada.toLowerCase().includes('sabina'))) {
+                            try { localStorage.removeItem('pref-tts-voice'); } catch (_) {}
+                            guardada = null;
+                        }
+                        if (guardada) return guardada;
+                        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                            const vs = window.speechSynthesis.getVoices() || [];
+                            const googleLat = vs.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')));
+                            if (googleLat) return googleLat.name;
+                            const google = vs.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('español') || (v.lang || '').toLowerCase().startsWith('es')));
+                            if (google) return google.name;
+                            const jorge = vs.find(v => v.name.toLowerCase().includes('jorge'));
+                            if (jorge) return jorge.name;
+                        }
+                        return 'Google español (Google)';
+                    },
                     options: () => obtenerListaVocesDisponibles(),
                     accion: (val) => {
                         localStorage.setItem('pref-tts-voice', val);
+                    }
+                },
+                {
+                    id: 'global-tts-download-voice',
+                    label: 'Audio para descargar',
+                    tipo: 'select',
+                    storageKey: 'pref-tts-download-voice',
+                    default: 'es-US',
+                    getValue: () => {
+                        return localStorage.getItem('pref-tts-download-voice') || 'es-US';
+                    },
+                    options: () => [
+                        { val: 'es-US', text: 'Google Español (Latinoamérica / EE. UU.)' },
+                        { val: 'es-MX', text: 'Google Español (México)' },
+                        { val: 'es-ES', text: 'Google Español (España)' }
+                    ],
+                    accion: (val) => {
+                        localStorage.setItem('pref-tts-download-voice', val);
+                        if (typeof window !== 'undefined') {
+                            window.dispatchEvent(new CustomEvent('lh-tts-download-voice-changed', { detail: { voice: val } }));
+                        }
                     }
                 },
                 {
@@ -987,7 +1026,15 @@ window.cambioEnExpandir = false;
                     label: 'Velocidad de Lectura',
                     tipo: 'range',
                     storageKey: 'pref-tts-rate',
-                    default: '1.3',
+                    default: '1',
+                    getValue: () => {
+                        const guardado = localStorage.getItem('pref-tts-rate');
+                        if (guardado === null || guardado === '1.3') {
+                            localStorage.setItem('pref-tts-rate', '1');
+                            return '1';
+                        }
+                        return guardado;
+                    },
                     min: 0.5,
                     max: 2.0,
                     step: 0.1,
@@ -1003,6 +1050,18 @@ window.cambioEnExpandir = false;
                     color: '#0288d1',
                     accion: () => {
                         window.probarTextoVozAjustes();
+                    }
+                },
+                {
+                    id: 'btn-test-download-audio',
+                    label: 'Probar Audio para descargar',
+                    tipo: 'button',
+                    icon: 'cloud_download',
+                    color: '#2e7d32',
+                    accion: () => {
+                        if (typeof window.probarAudioDescargaAjustes === 'function') {
+                            window.probarAudioDescargaAjustes();
+                        }
                     }
                 }
             ]
@@ -1191,10 +1250,10 @@ window.cambioEnExpandir = false;
     // ==========================================
     function obtenerListaVocesDisponibles() {
         const top4 = [
-            { id: 'Microsoft Raul - Spanish (Mexico)', match: ['raul'], label: 'Microsoft Raul - Spanish (Mexico)' },
-            { id: 'Microsoft Sabina - Spanish (Mexico)', match: ['sabina'], label: 'Microsoft Sabina - Spanish (Mexico)' },
             { id: 'Google español (Google)', realName: 'Google español', match: ['google español', 'google spanish'], label: 'Google español (Google)' },
-            { id: 'Google español de Estados Unidos (Google)', realName: 'Google español de Estados Unidos', match: ['estados unidos'], label: 'Google español de Estados Unidos (Google)' }
+            { id: 'Google español de Estados Unidos (Google)', realName: 'Google español de Estados Unidos', match: ['estados unidos'], label: 'Google español de Estados Unidos (Latinoamérica) (Google)' },
+            { id: 'Microsoft Jorge Online (Natural) - Spanish (Mexico)', match: ['jorge'], label: 'Microsoft Jorge Online (Natural) - Spanish (Mexico)' },
+            { id: 'Microsoft Dalia Online (Natural) - Spanish (Mexico)', match: ['dalia'], label: 'Microsoft Dalia Online (Natural) - Spanish (Mexico)' }
         ];
 
         const list = [];
@@ -1224,57 +1283,33 @@ window.cambioEnExpandir = false;
             });
         });
 
-        // 2. Agregar el resto de voces disponibles en el navegador
+        // 2. Agregar el resto de voces disponibles en el navegador (ÚNICAMENTE EN ESPAÑOL)
         if (voices.length > 0) {
-            const ordenIdiomas = ['es', 'en', 'it', 'pt', 'fr', 'la', 'de', 'ru', 'zh'];
-            const nombresIdiomas = {
-                'es': 'Español',
-                'en': 'Inglés',
-                'it': 'Italiano',
-                'pt': 'Portugués',
-                'fr': 'Francés',
-                'la': 'Latín',
-                'de': 'Alemán',
-                'ru': 'Ruso',
-                'zh': 'Chino'
-            };
-
             const restantes = voices.filter(v => {
                 const vName = (v.name || '').toLowerCase();
-                // Excluir si ya fue incluida en las 4 principales
+                const lang = (v.lang || '').toLowerCase().replace(/_/g, '-');
+                // SOLO voces en español
+                if (!lang.startsWith('es') && !vName.includes('español') && !vName.includes('spanish')) return false;
+                // Excluir voces obsoletas/robóticas
+                if (vName.includes('raul') || vName.includes('sabina')) return false;
+                // Excluir si ya fue incluida en las principales
                 const yaEsta = list.some(item => {
                     const itemVal = (item.val || '').toLowerCase();
                     if (itemVal === vName) return true;
-                    if (vName.includes('raul') && itemVal.includes('raul')) return true;
-                    if (vName.includes('sabina') && itemVal.includes('sabina')) return true;
+                    if (vName.includes('jorge') && itemVal.includes('jorge')) return true;
                     if (vName.includes('google') && vName.includes('español')) return true;
                     return false;
                 });
                 return !yaEsta;
             });
 
-            restantes.sort((a, b) => {
-                const langA = (a.lang || '').toLowerCase().replace(/_/g, '-');
-                const langB = (b.lang || '').toLowerCase().replace(/_/g, '-');
-                const prefA = langA.split('-')[0];
-                const prefB = langB.split('-')[0];
-                const idxA = ordenIdiomas.indexOf(prefA);
-                const idxB = ordenIdiomas.indexOf(prefB);
-                const rankA = idxA === -1 ? 999 : idxA;
-                const rankB = idxB === -1 ? 999 : idxB;
-
-                if (rankA !== rankB) return rankA - rankB;
-                if (langA !== langB) return langA.localeCompare(langB);
-                return a.name.localeCompare(b.name);
-            });
+            restantes.sort((a, b) => a.name.localeCompare(b.name));
 
             restantes.forEach(v => {
                 const langCode = (v.lang || '').replace(/_/g, '-');
-                const pref = langCode.toLowerCase().split('-')[0];
-                const nombreIdioma = nombresIdiomas[pref] || langCode;
                 list.push({
                     val: v.name,
-                    text: `${nombreIdioma} - ${v.name} (${langCode})`
+                    text: `Español - ${v.name} (${langCode})`
                 });
             });
         }
@@ -1301,7 +1336,11 @@ window.cambioEnExpandir = false;
         window.speechSynthesis.cancel();
         const texto = 'Liturgia de las Horas. Esta es una prueba de voz con la velocidad configurada.';
         const utter = new SpeechSynthesisUtterance(texto);
-        const vozGuardada = localStorage.getItem('pref-tts-voice') || '';
+        let vozGuardada = localStorage.getItem('pref-tts-voice') || '';
+        if (vozGuardada && (vozGuardada.toLowerCase().includes('raul') || vozGuardada.toLowerCase().includes('sabina'))) {
+            try { localStorage.removeItem('pref-tts-voice'); } catch (_) {}
+            vozGuardada = '';
+        }
         const voices = window.speechSynthesis.getVoices() || [];
 
         let encontrada = null;
@@ -1309,25 +1348,50 @@ window.cambioEnExpandir = false;
             encontrada = voices.find(v => 
                 v.name === vozGuardada || 
                 v.name.toLowerCase() === vozGuardada.toLowerCase() ||
-                (vozGuardada.includes('Raul') && v.name.includes('Raul')) ||
-                (vozGuardada.includes('Sabina') && v.name.includes('Sabina')) ||
-                (vozGuardada.includes('Estados Unidos') && v.name.includes('Estados Unidos') && v.name.includes('Google')) ||
-                (vozGuardada.startsWith('Google español') && !vozGuardada.includes('Estados Unidos') && v.name.startsWith('Google español') && !v.name.includes('Estados Unidos'))
+                (vozGuardada.includes('Estados Unidos') && v.name.includes('Estados Unidos') && v.name.toLowerCase().includes('google')) ||
+                (vozGuardada.includes('Google español') && v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('español')) ||
+                (vozGuardada.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('jorge'))
             );
         }
         if (!encontrada) {
-            encontrada = voices.find(v => v.name.includes('Raul'))
-                      || voices.find(v => v.name.includes('Sabina'))
-                      || voices.find(v => v.name.startsWith('Google español'))
+            // Prioridad Google español y Voces Naturales
+            encontrada = voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+                      || voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('español') || (v.lang || '').toLowerCase().startsWith('es')))
+                      || voices.find(v => v.name.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('natural'))
+                      || voices.find(v => v.name.toLowerCase().includes('dalia') && v.name.toLowerCase().includes('natural'))
+                      || voices.find(v => v.name.toLowerCase().includes('google') && (v.lang || '').toLowerCase().startsWith('es'))
+                      || voices.find(v => (v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('online')) && (v.lang || '').toLowerCase().startsWith('es'))
+                      || voices.find(v => {
+                          const l = (v.lang || '').toLowerCase().replace(/_/g, '-');
+                          return (l.startsWith('es-419') || l.startsWith('es-mx') || l.startsWith('es-us')) && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina');
+                      })
+                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es') && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina'))
                       || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
         }
 
         if (encontrada) utter.voice = encontrada;
+        utter.lang = (encontrada && encontrada.lang) ? encontrada.lang : 'es-MX';
 
-        const rateGuardado = parseFloat(localStorage.getItem('pref-tts-rate') || '1.3');
-        utter.rate = (!isNaN(rateGuardado) && rateGuardado >= 0.5 && rateGuardado <= 2.0) ? rateGuardado : 1.3;
+        const rateGuardado = parseFloat(localStorage.getItem('pref-tts-rate') || '1');
+        utter.rate = (!isNaN(rateGuardado) && rateGuardado >= 0.5 && rateGuardado <= 2.0) ? rateGuardado : 1.0;
 
         window.speechSynthesis.speak(utter);
+    };
+
+    window.probarAudioDescargaAjustes = () => {
+        const lang = localStorage.getItem('pref-tts-download-voice') || 'es-US';
+        const txt = 'Liturgia de las Horas. Esta es una prueba del audio con la voz seleccionada para descargar.';
+        const candidateBases = [
+            'https://lh.laantillana.com:4001',
+            'http://127.0.0.1:4000',
+            'http://localhost:4000'
+        ];
+        const audioUrl = `${candidateBases[0]}/api/tts-chunk?text=${encodeURIComponent(txt)}&lang=${encodeURIComponent(lang)}`;
+        const a = new Audio(audioUrl);
+        a.play().catch(() => {
+            const a2 = new Audio(`http://127.0.0.1:4000/api/tts-chunk?text=${encodeURIComponent(txt)}&lang=${encodeURIComponent(lang)}`);
+            a2.play().catch(e => console.warn('Error reproduciendo muestra de audio para descargar:', e));
+        });
     };
 
     // ==========================================
