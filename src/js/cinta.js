@@ -1110,17 +1110,36 @@ export class CintaLiturgica {
 
         try {
             // 1. PRIMER PASO: Si el archivo MP3 ya existe en el servidor remoto (ej: to.resucito.do), descargarlo directamente
+            // con barra de porcentaje en tiempo real en el reloj
             const urlCandidata = (this.modoActivo !== 'hora')
                 ? (this.audios[this.modoActivo] || this.audio?.src)
                 : (this.audios.hora || '');
 
             if (urlCandidata && !this.audiosFallidos.has(urlCandidata)) {
                 try {
-                    const res = await fetch(urlCandidata, { method: 'HEAD' });
+                    const res = await fetch(urlCandidata);
                     const cType = (res.headers.get('content-type') || '').toLowerCase();
                     if (res.ok && !cType.includes('text/html')) {
-                        const blobRes = await fetch(urlCandidata);
-                        const blob = await blobRes.blob();
+                        const totalBytes = parseInt(res.headers.get('content-length') || '0', 10);
+                        let blob;
+                        if (res.body && totalBytes > 0 && typeof res.body.getReader === 'function') {
+                            const reader = res.body.getReader();
+                            const chunks = [];
+                            let receivedBytes = 0;
+                            while (true) {
+                                const { done, value } = await reader.read();
+                                if (done) break;
+                                chunks.push(value);
+                                receivedBytes += value.length;
+                                const pct = Math.min(100, Math.round((receivedBytes / totalBytes) * 100));
+                                if (tActual) tActual.textContent = `${pct}%`;
+                                if (tTotal) tTotal.textContent = `${(receivedBytes / (1024 * 1024)).toFixed(1)} / ${(totalBytes / (1024 * 1024)).toFixed(1)} MB`;
+                            }
+                            blob = new Blob(chunks, { type: 'audio/mpeg' });
+                        } else {
+                            if (tActual) tActual.textContent = '100%';
+                            blob = await res.blob();
+                        }
                         dispararDescargaBlob(blob, nombreArchivo);
                         this.mostrarToastAviso(`¡${nombreArchivo} descargado exitosamente desde el servidor!`, 4000);
                         limpiarEstadoDescarga();
@@ -1146,7 +1165,7 @@ export class CintaLiturgica {
                 window.location.protocol === 'file:'
             );
 
-            // Si estamos en entorno local, sintetizar mediante el servicio local en puerto 4000
+            // Si estamos en entorno local y el servicio está levantado, sintetizar con porcentaje en el reloj
             if (esOrigenLocal && textoLiturgico && textoLiturgico.trim()) {
                 const sem = String(this.opciones?.semana || '1');
                 const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'lunes').toLowerCase();
@@ -1161,7 +1180,7 @@ export class CintaLiturgica {
 
                 if (tActual) tActual.textContent = '0%';
                 if (tTotal) tTotal.textContent = `${partes.length} partes`;
-                this.mostrarToastAviso(`Generando ${nombreArchivo} con voz de Google...`, 3000);
+                this.mostrarToastAviso(`Generando ${nombreArchivo}...`, 3000);
 
                 const activeBaseUrl = 'http://127.0.0.1:4000';
                 try {
@@ -1207,25 +1226,11 @@ export class CintaLiturgica {
                 }
             }
 
-            // 3. TERCER PASO: En producción (https://lh.resucito.do) o si no hay servicio local disponible
-            // Descargar el guión litúrgico canónico (.txt) sin arrojar errores de red ni Mixed Content
-            if (textoLiturgico && textoLiturgico.trim()) {
-                const modoLabel = MODOS_AUDIO[this.modoActivo]?.nombre || 'Liturgia';
-                const fechaHoy = new Date().toLocaleDateString('es-ES');
-                const encabezado = `============================================================\nLITURGIA DE LAS HORAS — GUIÓN CANÓNICO DE LOCUCIÓN\nModo: ${modoLabel}\nArchivo previsto: ${nombreArchivo}\nFecha: ${fechaHoy}\n============================================================\n\n`;
-                const textBlob = new Blob([encabezado + textoLiturgico], { type: 'text/plain;charset=utf-8' });
-                dispararDescargaBlob(textBlob, nombreArchivo.replace('.mp3', '.txt'));
-
-                if (!esOrigenLocal) {
-                    this.mostrarToastAviso(`Audio '${nombreArchivo}' aún no subido a to.resucito.do. Se descargó el guión (.txt). Puedes escuchar el rezo en vivo con el botón Play.`, 6000);
-                } else {
-                    this.mostrarToastAviso(`Inicia "iniciar-servicio-audio.bat" en tu PC para generar ${nombreArchivo} automáticamente en MP3. Se descargó el guión (.txt).`, 6000);
-                }
-                limpiarEstadoDescarga();
-                return;
-            }
-
-            this.mostrarToastAviso('No hay audio ni texto litúrgico disponible para este modo.');
+            // 3. TERCER PASO: En producción (https://lh.resucito.do) o si el audio aún no está en el servidor
+            // NUNCA descargar archivos .txt ni arrojar errores de red/Mixed Content
+            this.mostrarToastAviso(`El audio '${nombreArchivo}' aún no está alojado en el servidor para descarga. Puedes rezar en directo pulsando el botón de lectura en la cinta.`, 6000);
+            limpiarEstadoDescarga();
+            return;
         } catch (err) {
             console.warn('[Cinta] Error en proceso de descarga:', err);
             this.mostrarToastAviso('No se pudo completar la descarga.');
