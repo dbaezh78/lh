@@ -348,6 +348,32 @@ async function requestHandler(req, res) {
         return;
     }
 
+    // 5. Servir archivos estáticos del repositorio si aplica
+    const baseDir = path.resolve(__dirname, '..');
+    let reqPath = parsedUrl.pathname === '/' ? '/salterios.html' : parsedUrl.pathname;
+    try {
+        const safePath = path.normalize(path.join(baseDir, decodeURIComponent(reqPath)));
+        if (safePath.startsWith(baseDir) && fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
+            const ext = path.extname(safePath).toLowerCase();
+            const mimeTypes = {
+                '.html': 'text/html; charset=utf-8',
+                '.htm': 'text/html; charset=utf-8',
+                '.js': 'application/javascript; charset=utf-8',
+                '.mjs': 'application/javascript; charset=utf-8',
+                '.json': 'application/json; charset=utf-8',
+                '.css': 'text/css; charset=utf-8',
+                '.png': 'image/png',
+                '.jpg': 'image/jpeg',
+                '.svg': 'image/svg+xml',
+                '.mp3': 'audio/mpeg'
+            };
+            const cType = mimeTypes[ext] || 'application/octet-stream';
+            res.writeHead(200, { 'Content-Type': cType });
+            fs.createReadStream(safePath).pipe(res);
+            return;
+        }
+    } catch (_) {}
+
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');
 }

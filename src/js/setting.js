@@ -1379,19 +1379,37 @@ window.cambioEnExpandir = false;
     };
 
     window.probarAudioDescargaAjustes = () => {
+        if (!('speechSynthesis' in window)) {
+            alert('Tu navegador no soporta síntesis de voz.');
+            return;
+        }
+        window.speechSynthesis.cancel();
         const lang = localStorage.getItem('pref-tts-download-voice') || 'es-US';
-        const txt = 'Liturgia de las Horas. Esta es una prueba del audio con la voz seleccionada para descargar.';
-        const candidateBases = [
-            'https://lh.laantillana.com:4001',
-            'http://127.0.0.1:4000',
-            'http://localhost:4000'
-        ];
-        const audioUrl = `${candidateBases[0]}/api/tts-chunk?text=${encodeURIComponent(txt)}&lang=${encodeURIComponent(lang)}`;
-        const a = new Audio(audioUrl);
-        a.play().catch(() => {
-            const a2 = new Audio(`http://127.0.0.1:4000/api/tts-chunk?text=${encodeURIComponent(txt)}&lang=${encodeURIComponent(lang)}`);
-            a2.play().catch(e => console.warn('Error reproduciendo muestra de audio para descargar:', e));
-        });
+        const txt = 'Liturgia de las Horas. Esta es una muestra del audio para descargar con voz en español.';
+        const utter = new SpeechSynthesisUtterance(txt);
+        utter.lang = lang;
+        utter.rate = 1.0;
+
+        const voices = window.speechSynthesis.getVoices() || [];
+        let matchVoice = null;
+        if (lang === 'es-US') {
+            matchVoice = voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es-us'));
+        } else if (lang === 'es-MX') {
+            matchVoice = voices.find(v => v.name.toLowerCase().includes('jorge'))
+                      || voices.find(v => v.name.toLowerCase().includes('dalia'))
+                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es-mx'));
+        } else if (lang === 'es-ES') {
+            matchVoice = voices.find(v => v.name.toLowerCase().includes('google') && !v.name.toLowerCase().includes('estados unidos'))
+                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es-es'));
+        }
+        if (!matchVoice) {
+            matchVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith(lang.toLowerCase()))
+                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
+        }
+        if (matchVoice) utter.voice = matchVoice;
+
+        window.speechSynthesis.speak(utter);
     };
 
     // ==========================================

@@ -1109,7 +1109,27 @@ export class CintaLiturgica {
         };
 
         try {
-            // Generar y sintetizar MP3 directamente con Google TTS mostrando porcentaje en tiempo real en el reloj
+            // 1. PRIMER PASO: Si el archivo MP3 ya existe en el servidor remoto (ej: to.resucito.do), descargarlo directamente
+            const urlCandidata = (this.modoActivo !== 'hora')
+                ? (this.audios[this.modoActivo] || this.audio?.src)
+                : (this.audios.hora || '');
+
+            if (urlCandidata && !this.audiosFallidos.has(urlCandidata)) {
+                try {
+                    const res = await fetch(urlCandidata, { method: 'HEAD' });
+                    const cType = (res.headers.get('content-type') || '').toLowerCase();
+                    if (res.ok && !cType.includes('text/html')) {
+                        const blobRes = await fetch(urlCandidata);
+                        const blob = await blobRes.blob();
+                        dispararDescargaBlob(blob, nombreArchivo);
+                        this.mostrarToastAviso(`¡${nombreArchivo} descargado exitosamente desde el servidor!`, 4000);
+                        limpiarEstadoDescarga();
+                        return;
+                    }
+                } catch (_) {}
+            }
+
+            // 2. SEGUNDO PASO: Si no existe en el servidor remoto (404), preparar texto litúrgico
             if (!this.ttsState.fullText || this.ttsState.chunks.length === 0) {
                 if (this.modoActivo === 'hora') {
                     this.prepararTTS();
@@ -1120,7 +1140,14 @@ export class CintaLiturgica {
             }
 
             const textoLiturgico = this.ttsState.fullText || this.obtenerTextoParaModo(this.modoActivo) || '';
-            if (textoLiturgico && textoLiturgico.trim()) {
+            const esOrigenLocal = (typeof window !== 'undefined') && (
+                window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1' ||
+                window.location.protocol === 'file:'
+            );
+
+            // Si estamos en entorno local, sintetizar mediante el servicio local en puerto 4000
+            if (esOrigenLocal && textoLiturgico && textoLiturgico.trim()) {
                 const sem = String(this.opciones?.semana || '1');
                 const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'lunes').toLowerCase();
                 const langDescarga = localStorage.getItem('pref-tts-download-voice') || 'es-US';
@@ -1136,27 +1163,14 @@ export class CintaLiturgica {
                 if (tTotal) tTotal.textContent = `${partes.length} partes`;
                 this.mostrarToastAviso(`Generando ${nombreArchivo} con voz de Google...`, 3000);
 
-                // Detectar endpoint disponible: preferir HTTPS en puerto 4001 para laantillana.com, o HTTP en puerto 4000
-                const candidateBases = [
-                    'https://lh.laantillana.com:4001',
-                    'http://127.0.0.1:4000',
-                    'http://localhost:4000'
-                ];
+                const activeBaseUrl = 'http://127.0.0.1:4000';
+                try {
+                    const ctrl = new AbortController();
+                    const tm = setTimeout(() => ctrl.abort(), 800);
+                    const r = await fetch(`${activeBaseUrl}/status`, { signal: ctrl.signal });
+                    clearTimeout(tm);
 
-                let activeBaseUrl = null;
-                for (const base of candidateBases) {
-                    try {
-                        const ctrl = new AbortController();
-                        const tm = setTimeout(() => ctrl.abort(), 600);
-                        const r = await fetch(`${base}/status`, { signal: ctrl.signal });
-                        clearTimeout(tm);
-                        if (r.ok) { activeBaseUrl = base; break; }
-                    } catch (_) {}
-                }
-
-                // A. SÍNTESIS POR FRAGMENTOS CON PORCENTAJE EN TIEMPO REAL EN EL RELOJ
-                if (activeBaseUrl) {
-                    try {
+                    if (r.ok) {
                         const buffers = [];
                         for (let idx = 0; idx < partes.length; idx++) {
                             const pct = Math.round(((idx + 1) / partes.length) * 100);
@@ -1173,7 +1187,7 @@ export class CintaLiturgica {
                         if (buffers.length > 0) {
                             const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
                             dispararDescargaBlob(mp3Blob, nombreArchivo);
-                            this.mostrarToastAviso(`¡${nombreArchivo} generado y descargado exitosamente con voz de Google!`, 5000);
+                            this.mostrarToastAviso(`¡${nombreArchivo} generado y descargado exitosamente!`, 5000);
 
                             // Guardar automáticamente en el servidor y repositorio local
                             try {
@@ -1187,109 +1201,34 @@ export class CintaLiturgica {
                             limpiarEstadoDescarga();
                             return;
                         }
-                    } catch (chunkErr) {
-                        console.warn('[Cinta] Error en descarga por fragmentos, probando método por lote:', chunkErr);
                     }
-                }
-
-                // B. FALLBACK POR LOTE CON SIMULACIÓN DE PORCENTAJE EN EL RELOJ
-                let pctSimulado = 10;
-                if (tActual) tActual.textContent = `${pctSimulado}%`;
-                const intervaloProgreso = setInterval(() => {
-                    pctSimulado = Math.min(95, pctSimulado + 5);
-                    if (tActual) tActual.textContent = `${pctSimulado}%`;
-                }, 350);
-
-                try {
-                    const fallbackUrl = (activeBaseUrl || 'http://127.0.0.1:4000') + '/api/tts';
-                    const res = await fetch(fallbackUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            text: textoLiturgico,
-                            filename: nombreArchivo,
-                            semana: sem,
-                            dia: dia,
-                            lang: langDescarga
-                        })
-                    });
-                    clearInterval(intervaloProgreso);
-
-                    if (res.ok) {
-                        const blob = await res.blob();
-                        if (blob && blob.size > 1000) {
-                            if (tActual) tActual.textContent = '100%';
-                            dispararDescargaBlob(blob, nombreArchivo);
-                            this.mostrarToastAviso(`¡${nombreArchivo} generado y descargado exitosamente con voz de Google!`, 5000);
-                            limpiarEstadoDescarga();
-                            return;
-                        }
-                    }
-                } catch (fallbackErr) {
-                    clearInterval(intervaloProgreso);
-                    console.warn('[Cinta] Fetch por lote falló:', fallbackErr);
-                }
-
-                // C. FALLBACK FINAL POR FORMULARIO DIRECTO
-                try {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = 'http://127.0.0.1:4000/api/tts';
-                    form.target = '_blank';
-                    form.style.display = 'none';
-
-                    const campos = {
-                        text: textoLiturgico,
-                        filename: nombreArchivo,
-                        semana: sem,
-                        dia: dia,
-                        lang: langDescarga
-                    };
-
-                    for (const [k, v] of Object.entries(campos)) {
-                        const inp = document.createElement('input');
-                        inp.type = 'hidden';
-                        inp.name = k;
-                        inp.value = v;
-                        form.appendChild(inp);
-                    }
-
-                    document.body.appendChild(form);
-                    form.submit();
-                    setTimeout(() => {
-                        if (document.body.contains(form)) document.body.removeChild(form);
-                    }, 2500);
-
-                    this.mostrarToastAviso(`Petición enviada al generador local para descargar ${nombreArchivo}.`, 5000);
-                    limpiarEstadoDescarga();
-                    return;
-                } catch (formErr) {
-                    console.error('[Cinta] Error en formulario:', formErr);
+                } catch (localErr) {
+                    console.warn('[Cinta] Servicio local no disponible:', localErr);
                 }
             }
 
-            this.mostrarToastAviso(`El servicio de audio local no está activo en 127.0.0.1:4000. Inicia "iniciar-servicio-audio.bat" en la carpeta del proyecto para descargar ${nombreArchivo} con voz de Google.`, 7000);
-            limpiarEstadoDescarga();
-            return;
+            // 3. TERCER PASO: En producción (https://lh.resucito.do) o si no hay servicio local disponible
+            // Descargar el guión litúrgico canónico (.txt) sin arrojar errores de red ni Mixed Content
+            if (textoLiturgico && textoLiturgico.trim()) {
+                const modoLabel = MODOS_AUDIO[this.modoActivo]?.nombre || 'Liturgia';
+                const fechaHoy = new Date().toLocaleDateString('es-ES');
+                const encabezado = `============================================================\nLITURGIA DE LAS HORAS — GUIÓN CANÓNICO DE LOCUCIÓN\nModo: ${modoLabel}\nArchivo previsto: ${nombreArchivo}\nFecha: ${fechaHoy}\n============================================================\n\n`;
+                const textBlob = new Blob([encabezado + textoLiturgico], { type: 'text/plain;charset=utf-8' });
+                dispararDescargaBlob(textBlob, nombreArchivo.replace('.mp3', '.txt'));
 
-            // 3. Respaldo final: si hay otro audio MP3 colocado en this.audio.src o en evangelio
-            const urlRespaldo = this.audio?.src || this.audios.evangelio || this.audios.lectura1 || this.audios.lectura2;
-            if (urlRespaldo && !this.audiosFallidos.has(urlRespaldo)) {
-                try {
-                    const res = await fetch(urlRespaldo);
-                    if (res.ok && !(res.headers.get('content-type') || '').toLowerCase().includes('text/html')) {
-                        const blob = await res.blob();
-                        dispararDescargaBlob(blob, nombreArchivo);
-                        limpiarEstadoDescarga();
-                        return;
-                    }
-                } catch (_) {}
+                if (!esOrigenLocal) {
+                    this.mostrarToastAviso(`Audio '${nombreArchivo}' aún no subido a to.resucito.do. Se descargó el guión (.txt). Puedes escuchar el rezo en vivo con el botón Play.`, 6000);
+                } else {
+                    this.mostrarToastAviso(`Inicia "iniciar-servicio-audio.bat" en tu PC para generar ${nombreArchivo} automáticamente en MP3. Se descargó el guión (.txt).`, 6000);
+                }
+                limpiarEstadoDescarga();
+                return;
             }
 
-            this.mostrarToastAviso('No hay archivo de audio ni texto litúrgico disponible para este modo.');
+            this.mostrarToastAviso('No hay audio ni texto litúrgico disponible para este modo.');
         } catch (err) {
-            console.warn('Error al descargar audio desde la cinta:', err);
-            this.mostrarToastAviso('El audio no está alojado en el servidor. El sistema lo leerá con el lector de voz.');
+            console.warn('[Cinta] Error en proceso de descarga:', err);
+            this.mostrarToastAviso('No se pudo completar la descarga.');
         } finally {
             limpiarEstadoDescarga();
         }
