@@ -232,37 +232,48 @@ export function obtenerVozConfigurada() {
     let vozElegida = null;
 
     if (vozGuardada) {
-        vozElegida = voices.find(v => 
-            v.name === vozGuardada || 
-            v.name.toLowerCase() === vozGuardada.toLowerCase() ||
-            (vozGuardada.includes('Estados Unidos') && v.name.includes('Estados Unidos') && v.name.toLowerCase().includes('google')) ||
-            (vozGuardada.includes('Google español') && v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('español')) ||
-            (vozGuardada.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('jorge'))
-        );
+        const vg = vozGuardada.toLowerCase();
+        const esEEUU = vg.includes('estados unidos') || vg.includes('es-us');
+        const esJorge = vg.includes('jorge');
+        const esDalia = vg.includes('dalia');
+        const esGoogleHombre = vg.includes('google') && vg.includes('español') && !esEEUU;
+
+        // 1. Coincidencia exacta de nombre o valor
+        vozElegida = voices.find(v => v.name === vozGuardada || v.name.toLowerCase() === vg);
+
+        // 2. Coincidencia estricta sin confusión entre Hombre y Mujer
+        if (!vozElegida) {
+            if (esGoogleHombre) {
+                vozElegida = voices.find(v => {
+                    const vn = v.name.toLowerCase();
+                    return vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos');
+                });
+            } else if (esEEUU) {
+                vozElegida = voices.find(v => {
+                    const vn = v.name.toLowerCase();
+                    return vn.includes('google') && (vn.includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us'));
+                });
+            } else if (esJorge) {
+                vozElegida = voices.find(v => v.name.toLowerCase().includes('jorge'));
+            } else if (esDalia) {
+                vozElegida = voices.find(v => v.name.toLowerCase().includes('dalia'));
+            }
+        }
     }
+
     if (!vozElegida) {
-        // MÁXIMA PRIORIDAD: Voces de Google y Voces Naturales Latinas
-        // 1. Google español de Estados Unidos (acento neutro latinoamericano de Google en Chrome)
-        vozElegida = voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
-        // 2. Google español (voz natural nítida de Google en Chrome)
-                  || voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('español') || (v.lang || '').toLowerCase().startsWith('es')))
-        // 3. Microsoft Jorge Online (Natural) - Spanish (Mexico) (voz natural de Edge)
-                  || voices.find(v => v.name.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('natural'))
-        // 4. Microsoft Dalia Online (Natural) - Spanish (Mexico) (voz natural de Edge)
-                  || voices.find(v => v.name.toLowerCase().includes('dalia') && v.name.toLowerCase().includes('natural'))
-        // 5. Cualquier otra voz de Google en español
-                  || voices.find(v => v.name.toLowerCase().includes('google') && (v.lang || '').toLowerCase().startsWith('es'))
-        // 6. Cualquier voz natural u online en español
-                  || voices.find(v => (v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('online')) && (v.lang || '').toLowerCase().startsWith('es'))
-        // 7. Voces latinas (es-419, es-mx, es-us)
-                  || voices.find(v => {
-                      const l = (v.lang || '').toLowerCase().replace(/_/g, '-');
-                      return (l.startsWith('es-419') || l.startsWith('es-mx') || l.startsWith('es-us')) && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina');
-                  })
-        // 8. Cualquier voz en español excluyendo explícitamente Raul y Sabina
-                  || voices.find(v => (v.lang || '').toLowerCase().startsWith('es') && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina'))
-        // 9. Fallback final solo si no hay ninguna otra
-                  || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
+        // Prioridad por defecto: 1. Hombre (Google español) -> 2. Hombre (Jorge) -> 3. Mujer (Google EE.UU.) -> 4. Mujer (Dalia)
+        vozElegida = voices.find(v => {
+            const vn = v.name.toLowerCase();
+            return vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos');
+        })
+        || voices.find(v => v.name.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('natural'))
+        || voices.find(v => v.name.toLowerCase().includes('jorge'))
+        || voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+        || voices.find(v => v.name.toLowerCase().includes('dalia'))
+        || voices.find(v => v.name.toLowerCase().includes('google') && (v.lang || '').toLowerCase().startsWith('es'))
+        || voices.find(v => (v.lang || '').toLowerCase().startsWith('es') && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina'))
+        || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
     }
     return vozElegida;
 }
