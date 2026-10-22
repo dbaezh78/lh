@@ -979,7 +979,7 @@ window.cambioEnExpandir = false;
                     default: 'Google español (Google)',
                     getValue: () => {
                         let guardada = localStorage.getItem('pref-tts-voice');
-                        if (guardada && (guardada.toLowerCase().includes('raul') || guardada.toLowerCase().includes('sabina'))) {
+                        if (guardada && (guardada.toLowerCase().includes('raul') || guardada.toLowerCase().includes('sabina') || guardada.toLowerCase().includes('jorge') || guardada.toLowerCase().includes('dalia'))) {
                             try { localStorage.removeItem('pref-tts-voice'); } catch (_) {}
                             guardada = null;
                         }
@@ -988,39 +988,30 @@ window.cambioEnExpandir = false;
                             const vs = window.speechSynthesis.getVoices() || [];
                             const googleHombre = vs.find(v => v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('español') && !v.name.toLowerCase().includes('estados unidos'));
                             if (googleHombre) return googleHombre.name;
-                            const jorge = vs.find(v => v.name.toLowerCase().includes('jorge'));
-                            if (jorge) return jorge.name;
-                            const googleMujer = vs.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')));
-                            if (googleMujer) return googleMujer.name;
                         }
                         return 'Google español (Google)';
                     },
                     options: () => obtenerListaVocesDisponibles(),
                     accion: (val) => {
                         localStorage.setItem('pref-tts-voice', val);
-                        // Emitir audio de prueba inmediato para que el usuario escuche la voz seleccionada al instante
-                        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                        if (typeof window !== 'undefined' && window.dbAudioDescarga && typeof window.dbAudioDescarga.probarVoz === 'function') {
+                            window.dbAudioDescarga.probarVoz('lectura', 'Voz de lectura actualizada.');
+                        } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
                             try {
                                 window.speechSynthesis.cancel();
                                 const vs = window.speechSynthesis.getVoices() || [];
                                 const vg = (val || '').toLowerCase();
-                                const esEEUU = vg.includes('estados unidos') || vg.includes('es-us');
-                                let vFound = vs.find(v => v.name === val || v.name.toLowerCase() === vg);
-                                if (!vFound) {
-                                    if (vg.includes('google') && !esEEUU) {
-                                        vFound = vs.find(v => v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('español') && !v.name.toLowerCase().includes('estados unidos'));
-                                    } else if (esEEUU) {
-                                        vFound = vs.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')));
-                                    } else if (vg.includes('jorge')) {
-                                        vFound = vs.find(v => v.name.toLowerCase().includes('jorge'));
-                                    } else if (vg.includes('dalia')) {
-                                        vFound = vs.find(v => v.name.toLowerCase().includes('dalia'));
-                                    }
-                                }
+                                const esEEUU = vg.includes('estados unidos') || vg.includes('mujer');
+                                const vFound = vs.find(v => {
+                                    const vn = (v.name || '').toLowerCase();
+                                    return esEEUU
+                                        ? (vn.includes('google') && (vn.includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+                                        : (vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos'));
+                                }) || vs.find(v => (v.lang || '').toLowerCase().startsWith('es'));
                                 const utter = new SpeechSynthesisUtterance('Voz de lectura actualizada.');
                                 if (vFound) {
                                     utter.voice = vFound;
-                                    utter.lang = vFound.lang || 'es-ES';
+                                    utter.lang = vFound.lang || (esEEUU ? 'es-US' : 'es-ES');
                                 }
                                 window.speechSynthesis.speak(utter);
                             } catch (_) {}
@@ -1032,17 +1023,44 @@ window.cambioEnExpandir = false;
                     label: 'Audio para descargar',
                     tipo: 'select',
                     storageKey: 'pref-tts-download-voice',
-                    default: 'es-US',
+                    default: 'Google español (Google)',
                     getValue: () => {
-                        return localStorage.getItem('pref-tts-download-voice') || 'es-US';
+                        let guardada = localStorage.getItem('pref-tts-download-voice');
+                        if (!guardada || guardada === 'es-US' || guardada === 'es-MX' || guardada === 'es-ES') {
+                            guardada = 'Google español (Google)';
+                            try { localStorage.setItem('pref-tts-download-voice', guardada); } catch (_) {}
+                        }
+                        if (guardada && (guardada.toLowerCase().includes('raul') || guardada.toLowerCase().includes('sabina') || guardada.toLowerCase().includes('jorge') || guardada.toLowerCase().includes('dalia'))) {
+                            try { localStorage.removeItem('pref-tts-download-voice'); } catch (_) {}
+                            guardada = 'Google español (Google)';
+                        }
+                        return guardada;
                     },
-                    options: () => [
-                        { val: 'es-US', text: 'Google Español (Latinoamérica / EE. UU.)' },
-                        { val: 'es-MX', text: 'Google Español (México)' },
-                        { val: 'es-ES', text: 'Google Español (España)' }
-                    ],
+                    options: () => obtenerListaVocesDisponibles(),
                     accion: (val) => {
                         localStorage.setItem('pref-tts-download-voice', val);
+                        if (typeof window !== 'undefined' && window.dbAudioDescarga && typeof window.dbAudioDescarga.probarVoz === 'function') {
+                            window.dbAudioDescarga.probarVoz('descarga', 'Voz de descarga configurada.');
+                        } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                            try {
+                                window.speechSynthesis.cancel();
+                                const vs = window.speechSynthesis.getVoices() || [];
+                                const vg = (val || '').toLowerCase();
+                                const esEEUU = vg.includes('estados unidos') || vg.includes('mujer');
+                                const vFound = vs.find(v => {
+                                    const vn = (v.name || '').toLowerCase();
+                                    return esEEUU
+                                        ? (vn.includes('google') && (vn.includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+                                        : (vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos'));
+                                }) || vs.find(v => (v.lang || '').toLowerCase().startsWith('es'));
+                                const utter = new SpeechSynthesisUtterance('Voz de descarga configurada.');
+                                if (vFound) {
+                                    utter.voice = vFound;
+                                    utter.lang = vFound.lang || (esEEUU ? 'es-US' : 'es-ES');
+                                }
+                                window.speechSynthesis.speak(utter);
+                            } catch (_) {}
+                        }
                         if (typeof window !== 'undefined') {
                             window.dispatchEvent(new CustomEvent('lh-tts-download-voice-changed', { detail: { voice: val } }));
                         }
@@ -1276,174 +1294,84 @@ window.cambioEnExpandir = false;
     // MODULO: VOCES PARA TEXTO A VOZ (TTS)
     // ==========================================
     function obtenerListaVocesDisponibles() {
-        const top4 = [
-            { id: 'Google español (Google)', realName: 'Google español', match: ['google español', 'google spanish'], label: 'Google español (Hombre - Google)' },
-            { id: 'Google español de Estados Unidos (Google)', realName: 'Google español de Estados Unidos', match: ['estados unidos'], label: 'Google español de Estados Unidos (Mujer - Google)' },
-            { id: 'Microsoft Jorge Online (Natural) - Spanish (Mexico)', match: ['jorge'], label: 'Microsoft Jorge Online (Hombre - México)' },
-            { id: 'Microsoft Dalia Online (Natural) - Spanish (Mexico)', match: ['dalia'], label: 'Microsoft Dalia Online (Mujer - México)' }
-        ];
-
-        const list = [];
-        const voices = (typeof window !== 'undefined' && 'speechSynthesis' in window) 
-            ? (window.speechSynthesis.getVoices() || []) 
-            : [];
-
-        // 1. Agregar de primero las cuatro voces preferidas
-        top4.forEach(top => {
-            const voiceFound = voices.find(v => {
-                const vName = (v.name || '').toLowerCase();
-                if (top.id.toLowerCase() === vName) return true;
-                if (top.realName && top.realName.toLowerCase() === vName) return true;
-                if (top.id.includes('Estados Unidos')) {
-                    return vName.includes('estados unidos') && vName.includes('google');
-                }
-                if (top.id.includes('Google español') && !top.id.includes('Estados Unidos')) {
-                    return vName.includes('google') && vName.includes('español') && !vName.includes('estados unidos');
-                }
-                if (top.match && top.match.some(m => vName.includes(m))) return true;
-                return false;
-            });
-
-            list.push({
-                val: voiceFound ? voiceFound.name : top.id,
-                text: top.label
-            });
-        });
-
-        // 2. Agregar el resto de voces disponibles en el navegador (ÚNICAMENTE EN ESPAÑOL)
-        if (voices.length > 0) {
-            const restantes = voices.filter(v => {
-                const vName = (v.name || '').toLowerCase();
-                const lang = (v.lang || '').toLowerCase().replace(/_/g, '-');
-                // SOLO voces en español
-                if (!lang.startsWith('es') && !vName.includes('español') && !vName.includes('spanish')) return false;
-                // Excluir voces obsoletas/robóticas
-                if (vName.includes('raul') || vName.includes('sabina')) return false;
-                // Excluir si ya fue incluida en las principales
-                const yaEsta = list.some(item => {
-                    const itemVal = (item.val || '').toLowerCase();
-                    if (itemVal === vName) return true;
-                    if (vName.includes('jorge') && itemVal.includes('jorge')) return true;
-                    if (vName.includes('google') && vName.includes('español')) return true;
-                    return false;
-                });
-                return !yaEsta;
-            });
-
-            restantes.sort((a, b) => a.name.localeCompare(b.name));
-
-            restantes.forEach(v => {
-                const langCode = (v.lang || '').replace(/_/g, '-');
-                const vLow = v.name.toLowerCase();
-                let etiquetaGenero = '';
-                if (vLow.includes('jorge') || vLow.includes('pablo') || vLow.includes('alvaro') || vLow.includes('enrique') || vLow.includes('miguel') || vLow.includes('david')) {
-                    etiquetaGenero = 'Hombre - ';
-                } else if (vLow.includes('dalia') || vLow.includes('elena') || vLow.includes('laura') || vLow.includes('monica') || vLow.includes('helena') || vLow.includes('lucia') || vLow.includes('zira')) {
-                    etiquetaGenero = 'Mujer - ';
-                }
-                list.push({
-                    val: v.name,
-                    text: `Español (${etiquetaGenero}${v.name}) [${langCode}]`
-                });
-            });
+        if (typeof window !== 'undefined' && window.dbAudioDescarga && typeof window.dbAudioDescarga.obtenerVocesDisponibles === 'function') {
+            return window.dbAudioDescarga.obtenerVocesDisponibles();
         }
-
-        return list;
+        return [
+            { val: 'Google español (Google)', text: 'Google español (Hombre - Google)', genero: 'hombre', lang: 'es-ES' },
+            { val: 'Google español de Estados Unidos (Google)', text: 'Google español de Estados Unidos (Mujer - Google)', genero: 'mujer', lang: 'es-US' }
+        ];
     }
 
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = () => {
-            const select = document.querySelector('[data-id="global-tts-voice"] select');
-            if (select) {
+            const selectVoice = document.querySelector('[data-id="global-tts-voice"] select');
+            if (selectVoice) {
                 const valActual = localStorage.getItem('pref-tts-voice') || '';
                 const opts = obtenerListaVocesDisponibles();
-                select.innerHTML = opts.map(o => `<option value="${o.val}" ${(o.val === valActual || o.text === valActual) ? 'selected' : ''}>${o.text}</option>`).join('');
+                selectVoice.innerHTML = opts.map(o => `<option value="${o.val}" ${(o.val === valActual || o.text === valActual) ? 'selected' : ''}>${o.text}</option>`).join('');
+            }
+            const selectDownload = document.querySelector('[data-id="global-tts-download-voice"] select');
+            if (selectDownload) {
+                const valActual = localStorage.getItem('pref-tts-download-voice') || '';
+                const opts = obtenerListaVocesDisponibles();
+                selectDownload.innerHTML = opts.map(o => `<option value="${o.val}" ${(o.val === valActual || o.text === valActual) ? 'selected' : ''}>${o.text}</option>`).join('');
             }
         };
     }
 
     window.probarTextoVozAjustes = () => {
+        if (typeof window !== 'undefined' && window.dbAudioDescarga && typeof window.dbAudioDescarga.probarVoz === 'function') {
+            window.dbAudioDescarga.probarVoz('lectura');
+            return;
+        }
         if (!('speechSynthesis' in window)) {
             alert('Tu navegador no soporta síntesis de voz.');
             return;
         }
         window.speechSynthesis.cancel();
-        const texto = 'Liturgia de las Horas. Esta es una prueba de voz con la velocidad configurada.';
-        const utter = new SpeechSynthesisUtterance(texto);
-        let vozGuardada = localStorage.getItem('pref-tts-voice') || '';
-        if (vozGuardada && (vozGuardada.toLowerCase().includes('raul') || vozGuardada.toLowerCase().includes('sabina'))) {
-            try { localStorage.removeItem('pref-tts-voice'); } catch (_) {}
-            vozGuardada = '';
-        }
+        const vozGuardada = localStorage.getItem('pref-tts-voice') || '';
+        const esMujer = vozGuardada.toLowerCase().includes('estados unidos') || vozGuardada.toLowerCase().includes('mujer');
+        const txt = `Liturgia de las Horas. Esta es una muestra con voz de ${esMujer ? 'mujer' : 'hombre'}.`;
+        const utter = new SpeechSynthesisUtterance(txt);
         const voices = window.speechSynthesis.getVoices() || [];
-
-        let encontrada = null;
-        if (vozGuardada) {
-            const vg = vozGuardada.toLowerCase();
-            const esEEUU = vg.includes('estados unidos') || vg.includes('es-us');
-            encontrada = voices.find(v => v.name === vozGuardada || v.name.toLowerCase() === vg);
-            if (!encontrada) {
-                if (vg.includes('google') && !esEEUU) {
-                    encontrada = voices.find(v => v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('español') && !v.name.toLowerCase().includes('estados unidos'));
-                } else if (esEEUU) {
-                    encontrada = voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')));
-                } else if (vg.includes('jorge')) {
-                    encontrada = voices.find(v => v.name.toLowerCase().includes('jorge'));
-                } else if (vg.includes('dalia')) {
-                    encontrada = voices.find(v => v.name.toLowerCase().includes('dalia'));
-                }
-            }
-        }
-        if (!encontrada) {
-            // Prioridad: 1. Hombre (Google español) -> 2. Hombre (Jorge) -> 3. Mujer (Google EE.UU.) -> 4. Mujer (Dalia)
-            encontrada = voices.find(v => v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('español') && !v.name.toLowerCase().includes('estados unidos'))
-                      || voices.find(v => v.name.toLowerCase().includes('jorge'))
-                      || voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
-                      || voices.find(v => v.name.toLowerCase().includes('dalia'))
-                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es') && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina'))
-                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
-        }
-
+        const encontrada = voices.find(v => {
+            const vn = (v.name || '').toLowerCase();
+            return esMujer
+                ? (vn.includes('google') && (vn.includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+                : (vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos'));
+        }) || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
         if (encontrada) utter.voice = encontrada;
-        utter.lang = (encontrada && encontrada.lang) ? encontrada.lang : 'es-ES';
-
+        utter.lang = esMujer ? 'es-US' : 'es-ES';
         const rateGuardado = parseFloat(localStorage.getItem('pref-tts-rate') || '1');
         utter.rate = (!isNaN(rateGuardado) && rateGuardado >= 0.5 && rateGuardado <= 2.0) ? rateGuardado : 1.0;
-
         window.speechSynthesis.speak(utter);
     };
 
     window.probarAudioDescargaAjustes = () => {
+        if (typeof window !== 'undefined' && window.dbAudioDescarga && typeof window.dbAudioDescarga.probarVoz === 'function') {
+            window.dbAudioDescarga.probarVoz('descarga');
+            return;
+        }
         if (!('speechSynthesis' in window)) {
             alert('Tu navegador no soporta síntesis de voz.');
             return;
         }
         window.speechSynthesis.cancel();
-        const lang = localStorage.getItem('pref-tts-download-voice') || 'es-US';
-        const txt = 'Liturgia de las Horas. Esta es una muestra del audio para descargar con voz en español.';
+        const vozGuardada = localStorage.getItem('pref-tts-download-voice') || '';
+        const esMujer = vozGuardada.toLowerCase().includes('estados unidos') || vozGuardada.toLowerCase().includes('mujer');
+        const txt = `Liturgia de las Horas. Probando audio para descargar con voz de ${esMujer ? 'mujer' : 'hombre'}.`;
         const utter = new SpeechSynthesisUtterance(txt);
-        utter.lang = lang;
-        utter.rate = 1.0;
-
         const voices = window.speechSynthesis.getVoices() || [];
-        let matchVoice = null;
-        if (lang === 'es-US') {
-            matchVoice = voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
-                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es-us'));
-        } else if (lang === 'es-MX') {
-            matchVoice = voices.find(v => v.name.toLowerCase().includes('jorge'))
-                      || voices.find(v => v.name.toLowerCase().includes('dalia'))
-                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es-mx'));
-        } else if (lang === 'es-ES') {
-            matchVoice = voices.find(v => v.name.toLowerCase().includes('google') && !v.name.toLowerCase().includes('estados unidos'))
-                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es-es'));
-        }
-        if (!matchVoice) {
-            matchVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith(lang.toLowerCase()))
-                      || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
-        }
+        const matchVoice = voices.find(v => {
+            const vn = (v.name || '').toLowerCase();
+            return esMujer
+                ? (vn.includes('google') && (vn.includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+                : (vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos'));
+        }) || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
         if (matchVoice) utter.voice = matchVoice;
-
+        utter.lang = esMujer ? 'es-US' : 'es-ES';
+        utter.rate = 1.0;
         window.speechSynthesis.speak(utter);
     };
 

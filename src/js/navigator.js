@@ -13,6 +13,7 @@
 // 2. Inyectar archivos JS de ajustes y Firebase
     const v = window.APP_VERSION || Date.now();
     const scriptsToLoad = [
+        { src: `/src/js/dbaudiodescarga.js?v=${v}`, type: 'module' },
         { src: `/src/js/firebase-config.js?v=${v}`, type: 'module' },
         { src: `/src/js/accesscontrol.js?v=${v}`, type: 'module' },
         { src: `/src/js/setting.js?v=${v}`, type: 'text/javascript' }

@@ -1,0 +1,4 @@
+node_modules/
+audios_generados/
+package.json
+package-lock.json

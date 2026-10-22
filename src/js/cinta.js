@@ -3,6 +3,7 @@
 // =========================================================================
 
 import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+import { dbAudioDescarga } from './dbaudiodescarga.js';
 
 export const CONFIGURACION_TIEMPOS_CINTA = {
     adviento: {
@@ -221,9 +222,17 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 export function obtenerVozConfigurada() {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
 
+    if (typeof dbAudioDescarga !== 'undefined' && typeof dbAudioDescarga.resolverVozNativa === 'function') {
+        const v = dbAudioDescarga.resolverVozNativa();
+        if (v) return v;
+    }
+    if (window.dbAudioDescarga && typeof window.dbAudioDescarga.resolverVozNativa === 'function') {
+        const v = window.dbAudioDescarga.resolverVozNativa();
+        if (v) return v;
+    }
+
     let vozGuardada = localStorage.getItem('pref-tts-voice') || '';
-    // Purgar voces mecánicas antiguas si quedaron guardadas en localStorage
-    if (vozGuardada && (vozGuardada.toLowerCase().includes('raul') || vozGuardada.toLowerCase().includes('sabina'))) {
+    if (vozGuardada && (vozGuardada.toLowerCase().includes('raul') || vozGuardada.toLowerCase().includes('sabina') || vozGuardada.toLowerCase().includes('jorge') || vozGuardada.toLowerCase().includes('dalia'))) {
         try { localStorage.removeItem('pref-tts-voice'); } catch (_) {}
         vozGuardada = '';
     }
@@ -233,46 +242,30 @@ export function obtenerVozConfigurada() {
 
     if (vozGuardada) {
         const vg = vozGuardada.toLowerCase();
-        const esEEUU = vg.includes('estados unidos') || vg.includes('es-us');
-        const esJorge = vg.includes('jorge');
-        const esDalia = vg.includes('dalia');
-        const esGoogleHombre = vg.includes('google') && vg.includes('español') && !esEEUU;
-
-        // 1. Coincidencia exacta de nombre o valor
+        const esEEUU = vg.includes('estados unidos') || vg.includes('es-us') || vg.includes('mujer');
         vozElegida = voices.find(v => v.name === vozGuardada || v.name.toLowerCase() === vg);
 
-        // 2. Coincidencia estricta sin confusión entre Hombre y Mujer
         if (!vozElegida) {
-            if (esGoogleHombre) {
-                vozElegida = voices.find(v => {
-                    const vn = v.name.toLowerCase();
-                    return vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos');
-                });
-            } else if (esEEUU) {
+            if (esEEUU) {
                 vozElegida = voices.find(v => {
                     const vn = v.name.toLowerCase();
                     return vn.includes('google') && (vn.includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us'));
                 });
-            } else if (esJorge) {
-                vozElegida = voices.find(v => v.name.toLowerCase().includes('jorge'));
-            } else if (esDalia) {
-                vozElegida = voices.find(v => v.name.toLowerCase().includes('dalia'));
+            } else {
+                vozElegida = voices.find(v => {
+                    const vn = v.name.toLowerCase();
+                    return vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos');
+                });
             }
         }
     }
 
     if (!vozElegida) {
-        // Prioridad por defecto: 1. Hombre (Google español) -> 2. Hombre (Jorge) -> 3. Mujer (Google EE.UU.) -> 4. Mujer (Dalia)
         vozElegida = voices.find(v => {
             const vn = v.name.toLowerCase();
             return vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos');
         })
-        || voices.find(v => v.name.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('natural'))
-        || voices.find(v => v.name.toLowerCase().includes('jorge'))
         || voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
-        || voices.find(v => v.name.toLowerCase().includes('dalia'))
-        || voices.find(v => v.name.toLowerCase().includes('google') && (v.lang || '').toLowerCase().startsWith('es'))
-        || voices.find(v => (v.lang || '').toLowerCase().startsWith('es') && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina'))
         || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
     }
     return vozElegida;
@@ -1072,17 +1065,6 @@ export class CintaLiturgica {
         if (this._descargaEnCurso) return;
         this._descargaEnCurso = true;
 
-        const tActual = document.getElementById('cinta-tiempo-actual');
-        const tTotal = document.getElementById('cinta-tiempo-total');
-        if (tActual) tActual.classList.add('descargando-audio');
-        if (tTotal) tTotal.classList.add('descargando-audio');
-
-        const limpiarEstadoDescarga = () => {
-            this._descargaEnCurso = false;
-            if (tActual) tActual.classList.remove('descargando-audio');
-            if (tTotal) tTotal.classList.remove('descargando-audio');
-        };
-
         let nombreArchivo = 'audio.mp3';
         if (this.modoActivo === 'hora') {
             const libroNom = String(this.opciones?.libro || 'hora').toLowerCase();
@@ -1105,148 +1087,60 @@ export class CintaLiturgica {
             }
         }
 
-        const dispararDescargaBlob = (blob, filename) => {
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(blobUrl);
-            }, 1500);
-        };
+        const sem = String(this.opciones?.semana || '1');
+        const semPad = sem.padStart(2, '0');
+        const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'domingo').toLowerCase();
+
+        let urlCandidata = (this.modoActivo !== 'hora')
+            ? (this.audios[this.modoActivo] || this.audio?.src)
+            : (this.audios.hora || '');
+
+        if (!urlCandidata || urlCandidata.startsWith('blob:')) {
+            urlCandidata = `https://to.resucito.do/s${semPad}/${dia}/${nombreArchivo}`;
+        }
+
+        if (!this.ttsState.fullText || this.ttsState.chunks.length === 0) {
+            if (this.modoActivo === 'hora') {
+                this.prepararTTS();
+            } else {
+                const txt = this.obtenerTextoParaModo(this.modoActivo);
+                if (txt) this.prepararTTSConTexto(txt);
+            }
+        }
+        const textoLiturgico = this.ttsState.fullText || this.obtenerTextoParaModo(this.modoActivo) || '';
 
         try {
-            // 1. PRIMER PASO: Si el archivo MP3 ya existe en el servidor remoto (ej: to.resucito.do), descargarlo directamente
-            // con barra de porcentaje en tiempo real en el reloj
-            const urlCandidata = (this.modoActivo !== 'hora')
-                ? (this.audios[this.modoActivo] || this.audio?.src)
-                : (this.audios.hora || '');
-
-            if (urlCandidata && !this.audiosFallidos.has(urlCandidata)) {
-                try {
-                    const res = await fetch(urlCandidata);
-                    const cType = (res.headers.get('content-type') || '').toLowerCase();
-                    if (res.ok && !cType.includes('text/html')) {
-                        const totalBytes = parseInt(res.headers.get('content-length') || '0', 10);
-                        let blob;
-                        if (res.body && totalBytes > 0 && typeof res.body.getReader === 'function') {
-                            const reader = res.body.getReader();
-                            const chunks = [];
-                            let receivedBytes = 0;
-                            while (true) {
-                                const { done, value } = await reader.read();
-                                if (done) break;
-                                chunks.push(value);
-                                receivedBytes += value.length;
-                                const pct = Math.min(100, Math.round((receivedBytes / totalBytes) * 100));
-                                if (tActual) tActual.textContent = `${pct}%`;
-                                if (tTotal) tTotal.textContent = `${(receivedBytes / (1024 * 1024)).toFixed(1)} / ${(totalBytes / (1024 * 1024)).toFixed(1)} MB`;
-                            }
-                            blob = new Blob(chunks, { type: 'audio/mpeg' });
-                        } else {
-                            if (tActual) tActual.textContent = '100%';
-                            blob = await res.blob();
-                        }
-                        dispararDescargaBlob(blob, nombreArchivo);
-                        this.mostrarToastAviso(`¡${nombreArchivo} descargado exitosamente desde el servidor!`, 4000);
-                        limpiarEstadoDescarga();
-                        return;
-                    }
-                } catch (_) {}
-            }
-
-            // 2. SEGUNDO PASO: Si no existe en el servidor remoto (404), preparar texto litúrgico
-            if (!this.ttsState.fullText || this.ttsState.chunks.length === 0) {
-                if (this.modoActivo === 'hora') {
-                    this.prepararTTS();
+            const pluginDescarga = (typeof dbAudioDescarga !== 'undefined') ? dbAudioDescarga : (window.dbAudioDescarga || null);
+            if (pluginDescarga && typeof pluginDescarga.descargarAudio === 'function') {
+                await pluginDescarga.descargarAudio({
+                    url: urlCandidata,
+                    filename: nombreArchivo,
+                    textoLiturgico,
+                    semana: sem,
+                    dia: dia,
+                    cinta: this
+                });
+            } else {
+                const fetchUrl = urlCandidata.includes('?') ? `${urlCandidata}&_cb=${Date.now()}` : `${urlCandidata}?_cb=${Date.now()}`;
+                const res = await fetch(fetchUrl);
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = nombreArchivo;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => document.body.removeChild(a), 2000);
+                    this.mostrarToastAviso(`¡${nombreArchivo} descargado exitosamente!`, 4000);
                 } else {
-                    const txt = this.obtenerTextoParaModo(this.modoActivo);
-                    if (txt) this.prepararTTSConTexto(txt);
+                    this.mostrarToastAviso(`El audio '${nombreArchivo}' se está sincronizando con el servidor. Puedes rezar en directo pulsando el botón de lectura en la cinta.`, 6000);
                 }
             }
-
-            const textoLiturgico = this.ttsState.fullText || this.obtenerTextoParaModo(this.modoActivo) || '';
-            const esOrigenLocal = (typeof window !== 'undefined') && (
-                window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1' ||
-                window.location.protocol === 'file:'
-            );
-
-            // Si estamos en entorno local y el servicio está levantado, sintetizar con porcentaje en el reloj
-            if (esOrigenLocal && textoLiturgico && textoLiturgico.trim()) {
-                const sem = String(this.opciones?.semana || '1');
-                const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'lunes').toLowerCase();
-                const langDescarga = localStorage.getItem('pref-tts-download-voice') || 'es-US';
-
-                // Extraer fragmentos de texto para el proceso
-                let partes = (this.ttsState.chunks || []).map(c => c.text).filter(Boolean);
-                if (partes.length === 0) {
-                    partes = dividirEnFrasesLectura(textoLiturgico, 140).map(c => c.text).filter(Boolean);
-                }
-                if (partes.length === 0) partes = [textoLiturgico];
-
-                if (tActual) tActual.textContent = '0%';
-                if (tTotal) tTotal.textContent = `${partes.length} partes`;
-                this.mostrarToastAviso(`Generando ${nombreArchivo}...`, 3000);
-
-                const activeBaseUrl = 'http://127.0.0.1:4000';
-                try {
-                    const ctrl = new AbortController();
-                    const tm = setTimeout(() => ctrl.abort(), 800);
-                    const r = await fetch(`${activeBaseUrl}/status`, { signal: ctrl.signal });
-                    clearTimeout(tm);
-
-                    if (r.ok) {
-                        const buffers = [];
-                        for (let idx = 0; idx < partes.length; idx++) {
-                            const pct = Math.round(((idx + 1) / partes.length) * 100);
-                            if (tActual) tActual.textContent = `${pct}%`;
-
-                            const parteTexto = partes[idx];
-                            const chunkUrl = `${activeBaseUrl}/api/tts-chunk?text=${encodeURIComponent(parteTexto)}&lang=${encodeURIComponent(langDescarga)}`;
-                            const resChunk = await fetch(chunkUrl);
-                            if (!resChunk.ok) throw new Error(`HTTP ${resChunk.status} en parte ${idx + 1}`);
-                            const ab = await resChunk.arrayBuffer();
-                            if (ab && ab.byteLength > 0) buffers.push(ab);
-                        }
-
-                        if (buffers.length > 0) {
-                            const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
-                            dispararDescargaBlob(mp3Blob, nombreArchivo);
-                            this.mostrarToastAviso(`¡${nombreArchivo} generado y descargado exitosamente!`, 5000);
-
-                            // Guardar automáticamente en el servidor y repositorio local
-                            try {
-                                fetch(`${activeBaseUrl}/api/save-audio?filename=${encodeURIComponent(nombreArchivo)}&semana=${encodeURIComponent(sem)}&dia=${encodeURIComponent(dia)}`, {
-                                    method: 'POST',
-                                    body: mp3Blob,
-                                    headers: { 'Content-Type': 'audio/mpeg' }
-                                }).catch(() => {});
-                            } catch (_) {}
-
-                            limpiarEstadoDescarga();
-                            return;
-                        }
-                    }
-                } catch (localErr) {
-                    console.warn('[Cinta] Servicio local no disponible:', localErr);
-                }
-            }
-
-            // 3. TERCER PASO: En producción (https://lh.resucito.do) o si el audio aún no está en el servidor
-            // NUNCA descargar archivos .txt ni arrojar errores de red/Mixed Content
-            this.mostrarToastAviso(`El audio '${nombreArchivo}' aún no está alojado en el servidor para descarga. Puedes rezar en directo pulsando el botón de lectura en la cinta.`, 6000);
-            limpiarEstadoDescarga();
-            return;
         } catch (err) {
             console.warn('[Cinta] Error en proceso de descarga:', err);
             this.mostrarToastAviso('No se pudo completar la descarga.');
         } finally {
-            limpiarEstadoDescarga();
+            this._descargaEnCurso = false;
         }
     }
 

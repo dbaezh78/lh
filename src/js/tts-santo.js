@@ -37,8 +37,13 @@ let listenersAttached = false;
 export function obtenerVozConfigurada() {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
 
+    if (typeof window !== 'undefined' && window.dbAudioDescarga && typeof window.dbAudioDescarga.resolverVozNativa === 'function') {
+        const v = window.dbAudioDescarga.resolverVozNativa();
+        if (v) return v;
+    }
+
     let vozGuardada = localStorage.getItem('pref-tts-voice') || '';
-    if (vozGuardada && (vozGuardada.toLowerCase().includes('raul') || vozGuardada.toLowerCase().includes('sabina'))) {
+    if (vozGuardada && (vozGuardada.toLowerCase().includes('raul') || vozGuardada.toLowerCase().includes('sabina') || vozGuardada.toLowerCase().includes('jorge') || vozGuardada.toLowerCase().includes('dalia'))) {
         try { localStorage.removeItem('pref-tts-voice'); } catch (_) {}
         vozGuardada = '';
     }
@@ -47,28 +52,32 @@ export function obtenerVozConfigurada() {
     let vozElegida = null;
 
     if (vozGuardada) {
-        vozElegida = voices.find(v => 
-            v.name === vozGuardada || 
-            v.name.toLowerCase() === vozGuardada.toLowerCase() ||
-            (vozGuardada.includes('Estados Unidos') && v.name.includes('Estados Unidos') && v.name.toLowerCase().includes('google')) ||
-            (vozGuardada.includes('Google español') && v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('español')) ||
-            (vozGuardada.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('jorge'))
-        );
+        const vg = vozGuardada.toLowerCase();
+        const esEEUU = vg.includes('estados unidos') || vg.includes('es-us') || vg.includes('mujer');
+        vozElegida = voices.find(v => v.name === vozGuardada || v.name.toLowerCase() === vg);
+
+        if (!vozElegida) {
+            if (esEEUU) {
+                vozElegida = voices.find(v => {
+                    const vn = v.name.toLowerCase();
+                    return vn.includes('google') && (vn.includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us'));
+                });
+            } else {
+                vozElegida = voices.find(v => {
+                    const vn = v.name.toLowerCase();
+                    return vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos');
+                });
+            }
+        }
     }
+
     if (!vozElegida) {
-        // Prioridad Google español y Voces Naturales
-        vozElegida = voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
-                  || voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('español') || (v.lang || '').toLowerCase().startsWith('es')))
-                  || voices.find(v => v.name.toLowerCase().includes('jorge') && v.name.toLowerCase().includes('natural'))
-                  || voices.find(v => v.name.toLowerCase().includes('dalia') && v.name.toLowerCase().includes('natural'))
-                  || voices.find(v => v.name.toLowerCase().includes('google') && (v.lang || '').toLowerCase().startsWith('es'))
-                  || voices.find(v => (v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('online')) && (v.lang || '').toLowerCase().startsWith('es'))
-                  || voices.find(v => {
-                      const l = (v.lang || '').toLowerCase().replace(/_/g, '-');
-                      return (l.startsWith('es-419') || l.startsWith('es-mx') || l.startsWith('es-us')) && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina');
-                  })
-                  || voices.find(v => (v.lang || '').toLowerCase().startsWith('es') && !v.name.toLowerCase().includes('raul') && !v.name.toLowerCase().includes('sabina'))
-                  || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
+        vozElegida = voices.find(v => {
+            const vn = v.name.toLowerCase();
+            return vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos');
+        })
+        || voices.find(v => v.name.toLowerCase().includes('google') && (v.name.toLowerCase().includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
+        || voices.find(v => (v.lang || '').toLowerCase().startsWith('es'));
     }
     return vozElegida;
 }
