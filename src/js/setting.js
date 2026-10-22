@@ -972,6 +972,20 @@ window.cambioEnExpandir = false;
             icon: 'record_voice_over',
             secciones: [
                 {
+                    id: 'global-forzar-tts',
+                    label: 'Forzar siempre Lector de voz (Texto a voz)',
+                    sublabel: 'Si está activado, lee con texto a voz. Si está desactivado, reproduce el audio guardado si existe (y si no existe, usa texto a voz).',
+                    tipo: 'switch',
+                    storageKey: 'pref-forzar-tts',
+                    default: false,
+                    accion: (val) => {
+                        localStorage.setItem('pref-forzar-tts', String(val));
+                        if (typeof window !== 'undefined') {
+                            window.dispatchEvent(new CustomEvent('lh-forzar-tts-changed', { detail: { activo: !!val } }));
+                        }
+                    }
+                },
+                {
                     id: 'global-tts-voice',
                     label: 'Voz de Lectura',
                     tipo: 'select',
@@ -979,10 +993,6 @@ window.cambioEnExpandir = false;
                     default: 'Google español (Google)',
                     getValue: () => {
                         let guardada = localStorage.getItem('pref-tts-voice');
-                        if (guardada && (guardada.toLowerCase().includes('raul') || guardada.toLowerCase().includes('sabina') || guardada.toLowerCase().includes('jorge') || guardada.toLowerCase().includes('dalia'))) {
-                            try { localStorage.removeItem('pref-tts-voice'); } catch (_) {}
-                            guardada = null;
-                        }
                         if (guardada) return guardada;
                         if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
                             const vs = window.speechSynthesis.getVoices() || [];
@@ -1007,10 +1017,6 @@ window.cambioEnExpandir = false;
                         if (!guardada || guardada === 'es-US' || guardada === 'es-MX' || guardada === 'es-ES') {
                             guardada = 'Google español (Google)';
                             try { localStorage.setItem('pref-tts-download-voice', guardada); } catch (_) {}
-                        }
-                        if (guardada && (guardada.toLowerCase().includes('raul') || guardada.toLowerCase().includes('sabina') || guardada.toLowerCase().includes('jorge') || guardada.toLowerCase().includes('dalia'))) {
-                            try { localStorage.removeItem('pref-tts-download-voice'); } catch (_) {}
-                            guardada = 'Google español (Google)';
                         }
                         return guardada;
                     },
@@ -1442,7 +1448,10 @@ window.cambioEnExpandir = false;
 
             return `
             <div class="setting-row" data-id="${opt.id || ''}">
-                <label>${opt.label}</label>
+                <div class="setting-label-box">
+                    <label>${opt.label}</label>
+                    ${opt.sublabel ? `<span class="setting-sublabel" style="display:block; font-size:11px; opacity:0.75; margin-top:2px;">${opt.sublabel}</span>` : ''}
+                </div>
                 <div class="setting-control">${renderControl(opt, isChecked, valActual)}</div>
             </div>`;
         }).join('');

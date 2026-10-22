@@ -1261,6 +1261,14 @@ export class CintaLiturgica {
     }
 
     iniciarReproduccionModo(modo) {
+        const forzarTTS = localStorage.getItem('pref-forzar-tts') === 'true';
+
+        // Si el usuario activó la opción "Forzar siempre Lector de voz (Texto a voz)"
+        if (modo === 'hora' && forzarTTS) {
+            this.ejecutarFallbackTTS(modo);
+            return;
+        }
+
         const urlAudio = (modo === 'hora')
             ? (this.audios.hora || '')
             : (this.audios[modo] || '');
@@ -1899,7 +1907,7 @@ export class CintaLiturgica {
         const rateFinal = obtenerRateConfigurado(true);
 
         const utterance = new SpeechSynthesisUtterance(textoChunk);
-        utterance.lang = (vozElegida && vozElegida.lang) ? vozElegida.lang : 'es-MX';
+        utterance.lang = (vozElegida && vozElegida.lang) ? vozElegida.lang : 'es-ES';
         utterance.rate = rateFinal;
         if (vozElegida) utterance.voice = vozElegida;
 

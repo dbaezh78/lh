@@ -18,15 +18,21 @@ const PORT_HTTP = 4000;
 const PORT_HTTPS = 4001;
 const DEFAULT_BITRATE = '40k';
 
-function transcodificarA40k(mp3Buffer, bitrate = DEFAULT_BITRATE) {
+function transcodificarA40k(mp3Buffer, bitrate = DEFAULT_BITRATE, genero = 'hombre') {
     if (!mp3Buffer || mp3Buffer.length === 0 || !ffmpegPath || !fs.existsSync(ffmpegPath)) {
         return Promise.resolve(mp3Buffer);
     }
     return new Promise((resolve) => {
         try {
+            const esHombre = String(genero || '').toLowerCase().includes('hombre');
+            const audioFilters = esHombre 
+                ? ['-af', 'asetrate=24000*0.87,atempo=1.149,aresample=24000'] 
+                : [];
+
             const proc = spawn(ffmpegPath, [
                 '-y',
                 '-i', 'pipe:0',
+                ...audioFilters,
                 '-codec:a', 'libmp3lame',
                 '-b:a', bitrate,
                 '-ac', '1',
@@ -181,7 +187,7 @@ async function sintetizarTextoCompleto(texto, lang = 'es-US', onProgreso = null)
     return await transcodificarA40k(rawConcat, '40k');
 }
 
-function guardarEnReposLocales(filename, semana, dia, mp3Buffer) {
+function guardarEnReposLocales(filename, semana, dia, mp3Buffer, textHash = '', voice = 'hombre') {
     if (!semana || !dia || !mp3Buffer || mp3Buffer.length === 0) return;
     const semPadded = semana.startsWith('s') ? semana.toLowerCase() : ('s' + semana.padStart(2, '0'));
     const diaNorm = dia.toLowerCase().trim();
@@ -197,7 +203,17 @@ function guardarEnReposLocales(filename, semana, dia, mp3Buffer) {
                 }
                 const destFilePath = path.join(destFolder, filename);
                 fs.writeFileSync(destFilePath, mp3Buffer);
-                console.log(`[TTS Auto-Save] Guardado en: ${destFilePath} (${Math.round(mp3Buffer.length / 1024)} KB)`);
+                if (textHash) {
+                    const metaPath = `${destFilePath}.meta.json`;
+                    fs.writeFileSync(metaPath, JSON.stringify({
+                        hash: textHash,
+                        bitrate: '40k',
+                        voice: voice,
+                        engine: 'Google Español',
+                        updatedAt: new Date().toISOString()
+                    }, null, 2), 'utf8');
+                }
+                console.log(`[TTS Auto-Save] Guardado en: ${destFilePath} (${Math.round(mp3Buffer.length / 1024)} KB) @ 40kbps [${voice}]`);
             }
         } catch (err) {
             console.warn(`[TTS Auto-Save] No se pudo guardar en ${r}:`, err.message);
@@ -287,10 +303,63 @@ async function requestHandler(req, res) {
         return;
     }
 
+    // 1b. Verificación de audio canónico a 40 kbps por hash de texto en pantalla
+    if (parsedUrl.pathname === '/api/check-audio') {
+        const filename = parsedUrl.searchParams.get('filename') || '';
+        const semana = parsedUrl.searchParams.get('semana') || '';
+        const dia = parsedUrl.searchParams.get('dia') || '';
+        const clientHash = parsedUrl.searchParams.get('textHash') || '';
+
+        if (!filename || !semana || !dia || !clientHash) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ cached: false }));
+            return;
+        }
+
+        const semPadded = semana.startsWith('s') ? semana.toLowerCase() : ('s' + semana.padStart(2, '0'));
+        const diaNorm = dia.toLowerCase().trim();
+        const repos = ['c:/db/Github/to', 'c:/db/Github/tordinario'];
+        const clientVoice = parsedUrl.searchParams.get('voice') || 'hombre';
+
+        let matchPath = null;
+        for (const r of repos) {
+            const destFolder = path.join(path.resolve(r), semPadded, diaNorm);
+            const destFilePath = path.join(destFolder, filename);
+            const metaPath = `${destFilePath}.meta.json`;
+
+            if (fs.existsSync(destFilePath) && fs.existsSync(metaPath)) {
+                try {
+                    const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+                    const vozCoincide = !meta.voice || meta.voice === clientVoice;
+                    if (meta.hash && meta.hash === clientHash && vozCoincide && (meta.bitrate === '40k' || meta.bitrate === '40kbps')) {
+                        matchPath = destFilePath;
+                        break;
+                    }
+                } catch (_) {}
+            }
+        }
+
+        if (matchPath) {
+            const stat = fs.statSync(matchPath);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                cached: true,
+                url: `/${semPadded}/${diaNorm}/${filename}`,
+                size: stat.size,
+                bitrate: '40kbps'
+            }));
+        } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ cached: false }));
+        }
+        return;
+    }
+
     // 2. Fragmento individual para actualización en tiempo real del porcentaje en el reloj
     if (parsedUrl.pathname === '/api/tts-chunk') {
         const text = parsedUrl.searchParams.get('text') || '';
-        const lang = parsedUrl.searchParams.get('lang') || 'es-US';
+        const lang = parsedUrl.searchParams.get('lang') || 'es-ES';
+        const voice = parsedUrl.searchParams.get('voice') || '';
 
         if (!text.trim()) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -299,7 +368,10 @@ async function requestHandler(req, res) {
         }
 
         try {
-            const buf = await descargarChunkGoogle(text, lang);
+            let buf = await descargarChunkGoogle(text, lang);
+            if (voice) {
+                buf = await transcodificarA40k(buf, '40k', voice);
+            }
             res.writeHead(200, {
                 'Content-Type': 'audio/mpeg',
                 'Content-Length': buf.length,
@@ -320,6 +392,8 @@ async function requestHandler(req, res) {
         const semana = parsedUrl.searchParams.get('semana') || req.headers['x-semana'] || '';
         const dia = parsedUrl.searchParams.get('dia') || req.headers['x-dia'] || '';
         const returnAudio = parsedUrl.searchParams.get('returnAudio') === '1' || parsedUrl.searchParams.get('download') === '1';
+        const textHash = parsedUrl.searchParams.get('textHash') || req.headers['x-text-hash'] || '';
+        const voice = parsedUrl.searchParams.get('voice') || req.headers['x-voice'] || 'hombre';
 
         const chunks = [];
         req.on('data', c => chunks.push(c));
@@ -327,10 +401,10 @@ async function requestHandler(req, res) {
             const fullBuf = Buffer.concat(chunks);
             let bufFinal = fullBuf;
             if (fullBuf.length > 0) {
-                // Transcodificar a 40 kbps garantizado con ffmpeg
-                bufFinal = await transcodificarA40k(fullBuf, '40k');
+                // Transcodificar a 40 kbps garantizado con ffmpeg modulando voz masculina si aplica
+                bufFinal = await transcodificarA40k(fullBuf, '40k', voice);
                 if (semana && dia) {
-                    guardarEnReposLocales(filename, semana, dia, bufFinal);
+                    guardarEnReposLocales(filename, semana, dia, bufFinal, textHash, voice);
                 }
             }
 
