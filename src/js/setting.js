@@ -613,7 +613,7 @@ window.cambioEnExpandir = false;
     // ==========================================
     // MODULO: DEFINICION DE PESTAÑAS Y OPCIONES
     // ==========================================
-    window.tabsConfig = [
+    const tabsConfig = window.tabsConfig = [
         // ==========================================
         // MODULO: TAB GENERAL (CON SUBMÓDULOS AJUSTES Y TEMA)
         // ==========================================
@@ -994,28 +994,6 @@ window.cambioEnExpandir = false;
                     options: () => obtenerListaVocesDisponibles(),
                     accion: (val) => {
                         localStorage.setItem('pref-tts-voice', val);
-                        if (typeof window !== 'undefined' && window.dbAudioDescarga && typeof window.dbAudioDescarga.probarVoz === 'function') {
-                            window.dbAudioDescarga.probarVoz('lectura', 'Voz de lectura actualizada.');
-                        } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-                            try {
-                                window.speechSynthesis.cancel();
-                                const vs = window.speechSynthesis.getVoices() || [];
-                                const vg = (val || '').toLowerCase();
-                                const esEEUU = vg.includes('estados unidos') || vg.includes('mujer');
-                                const vFound = vs.find(v => {
-                                    const vn = (v.name || '').toLowerCase();
-                                    return esEEUU
-                                        ? (vn.includes('google') && (vn.includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
-                                        : (vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos'));
-                                }) || vs.find(v => (v.lang || '').toLowerCase().startsWith('es'));
-                                const utter = new SpeechSynthesisUtterance('Voz de lectura actualizada.');
-                                if (vFound) {
-                                    utter.voice = vFound;
-                                    utter.lang = vFound.lang || (esEEUU ? 'es-US' : 'es-ES');
-                                }
-                                window.speechSynthesis.speak(utter);
-                            } catch (_) {}
-                        }
                     }
                 },
                 {
@@ -1039,52 +1017,9 @@ window.cambioEnExpandir = false;
                     options: () => obtenerListaVocesDisponibles(),
                     accion: (val) => {
                         localStorage.setItem('pref-tts-download-voice', val);
-                        if (typeof window !== 'undefined' && window.dbAudioDescarga && typeof window.dbAudioDescarga.probarVoz === 'function') {
-                            window.dbAudioDescarga.probarVoz('descarga', 'Voz de descarga configurada.');
-                        } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-                            try {
-                                window.speechSynthesis.cancel();
-                                const vs = window.speechSynthesis.getVoices() || [];
-                                const vg = (val || '').toLowerCase();
-                                const esEEUU = vg.includes('estados unidos') || vg.includes('mujer');
-                                const vFound = vs.find(v => {
-                                    const vn = (v.name || '').toLowerCase();
-                                    return esEEUU
-                                        ? (vn.includes('google') && (vn.includes('estados unidos') || (v.lang || '').toLowerCase().startsWith('es-us')))
-                                        : (vn.includes('google') && vn.includes('español') && !vn.includes('estados unidos'));
-                                }) || vs.find(v => (v.lang || '').toLowerCase().startsWith('es'));
-                                const utter = new SpeechSynthesisUtterance('Voz de descarga configurada.');
-                                if (vFound) {
-                                    utter.voice = vFound;
-                                    utter.lang = vFound.lang || (esEEUU ? 'es-US' : 'es-ES');
-                                }
-                                window.speechSynthesis.speak(utter);
-                            } catch (_) {}
-                        }
                         if (typeof window !== 'undefined') {
                             window.dispatchEvent(new CustomEvent('lh-tts-download-voice-changed', { detail: { voice: val } }));
                         }
-                    }
-                },
-                {
-                    id: 'global-tts-rate',
-                    label: 'Velocidad de Lectura',
-                    tipo: 'range',
-                    storageKey: 'pref-tts-rate',
-                    default: '1',
-                    getValue: () => {
-                        const guardado = localStorage.getItem('pref-tts-rate');
-                        if (guardado === null || guardado === '1.3') {
-                            localStorage.setItem('pref-tts-rate', '1');
-                            return '1';
-                        }
-                        return guardado;
-                    },
-                    min: 0.5,
-                    max: 2.0,
-                    step: 0.1,
-                    accion: (val) => {
-                        localStorage.setItem('pref-tts-rate', val);
                     }
                 },
                 {
@@ -1108,6 +1043,44 @@ window.cambioEnExpandir = false;
                             window.probarAudioDescargaAjustes();
                         }
                     }
+                },
+                {
+                    id: 'global-audio-default-mode',
+                    label: 'Seleccionar audio por defecto',
+                    tipo: 'select',
+                    storageKey: 'pref-audio-modo-defecto',
+                    default: 'hora',
+                    getValue: () => {
+                        const guardado = localStorage.getItem('pref-audio-modo-defecto');
+                        if (guardado && ['hora', 'evangelio', 'lectura1', 'lectura2'].includes(guardado)) {
+                            return guardado;
+                        }
+                        return 'hora';
+                    },
+                    options: () => [
+                        { val: 'hora', text: 'Lector de voz (Texto a voz)' },
+                        { val: 'evangelio', text: 'Evangelio del Día' },
+                        { val: 'lectura1', text: '1ª Lectura del Oficio' },
+                        { val: 'lectura2', text: '2ª Lectura del Oficio' }
+                    ],
+                    accion: (val) => {
+                        localStorage.setItem('pref-audio-modo-defecto', val);
+                        if (typeof window !== 'undefined') {
+                            if (window.cinta && typeof window.cinta.cambiarModoAudio === 'function') {
+                                window.cinta.cambiarModoAudio(val, false);
+                            } else if (window.cintaInstancia && typeof window.cintaInstancia.cambiarModoAudio === 'function') {
+                                window.cintaInstancia.cambiarModoAudio(val, false);
+                            }
+                            window.dispatchEvent(new CustomEvent('lh-audio-modo-defecto-changed', { detail: { modo: val } }));
+                        }
+                    }
+                },
+                {
+                    id: 'global-speed-steps',
+                    label: 'Velocidad de Lectura',
+                    tipo: 'speed-steps',
+                    storageKey: 'pref-audio-speed-step',
+                    default: 0
                 }
             ]
         },
@@ -1375,6 +1348,62 @@ window.cambioEnExpandir = false;
         window.speechSynthesis.speak(utter);
     };
 
+    window.obtenerTextoVelocidadAjustes = (step = null, rate = null) => {
+        const s = (typeof step === 'number') ? step : (parseInt(localStorage.getItem('pref-audio-speed-step') || '0', 10) || 0);
+        const r = (typeof rate === 'number') ? rate : parseFloat(localStorage.getItem('pref-tts-rate') || '1.0');
+        if (s === 0) return '0 (x1)';
+        const rStr = r.toFixed(2).replace(/0$/, '');
+        return `${s > 0 ? '+' : ''}${s} (x${rStr})`;
+    };
+
+    window.cambiarVelocidadAjustes = (step) => {
+        const s = parseInt(step, 10) || 0;
+        const rate = parseFloat((1.0 + (s / 100)).toFixed(2));
+        localStorage.setItem('pref-audio-speed-step', String(s));
+        localStorage.setItem('pref-tts-rate', String(rate));
+
+        window.actualizarVelocidadEnAjustes(s, rate);
+
+        const cintaInst = (typeof window !== 'undefined' && (window.cintaInstancia || window.cinta)) ? (window.cintaInstancia || window.cinta) : null;
+        if (cintaInst) {
+            if (cintaInst.audio) {
+                cintaInst.audio.playbackRate = rate;
+            }
+            const btnCinta = document.getElementById('btn-cinta-velocidad');
+            if (btnCinta) btnCinta.textContent = 'x1';
+            document.querySelectorAll('.cinta-vel-item').forEach(it => {
+                const itStep = parseInt(it.getAttribute('data-step'), 10);
+                if (itStep === s) {
+                    it.classList.add('activo');
+                } else {
+                    it.classList.remove('activo');
+                }
+            });
+        }
+
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('lh-tts-rate-changed', { detail: { rate, step: s } }));
+        }
+    };
+
+    window.reiniciarVelocidadAjustes = () => {
+        window.cambiarVelocidadAjustes(0);
+    };
+
+    window.actualizarVelocidadEnAjustes = (step, rate) => {
+        const badge = document.getElementById('setting-speed-badge');
+        if (badge) badge.textContent = window.obtenerTextoVelocidadAjustes(step, rate);
+
+        document.querySelectorAll('.btn-setting-vel-step').forEach(btn => {
+            const bStep = parseInt(btn.getAttribute('data-step'), 10);
+            if (bStep === step) {
+                btn.classList.add('activo');
+            } else {
+                btn.classList.remove('activo');
+            }
+        });
+    };
+
     // ==========================================
     // MODULO: MOTOR DE GENERACION DE HTML
     // ==========================================
@@ -1394,6 +1423,22 @@ window.cambioEnExpandir = false;
                             : false;
 
             const valActual = valorLimpio;
+
+            if (opt.tipo === 'speed-steps') {
+                return `
+                <div class="setting-row setting-row-velocidad" data-id="${opt.id || ''}">
+                    <div class="setting-velocidad-header">
+                        <label>${opt.label}</label>
+                        <div class="setting-velocidad-acciones">
+                            <span class="setting-speed-badge" id="setting-speed-badge">${window.obtenerTextoVelocidadAjustes()}</span>
+                            <button type="button" class="btn-setting-reset-speed" id="btn-setting-reset-speed" title="Reiniciar velocidad a 0 (x1)" onclick="window.reiniciarVelocidadAjustes()">
+                                <span class="material-symbols-outlined">restart_alt</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="setting-control setting-control-full">${renderControl(opt, isChecked, valActual)}</div>
+                </div>`;
+            }
 
             return `
             <div class="setting-row" data-id="${opt.id || ''}">
@@ -1554,6 +1599,20 @@ window.cambioEnExpandir = false;
         if (opt.tipo === 'color') return `<input type="color" value="${valActual || '#bc0009'}" ${onchange}>`;
         if (opt.tipo === 'text') return `<input type="text" placeholder="..." value="${valActual || ''}" ${onchange}>`;
         
+        if (opt.tipo === 'speed-steps') {
+            const stepActual = parseInt(localStorage.getItem('pref-audio-speed-step') || '0', 10) || 0;
+            const pasos = [-50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+            return `
+                <div class="setting-speed-steps-container" id="setting-speed-steps-container">
+                    ${pasos.map(p => {
+                        const esActivo = (p === stepActual) ? 'activo' : '';
+                        const esCero = (p === 0) ? 'cero' : '';
+                        return `<button type="button" class="btn-setting-vel-step ${esCero} ${esActivo}" data-step="${p}" onclick="window.cambiarVelocidadAjustes(${p})">${p}</button>`;
+                    }).join('')}
+                </div>
+            `;
+        }
+
         // CONTROL DE RANGO VINCULADO (BARRA + NÚMERO)
     if (opt.tipo === 'range') {
             return `

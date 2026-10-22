@@ -167,19 +167,24 @@ export class DbAudioDescarga {
 
         try {
             // ------------------------------------------------------------------
-            // 1. DESCARGA DIRECTA DE LA NUBE (to.resucito.do) CON PROGRESO STREAM
+            // 1. DESCARGA DIRECTA (to.resucito.do O SERVICIO LOCAL A 40kbps)
             // ------------------------------------------------------------------
             const semPad = String(semana).padStart(2, '0');
-            const urlRemota = url || `https://to.resucito.do/s${semPad}/${dia}/${filename}`;
+            const urlsAProbar = [
+                url,
+                `https://to.resucito.do/s${semPad}/${dia}/${filename}`,
+                `http://127.0.0.1:4000/s${semPad}/${dia}/${filename}`,
+                `http://localhost:4000/s${semPad}/${dia}/${filename}`
+            ].filter(Boolean);
 
-            if (urlRemota) {
+            for (const urlCandidata of urlsAProbar) {
                 // Añadir cache buster para evitar que el navegador use un 404 anterior en caché
-                const fetchUrl = urlRemota.includes('?') ? `${urlRemota}&_cb=${Date.now()}` : `${urlRemota}?_cb=${Date.now()}`;
+                const fetchUrl = urlCandidata.includes('?') ? `${urlCandidata}&_cb=${Date.now()}` : `${urlCandidata}?_cb=${Date.now()}`;
                 try {
                     const res = await fetch(fetchUrl);
                     const cType = (res.headers.get('content-type') || '').toLowerCase();
 
-                    if (res.ok && !cType.includes('text/html')) {
+                    if (res.ok && !cType.includes('text/html') && (cType.includes('audio') || cType.includes('octet-stream') || urlCandidata.endsWith('.mp3'))) {
                         const totalBytes = parseInt(res.headers.get('content-length') || '0', 10);
                         let blobFinal = null;
 
@@ -214,11 +219,11 @@ export class DbAudioDescarga {
                             dispararDescargaBlob(blobFinal, filename);
                             if (cinta) {
                                 if (cinta.audiosFallidos && typeof cinta.audiosFallidos.delete === 'function') {
-                                    cinta.audiosFallidos.delete(urlRemota);
+                                    cinta.audiosFallidos.delete(urlCandidata);
                                     cinta.audiosFallidos.delete(url);
                                 }
                                 if (typeof cinta.mostrarToastAviso === 'function') {
-                                    cinta.mostrarToastAviso(`¡${filename} descargado exitosamente desde el servidor!`, 4000);
+                                    cinta.mostrarToastAviso(`¡${filename} (40kbps) descargado exitosamente!`, 4000);
                                 }
                             }
                             limpiarReloj();
@@ -226,30 +231,40 @@ export class DbAudioDescarga {
                         }
                     }
                 } catch (netErr) {
-                    console.warn('[DbAudioDescarga] Petición remota falló, intentando alternativas:', netErr);
+                    // Silencioso, pasa a la siguiente alternativa
                 }
             }
 
             // ------------------------------------------------------------------
-            // 2. ENTORNO LOCAL CON SERVICIO DE AUDIO (PUERTO 4000)
+            // 2. GENERACIÓN AUTOMÁTICA DEL AUDIO DEL CONTENIDO LITÚRGICO
             // ------------------------------------------------------------------
-            const esLocal = (typeof window !== 'undefined') && (
-                window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1' ||
-                window.location.protocol === 'file:'
-            );
+            let texto = (textoLiturgico || '').trim();
+            if (!texto && cinta) {
+                if (typeof cinta.obtenerTextoParaModo === 'function') {
+                    texto = (cinta.obtenerTextoParaModo(cinta.modoActivo) || '').trim();
+                }
+                if (!texto && cinta.ttsState && cinta.ttsState.fullText) {
+                    texto = (cinta.ttsState.fullText || '').trim();
+                }
+            }
+            if (!texto && typeof document !== 'undefined') {
+                const cuerpoEl = document.getElementById('salterio-contenido') || document.getElementById('cuerpo') || document.querySelector('.cuerpo') || document.querySelector('article') || document.querySelector('main');
+                if (cuerpoEl) {
+                    texto = (cuerpoEl.innerText || cuerpoEl.textContent || '').trim();
+                }
+            }
 
-            if (esLocal && textoLiturgico && textoLiturgico.trim()) {
-                const valGuardado = localStorage.getItem('pref-tts-download-voice') || localStorage.getItem('pref-tts-voice') || '';
-                const esMujer = valGuardado.toLowerCase().includes('estados unidos') || valGuardado.toLowerCase().includes('mujer');
-                const langDescarga = esMujer ? 'es-US' : 'es-ES';
+            let partes = (options.partes && Array.isArray(options.partes) && options.partes.length > 0)
+                ? options.partes
+                : (cinta && cinta.ttsState && Array.isArray(cinta.ttsState.chunks) && cinta.ttsState.chunks.length > 0)
+                    ? cinta.ttsState.chunks.map(c => c.text).filter(Boolean)
+                    : [];
 
-                // Subdividir texto para sintetizar
-                const oraciones = textoLiturgico.match(/[^.!?;\n]+[.!?;\n]*|\s+/g) || [textoLiturgico];
-                const partes = [];
+            if (partes.length === 0 && texto) {
+                const oraciones = texto.match(/[^.!?;\n]+[.!?;\n]*|\s+/g) || [texto];
                 let cur = '';
                 for (const seg of oraciones) {
-                    if ((cur.length + seg.length) > 140 && cur.trim()) {
+                    if ((cur.length + seg.length) > 130 && cur.trim()) {
                         partes.push(cur.trim());
                         cur = seg;
                     } else {
@@ -257,51 +272,82 @@ export class DbAudioDescarga {
                     }
                 }
                 if (cur.trim()) partes.push(cur.trim());
+            }
 
-                actualizarReloj(0, `0/${partes.length} partes`);
-                const activeBaseUrl = 'http://127.0.0.1:4000';
+            if (partes.length > 0) {
+                const valGuardado = localStorage.getItem('pref-tts-download-voice') || localStorage.getItem('pref-tts-voice') || '';
+                const esMujer = valGuardado.toLowerCase().includes('estados unidos') || valGuardado.toLowerCase().includes('mujer');
+                const langDescarga = esMujer ? 'es-US' : 'es-ES';
 
-                try {
-                    const ctrl = new AbortController();
-                    const tm = setTimeout(() => ctrl.abort(), 800);
-                    const r = await fetch(`${activeBaseUrl}/status`, { signal: ctrl.signal });
-                    clearTimeout(tm);
+                // Probar servicio local de síntesis en localhost / 127.0.0.1
+                const basesAProbar = [
+                    'http://127.0.0.1:4000',
+                    'http://localhost:4000'
+                ];
 
-                    if (r.ok) {
-                        const buffers = [];
-                        for (let i = 0; i < partes.length; i++) {
-                            const pct = Math.round(((i + 1) / partes.length) * 100);
-                            actualizarReloj(pct, `${i + 1}/${partes.length} partes`);
-
-                            const chunkUrl = `${activeBaseUrl}/api/tts-chunk?text=${encodeURIComponent(partes[i])}&lang=${encodeURIComponent(langDescarga)}`;
-                            const resChunk = await fetch(chunkUrl);
-                            if (!resChunk.ok) throw new Error(`HTTP ${resChunk.status}`);
-                            const ab = await resChunk.arrayBuffer();
-                            if (ab && ab.byteLength > 0) buffers.push(ab);
+                let activeBaseUrl = null;
+                for (const b of basesAProbar) {
+                    try {
+                        const ctrl = new AbortController();
+                        const tm = setTimeout(() => ctrl.abort(), 1200);
+                        const r = await fetch(`${b}/status`, { signal: ctrl.signal });
+                        clearTimeout(tm);
+                        if (r.ok) {
+                            activeBaseUrl = b;
+                            break;
                         }
+                    } catch (_) {}
+                }
 
-                        if (buffers.length > 0) {
-                            const mp3Blob = new Blob(buffers, { type: 'audio/mpeg' });
-                            dispararDescargaBlob(mp3Blob, filename);
-
-                            // Guardar en repositorio local
-                            try {
-                                fetch(`${activeBaseUrl}/api/save-audio?filename=${encodeURIComponent(filename)}&semana=${encodeURIComponent(semana)}&dia=${encodeURIComponent(dia)}`, {
-                                    method: 'POST',
-                                    body: mp3Blob,
-                                    headers: { 'Content-Type': 'audio/mpeg' }
-                                }).catch(() => {});
-                            } catch (_) {}
-
-                            if (cinta && typeof cinta.mostrarToastAviso === 'function') {
-                                cinta.mostrarToastAviso(`¡${filename} generado y descargado exitosamente!`, 4000);
-                            }
-                            limpiarReloj();
-                            return true;
-                        }
+                if (activeBaseUrl) {
+                    actualizarReloj(0, `0/${partes.length} partes`);
+                    if (cinta && typeof cinta.mostrarToastAviso === 'function') {
+                        cinta.mostrarToastAviso(`Generando audio '${filename}' (${partes.length} fragmentos)...`, 3500);
                     }
-                } catch (localErr) {
-                    console.warn('[DbAudioDescarga] Servicio local no disponible:', localErr);
+
+                    const buffers = [];
+                    for (let i = 0; i < partes.length; i++) {
+                        const pct = Math.max(1, Math.min(99, Math.round(((i + 1) / partes.length) * 100)));
+                        actualizarReloj(pct, `${i + 1}/${partes.length} partes`);
+
+                        const chunkUrl = `${activeBaseUrl}/api/tts-chunk?text=${encodeURIComponent(partes[i])}&lang=${encodeURIComponent(langDescarga)}`;
+                        const resChunk = await fetch(chunkUrl);
+                        if (!resChunk.ok) throw new Error(`HTTP ${resChunk.status}`);
+                        const ab = await resChunk.arrayBuffer();
+                        if (ab && ab.byteLength > 0) buffers.push(ab);
+                    }
+
+                    if (buffers.length > 0) {
+                        actualizarReloj(99, 'Optimizando a 40kbps...');
+                        const rawBlob = new Blob(buffers, { type: 'audio/mpeg' });
+                        let blobFinalDescarga = rawBlob;
+
+                        // Guardar en repositorios locales y obtener versión transcodificada a 40kbps
+                        try {
+                            const resSave = await fetch(`${activeBaseUrl}/api/save-audio?filename=${encodeURIComponent(filename)}&semana=${encodeURIComponent(semana)}&dia=${encodeURIComponent(dia)}&returnAudio=1`, {
+                                method: 'POST',
+                                body: rawBlob,
+                                headers: { 'Content-Type': 'audio/mpeg' }
+                            });
+                            if (resSave.ok) {
+                                const cType = (resSave.headers.get('content-type') || '').toLowerCase();
+                                if (cType.includes('audio') || cType.includes('octet-stream')) {
+                                    blobFinalDescarga = await resSave.blob();
+                                }
+                            }
+                        } catch (saveErr) {
+                            console.warn('[DbAudioDescarga] No se pudo obtener 40kbps del servidor, usando audio directo:', saveErr);
+                        }
+
+                        actualizarReloj(100, 'Listo (40kbps)');
+                        dispararDescargaBlob(blobFinalDescarga, filename);
+
+                        if (cinta && typeof cinta.mostrarToastAviso === 'function') {
+                            cinta.mostrarToastAviso(`¡${filename} (40kbps) generado y descargado exitosamente!`, 4500);
+                        }
+                        limpiarReloj();
+                        return true;
+                    }
                 }
             }
 

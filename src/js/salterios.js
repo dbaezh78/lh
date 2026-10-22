@@ -864,6 +864,9 @@ function aplicarTemaConfigurado() {
 function montarOActualizarVista(params, datos) {
     if (!datos) return;
     horaActualDatos = datos;
+    if (typeof window !== 'undefined') {
+        window.__salterioDataActual = datos;
+    }
 
     const { tiempo, semana, dia, libro, fecha, santo } = params;
 
@@ -1067,8 +1070,13 @@ function montarOActualizarVista(params, datos) {
     // Renderizar cuerpo del salterio
     renderizarCuerpoLiturgico(datos);
 
-    // Reaplicar tamaño de fuente preferido por el usuario
+    // Reaplicar tamaño de fuente preferido por el usuario y refrescar guion TTS con el contenido actual
     if (cintaInstancia) {
+        cintaInstancia.ttsState.fullText = '';
+        cintaInstancia.ttsState.chunks = [];
+        if (!cintaInstancia.ttsState.isSpeaking) {
+            cintaInstancia.prepararTTS(cintaInstancia.modoActivo || 'hora');
+        }
         cintaInstancia.aplicarTamanoTexto(cintaInstancia.fontZoom);
     }
 }
@@ -1214,20 +1222,169 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo, docId
     const himnoObj = (HimnosDB && typeof HimnosDB.filtrar === 'function')
         ? (filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, numSemana, dia, libro))[0]
            || filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, semCiclo, dia, libro))[0]
-           || filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, 1, dia, libro))[0]
-           || filtrarHimnosIniciales(HimnosDB.filtrar('ordinario', 1, dia, libro))[0]
-           || filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, semCiclo, dia, 'laudes'))[0]
-           || filtrarHimnosIniciales(HimnosDB.filtrar('ordinario', 1, dia, 'laudes'))[0])
+           || ((libro === 'laudes' || libro === 'oficio' || libro === 'visperas')
+               ? (filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, 1, dia, libro))[0]
+                  || filtrarHimnosIniciales(HimnosDB.filtrar('ordinario', 1, dia, libro))[0]
+                  || filtrarHimnosIniciales(HimnosDB.filtrar(tiempo, semCiclo, dia, 'laudes'))[0]
+                  || filtrarHimnosIniciales(HimnosDB.filtrar('ordinario', 1, dia, 'laudes'))[0])
+               : null))
         : null;
+
+    const esSemana2o4 = (semCiclo === 2 || semCiclo === 4);
+
+    let himnoPorDefectoHora = {
+        titulo: 'HIMNO: ERES LA LUZ Y SIEMBRAS CLARIDADES.',
+        texto: `Eres la luz y siembras claridades,
+eres amor y siembras armonía
+desde tu eternidad de eternidades.
+
+Por tu roja frescura de alegría,
+la tierra se estremece de rocío,
+Hijo eterno del Padre y de María.
+
+Entro en tus esplendores, Cristo, ciego;
+mientras corre la vida paso a paso,
+pongo mis horas grises en tu brazo,
+y a ti, Señor, mi corazón entrego. Amén.`
+    };
+
+    if (libro === 'nona') {
+        himnoPorDefectoHora = esSemana2o4 ? {
+            titulo: 'Himno: OH JESÚS, QUE EN TU CRUZ HAS DEMOSTRADO',
+            texto: `Oh Jesús, que en tu cruz has demostrado
+tu gran amor, tu gran misericordia,
+y tu fuerza nos das para seguirte
+por el mismo camino hacia la gloria.
+
+Que fielmente cumplamos en tu Iglesia
+nuestra parte en tu obra salvadora,
+y, al llegar a la tarde de la vida,
+en gozo eterno el Padre nos acoja.
+
+Gracias, Padre, a ti porque nos llamas,
+a Jesús, que en su sangre nos redime,
+y al Espíritu Santo, luz y guía
+de este pueblo que al cielo se dirige. Amén.`
+        } : {
+            titulo: 'HIMNO: FUNDAMENTO DE TODO LO QUE EXISTE',
+            texto: `Fundamento de todo lo que existe,
+de tu pueblo elegido eterna roca,
+de los tiempos Señor, que prometiste
+dar tu vigor al que con fe te invoca.
+
+Mira al hombre que es fiel y no te olvida,
+tu Espíritu, tu paz háganlo fuerte
+para amarte y servirte en esta vida
+y gozarte después de santa muerte.
+
+Jesús, Hijo del Padre, ven aprisa
+en este atardecer que se avecina,
+serena claridad y dulce brisa
+será tu amor que todo lo domina. Amén.`
+        };
+    } else if (libro === 'sexta') {
+        himnoPorDefectoHora = esSemana2o4 ? {
+            titulo: 'Himno: ESTE MUNDO DEL HOMBRE EN QUE ÉL SE AFANA.',
+            texto: `Este mundo del hombre, en que él se afana
+tras la felicidad que tanto ansía,
+tú lo vistes, Señor, de luz temprana
+y de radiante sol al mediodía.
+
+Así el poder de tu presencia encierra
+el secreto más hondo de esta vida;
+un nuevo cielo y una nueva tierra
+colmarán nuestro anhelo sin medida.
+
+Poderoso Señor de nuestra historia,
+no tardes en venir gloriosamente;
+tu luz resplandeciente y tu victoria
+inunden nuestra vida eternamente. Amén.`
+        } : {
+            titulo: 'HIMNO: CUANDO LA LUZ DEL DÍA ESTÁ EN SU CUMBRE',
+            texto: `Cuando la luz del día está en su cumbre,
+eres, Señor Jesús, luz y alegría
+de quienes en la fe y en la esperanza
+celebran ya la fiesta de la Vida.
+
+Eres resurrección, palabra y prenda
+de ser y de vivir eternamente;
+sembradas de esperanzas nuestras vidas,
+serán en ti cosecha para siempre.
+
+Ven ya, Señor Jesús, Salvador nuestro,
+de tu radiante luz llena este día,
+camino de alegría y de esperanza,
+cabal acontecer de nueva vida.
+
+Concédenos, oh Padre omnipotente,
+por tu Hijo Jesucristo, hermano nuestro,
+vivir ahora el fuego de tu Espíritu,
+haciendo de esta tierra un cielo nuevo. Amén.`
+        };
+    } else if (libro === 'tercia') {
+        himnoPorDefectoHora = {
+            titulo: 'HIMNO: VEN ESPÍRITU SANTO, LUZ Y GOZO',
+            texto: `Ven, Espíritu Santo, luz y gozo,
+Amor, que en tus incendios nos abrasas:
+renueva el alma de este pueblo tuyo
+que por mis labios canta tu alabanza.
+
+En sus fatigas diarias, sé descanso;
+en su lucha tenaz, vigor y gracia:
+haz germinar la caridad del Padre,
+que engendra flores y que quema zarzas.
+
+Ven, Amor, que iluminas el camino,
+compañero divino de las almas:
+ven con tu viento a sacudir al mundo
+y a abrir nuevos senderos de esperanza. Amén.`
+        };
+    } else if (libro === 'completas') {
+        himnoPorDefectoHora = esSemana2o4 ? {
+            titulo: 'Himno: SE INCLINA YA MI FRENTE',
+            texto: `Se inclina ya mi frente,
+sellado está el trabajo;
+Señor, tu pecho sea
+la gracia del descanso.
+
+Mis ojos se retiran,
+la voz deja su canto,
+pero el amor enciende
+su lámpara velando.
+
+Lucero que te fuiste,
+con gran amor amado,
+en tu gloria dormimos
+y en sueños te adoramos. Amén.`
+        } : {
+            titulo: 'HIMNO: CUANDO LA LUZ DEL SOL ES YA PONIENTE',
+            texto: `Cuando la luz del sol es ya poniente,
+gracias, Señor, es nuestra melodía;
+recibe, como ofrenda, amablemente,
+nuestro dolor, trabajo y alegría.
+
+Si poco fue el amor en nuestro empeño
+de darle vida al día que fenece,
+convierta en realidad lo que fue un sueño
+tu gran amor que todo lo engrandece.
+
+Tu cruz, Señor, redime nuestra suerte
+de pecadora en justa, e ilumina
+la senda de la vida y de la muerte
+del hombre que en la fe lucha y camina.
+
+Jesús, Hijo del Padre, cuando avanza
+la noche oscura sobre nuestro día,
+concédenos la paz y la esperanza
+de esperar cada noche tu gran día. Amén.`
+        };
+    }
 
     const himnoFinal = himnoObj ? {
         id: himnoObj.id || himnoObj.varName,
         titulo: himnoObj.titulo || 'HIMNO',
         texto: himnoObj.texto || ''
-    } : {
-        titulo: 'HIMNO: ERES LA LUZ Y SIEMBRAS CLARIDADES.',
-        texto: `Eres la luz y siembras claridades,\neres amor y siembras armonía\ndesde tu eternidad de eternidades.\n\nPor tu roja frescura de alegría,\nla tierra se estremece de rocío,\nHijo eterno del Padre y de María.\n\nEntro en tus esplendores, Cristo, ciego;\nmientras corre la vida paso a paso,\npongo mis horas grises en tu brazo,\ny a ti, Señor, mi corazón entrego. Amén.`
-    };
+    } : himnoPorDefectoHora;
 
     return {
         tiempo,

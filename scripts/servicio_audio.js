@@ -7,23 +7,69 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { spawn } = require('child_process');
+
+let ffmpegPath = null;
+try {
+    ffmpegPath = require('ffmpeg-static');
+} catch (_) {}
 
 const PORT_HTTP = 4000;
 const PORT_HTTPS = 4001;
+const DEFAULT_BITRATE = '40k';
+
+function transcodificarA40k(mp3Buffer, bitrate = DEFAULT_BITRATE) {
+    if (!mp3Buffer || mp3Buffer.length === 0 || !ffmpegPath || !fs.existsSync(ffmpegPath)) {
+        return Promise.resolve(mp3Buffer);
+    }
+    return new Promise((resolve) => {
+        try {
+            const proc = spawn(ffmpegPath, [
+                '-y',
+                '-i', 'pipe:0',
+                '-codec:a', 'libmp3lame',
+                '-b:a', bitrate,
+                '-ac', '1',
+                '-f', 'mp3',
+                'pipe:1'
+            ], { stdio: ['pipe', 'pipe', 'pipe'] });
+
+            const outChunks = [];
+            let errBuf = '';
+
+            proc.stdout.on('data', d => outChunks.push(d));
+            proc.stderr.on('data', d => { errBuf += d.toString(); });
+
+            proc.on('close', code => {
+                if (code === 0 && outChunks.length > 0) {
+                    const transcoded = Buffer.concat(outChunks);
+                    resolve(transcoded);
+                } else {
+                    console.warn('[FFmpeg] Transcodificación fallback al original. Código:', code);
+                    resolve(mp3Buffer);
+                }
+            });
+
+            proc.on('error', err => {
+                console.warn('[FFmpeg] Error ejecutando ffmpeg:', err.message);
+                resolve(mp3Buffer);
+            });
+
+            proc.stdin.write(mp3Buffer);
+            proc.stdin.end();
+        } catch (e) {
+            console.warn('[FFmpeg] Excepción en transcodificarA40k:', e.message);
+            resolve(mp3Buffer);
+        }
+    });
+}
 
 function limpiarTextoParaGoogle(texto) {
     if (!texto) return '';
     return texto
         .replace(/={20,}[\s\S]*?={20,}/g, '') // Quitar encabezados o metadatos
         .replace(/LITURGIA DE LAS HORAS[\s\S]*?={10,}/gi, '')
-        .replace(/Archivo(?: de audio)? previsto:.*$/gim, '')
-        .replace(/Tiempo:.*$/gim, '')
-        .replace(/Semana:.*$/gim, '')
-        .replace(/Día:.*$/gim, '')
-        .replace(/Hora:.*$/gim, '')
-        .replace(/Modo:.*$/gim, '')
-        .replace(/Fecha:.*$/gim, '')
-        .replace(/ID Canónico:.*$/gim, '')
+        .replace(/^(?:Archivo(?:\s+de\s+audio)?\s+previsto|Tiempo|Semana|Día|Hora|Modo|Fecha|ID\s+Canónico)\s*:.*$/gim, '')
         .replace(/\s*\*\s*/g, ', ') // Pausa para asterisco litúrgico
         .replace(/\bN:\.?\s*/gi, 'por nuestro hermano ')
         .replace(/\(?[Aa]ño\s+(?:par|impar|[I|V|X]+)\)?/gi, '')
@@ -130,7 +176,9 @@ async function sintetizarTextoCompleto(texto, lang = 'es-US', onProgreso = null)
             console.warn('[Google TTS] Error en frase', i, err.message);
         }
     }
-    return Buffer.concat(buffers);
+    const rawConcat = Buffer.concat(buffers);
+    // Transcodificar a 40 kbps para compresión y fluidez óptima de voz litúrgica
+    return await transcodificarA40k(rawConcat, '40k');
 }
 
 function guardarEnReposLocales(filename, semana, dia, mp3Buffer) {
@@ -266,21 +314,53 @@ async function requestHandler(req, res) {
         return;
     }
 
-    // 3. Guardar audio ensamblado directamente en repositorios locales (tordinario y to)
+    // 3. Guardar audio ensamblado y transcodificar a 40 kbps
     if (parsedUrl.pathname === '/api/save-audio' && req.method === 'POST') {
         const filename = parsedUrl.searchParams.get('filename') || req.headers['x-filename'] || 'audio.mp3';
         const semana = parsedUrl.searchParams.get('semana') || req.headers['x-semana'] || '';
         const dia = parsedUrl.searchParams.get('dia') || req.headers['x-dia'] || '';
+        const returnAudio = parsedUrl.searchParams.get('returnAudio') === '1' || parsedUrl.searchParams.get('download') === '1';
 
         const chunks = [];
         req.on('data', c => chunks.push(c));
-        req.on('end', () => {
+        req.on('end', async () => {
             const fullBuf = Buffer.concat(chunks);
-            if (fullBuf.length > 0 && semana && dia) {
-                guardarEnReposLocales(filename, semana, dia, fullBuf);
+            let bufFinal = fullBuf;
+            if (fullBuf.length > 0) {
+                // Transcodificar a 40 kbps garantizado con ffmpeg
+                bufFinal = await transcodificarA40k(fullBuf, '40k');
+                if (semana && dia) {
+                    guardarEnReposLocales(filename, semana, dia, bufFinal);
+                }
             }
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ status: 'ok', saved: true, bytes: fullBuf.length }));
+
+            if (returnAudio && bufFinal.length > 0) {
+                res.writeHead(200, {
+                    'Content-Type': 'audio/mpeg',
+                    'Content-Length': bufFinal.length,
+                    'Content-Disposition': `attachment; filename="${filename}"`
+                });
+                res.end(bufFinal);
+            } else {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ status: 'ok', saved: true, bytes: bufFinal.length, bitrate: '40kbps' }));
+            }
+        });
+        return;
+    }
+
+    // 3b. Endpoint directo de transcodificación a 40 kbps
+    if (parsedUrl.pathname === '/api/transcode-40k' && req.method === 'POST') {
+        const chunks = [];
+        req.on('data', c => chunks.push(c));
+        req.on('end', async () => {
+            const raw = Buffer.concat(chunks);
+            const out = await transcodificarA40k(raw, '40k');
+            res.writeHead(200, {
+                'Content-Type': 'audio/mpeg',
+                'Content-Length': out.length
+            });
+            res.end(out);
         });
         return;
     }
@@ -348,29 +428,36 @@ async function requestHandler(req, res) {
         return;
     }
 
-    // 5. Servir archivos estáticos del repositorio si aplica
-    const baseDir = path.resolve(__dirname, '..');
+    // 5. Servir archivos estáticos del repositorio si aplica (incluye repositorios de audio to y tordinario)
+    const searchDirs = [
+        path.resolve(__dirname, '..'),
+        path.resolve('C:/db/Github/to'),
+        path.resolve('C:/db/Github/tordinario')
+    ];
     let reqPath = parsedUrl.pathname === '/' ? '/salterios.html' : parsedUrl.pathname;
     try {
-        const safePath = path.normalize(path.join(baseDir, decodeURIComponent(reqPath)));
-        if (safePath.startsWith(baseDir) && fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
-            const ext = path.extname(safePath).toLowerCase();
-            const mimeTypes = {
-                '.html': 'text/html; charset=utf-8',
-                '.htm': 'text/html; charset=utf-8',
-                '.js': 'application/javascript; charset=utf-8',
-                '.mjs': 'application/javascript; charset=utf-8',
-                '.json': 'application/json; charset=utf-8',
-                '.css': 'text/css; charset=utf-8',
-                '.png': 'image/png',
-                '.jpg': 'image/jpeg',
-                '.svg': 'image/svg+xml',
-                '.mp3': 'audio/mpeg'
-            };
-            const cType = mimeTypes[ext] || 'application/octet-stream';
-            res.writeHead(200, { 'Content-Type': cType });
-            fs.createReadStream(safePath).pipe(res);
-            return;
+        for (const baseDir of searchDirs) {
+            if (!fs.existsSync(baseDir)) continue;
+            const safePath = path.normalize(path.join(baseDir, decodeURIComponent(reqPath)));
+            if (safePath.startsWith(path.normalize(baseDir)) && fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
+                const ext = path.extname(safePath).toLowerCase();
+                const mimeTypes = {
+                    '.html': 'text/html; charset=utf-8',
+                    '.htm': 'text/html; charset=utf-8',
+                    '.js': 'application/javascript; charset=utf-8',
+                    '.mjs': 'application/javascript; charset=utf-8',
+                    '.json': 'application/json; charset=utf-8',
+                    '.css': 'text/css; charset=utf-8',
+                    '.png': 'image/png',
+                    '.jpg': 'image/jpeg',
+                    '.svg': 'image/svg+xml',
+                    '.mp3': 'audio/mpeg'
+                };
+                const cType = mimeTypes[ext] || 'application/octet-stream';
+                res.writeHead(200, { 'Content-Type': cType });
+                fs.createReadStream(safePath).pipe(res);
+                return;
+            }
         }
     } catch (_) {}
 

@@ -762,3 +762,147 @@ body.dark-theme .nested-subtab-btn.active {
     background: #bc0009;
     color: #ffffff;
 }
+
+
+/* ==========================================================================
+   CONTROL DE VELOCIDAD EN CONFIGURACIÓN (-50 A 50)
+   ========================================================================== */
+.setting-row-velocidad {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 14px 0 !important;
+}
+
+.setting-velocidad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.setting-velocidad-header label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color, #1e293b);
+}
+
+.setting-velocidad-acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.setting-speed-badge {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0288d1;
+    background: rgba(2, 136, 209, 0.1);
+    border: 1px solid rgba(2, 136, 209, 0.25);
+    padding: 2px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+    font-family: inherit;
+}
+
+.btn-setting-reset-speed {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.btn-setting-reset-speed:hover {
+    background: #f1f5f9;
+    color: #0288d1;
+    border-color: #0288d1;
+    transform: rotate(-30deg);
+}
+
+.btn-setting-reset-speed .material-symbols-outlined {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.setting-control-full {
+    width: 100% !important;
+}
+
+.setting-speed-steps-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.btn-setting-vel-step {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 3px;
+    border-radius: 5px;
+    cursor: pointer;
+    min-width: 22px;
+    flex: 1 1 auto;
+    text-align: center;
+    transition: all 0.12s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    font-family: inherit;
+}
+
+.btn-setting-vel-step:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.btn-setting-vel-step.cero {
+    font-weight: 700;
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-setting-vel-step.activo {
+    background: #0288d1 !important;
+    border-color: #38bdf8 !important;
+    color: #ffffff !important;
+    font-weight: 800;
+    box-shadow: 0 0 8px rgba(2, 136, 209, 0.6);
+}
+
+/* Modo oscuro para el control en settings */
+body.dark-theme .setting-velocidad-header label {
+    color: #f1f5f9;
+}
+body.dark-theme .btn-setting-reset-speed {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #94a3b8;
+}
+body.dark-theme .btn-setting-reset-speed:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #38bdf8;
+    border-color: #38bdf8;
+}

@@ -7,7 +7,7 @@
 
     const linkSettings = document.createElement('link');
     linkSettings.rel = 'stylesheet';
-    linkSettings.href = '/src/css/setting.css';
+    linkSettings.href = `/src/css/setting.css?v=${window.APP_VERSION || Date.now()}`;
     document.head.appendChild(linkSettings);
 
 // 2. Inyectar archivos JS de ajustes y Firebase
@@ -31,7 +31,7 @@
     // 3. Crear el HTML de la navegación 
     // Añadimos 'style="visibility: hidden"' para evitar el parpadeo sin estilos
 // 3. Crear el HTML de la navegación 
-    window.APP_VERSION = '1.0.11';
+    window.APP_VERSION = '1.0.12';
     const appVersion = window.APP_VERSION;
 
     // Función universal para mostrar ventana modal de archivos actualizándose

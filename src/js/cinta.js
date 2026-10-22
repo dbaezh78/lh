@@ -205,6 +205,8 @@ export const MODOS_AUDIO = {
     }
 };
 
+export const PASOS_VELOCIDAD = [-50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+
 // =========================================================================
 // CONFIGURACIÓN Y HELPER DE VOCES TTS (COMPATIBLE CON AJUSTES Y SANTOS)
 // =========================================================================
@@ -526,8 +528,20 @@ export class CintaLiturgica {
             ...opciones
         };
 
-        // Estado del Reproductor y Modo Activo (Por defecto: Evangelio)
-        this.modoActivo = 'evangelio';
+        // Estado del Reproductor y Modo Activo (Por defecto: Lector de voz / Texto a voz)
+        let modoDefecto = 'hora';
+        try {
+            const guardado = localStorage.getItem('pref-audio-modo-defecto');
+            if (guardado && MODOS_AUDIO[guardado]) {
+                modoDefecto = guardado;
+            }
+        } catch (_) {}
+        this.modoActivo = modoDefecto;
+
+        if (typeof window !== 'undefined') {
+            window.cinta = this;
+            window.cintaInstancia = this;
+        }
         // Ciclo de lectura para Oficio: 'par' (Año II) o 'impar' (Año I) según el calendario real (2026 = Par / II)
         const anioActual = new Date().getFullYear();
         this.cicloAnio = (typeof window !== 'undefined' && window.__cicloAnioOficio)
@@ -712,6 +726,14 @@ export class CintaLiturgica {
                             <button type="button" class="cinta-btn-zoom" id="btn-zoom-mas" title="Aumentar tamaño de letra">+</button>
                             <span class="cinta-zoom-valor" id="cinta-zoom-valor" title="Doble clic para restablecer tamaño (16px)">${Math.round(this.fontZoom * 16)}px</span>
                         </div>
+                        <div class="cinta-velocidad-box" id="cinta-velocidad-box">
+                            <button type="button" class="cinta-btn-velocidad" id="btn-cinta-velocidad" title="Velocidad">x1</button>
+                            <div class="cinta-velocidad-popover" id="cinta-velocidad-popover">
+                                <div class="cinta-velocidad-lista">
+                                    ${this.generarPasosVelocidadHtml()}
+                                </div>
+                            </div>
+                        </div>
                         <div class="cinta-scroll-controles">
                             <button type="button" class="cinta-btn-scroll" id="btn-scroll-arriba" title="Ir hasta arriba" aria-label="Ir hasta arriba">
                                 <span class="material-symbols-outlined">arrow_upward</span>
@@ -765,7 +787,7 @@ export class CintaLiturgica {
                 <!-- Fila 2: Reproductor y Navegación de Horas (Colapsable al pulsar en el Tiempo Litúrgico) -->
                 <div class="cinta-fila-inf" id="cinta-fila-inf">
                     <div class="cinta-reproductor-horas">
-                        <button type="button" class="cinta-btn-play modo-evangelio" id="btn-cinta-play" title="Reproducir Evangelio">
+                        <button type="button" class="cinta-btn-play ${(MODOS_AUDIO[this.modoActivo] || MODOS_AUDIO.hora).claseBtn}" id="btn-cinta-play" title="Reproducir ${(MODOS_AUDIO[this.modoActivo] || MODOS_AUDIO.hora).nombre}">
                             <span class="material-symbols-outlined" id="cinta-icon-play">play_arrow</span>
                         </button>
                         <nav class="cinta-horas-nav" id="cinta-horas-nav">
@@ -908,6 +930,48 @@ export class CintaLiturgica {
             });
         }
 
+        // 2d. Control de Velocidad Desplegable (-25 a 25)
+        const btnVelocidad = document.getElementById('btn-cinta-velocidad');
+        const popoverVelocidad = document.getElementById('cinta-velocidad-popover');
+
+        if (btnVelocidad && popoverVelocidad) {
+            btnVelocidad.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const menuAudios = document.getElementById('cinta-menu-audios');
+                if (menuAudios) menuAudios.classList.remove('abierto');
+                const menuSemanas = document.getElementById('cinta-selector-semanas');
+                if (menuSemanas) menuSemanas.classList.remove('abierto');
+
+                popoverVelocidad.classList.toggle('abierto');
+                btnVelocidad.classList.toggle('abierto');
+
+                if (popoverVelocidad.classList.contains('abierto')) {
+                    const itemActivo = popoverVelocidad.querySelector('.cinta-vel-item.activo');
+                    if (itemActivo && typeof itemActivo.scrollIntoView === 'function') {
+                        itemActivo.scrollIntoView({ inline: 'center', block: 'nearest' });
+                    }
+                }
+            });
+
+            popoverVelocidad.querySelectorAll('.cinta-vel-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const step = item.getAttribute('data-step');
+                    this.establecerVelocidad(step);
+                    // Desaparecer inmediatamente después de la selección
+                    popoverVelocidad.classList.remove('abierto');
+                    btnVelocidad.classList.remove('abierto');
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!popoverVelocidad.contains(e.target) && !btnVelocidad.contains(e.target)) {
+                    popoverVelocidad.classList.remove('abierto');
+                    btnVelocidad.classList.remove('abierto');
+                }
+            });
+        }
+
         // 3. Menú Desplegable de la Iglesia
         const btnIglesia = document.getElementById('btn-iglesia-selector');
         const menuAudios = document.getElementById('cinta-menu-audios');
@@ -952,6 +1016,7 @@ export class CintaLiturgica {
 
         // Eventos del Audio HTML5 (Evangelio, Lectura 1, Lectura 2 y Rezo de las Horas)
         this.audio.addEventListener('play', () => {
+            this.audio.playbackRate = obtenerRateConfigurado(true);
             if (this.fuenteActiva === 'audio' || !this.ttsState.isSpeaking) {
                 if (iconPlay) iconPlay.textContent = 'pause';
             }
@@ -985,6 +1050,7 @@ export class CintaLiturgica {
         });
 
         this.audio.addEventListener('loadedmetadata', () => {
+            this.audio.playbackRate = obtenerRateConfigurado(true);
             if (this.fuenteActiva === 'audio' || !this.ttsState.isSpeaking) {
                 if (tTotal && !isNaN(this.audio.duration)) {
                     tTotal.textContent = this.formatearTiempo(this.audio.duration);
@@ -1059,6 +1125,14 @@ export class CintaLiturgica {
 
         vincularDescargaReloj(tActual);
         vincularDescargaReloj(tTotal);
+
+        // 5. Escuchar cambios de preferencia de audio por defecto desde la configuración
+        window.addEventListener('lh-audio-modo-defecto-changed', (e) => {
+            const nuevoModo = e.detail && e.detail.modo;
+            if (nuevoModo && MODOS_AUDIO[nuevoModo] && nuevoModo !== this.modoActivo) {
+                this.cambiarModoAudio(nuevoModo, false);
+            }
+        });
     }
 
     async descargarAudioActual() {
@@ -1099,12 +1173,14 @@ export class CintaLiturgica {
             urlCandidata = `https://to.resucito.do/s${semPad}/${dia}/${nombreArchivo}`;
         }
 
-        if (!this.ttsState.fullText || this.ttsState.chunks.length === 0) {
-            if (this.modoActivo === 'hora') {
-                this.prepararTTS();
-            } else {
-                const txt = this.obtenerTextoParaModo(this.modoActivo);
-                if (txt) this.prepararTTSConTexto(txt);
+        if (this.modoActivo === 'hora') {
+            this.prepararTTS('hora');
+        } else {
+            const txt = this.obtenerTextoParaModo(this.modoActivo);
+            if (txt) {
+                this.prepararTTSConTexto(txt);
+            } else if (!this.ttsState.fullText || this.ttsState.chunks.length === 0) {
+                this.prepararTTS(this.modoActivo);
             }
         }
         const textoLiturgico = this.ttsState.fullText || this.obtenerTextoParaModo(this.modoActivo) || '';
@@ -1112,10 +1188,12 @@ export class CintaLiturgica {
         try {
             const pluginDescarga = (typeof dbAudioDescarga !== 'undefined') ? dbAudioDescarga : (window.dbAudioDescarga || null);
             if (pluginDescarga && typeof pluginDescarga.descargarAudio === 'function') {
+                const partes = (this.ttsState.chunks || []).map(c => c.text).filter(Boolean);
                 await pluginDescarga.descargarAudio({
                     url: urlCandidata,
                     filename: nombreArchivo,
                     textoLiturgico,
+                    partes,
                     semana: sem,
                     dia: dia,
                     cinta: this
@@ -2065,6 +2143,14 @@ export class CintaLiturgica {
         if (!MODOS_AUDIO[nuevoModo]) return;
         this.modoActivo = nuevoModo;
 
+        try {
+            localStorage.setItem('pref-audio-modo-defecto', nuevoModo);
+            const selectDefault = document.querySelector('[data-id="global-audio-default-mode"] select');
+            if (selectDefault && selectDefault.value !== nuevoModo) {
+                selectDefault.value = nuevoModo;
+            }
+        } catch (_) {}
+
         const infoModo = MODOS_AUDIO[nuevoModo];
         const btnPlay = document.getElementById('btn-cinta-play');
         const iconPlay = document.getElementById('cinta-icon-play');
@@ -2140,6 +2226,9 @@ export class CintaLiturgica {
             this.subtitulos.hora = nombreLibro;
             const sub = document.getElementById('menu-sub-hora');
             if (sub && nombreLibro) sub.textContent = nombreLibro;
+            if (this.modoActivo === 'hora' && (!this.audio.src || this.audio.paused)) {
+                this.audio.src = url;
+            }
         }
     }
 
@@ -2240,6 +2329,71 @@ export class CintaLiturgica {
         const spanZoom = document.getElementById('cinta-zoom-valor');
         if (spanZoom) {
             spanZoom.textContent = `${Math.round(valZoom * 16)}px`;
+        }
+    }
+
+    // =========================================================================
+    // CONTROL DE VELOCIDAD DE AUDIO (DE 5 EN 5: -25 A 25)
+    // =========================================================================
+
+    obtenerPasoVelocidadActual() {
+        const stepSaved = localStorage.getItem('pref-audio-speed-step');
+        if (stepSaved !== null && !isNaN(parseInt(stepSaved, 10))) {
+            const s = parseInt(stepSaved, 10);
+            if (PASOS_VELOCIDAD.includes(s)) return s;
+        }
+        const r = obtenerRateConfigurado(true);
+        const dif = Math.round((r - 1.0) * 100);
+        return PASOS_VELOCIDAD.reduce((prev, curr) => Math.abs(curr - dif) < Math.abs(prev - dif) ? curr : prev, 0);
+    }
+
+    formatearTextoVelocidad(rate = null) {
+        const r = (typeof rate === 'number' && !isNaN(rate)) ? rate : obtenerRateConfigurado(true);
+        const dif = Math.round((r - 1.0) * 100);
+        if (dif === 0) return 'x1';
+        const s = r.toFixed(2).replace(/0$/, '');
+        return `x${s}`;
+    }
+
+    generarPasosVelocidadHtml() {
+        const pasoActual = this.obtenerPasoVelocidadActual();
+        return PASOS_VELOCIDAD.map(p => {
+            const esActivo = (p === pasoActual) ? 'activo' : '';
+            const esCero = (p === 0) ? 'cinta-vel-cero' : '';
+            return `<button type="button" class="cinta-vel-item ${esCero} ${esActivo}" data-step="${p}">${p}</button>`;
+        }).join('');
+    }
+
+    establecerVelocidad(step) {
+        const s = parseInt(step, 10) || 0;
+        const rate = parseFloat((1.0 + (s / 100)).toFixed(2));
+        localStorage.setItem('pref-tts-rate', String(rate));
+        localStorage.setItem('pref-audio-speed-step', String(s));
+
+        if (this.audio) {
+            this.audio.playbackRate = rate;
+        }
+
+        // El botón solo dice x1 como solicitó el usuario
+        const btn = document.getElementById('btn-cinta-velocidad');
+        if (btn) btn.textContent = 'x1';
+
+        document.querySelectorAll('.cinta-vel-item').forEach(it => {
+            const itStep = parseInt(it.getAttribute('data-step'), 10);
+            if (itStep === s) {
+                it.classList.add('activo');
+            } else {
+                it.classList.remove('activo');
+            }
+        });
+
+        // Actualizar control en Configuración si existe
+        if (typeof window !== 'undefined' && typeof window.actualizarVelocidadEnAjustes === 'function') {
+            window.actualizarVelocidadEnAjustes(s, rate);
+        }
+
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('lh-tts-rate-changed', { detail: { rate, step: s } }));
         }
     }
 
