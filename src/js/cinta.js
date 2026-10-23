@@ -1935,13 +1935,28 @@ export class CintaLiturgica {
             console.warn('Error en TTS litúrgico:', err);
             this.ttsState.currentChunkIndex++;
             if (this.ttsState.currentChunkIndex < this.ttsState.chunks.length) {
-                this.reproducirChunkActualTTS();
+                // Usar setTimeout para evitar bucle sincrónico infinito (Maximum call stack size exceeded)
+                setTimeout(() => {
+                    if (this.ttsState.isSpeaking) {
+                        this.reproducirChunkActualTTS();
+                    }
+                }, 40);
             } else {
                 this.finalizarTTS();
             }
         };
 
-        window.speechSynthesis.speak(utterance);
+        try {
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {
+            console.warn('Error al invocar speechSynthesis.speak:', e);
+            setTimeout(() => {
+                if (this.ttsState.isSpeaking) {
+                    this.ttsState.currentChunkIndex++;
+                    this.reproducirChunkActualTTS();
+                }
+            }, 60);
+        }
     }
 
     iniciarTrackingProgresoTTS() {
