@@ -286,9 +286,31 @@ function buscarConfigurada(codigo, tiempo, semana, dia, libro) {
         // Solo considerar equivalencias de la MISMA semana para no contar módulo de salterio 4 como configurada directa
         if (state.mapaConfiguradas.has(eqClean)) {
             const dec = (typeof decodificarCodigoLiturgico === 'function') ? decodificarCodigoLiturgico(eqClean) : null;
-            const esCompletasOrdinario = (tiempo === 'ordinario' && libro === 'completas');
+            const esCompletasOrdinario = (tiempo === 'ordinario' && (libro === 'completas' || libro === 'co'));
             if (!dec || Number(dec.semana) === Number(semana) || esCompletasOrdinario) {
                 return state.mapaConfiguradas.get(eqClean);
+            }
+        }
+    }
+
+    // 3. Regla canónica explícita para Completas del Tiempo Ordinario:
+    // Las completas son idénticas en todas las semanas (1 a 34) y toman como base la Semana 1.
+    // Si la semana actual no tiene su documento propio pero la semana 1 sí está configurada, se considera configurada.
+    if (tiempo === 'ordinario' && (libro === 'completas' || libro === 'co')) {
+        const diaCod = (dia === 'domingo' ? 'do' : dia === 'lunes' ? 'lu' : dia === 'martes' ? 'ma' : dia === 'miercoles' ? 'mi' : dia === 'jueves' ? 'ju' : dia === 'viernes' ? 'vi' : dia === 'sabado' ? 'sa' : dia);
+        const candidatosSemana1 = [
+            `tos01${diaCod}co`,
+            `tos1${diaCod}co`,
+            `tos01co${diaCod}`,
+            `tos1co${diaCod}`,
+            `ordinario_semana_1_${dia}_completas`,
+            `ordinario_semana_01_${dia}_completas`,
+            `ordinario_s1_${dia}_completas`,
+            `ordinario_s01_${dia}_completas`
+        ];
+        for (const c1 of candidatosSemana1) {
+            if (state.mapaConfiguradas.has(c1.toLowerCase())) {
+                return state.mapaConfiguradas.get(c1.toLowerCase());
             }
         }
     }
