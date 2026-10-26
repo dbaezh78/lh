@@ -5021,7 +5021,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (coincideLibroLocal) {
                         const numSemActual = idCodigo.match(/s0?(\d+)/)?.[1];
                         const numSemCand = candId.match(/s0?(\d+)/)?.[1];
-                        const esFallbackCiclo = Boolean(tiempoVal === 'ordinario' && numSemActual && numSemCand && parseInt(numSemActual, 10) !== parseInt(numSemCand, 10));
+                        const esFallbackCiclo = Boolean(tiempoVal === 'ordinario' && libroVal !== 'completas' && numSemActual && numSemCand && parseInt(numSemActual, 10) !== parseInt(numSemCand, 10));
 
                         if (esFallbackCiclo) {
                             datos = { ...datos };
@@ -5065,7 +5065,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (datosCargados) {
                             const numSemActual = idCodigo.match(/s0?(\d+)/)?.[1];
                             const numSemCand = candId.match(/s0?(\d+)/)?.[1];
-                            esFallbackCicloRemoto = Boolean(tiempoVal === 'ordinario' && numSemActual && numSemCand && parseInt(numSemActual, 10) !== parseInt(numSemCand, 10));
+                            esFallbackCicloRemoto = Boolean(tiempoVal === 'ordinario' && libroVal !== 'completas' && numSemActual && numSemCand && parseInt(numSemActual, 10) !== parseInt(numSemCand, 10));
 
                             if (esFallbackCicloRemoto) {
                                 datosCargados = { ...datosCargados };
@@ -5264,7 +5264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (coincideLibroLocal) {
                         const numSemActual = codSemana ? codSemana.match(/\d+/)?.[0] : (codigoFinal.match(/s0?(\d+)/)?.[1]);
                         const numSemCand = candId.match(/s0?(\d+)/)?.[1];
-                        const esFallbackCiclo = Boolean(tiempoVal === 'ordinario' && numSemActual && numSemCand && parseInt(numSemActual, 10) !== parseInt(numSemCand, 10));
+                        const esFallbackCiclo = Boolean(tiempoVal === 'ordinario' && libroVal !== 'completas' && numSemActual && numSemCand && parseInt(numSemActual, 10) !== parseInt(numSemCand, 10));
 
                         if (esFallbackCiclo) {
                             datos = { ...datos };

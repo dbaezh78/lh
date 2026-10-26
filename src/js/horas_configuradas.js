@@ -286,7 +286,8 @@ function buscarConfigurada(codigo, tiempo, semana, dia, libro) {
         // Solo considerar equivalencias de la MISMA semana para no contar módulo de salterio 4 como configurada directa
         if (state.mapaConfiguradas.has(eqClean)) {
             const dec = (typeof decodificarCodigoLiturgico === 'function') ? decodificarCodigoLiturgico(eqClean) : null;
-            if (!dec || Number(dec.semana) === Number(semana)) {
+            const esCompletasOrdinario = (tiempo === 'ordinario' && libro === 'completas');
+            if (!dec || Number(dec.semana) === Number(semana) || esCompletasOrdinario) {
                 return state.mapaConfiguradas.get(eqClean);
             }
         }

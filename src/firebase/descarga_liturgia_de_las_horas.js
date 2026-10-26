@@ -464,6 +464,20 @@ export function obtenerIdsEquivalentes(codigo) {
         resultado.add(`${dec.tiempo}_s${dec.semana}_${dec.dia}_${dec.libro}`);
         resultado.add(`${dec.tiempo}_s${String(dec.semana).padStart(2, '0')}_${dec.dia}_${dec.libro}`);
 
+        // 5b. Completas del Tiempo Ordinario: Son idénticas en todas las semanas (1 a 34) a las de la Semana 1
+        if (dec.tiempo === 'ordinario' && dec.libro === 'completas') {
+            const s01Pad = 's01';
+            const s01Num = 's1';
+            resultado.add(codT + s01Pad + codD + codH);
+            resultado.add(codT + s01Num + codD + codH);
+            resultado.add(codT + s01Pad + codH + codD);
+            resultado.add(codT + s01Num + codH + codD);
+            resultado.add(dec.tiempo + '_semana_1_' + dec.dia + '_completas');
+            resultado.add(dec.tiempo + '_semana_01_' + dec.dia + '_completas');
+            resultado.add(dec.tiempo + '_s1_' + dec.dia + '_completas');
+            resultado.add(dec.tiempo + '_s01_' + dec.dia + '_completas');
+        }
+
         // 6. Equivalencias del ciclo litúrgico de 4 semanas del Salterio (Tiempo Ordinario)
         // Semanas 1, 5, 9, 13, 17, 21, 25, 29, 33 -> Salterio 1
         // Semanas 2, 6, 10, 14, 18, 22, 26, 30, 34 -> Salterio 2
@@ -1446,7 +1460,8 @@ export async function consultarHoraEnFirebase(idCodigo, params = {}) {
                     const esFallbackCiclo = Boolean(
                         decPrincipal && decCand &&
                         decPrincipal.tiempo === 'ordinario' && decCand.tiempo === 'ordinario' &&
-                        Number(decPrincipal.semana) !== Number(decCand.semana)
+                        Number(decPrincipal.semana) !== Number(decCand.semana) &&
+                        decPrincipal.libro !== 'completas'
                     );
 
                     if (esFallbackCiclo) {

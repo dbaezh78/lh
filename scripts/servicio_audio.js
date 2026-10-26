@@ -316,7 +316,10 @@ async function requestHandler(req, res) {
             return;
         }
 
-        const semPadded = semana.startsWith('s') ? semana.toLowerCase() : ('s' + semana.padStart(2, '0'));
+        let semPadded = semana.startsWith('s') ? semana.toLowerCase() : ('s' + semana.padStart(2, '0'));
+        if (filename.toLowerCase() === 'completas.mp3') {
+            semPadded = 's01';
+        }
         const diaNorm = dia.toLowerCase().trim();
         const repos = ['c:/db/Github/to', 'c:/db/Github/tordinario'];
         const clientVoice = parsedUrl.searchParams.get('voice') || 'hombre';

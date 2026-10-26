@@ -4,6 +4,7 @@
 
 import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
 import { dbAudioDescarga } from './dbaudiodescarga.js';
+import { offlineAudioLh } from './offlineAudioLh.js';
 
 export const CONFIGURACION_TIEMPOS_CINTA = {
     adviento: {
@@ -752,34 +753,46 @@ export class CintaLiturgica {
 
                         <!-- Menú Desplegable con Efecto Slide-Down -->
                         <div class="cinta-menu-audios" id="cinta-menu-audios">
-                            <button type="button" class="cinta-menu-item ${this.modoActivo === 'evangelio' ? 'activo' : ''}" data-modo="evangelio">
+                            <div class="cinta-menu-item ${this.modoActivo === 'evangelio' ? 'activo' : ''}" data-modo="evangelio" role="button" tabindex="0">
                                 <span class="cinta-item-badge badge-evangelio">✞</span>
                                 <div class="cinta-item-info">
                                     <div class="cinta-item-titulo">Evangelio del Día</div>
                                     <div class="cinta-item-sub" id="menu-sub-evangelio">Blanco con flecha negra</div>
                                 </div>
-                            </button>
-                            <button type="button" class="cinta-menu-item ${this.modoActivo === 'hora' ? 'activo' : ''}" data-modo="hora">
+                                <button type="button" class="cinta-btn-offline" data-offline-modo="evangelio" title="Descargar audio para escuchar sin internet">
+                                    <span class="material-symbols-outlined">download</span>
+                                </button>
+                            </div>
+                            <div class="cinta-menu-item ${this.modoActivo === 'hora' ? 'activo' : ''}" data-modo="hora" role="button" tabindex="0">
                                 <span class="cinta-item-badge badge-hora">🙏</span>
                                 <div class="cinta-item-info">
                                     <div class="cinta-item-titulo">Liturgia de la Hora (${libro.toUpperCase()})</div>
                                     <div class="cinta-item-sub" id="menu-sub-hora">Lector de voz (Azul con flecha blanca)</div>
                                 </div>
-                            </button>
-                            <button type="button" class="cinta-menu-item ${this.modoActivo === 'lectura1' ? 'activo' : ''}" data-modo="lectura1">
+                                <button type="button" class="cinta-btn-offline" data-offline-modo="hora" title="Descargar audio para escuchar sin internet">
+                                    <span class="material-symbols-outlined">download</span>
+                                </button>
+                            </div>
+                            <div class="cinta-menu-item ${this.modoActivo === 'lectura1' ? 'activo' : ''}" data-modo="lectura1" role="button" tabindex="0">
                                 <span class="cinta-item-badge badge-lectura1">1️⃣</span>
                                 <div class="cinta-item-info">
                                     <div class="cinta-item-titulo">1ª Lectura del Oficio</div>
                                     <div class="cinta-item-sub" id="menu-sub-lectura1">Verde con flecha blanca</div>
                                 </div>
-                            </button>
-                            <button type="button" class="cinta-menu-item ${this.modoActivo === 'lectura2' ? 'activo' : ''}" data-modo="lectura2">
+                                <button type="button" class="cinta-btn-offline" data-offline-modo="lectura1" title="Descargar audio para escuchar sin internet">
+                                    <span class="material-symbols-outlined">download</span>
+                                </button>
+                            </div>
+                            <div class="cinta-menu-item ${this.modoActivo === 'lectura2' ? 'activo' : ''}" data-modo="lectura2" role="button" tabindex="0">
                                 <span class="cinta-item-badge badge-lectura2">2️⃣</span>
                                 <div class="cinta-item-info">
                                     <div class="cinta-item-titulo">2ª Lectura del Oficio</div>
                                     <div class="cinta-item-sub" id="menu-sub-lectura2">Rojo con flecha blanca</div>
                                 </div>
-                            </button>
+                                <button type="button" class="cinta-btn-offline" data-offline-modo="lectura2" title="Descargar audio para escuchar sin internet">
+                                    <span class="material-symbols-outlined">download</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -991,7 +1004,9 @@ export class CintaLiturgica {
 
             // Selección de modo en el menú
             menuAudios.querySelectorAll('.cinta-menu-item').forEach(item => {
-                item.addEventListener('click', () => {
+                item.addEventListener('click', (e) => {
+                    // Si el clic vino del botón de descarga offline, no activar el cambio de modo
+                    if (e.target.closest('.cinta-btn-offline')) return;
                     const modo = item.getAttribute('data-modo');
                     if (modo) {
                         this.cambiarModoAudio(modo, true);
@@ -999,6 +1014,9 @@ export class CintaLiturgica {
                     }
                 });
             });
+
+            // Configurar botones de descarga offline (estilo Resucitó)
+            this.configurarBotonesOfflineMenu();
         }
 
         // 4. Controles del Reproductor Unificado
@@ -1161,7 +1179,11 @@ export class CintaLiturgica {
             }
         }
 
-        const sem = String(this.opciones?.semana || '1');
+        const libroNom = String(this.opciones?.libro || 'hora').toLowerCase();
+        const slugReal = String(this.opciones?.tiempoSlug || 'ordinario').toLowerCase();
+        const esCompletasOrdinario = (libroNom === 'completas' && (slugReal === 'ordinario' || slugReal === 'to'));
+
+        const sem = esCompletasOrdinario ? '1' : String(this.opciones?.semana || '1');
         const semPad = sem.padStart(2, '0');
         const dia = String(this.opciones?.diaSlug || this.opciones?.dia || 'domingo').toLowerCase();
 
@@ -1278,38 +1300,45 @@ export class CintaLiturgica {
             this.fuenteActiva = 'audio';
             this.detenerTTS();
 
-            if (this.audio.src !== urlAudio) {
-                this.audio.src = urlAudio;
-                this.audio.load();
-            }
-
-            this.audio.play().then(() => {
-                const sub = document.getElementById(`menu-sub-${modo}`);
-                if (sub && modo === 'hora') {
-                    const libroNom = (this.opciones?.libro || 'hora').toUpperCase();
-                    sub.textContent = `Rezo de ${libroNom}`;
+            // Resolver URL offline si está descargado en caché local
+            offlineAudioLh.getPlayableAudioUrl(urlAudio).then(playableUrl => {
+                if (this.audio.src !== playableUrl) {
+                    this.audio.src = playableUrl;
+                    this.audio.load();
                 }
-            }).catch(err => {
-                console.warn(`[Cinta] Audio no disponible en servidor para '${modo}' (${urlAudio}):`, err);
-                this.audiosFallidos.add(urlAudio);
 
-                // Si era oficio1.mp3 u oficio2.mp3 y falló, probar con oficio.mp3 antes de TTS
-                if (modo === 'hora' && /oficio[12]\.mp3$/i.test(urlAudio)) {
-                    const urlGenerica = urlAudio.replace(/oficio[12]\.mp3$/i, 'oficio.mp3');
-                    if (!this.audiosFallidos.has(urlGenerica)) {
-                        this.audio.src = urlGenerica;
-                        this.audio.load();
-                        this.audio.play().then(() => {
-                            const sub = document.getElementById(`menu-sub-${modo}`);
-                            if (sub) sub.textContent = `Rezo de OFICIO`;
-                        }).catch(() => {
-                            this.audiosFallidos.add(urlGenerica);
-                            this.ejecutarFallbackTTS(modo);
-                        });
-                        return;
+                this.audio.play().then(() => {
+                    const sub = document.getElementById(`menu-sub-${modo}`);
+                    if (sub && modo === 'hora') {
+                        const libroNom = (this.opciones?.libro || 'hora').toUpperCase();
+                        sub.textContent = `Rezo de ${libroNom}`;
                     }
-                }
+                }).catch(err => {
+                    console.warn(`[Cinta] Audio no disponible en servidor para '${modo}' (${urlAudio}):`, err);
+                    this.audiosFallidos.add(urlAudio);
 
+                    // Si era oficio1.mp3 u oficio2.mp3 y falló, probar con oficio.mp3 antes de TTS
+                    if (modo === 'hora' && /oficio[12]\.mp3$/i.test(urlAudio)) {
+                        const urlGenerica = urlAudio.replace(/oficio[12]\.mp3$/i, 'oficio.mp3');
+                        if (!this.audiosFallidos.has(urlGenerica)) {
+                            offlineAudioLh.getPlayableAudioUrl(urlGenerica).then(playableGen => {
+                                this.audio.src = playableGen;
+                                this.audio.load();
+                                this.audio.play().then(() => {
+                                    const sub = document.getElementById(`menu-sub-${modo}`);
+                                    if (sub) sub.textContent = `Rezo de OFICIO`;
+                                }).catch(() => {
+                                    this.audiosFallidos.add(urlGenerica);
+                                    this.ejecutarFallbackTTS(modo);
+                                });
+                            });
+                            return;
+                        }
+                    }
+
+                    this.ejecutarFallbackTTS(modo);
+                });
+            }).catch(() => {
                 this.ejecutarFallbackTTS(modo);
             });
             return;
@@ -2240,6 +2269,7 @@ export class CintaLiturgica {
             if (this.modoActivo === 'evangelio' && (!this.audio.src || this.audio.paused)) {
                 this.audio.src = url;
             }
+            this.actualizarBotonesOfflineMenu();
         }
     }
 
@@ -2252,6 +2282,7 @@ export class CintaLiturgica {
             if (this.modoActivo === 'hora' && (!this.audio.src || this.audio.paused)) {
                 this.audio.src = url;
             }
+            this.actualizarBotonesOfflineMenu();
         }
     }
 
@@ -2270,6 +2301,7 @@ export class CintaLiturgica {
                     }
                 }
             }
+            this.actualizarBotonesOfflineMenu();
         }
     }
 
@@ -2282,6 +2314,7 @@ export class CintaLiturgica {
             if (this.modoActivo === 'lectura2' && (!this.audio.src || this.audio.paused)) {
                 this.audio.src = url;
             }
+            this.actualizarBotonesOfflineMenu();
         }
     }
 
@@ -2292,6 +2325,187 @@ export class CintaLiturgica {
         if (mapAudios.hora) this.cargarAudioLibro(mapAudios.hora, mapAudios.subHora);
         if (mapAudios.lectura1) this.cargarLectura1(mapAudios.lectura1, mapAudios.subLectura1);
         if (mapAudios.lectura2) this.cargarLectura2(mapAudios.lectura2, mapAudios.subLectura2);
+        this.actualizarBotonesOfflineMenu();
+    }
+
+    // =========================================================================
+    // ADMINISTRACIÓN DE AUDIOS OFFLINE EN EL MENÚ (ESTILO RESUCITÓ)
+    // =========================================================================
+
+    configurarBotonesOfflineMenu() {
+        const menuAudios = document.getElementById('cinta-menu-audios');
+        if (!menuAudios) return;
+
+        // Escuchar eventos globales de cambio en caché offline
+        window.addEventListener('lh_offline_audio_changed', () => {
+            this.actualizarBotonesOfflineMenu();
+        });
+
+        // Event listener delegado para los botones offline
+        menuAudios.addEventListener('click', (e) => {
+            const btn = e.target.closest('.cinta-btn-offline');
+            if (!btn) return;
+            e.stopPropagation();
+
+            const modo = btn.getAttribute('data-offline-modo');
+            if (!modo) return;
+
+            const urlAudio = (modo === 'hora') ? (this.audios.hora || '') : (this.audios[modo] || '');
+            if (!urlAudio) {
+                this.mostrarToastAviso('No hay audio en el servidor para esta opción');
+                return;
+            }
+
+            const itemTitulo = btn.closest('.cinta-menu-item')?.querySelector('.cinta-item-titulo')?.textContent || MODOS_AUDIO[modo]?.nombre || modo;
+
+            if (offlineAudioLh.isDownloading(urlAudio)) {
+                this.mostrarToastAviso(`El audio de "${itemTitulo}" ya se está descargando...`);
+                return;
+            }
+
+            // Si ya está descargado, mostrar popover para "Liberar"
+            if (offlineAudioLh.isDownloaded(urlAudio)) {
+                this.abrirPopoverLiberarAudio(btn, { id: urlAudio, title: itemTitulo, audioSrc: urlAudio, modo });
+                return;
+            }
+
+            // Si está pendiente, descargarlo
+            this.descargarAudioOffline(btn, { id: urlAudio, title: itemTitulo, audioSrc: urlAudio, modo });
+        });
+
+        this.actualizarBotonesOfflineMenu();
+    }
+
+    actualizarBotonesOfflineMenu() {
+        const menuAudios = document.getElementById('cinta-menu-audios');
+        if (!menuAudios) return;
+
+        menuAudios.querySelectorAll('.cinta-btn-offline').forEach(btn => {
+            const modo = btn.getAttribute('data-offline-modo');
+            const urlAudio = (modo === 'hora') ? (this.audios.hora || '') : (this.audios[modo] || '');
+
+            const iconSpan = btn.querySelector('.material-symbols-outlined');
+            if (!iconSpan) return;
+
+            if (offlineAudioLh.isDownloading(urlAudio)) {
+                btn.className = 'cinta-btn-offline downloading';
+                iconSpan.textContent = 'progress_activity';
+                btn.title = 'Descargando audio para escuchar sin internet...';
+            } else if (urlAudio && offlineAudioLh.isDownloaded(urlAudio)) {
+                btn.className = 'cinta-btn-offline downloaded';
+                iconSpan.textContent = 'download_done';
+                btn.title = 'Audio descargado (Toca para liberar o ver detalles)';
+            } else {
+                btn.className = 'cinta-btn-offline';
+                iconSpan.textContent = 'download';
+                btn.title = urlAudio ? 'Descargar audio para escuchar sin conexión' : 'Audio aún no disponible para descarga';
+                btn.style.opacity = urlAudio ? '1' : '0.4';
+            }
+        });
+    }
+
+    async descargarAudioOffline(btn, audioInfo) {
+        if (!audioInfo || !audioInfo.audioSrc) return;
+
+        btn.classList.add('downloading');
+        const iconSpan = btn.querySelector('.material-symbols-outlined');
+        if (iconSpan) iconSpan.textContent = 'progress_activity';
+
+        try {
+            const ok = await offlineAudioLh.downloadAudio(audioInfo);
+            if (ok) {
+                this.mostrarToastAviso(`¡Audio de "${audioInfo.title}" guardado! Ya puedes escucharlo sin conexión.`);
+            }
+        } catch (err) {
+            console.warn('[Cinta] Error al descargar audio offline:', err);
+            this.mostrarToastAviso(`No se pudo descargar el audio: ${err.message}`);
+        } finally {
+            this.actualizarBotonesOfflineMenu();
+        }
+    }
+
+    abrirPopoverLiberarAudio(targetBtn, audioInfo) {
+        this.cerrarPopoverLiberarAudio();
+
+        const regItem = offlineAudioLh.getItem(audioInfo.id || audioInfo.audioSrc);
+        let sizeText = 'Guardado localmente en este equipo';
+        if (regItem && regItem.sizeBytes > 0) {
+            const mb = (regItem.sizeBytes / (1024 * 1024)).toFixed(1);
+            sizeText = `${mb} MB · Guardado en este equipo`;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'lh-offline-popover-overlay';
+        overlay.id = 'lh-offline-popover-overlay';
+        overlay.addEventListener('click', () => this.cerrarPopoverLiberarAudio());
+
+        const popover = document.createElement('div');
+        popover.className = 'lh-offline-popover';
+        popover.id = 'lh-offline-popover';
+        popover.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+                <div class="popover-header">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">download_done</span>
+                    <span>Audio Descargado</span>
+                </div>
+                <button type="button" class="btn-close-popover" style="background: none; border: none; padding: 2px; cursor: pointer; color: #94a3b8; display: flex; align-items: center;" title="Cerrar">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
+                </button>
+            </div>
+            <div class="popover-audio-name" title="${audioInfo.title}">${audioInfo.title}</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 3px;">${sizeText}</div>
+            <div class="popover-divider"></div>
+            <button type="button" class="btn-popover-liberar" data-action="confirm-liberar-audio">
+                <span class="material-symbols-outlined" style="font-size: 19px;">delete_outline</span>
+                <span>Liberar (Escuchar solo online)</span>
+            </button>
+            <div class="popover-hint">Al liberar se borra el archivo del equipo. Si quieres, podrás volver a descargarlo en cualquier momento.</div>
+        `;
+
+        popover.querySelector('.btn-close-popover')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.cerrarPopoverLiberarAudio();
+        });
+
+        const btnLiberar = popover.querySelector('[data-action="confirm-liberar-audio"]');
+        btnLiberar?.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            this.cerrarPopoverLiberarAudio();
+            try {
+                await offlineAudioLh.deleteAudio(audioInfo.id || audioInfo.audioSrc);
+                this.mostrarToastAviso(`Audio de "${audioInfo.title}" liberado del equipo. Ahora se reproducirá online.`);
+            } catch (err) {
+                console.warn('[Cinta] Error al liberar audio offline:', err);
+                this.mostrarToastAviso(`No se pudo liberar el audio: ${err.message}`);
+            } finally {
+                this.actualizarBotonesOfflineMenu();
+            }
+        });
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(popover);
+
+        // Posicionar popover cerca del botón objetivo
+        const rect = targetBtn.getBoundingClientRect();
+        const popoverWidth = 260;
+        let left = rect.left - popoverWidth + rect.width;
+        let top = rect.bottom + 8;
+
+        if (left < 10) left = 10;
+        if (left + popoverWidth > window.innerWidth - 10) {
+            left = window.innerWidth - popoverWidth - 10;
+        }
+        if (top + 180 > window.innerHeight) {
+            top = Math.max(10, rect.top - 190);
+        }
+
+        popover.style.left = `${Math.round(left)}px`;
+        popover.style.top = `${Math.round(top)}px`;
+    }
+
+    cerrarPopoverLiberarAudio() {
+        document.getElementById('lh-offline-popover-overlay')?.remove();
+        document.getElementById('lh-offline-popover')?.remove();
     }
 
     // =========================================================================

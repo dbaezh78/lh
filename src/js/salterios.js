@@ -2535,12 +2535,16 @@ function construirUrlAudioHora(tiempo, semana, dia, libro, esPar = null) {
     else if (tSlug.includes('cuaresma') || tSlug === 'tc') subdominio = 'tc';
     else if (tSlug.includes('pascua') || tSlug === 'tp') subdominio = 'tp';
 
-    const numSem = String(semana || '1').replace(/\D/g, '') || '1';
+    const libroNorm = String(libro || 'laudes').toLowerCase().trim();
+    const esCompletasOrdinario = (subdominio === 'to' && libroNorm === 'completas');
+
+    // Para completas del tiempo ordinario, siempre se utiliza el audio grabado en la semana 1 (s01)
+    const numSem = esCompletasOrdinario ? '1' : (String(semana || '1').replace(/\D/g, '') || '1');
     const semPadded = `s${numSem.padStart(2, '0')}`;
     const diaNorm = String(dia || 'domingo').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
-    let archivo = `${String(libro || 'laudes').toLowerCase()}.mp3`;
-    if (libro === 'oficio') {
+    let archivo = `${libroNorm}.mp3`;
+    if (libroNorm === 'oficio') {
         const parActual = (esPar !== null) ? esPar : (new Date().getFullYear() % 2 === 0);
         archivo = parActual ? 'oficio2.mp3' : 'oficio1.mp3';
     }

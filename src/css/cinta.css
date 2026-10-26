@@ -492,6 +492,7 @@
     width: 100%;
     text-align: left;
     transition: all 0.18s ease;
+    box-sizing: border-box;
 }
 
 .cinta-menu-item:hover {
@@ -502,6 +503,160 @@
 .cinta-menu-item.activo {
     background: rgba(255, 255, 255, 0.14);
     border-left: 3px solid #ff0000;
+}
+
+.cinta-menu-item .cinta-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+/* =========================================================================
+   BOTONES DE DESCARGA OFFLINE EN EL MENÚ DE AUDIOS (ESTILO RESUCITÓ)
+   ========================================================================= */
+
+.cinta-btn-offline {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: rgba(22, 163, 74, 0.12);
+    color: #16a34a;
+    border: 1px solid rgba(22, 163, 74, 0.32);
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 0;
+}
+
+.cinta-btn-offline:hover {
+    background: rgba(22, 163, 74, 0.22);
+    border-color: #16a34a;
+    transform: scale(1.06);
+}
+
+.cinta-btn-offline .material-symbols-outlined {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* Estado Descargado (Cotejo verde sólido igual a Resucitó) */
+.cinta-btn-offline.downloaded {
+    background: #16a34a !important;
+    color: #ffffff !important;
+    border-color: #15803d !important;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.4);
+}
+
+.cinta-btn-offline.downloaded:hover {
+    background: #15803d !important;
+}
+
+/* Estado Descargando con spinner */
+.cinta-btn-offline.downloading {
+    pointer-events: none;
+    background: rgba(22, 163, 74, 0.08);
+    opacity: 0.85;
+}
+
+.cinta-btn-offline.downloading .material-symbols-outlined {
+    animation: lhOfflineSpinAnim 1s linear infinite;
+}
+
+@keyframes lhOfflineSpinAnim {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Popover flotante para Liberar Audio Descargado */
+.lh-offline-popover-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999998;
+    background: transparent;
+}
+
+.lh-offline-popover {
+    position: fixed;
+    background: #1e293b;
+    color: #f1f5f9;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+    z-index: 999999;
+    min-width: 240px;
+    max-width: 300px;
+    animation: lhPopoverFadeAnim 0.18s ease-out forwards;
+}
+
+@keyframes lhPopoverFadeAnim {
+    from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.lh-offline-popover .popover-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #16a34a;
+}
+
+.lh-offline-popover .popover-audio-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #ffffff;
+}
+
+.lh-offline-popover .popover-divider {
+    height: 1px;
+    background: #334155;
+    margin: 10px 0;
+}
+
+.lh-offline-popover .btn-popover-liberar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(220, 38, 38, 0.12);
+    color: #ef4444;
+    border: 1px solid rgba(220, 38, 38, 0.32);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.lh-offline-popover .btn-popover-liberar:hover {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.lh-offline-popover .btn-popover-liberar:hover .material-symbols-outlined {
+    color: #ffffff !important;
+}
+
+.lh-offline-popover .popover-hint {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin-top: 8px;
+    line-height: 1.35;
+    text-align: center;
 }
 
 .cinta-item-badge {
