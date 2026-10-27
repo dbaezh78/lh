@@ -1411,7 +1411,17 @@ de esperar cada noche tu gran día. Amén.`
         examenConciencia: (libro === 'completas') ? { ...EXAMEN_CONCIENCIA_CANONICO } : null,
         bendicionCompletas: (libro === 'completas') ? { ...BENDICION_COMPLETAS_CANONICA } : null,
         himno: himnoFinal,
-        salmodia: {
+        salmodia: (libro === 'completas') ? {
+            ant1: ant1Obj.texto,
+            salmo1Titulo: salmo1 ? salmo1.titulo : 'Salmo 4 - ACCIÓN DE GRACIAS',
+            salmo1Texto: salmo1 ? salmo1.texto : '',
+            ant2: '',
+            salmo2Titulo: '',
+            salmo2Texto: '',
+            ant3: '',
+            salmo3Titulo: '',
+            salmo3Texto: ''
+        } : {
             ant1: ant1Obj.texto,
             salmo1Titulo: salmo1 ? salmo1.titulo : (libro === 'oficio' ? 'Salmo 23 - ENTRADA SOLEMNE DE DIOS EN SU SANTUARIO' : 'Salmo 62 - EL ALMA SEDIENTA DE DIOS'),
             salmo1Texto: salmo1 ? salmo1.texto : '',
@@ -1598,7 +1608,7 @@ de esperar cada noche tu gran día. Amén.`
                 texto: (cantObjDef && cantObjDef.texto) ? cantObjDef.texto : ''
             };
         })(),
-        preces: (() => {
+        preces: (libro === 'completas' || libro === 'oficio' || libro === 'tercia' || libro === 'sexta' || libro === 'nona') ? null : (() => {
             const canonP = (PrecesDB && typeof PrecesDB.obtener === 'function')
                 ? (PrecesDB.obtener(null, tiempo, semana, dia, libro) || PrecesDB.obtenerRecomendada(tiempo, semana, dia, libro))
                 : null;
@@ -1840,16 +1850,17 @@ function renderizarCuerpoLiturgico(d) {
         if (mostrarSalmo1) {
             const omitirAnt1_E = Boolean(om.antifona1 || om.ant1_E);
             const omitirAnt1_S = Boolean(om.antifona1 || om.ant1_S);
+            const prefAnt1 = (libroKey === 'completas') ? 'Ant.' : 'Ant 1.';
             html += `
-                ${!omitirAnt1_E && d.salmodia.ant1 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant 1.</span> ${d.salmodia.ant1}</div>` : ''}
+                ${!omitirAnt1_E && d.salmodia.ant1 ? `<div class="antifona-bloque"><span class="rubrica-ant">${prefAnt1}</span> ${d.salmodia.ant1}</div>` : ''}
                 <div class="salmo-titulo-rubrica">${s1Info.titulo}</div>
                 <div class="texto-estrofas-salmo">${formatearTextoSalmo(s1Info.texto)}</div>
                 ${!omitirAnt1_S && d.salmodia.ant1 ? `<div class="antifona-bloque"><span class="rubrica-ant">Ant.</span> ${d.salmodia.ant1}</div>` : ''}
             `;
         }
 
-        // Salmo 2
-        if (mostrarSalmo2) {
+        // Salmo 2 (No en Completas)
+        if (mostrarSalmo2 && libroKey !== 'completas') {
             const omitirAnt2_E = Boolean(om.antifona2 || om.ant2_E);
             const omitirAnt2_S = Boolean(om.antifona2 || om.ant2_S);
             html += `
@@ -1860,8 +1871,8 @@ function renderizarCuerpoLiturgico(d) {
             `;
         }
 
-        // Salmo 3
-        if (mostrarSalmo3) {
+        // Salmo 3 (No en Completas)
+        if (mostrarSalmo3 && libroKey !== 'completas') {
             const omitirAnt3_E = Boolean(om.antifona3 || om.ant3_E);
             const omitirAnt3_S = Boolean(om.antifona3 || om.ant3_S);
             html += `

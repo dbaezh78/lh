@@ -336,6 +336,21 @@ export class DbAudioDescarga {
                 }
             }
 
+            // Sanitizar títulos en mayúsculas que TTS deletrea por sílabas
+            if (texto) {
+                texto = texto
+                    .replace(/ANT[IÍ]FONA\s+FINAL\s+DE\s+LA\s+SANT[IÍ]SIMA\s+VIRGEN/gi, 'Antífona final de la Santísima Virgen.')
+                    .replace(/ANT[IÍ]FONA\s+FINAL/gi, 'Antífona final.')
+                    .replace(/\bANT[IÍ]FONA\s+(\d+)\b/gi, 'Antífona $1.')
+                    .replace(/\bANT[IÍ]FONA\b/g, 'Antífona.')
+                    .replace(/\bSALMODIA\b/g, 'Salmodia.')
+                    .replace(/\bPRECES\b/g, 'Preces.')
+                    .replace(/\bBENDICI[OÓ]N\b/g, 'Bendición.')
+                    .replace(/\bCONCLUSI[OÓ]N\b/g, 'Conclusión.')
+                    .replace(/\bORACI[OÓ]N\b/g, 'Oración.')
+                    .replace(/\bHIMNO\b/g, 'Himno.');
+            }
+
             let partes = (options.partes && Array.isArray(options.partes) && options.partes.length > 0)
                 ? options.partes
                 : (cinta && cinta.ttsState && Array.isArray(cinta.ttsState.chunks) && cinta.ttsState.chunks.length > 0)

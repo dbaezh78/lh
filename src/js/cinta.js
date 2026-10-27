@@ -365,6 +365,16 @@ export function resolverNombreLibroBiblico(cita = '') {
 export function limpiarTextoParaVoz(texto = '') {
     if (!texto) return '';
     return texto
+        .replace(/ANT[IÍ]FONA\s+FINAL\s+DE\s+LA\s+SANT[IÍ]SIMA\s+VIRGEN/gi, 'Antífona final de la Santísima Virgen.')
+        .replace(/ANT[IÍ]FONA\s+FINAL/gi, 'Antífona final.')
+        .replace(/\bANT[IÍ]FONA\s+(\d+)\b/gi, 'Antífona $1.')
+        .replace(/\bANT[IÍ]FONA\b/g, 'Antífona.')
+        .replace(/\bSALMODIA\b/g, 'Salmodia.')
+        .replace(/\bPRECES\b/g, 'Preces.')
+        .replace(/\bBENDICI[OÓ]N\b/g, 'Bendición.')
+        .replace(/\bCONCLUSI[OÓ]N\b/g, 'Conclusión.')
+        .replace(/\bORACI[OÓ]N\b/g, 'Oración.')
+        .replace(/\bHIMNO\b/g, 'Himno.')
         .replace(/\[?\s*\(?\s*no\s+se\s+dice\s+(?:el\s+)?(?:«|"|'|“)?gloria\s+al\s+padre(?:»|"|'|”)?(?:\s|[^a-záéíóúüñ\n])*/gi, '') // Omitir "No se dice Gloria al Padre"
         .replace(/\([^\)]*\)/g, '') // Eliminar notas parentéticas
         .replace(/[*✦]/g, '')       // Eliminar asteriscos y cruces de pausa métrica
@@ -638,6 +648,11 @@ export class CintaLiturgica {
 
         this.render();
         this.vincularEventos();
+
+        // Aplicar velocidad inicial según el modo activo:
+        // Liturgia de las Horas (hora) = 20 (+20 / 1.20x)
+        // Demás modos (evangelio, lectura1, lectura2) = 0 (1.00x normal)
+        this.establecerVelocidadSegunModo(this.modoActivo);
     }
 
     formatearTextoMetadatos(semana, dia) {
@@ -1052,6 +1067,22 @@ export class CintaLiturgica {
                 if (slider) slider.value = 0;
                 if (tActual) tActual.textContent = '0:00';
                 document.documentElement.style.setProperty('--progreso-reproduccion', '0%');
+
+                // Encadenamiento automático de lecturas:
+                // 1ª Lectura -> 2ª Lectura -> Evangelio
+                if (this.modoActivo === 'lectura1') {
+                    console.log('⏭️ [Cinta] Fin de 1ª Lectura: Continuando automáticamente con 2ª Lectura');
+                    this.mostrarToastAviso('Continuando con 2ª Lectura...', 2500);
+                    setTimeout(() => {
+                        this.cambiarModoAudio('lectura2', true);
+                    }, 400);
+                } else if (this.modoActivo === 'lectura2') {
+                    console.log('⏭️ [Cinta] Fin de 2ª Lectura: Continuando automáticamente con Evangelio');
+                    this.mostrarToastAviso('Continuando con Evangelio del Día...', 2500);
+                    setTimeout(() => {
+                        this.cambiarModoAudio('evangelio', true);
+                    }, 400);
+                }
             }
         });
 
@@ -1653,15 +1684,19 @@ export class CintaLiturgica {
             if (d.salmodia) {
                 segmentos.push({ texto: "Salmodia." });
 
+                const esCompletas = (libroNormalizado === 'completas');
+
                 if (d.salmodia.salmo1Texto) {
-                    segmentos.push({ texto: `Antífona 1. ${limpiarTextoParaVoz(d.salmodia.ant1 || '')}` });
+                    const prefAnt1 = esCompletas ? "Antífona." : "Antífona 1.";
+                    segmentos.push({ texto: `${prefAnt1} ${limpiarTextoParaVoz(d.salmodia.ant1 || '')}` });
                     segmentos.push({ texto: limpiarTextoParaVoz(d.salmodia.salmo1Texto) });
                     if (d.salmodia.ant1) {
                         segmentos.push({ texto: limpiarTextoParaVoz(d.salmodia.ant1) });
                     }
                 }
 
-                if (d.salmodia.salmo2Texto) {
+                // En Completas solo existe 1 salmo/antífona (o dos salmos bajo una sola antífona), nunca Antífona 2 ni Antífona 3
+                if (!esCompletas && d.salmodia.salmo2Texto) {
                     segmentos.push({ texto: `Antífona 2. ${limpiarTextoParaVoz(d.salmodia.ant2 || '')}` });
                     segmentos.push({ texto: limpiarTextoParaVoz(d.salmodia.salmo2Texto) });
                     if (d.salmodia.ant2) {
@@ -1669,7 +1704,7 @@ export class CintaLiturgica {
                     }
                 }
 
-                if (d.salmodia.salmo3Texto) {
+                if (!esCompletas && d.salmodia.salmo3Texto) {
                     segmentos.push({ texto: `Antífona 3. ${limpiarTextoParaVoz(d.salmodia.ant3 || '')}` });
                     segmentos.push({ texto: limpiarTextoParaVoz(d.salmodia.salmo3Texto) });
                     if (d.salmodia.ant3) {
@@ -1716,8 +1751,8 @@ export class CintaLiturgica {
                 }
             }
 
-            // 7. PRECES
-            if (d.preces) {
+            // 7. PRECES (Solo en Laudes y Vísperas; NO en Completas ni Oficio ni Horas Menores)
+            if (d.preces && libroNormalizado !== 'completas' && libroNormalizado !== 'oficio' && libroNormalizado !== 'tercia' && libroNormalizado !== 'sexta' && libroNormalizado !== 'nona' && !d.omisiones?.preces) {
                 segmentos.push({ texto: "Preces." });
                 if (d.preces.intro) segmentos.push({ texto: limpiarTextoParaVoz(d.preces.intro) });
                 if (d.preces.respuesta) segmentos.push({ texto: limpiarTextoParaVoz(d.preces.respuesta) });
@@ -1754,7 +1789,10 @@ export class CintaLiturgica {
                 const rBen = ben.r || ben.bendicionR || "Amén.";
                 segmentos.push({ texto: `${limpiarTextoParaVoz(vBen)} ${limpiarTextoParaVoz(rBen)}` });
 
-                const titMar = ben.tituloMariana || ben.tituloAntifonaMariana || "Antífona final de la Santísima Virgen.";
+                let titMar = ben.tituloMariana || ben.tituloAntifonaMariana || "Antífona final de la Santísima Virgen.";
+                if (/ANT[IÍ]FONA\s+FINAL\s+DE\s+LA\s+SANT[IÍ]SIMA\s+VIRGEN/i.test(titMar)) {
+                    titMar = "Antífona final de la Santísima Virgen.";
+                }
                 segmentos.push({ texto: limpiarTextoParaVoz(titMar) });
                 const txtMar = ben.textoMariana || ben.textoAntifonaMariana || "Madre del Redentor, Virgen fecunda, puerta del cielo siempre abierta, estrella del mar, ven a librar al pueblo que tropieza y se quiere levantar. Ante la admiración de cielo y tierra, engendraste a tu santo Creador, y permaneces siempre virgen. Recibe el saludo del ángel Gabriel, y ten piedad de nosotros, pecadores.";
                 segmentos.push({ texto: limpiarTextoParaVoz(txtMar) });
@@ -2125,6 +2163,7 @@ export class CintaLiturgica {
     }
 
     finalizarTTS() {
+        const modoTerminado = this.modoActivo;
         this.detenerTTS();
         this.ttsState.currentCharIndex = 0;
         this.ttsState.currentChunkIndex = 0;
@@ -2133,6 +2172,22 @@ export class CintaLiturgica {
         if (slider) slider.value = 0;
         if (tActual) tActual.textContent = '0:00';
         document.documentElement.style.setProperty('--progreso-reproduccion', '0%');
+
+        // Encadenamiento automático de lecturas en TTS:
+        // 1ª Lectura -> 2ª Lectura -> Evangelio
+        if (modoTerminado === 'lectura1') {
+            console.log('⏭️ [Cinta TTS] Fin de 1ª Lectura: Continuando automáticamente con 2ª Lectura');
+            this.mostrarToastAviso('Continuando con 2ª Lectura...', 2500);
+            setTimeout(() => {
+                this.cambiarModoAudio('lectura2', true);
+            }, 400);
+        } else if (modoTerminado === 'lectura2') {
+            console.log('⏭️ [Cinta TTS] Fin de 2ª Lectura: Continuando automáticamente con Evangelio');
+            this.mostrarToastAviso('Continuando con Evangelio del Día...', 2500);
+            setTimeout(() => {
+                this.cambiarModoAudio('evangelio', true);
+            }, 400);
+        }
     }
 
     seekTTS(fraction) {
@@ -2194,6 +2249,11 @@ export class CintaLiturgica {
     cambiarModoAudio(nuevoModo, autoPlay = false) {
         if (!MODOS_AUDIO[nuevoModo]) return;
         this.modoActivo = nuevoModo;
+
+        // Ajustar velocidad automáticamente según el modo:
+        // Liturgia de las Horas (hora) = 20 (1.20x)
+        // Las demás (evangelio, lectura1, lectura2) = 0 (1.00x normal)
+        this.establecerVelocidadSegunModo(nuevoModo);
 
         try {
             localStorage.setItem('pref-audio-modo-defecto', nuevoModo);
@@ -2632,6 +2692,13 @@ export class CintaLiturgica {
         if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('lh-tts-rate-changed', { detail: { rate, step: s } }));
         }
+    }
+
+    establecerVelocidadSegunModo(modo) {
+        // Para Liturgia de la Hora ('hora') la velocidad es 20 (1.20x)
+        // Para las demás ('evangelio', 'lectura1', 'lectura2') es normal (0 / 1.00x)
+        const step = (modo === 'hora') ? 20 : 0;
+        this.establecerVelocidad(step);
     }
 
     // Actualización de Información Litúrgica y Botones Activos

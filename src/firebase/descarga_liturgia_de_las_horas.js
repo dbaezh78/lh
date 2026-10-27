@@ -676,10 +676,11 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
 
     // 4. SALMODIA
     const salmodiasRaw = d.Salmodias || d.salmodia || {};
+    const esCompletas = (libro === 'completas');
 
     const s1Info = resolverSalmoLiturgicoNorm(salmodiasRaw.salmo1Id || d.salmo1Id, salmodiasRaw.salmo1Titulo || salmodiasRaw.SalmoUNOt, salmodiasRaw.salmo1Texto || salmodiasRaw.SalmoUNO, base.salmodia?.salmo1Id || 'salmo62_2_9', TEXTO_SALMO_62_CANONICO, "SALMO 62, 2-9 - EL ALMA SEDIENTA DE DIOS");
-    const s2Info = resolverSalmoLiturgicoNorm(salmodiasRaw.salmo2Id || d.salmo2Id, salmodiasRaw.salmo2Titulo || salmodiasRaw.SalmoDOSt, salmodiasRaw.salmo2Texto || salmodiasRaw.SalmoDOS, base.salmodia?.salmo2Id || 'dn_3_57_88_56', TEXTO_CANTICO_DANIEL_CANONICO, "Cántico: TODA LA CREACIÓN ALABE AL SEÑOR - Dn 3, 57-88. 56");
-    const s3Info = resolverSalmoLiturgicoNorm(salmodiasRaw.salmo3Id || d.salmo3Id, salmodiasRaw.salmo3Titulo || salmodiasRaw.SalmoTRESt, salmodiasRaw.salmo3Texto || salmodiasRaw.SalmoTRES, base.salmodia?.salmo3Id || 'salmo149', TEXTO_SALMO_149_CANONICO, "SALMO 149 - ALEGRÍA DE LOS SANTOS");
+    const s2Info = esCompletas ? { id: null, titulo: '', texto: '' } : resolverSalmoLiturgicoNorm(salmodiasRaw.salmo2Id || d.salmo2Id, salmodiasRaw.salmo2Titulo || salmodiasRaw.SalmoDOSt, salmodiasRaw.salmo2Texto || salmodiasRaw.SalmoDOS, base.salmodia?.salmo2Id || 'dn_3_57_88_56', TEXTO_CANTICO_DANIEL_CANONICO, "Cántico: TODA LA CREACIÓN ALABE AL SEÑOR - Dn 3, 57-88. 56");
+    const s3Info = esCompletas ? { id: null, titulo: '', texto: '' } : resolverSalmoLiturgicoNorm(salmodiasRaw.salmo3Id || d.salmo3Id, salmodiasRaw.salmo3Titulo || salmodiasRaw.SalmoTRESt, salmodiasRaw.salmo3Texto || salmodiasRaw.SalmoTRES, base.salmodia?.salmo3Id || 'salmo149', TEXTO_SALMO_149_CANONICO, "SALMO 149 - ALEGRÍA DE LOS SANTOS");
 
     const salmodiaNorm = {
         ant1Id: salmodiasRaw.ant1Id || d.ant1Id || base.salmodia?.ant1Id || null,
@@ -688,14 +689,14 @@ export function normalizarObjetoLiturgico(raw, idCodigo = null, params = {}, fal
         salmo1Titulo: s1Info.titulo,
         salmo1Texto: s1Info.texto,
 
-        ant2Id: salmodiasRaw.ant2Id || d.ant2Id || base.salmodia?.ant2Id || null,
-        ant2: salmodiasRaw.ant2 || salmodiasRaw.Ant2 || base.salmodia?.ant2 || "Cantemos un himno al Señor nuestro Dios. Aleluya.",
+        ant2Id: esCompletas ? null : (salmodiasRaw.ant2Id || d.ant2Id || base.salmodia?.ant2Id || null),
+        ant2: esCompletas ? "" : (salmodiasRaw.ant2 || salmodiasRaw.Ant2 || base.salmodia?.ant2 || "Cantemos un himno al Señor nuestro Dios. Aleluya."),
         salmo2Id: s2Info.id,
         salmo2Titulo: s2Info.titulo,
         salmo2Texto: s2Info.texto,
 
-        ant3Id: salmodiasRaw.ant3Id || d.ant3Id || base.salmodia?.ant3Id || null,
-        ant3: salmodiasRaw.ant3 || salmodiasRaw.Ant3 || base.salmodia?.ant3 || "Alabad al Señor por su inmensa grandeza. Aleluya.",
+        ant3Id: esCompletas ? null : (salmodiasRaw.ant3Id || d.ant3Id || base.salmodia?.ant3Id || null),
+        ant3: esCompletas ? "" : (salmodiasRaw.ant3 || salmodiasRaw.Ant3 || base.salmodia?.ant3 || "Alabad al Señor por su inmensa grandeza. Aleluya."),
         salmo3Id: s3Info.id,
         salmo3Titulo: s3Info.titulo,
         salmo3Texto: s3Info.texto
