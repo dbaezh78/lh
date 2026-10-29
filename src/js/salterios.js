@@ -3,6 +3,7 @@
 // =========================================================================
 
 import { CintaLiturgica } from './cinta.js';
+import { obtenerAudioPropio } from './frm_audio.js';
 import { AntifonasDB } from '../data/db-antifonas.js';
 import { HimnosDB, normalizarClaveHimno } from '../data/db-himnos.js';
 import { PrecesDB } from '../data/db-preces.js';
@@ -931,10 +932,17 @@ function montarOActualizarVista(params, datos) {
         dia: dia
     });
 
-    const urlEvangelio = construirUrlEvangelio(tiempo, semana, dia);
-    const urlAudioHora = datos.audioLibro || construirUrlAudioHora(tiempo, semana, dia, libro, esPar);
-    const urlLectura1 = esPar ? rutasOficio.lecturaPar : rutasOficio.lecturaImpar;
-    const urlLectura2 = rutasOficio.segundaLectura;
+    const urlEvangelio = obtenerAudioPropio(`evangelio_${dia}`) || construirUrlEvangelio(tiempo, semana, dia);
+    const audioHoraPropio = obtenerAudioPropio(datos.codigo || datos.id || `${tiempo}_${semana}_${dia}_${libro}`);
+    const urlAudioHora = audioHoraPropio || datos.audioLibro || construirUrlAudioHora(tiempo, semana, dia, libro, esPar);
+    
+    const idL1 = datos?.lecturasOficio?.primera?.id || (esPar ? 'lectura1_par' : 'lectura1_impar');
+    const audioL1Propio = obtenerAudioPropio(idL1) || (datos?.lecturasOficio?.primera?.audioUrl);
+    const urlLectura1 = audioL1Propio || (esPar ? rutasOficio.lecturaPar : rutasOficio.lecturaImpar);
+
+    const idL2 = datos?.lecturasOficio?.segunda?.id || 'lectura2';
+    const audioL2Propio = obtenerAudioPropio(idL2) || (datos?.lecturasOficio?.segunda?.audioUrl);
+    const urlLectura2 = audioL2Propio || rutasOficio.segundaLectura;
 
     cintaInstancia.cargarAudios({
         evangelio: urlEvangelio,

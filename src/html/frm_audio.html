@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor Central de Audios — Liturgia de las Horas</title>
+    <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="../css/buttons.css">
+    <link rel="stylesheet" href="../css/navigator.css">
+    <link rel="stylesheet" href="../css/frm_audio.css">
+</head>
+<body>
+
+    <div class="contenedor-principal">
+        <!-- Cabecera -->
+        <header class="header-audio">
+            <div class="titulo-box">
+                <h1>
+                    <span class="material-symbols-outlined">mic</span>
+                    Gestor Central de Audios Litúrgicos
+                </h1>
+                <p>Asignación de audios grabados con voz propia para salmos, antífonas, lecturas, himnos y oraciones</p>
+            </div>
+            <div class="header-acciones">
+                <button id="btn-sincronizar" class="btn-header" title="Consultar Firestore y LocalStorage para actualizar">
+                    <span class="material-symbols-outlined">sync</span> Sincronizar
+                </button>
+                <button id="btn-guardar-todo" class="btn-header verde" title="Guardar todos los cambios pendientes en Firebase">
+                    <span class="material-symbols-outlined">cloud_upload</span> Guardar en Nube
+                </button>
+                <button id="btn-exportar-json" class="btn-header" title="Exportar catálogo de audios en JSON">
+                    <span class="material-symbols-outlined">download</span> Exportar JSON
+                </button>
+                <a href="frm_salterios.html" class="btn-header primario" title="Ir al Formulario Salterios">
+                    <span class="material-symbols-outlined">edit_calendar</span> Formulario
+                </a>
+                <a href="/salterios.html" class="btn-header" title="Abrir visor del Salterio">
+                    <span class="material-symbols-outlined">menu_book</span> Salterio
+                </a>
+                <a href="../../index.html" class="btn-header" title="Volver al Inicio">
+                    <span class="material-symbols-outlined">home</span> Inicio
+                </a>
+            </div>
+        </header>
+
+        <!-- Banner de estado dinámico -->
+        <div id="banner-estado" class="estado-banner info">
+            <span class="material-symbols-outlined">info</span>
+            <span id="banner-texto">Cargando catálogo litúrgico...</span>
+        </div>
+
+        <!-- KPIs / Resumen -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+                    <span class="material-symbols-outlined">library_music</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Total Ítems</span>
+                    <strong class="stat-value" id="stat-total" style="color: #60a5fa;">0</strong>
+                    <span class="stat-subtext" id="stat-sub-categoria">Todos los componentes</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: var(--color-verde-bg); color: var(--color-verde);">
+                    <span class="material-symbols-outlined">record_voice_over</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Con Voz Propia</span>
+                    <strong class="stat-value" id="stat-grabados" style="color: var(--color-verde);">0</strong>
+                    <span class="stat-subtext" id="stat-pct-grabados">0% completado</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: var(--color-naranja-bg); color: var(--color-naranja);">
+                    <span class="material-symbols-outlined">hourglass_empty</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Pendientes</span>
+                    <strong class="stat-value" id="stat-pendientes" style="color: var(--color-naranja);">0</strong>
+                    <span class="stat-subtext">Usando audio estándar / TTS</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper" style="background: var(--color-morado-bg); color: var(--color-morado);">
+                    <span class="material-symbols-outlined">cloud_done</span>
+                </div>
+                <div class="stat-data">
+                    <span class="stat-label">Sincronizados</span>
+                    <strong class="stat-value" id="stat-sincronizados" style="color: #c084fc;">0</strong>
+                    <span class="stat-subtext">En Firebase Firestore</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestañas de Categoría -->
+        <div class="tabs-categorias" id="tabs-categorias">
+            <button class="tab-btn activo" data-cat="todos">
+                <span class="material-symbols-outlined" style="font-size:18px;">grid_view</span> Todos
+                <span class="badge-count" id="count-todos">0</span>
+            </button>
+            <button class="tab-btn" data-cat="salmos">
+                <span class="material-symbols-outlined" style="font-size:18px;">library_books</span> Salmos & Cánticos
+                <span class="badge-count" id="count-salmos">0</span>
+            </button>
+            <button class="tab-btn" data-cat="antifonas">
+                <span class="material-symbols-outlined" style="font-size:18px;">auto_stories</span> Antífonas
+                <span class="badge-count" id="count-antifonas">0</span>
+            </button>
+            <button class="tab-btn" data-cat="lecturas_oficio">
+                <span class="material-symbols-outlined" style="font-size:18px;">import_contacts</span> 1ª y 2ª Lectura Oficio
+                <span class="badge-count" id="count-lecturas-oficio">0</span>
+            </button>
+            <button class="tab-btn" data-cat="lecturas_breves">
+                <span class="material-symbols-outlined" style="font-size:18px;">menu_book</span> Lecturas Breves
+                <span class="badge-count" id="count-lecturas-breves">0</span>
+            </button>
+            <button class="tab-btn" data-cat="himnos">
+                <span class="material-symbols-outlined" style="font-size:18px;">music_note</span> Himnos
+                <span class="badge-count" id="count-himnos">0</span>
+            </button>
+            <button class="tab-btn" data-cat="responsorios">
+                <span class="material-symbols-outlined" style="font-size:18px;">forum</span> Responsorios
+                <span class="badge-count" id="count-responsorios">0</span>
+            </button>
+            <button class="tab-btn" data-cat="preces">
+                <span class="material-symbols-outlined" style="font-size:18px;">volunteer_activism</span> Preces
+                <span class="badge-count" id="count-preces">0</span>
+            </button>
+            <button class="tab-btn" data-cat="oraciones">
+                <span class="material-symbols-outlined" style="font-size:18px;">church</span> Oraciones
+                <span class="badge-count" id="count-oraciones">0</span>
+            </button>
+            <button class="tab-btn" data-cat="completas">
+                <span class="material-symbols-outlined" style="font-size:18px;">nightlight</span> Completas
+                <span class="badge-count" id="count-completas">0</span>
+            </button>
+        </div>
+
+        <!-- Barra de Búsqueda y Filtros -->
+        <div class="filtros-box">
+            <div class="busqueda-wrapper">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="input-busqueda" placeholder="Buscar por título, cita bíblica, ID o texto...">
+            </div>
+
+            <select id="filtro-estado" class="select-filtro">
+                <option value="todos">Todos los estados</option>
+                <option value="grabado">Con audio propio</option>
+                <option value="pendiente">Sin audio (Pendientes)</option>
+            </select>
+
+            <select id="filtro-tiempo" class="select-filtro">
+                <option value="todos">Todos los tiempos</option>
+                <option value="ordinario">Tiempo Ordinario</option>
+                <option value="adviento">Adviento</option>
+                <option value="navidad">Navidad</option>
+                <option value="cuaresma">Cuaresma</option>
+                <option value="pascua">Pascua</option>
+                <option value="santos">Santos / Fiestas</option>
+            </select>
+
+            <select id="filtro-orden" class="select-filtro">
+                <option value="id_asc">Ordenar por ID (A-Z)</option>
+                <option value="id_desc">Ordenar por ID (Z-A)</option>
+                <option value="titulo">Ordenar por Título</option>
+            </select>
+        </div>
+
+        <!-- Contenedor dinámico de ítems -->
+        <div id="contenedor-items" class="items-contenedor">
+            <!-- Renderizado por JS -->
+        </div>
+
+        <!-- Paginación -->
+        <div class="paginacion-box" id="paginacion-box">
+            <span id="info-paginacion">Mostrando 0 de 0</span>
+            <div class="paginacion-botones">
+                <button id="btn-pag-anterior" class="btn-pag" disabled>&laquo; Anterior</button>
+                <span id="numero-pagina" style="align-self:center; font-weight:600;">1 / 1</span>
+                <button id="btn-pag-siguiente" class="btn-pag" disabled>Siguiente &raquo;</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts del Sistema y Navegador Inferior -->
+    <script src="../js/firebase-config.js?v=1.0.12" type="module"></script>
+    <script src="../js/accesscontrol.js?v=1.0.03" type="module"></script>
+    <script src="../js/navigator.js?v=1.0.18"></script>
+    <script type="module" src="../js/frm_audio.js?v=1.0.0"></script>
+</body>
+</html>

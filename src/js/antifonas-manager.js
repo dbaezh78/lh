@@ -371,9 +371,13 @@ async function cargarDatos() {
         if (window.firebaseAPI && window.firebaseAPI.cargarAntifonasFirestore) {
             const desdeFirestore = await window.firebaseAPI.cargarAntifonasFirestore();
             if (desdeFirestore && desdeFirestore.length > 0) {
-                listaAntifonas = sanitizar(desdeFirestore);
+                // Fusionar con el catálogo semilla base (377 antífonas) para no perder ninguna antífona canónica
+                const mapa = new Map();
+                CATALOGO_ANTIFONAS_SEED.forEach(a => { if (a && (a.id || a.varName)) mapa.set(a.id || a.varName, a); });
+                desdeFirestore.forEach(a => { if (a && (a.id || a.varName)) mapa.set(a.id || a.varName, a); });
+                listaAntifonas = sanitizar(Array.from(mapa.values()));
                 localStorage.setItem('lh_antifonas_cache', JSON.stringify(listaAntifonas));
-                mostrarBannerEstado(`✅ Se cargaron ${listaAntifonas.length} antífonas desde Firestore.`, 'exito');
+                mostrarBannerEstado(`✅ Se cargaron ${listaAntifonas.length} antífonas (sincronizadas con Firestore).`, 'exito');
                 return;
             }
         }
@@ -381,14 +385,16 @@ async function cargarDatos() {
         console.warn('Fallo al conectar con Firestore, usando respaldo local:', e);
     }
 
-    // Fallback a caché local o catálogo semilla
+    // Fallback a caché local combinada con catálogo semilla
     const cacheLocal = localStorage.getItem('lh_antifonas_cache');
     if (cacheLocal) {
         try {
             const parsed = JSON.parse(cacheLocal);
-            // Si la caché tiene al menos 50 antífonas, es un catálogo representativo
-            if (Array.isArray(parsed) && parsed.length >= 50) {
-                listaAntifonas = sanitizar(parsed);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                const mapa = new Map();
+                CATALOGO_ANTIFONAS_SEED.forEach(a => { if (a && (a.id || a.varName)) mapa.set(a.id || a.varName, a); });
+                parsed.forEach(a => { if (a && (a.id || a.varName)) mapa.set(a.id || a.varName, a); });
+                listaAntifonas = sanitizar(Array.from(mapa.values()));
                 localStorage.setItem('lh_antifonas_cache', JSON.stringify(listaAntifonas));
                 mostrarBannerEstado(`📂 Cargadas ${listaAntifonas.length} antífonas desde caché local.`, 'alerta');
                 return;

@@ -424,6 +424,7 @@
                     <div class="nav-submenu" id="nav-submenu-formularios">
                         <a href="/src/html/frm_salterios.html"><span class="material-symbols-outlined">edit_note</span> Formulario Salterios</a>
                         <a href="/src/html/horas_configuradas.html"><span class="material-symbols-outlined">checklist</span> Horas (Estado y Faltantes)</a>
+                        <a href="/src/html/frm_audio.html"><span class="material-symbols-outlined">mic</span> Audios Litúrgicos</a>
                         <a href="/src/html/salmos.html"><span class="material-symbols-outlined">format_list_bulleted</span> Salmos</a>
                         <a href="/src/html/himno.html"><span class="material-symbols-outlined">music_note</span> Himnos</a>
                         <a href="/src/html/lecturabreve.html"><span class="material-symbols-outlined">auto_stories</span> Lectura Breve</a>
@@ -829,6 +830,7 @@
             let perm = null;
             if (href.includes('frm_salterios.html')) perm = 'page_frm_salterios';
             else if (href.includes('horas_configuradas.html')) perm = 'page_horas_configuradas';
+            else if (href.includes('frm_audio.html')) perm = 'page_frm_audio';
             else if (href.includes('salmos.html')) perm = 'page_frm_salmos';
             else if (href.includes('himno.html')) perm = 'page_frm_himnos';
             else if (href.includes('lecturabreve.html')) perm = 'page_frm_lecturabreve';
@@ -878,6 +880,9 @@
         } else if (path.includes("horas_configuradas.html")) {
             requiredPerm = "page_horas_configuradas";
             pageTitle = "Horas Configuradas y Faltantes";
+        } else if (path.includes("frm_audio.html")) {
+            requiredPerm = "page_frm_audio";
+            pageTitle = "Gestor Central de Audios";
         } else if (path.includes("salmos.html")) {
             requiredPerm = "page_frm_salmos";
             pageTitle = "Salmos";

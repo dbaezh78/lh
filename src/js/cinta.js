@@ -650,8 +650,7 @@ export class CintaLiturgica {
         this.vincularEventos();
 
         // Aplicar velocidad inicial según el modo activo:
-        // Liturgia de las Horas (hora) = 20 (+20 / 1.20x)
-        // Demás modos (evangelio, lectura1, lectura2) = 0 (1.00x normal)
+        // Velocidad normal por defecto en 0 (1.00x)
         this.establecerVelocidadSegunModo(this.modoActivo);
     }
 
@@ -2251,8 +2250,7 @@ export class CintaLiturgica {
         this.modoActivo = nuevoModo;
 
         // Ajustar velocidad automáticamente según el modo:
-        // Liturgia de las Horas (hora) = 20 (1.20x)
-        // Las demás (evangelio, lectura1, lectura2) = 0 (1.00x normal)
+        // Velocidad normal por defecto en 0 (1.00x)
         this.establecerVelocidadSegunModo(nuevoModo);
 
         try {
@@ -2695,9 +2693,8 @@ export class CintaLiturgica {
     }
 
     establecerVelocidadSegunModo(modo) {
-        // Para Liturgia de la Hora ('hora') la velocidad es 20 (1.20x)
-        // Para las demás ('evangelio', 'lectura1', 'lectura2') es normal (0 / 1.00x)
-        const step = (modo === 'hora') ? 20 : 0;
+        // Velocidad normal en 0 (1.00x) para todos los modos (incluyendo Liturgia de las Horas)
+        const step = 0;
         this.establecerVelocidad(step);
     }
 

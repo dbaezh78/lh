@@ -143,6 +143,7 @@ export const PERMISSIONS = {
   PAGE_FORMULARIO: "page_formulario",
   PAGE_FRM_SALTERIOS: "page_frm_salterios",
   PAGE_HORAS_CONFIGURADAS: "page_horas_configuradas",
+  PAGE_FRM_AUDIO: "page_frm_audio",
   FRM_SALTERIOS_GUARDAR: "frm_salterios_guardar",
   FRM_SALTERIOS_COPIAR: "frm_salterios_copiar",
   PAGE_FRM_SALMOS: "page_frm_salmos",
@@ -384,6 +385,7 @@ export const PERMISSION_TREE = [
         children: [
           { key: "page_frm_salterios", label: "Ver página" },
           { key: "page_horas_configuradas", label: "Ver Horas Configuradas y Faltantes" },
+          { key: "page_frm_audio", label: "Ver Gestor Central de Audios" },
           { key: "frm_salterios_guardar", label: "Guardar en Firebase" },
           { key: "frm_salterios_copiar", label: "Copiar código" }
         ]
@@ -616,6 +618,7 @@ export function esPermisoFormulario(p) {
   return (
     p === "page_formulario" ||
     p === "page_horas_configuradas" ||
+    p === "page_frm_audio" ||
     p === "page_cambio_liturgico" ||
     p === "page_santos_iglesia" ||
     p === "page_registro_santo" ||
