@@ -472,16 +472,42 @@ export function obtenerTodasLasLecturasOficioDesdeCatalogo() {
     }
 
     const mapa = new Map();
+    const mapaClaves = new Map();
+    const generarClave = (x) => {
+        if (!x) return '';
+        const citaNorm = String(x.cita || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+        const tipoNorm = String(x.tipo || '').toLowerCase().trim();
+        if (citaNorm) return `${tipoNorm}:::${citaNorm}`;
+        return String(x.id || x.varName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    };
+
     // 1. Semillas canónicas base
     if (Array.isArray(CATALOGO_LECTURAS_OFICIO_SEED)) {
         CATALOGO_LECTURAS_OFICIO_SEED.forEach(s => {
-            if (s && (s.id || s.varName)) mapa.set(s.id || s.varName, s);
+            if (s && (s.id || s.varName)) {
+                const idVal = s.id || s.varName;
+                mapa.set(idVal, s);
+                const k = generarClave(s);
+                if (k) mapaClaves.set(k, idVal);
+            }
         });
     }
     // 2. Elementos en caché local (añadir o actualizar)
     if (Array.isArray(lecturas)) {
         lecturas.forEach(l => {
-            if (l && (l.id || l.varName)) mapa.set(l.id || l.varName, l);
+            if (l && (l.id || l.varName)) {
+                const idVal = l.id || l.varName;
+                const k = generarClave(l);
+                if (mapa.has(idVal)) {
+                    mapa.set(idVal, { ...mapa.get(idVal), ...l });
+                } else if (k && mapaClaves.has(k)) {
+                    const seedId = mapaClaves.get(k);
+                    mapa.set(seedId, { ...mapa.get(seedId), ...l, id: seedId });
+                } else {
+                    mapa.set(idVal, l);
+                    if (k) mapaClaves.set(k, idVal);
+                }
+            }
         });
     }
 
@@ -1163,7 +1189,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         selectElement.innerHTML = '';
-        opciones.forEach(opt => selectElement.appendChild(opt));
+        const vistas = new Set();
+        opciones.forEach(opt => {
+            const textoNorm = (opt.textContent || '').replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+            const citaVal = (opt.getAttribute('data-cita') || '').replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+            const val = (opt.value || '').trim().toLowerCase();
+            const claveOpt = citaVal ? `${val}:::${citaVal}` : `${val}:::${textoNorm}`;
+            if (vistas.has(claveOpt)) return;
+            vistas.add(claveOpt);
+            selectElement.appendChild(opt);
+        });
 
         if (valorDeseado && Array.from(selectElement.options).some(o => o.value === valorDeseado || o.getAttribute('data-texto') === valorDeseado)) {
             const match = Array.from(selectElement.options).find(o => o.value === valorDeseado || o.getAttribute('data-texto') === valorDeseado);
@@ -1361,7 +1396,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+            const vistasLi = new Set();
             opts.forEach(opt => {
+                const textNorm = (opt.textContent || '').replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+                const valNorm = (opt.value || '').trim().toLowerCase();
+                const liKey = `${valNorm}:::${textNorm}`;
+                if (vistasLi.has(liKey)) return;
+                vistasLi.add(liKey);
+
                 const li = document.createElement('li');
                 li.className = 'custom-select-opcion';
                 if (opt.value === valActual) {
@@ -2299,7 +2341,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Todas las lecturas bíblicas (1ª lectura) de todo el catálogo abierto
             const biblicas = cacheTodasLasLecturasOficio.filter(l => !esPatristica(l));
             const lista1 = biblicas.length > 0 ? biblicas : cacheTodasLasLecturasOficio;
+            const citasVistasL1 = new Set();
             lista1.forEach(item => {
+                const cKey = String(item.cita || item.id || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                const anioKey = item.esPar || item.tipo === 'lectura1_par' ? 'par' : ((item.esImpar || item.tipo === 'lectura1_impar') ? 'impar' : 'ambos');
+                const claveFull = `${anioKey}:::${cKey}`;
+                if (citasVistasL1.has(claveFull)) return;
+                citasVistasL1.add(claveFull);
+
                 const opt = document.createElement('option');
                 const lid = item.id || item.varName || '';
                 opt.value = lid;
@@ -2329,7 +2378,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Todas las lecturas patrísticas (2ª lectura) de todo el catálogo abierto
             const patristicas = cacheTodasLasLecturasOficio.filter(l => esPatristica(l));
             const lista2 = patristicas.length > 0 ? patristicas : cacheTodasLasLecturasOficio;
+            const citasVistasL2 = new Set();
             lista2.forEach(item => {
+                const cKey = String(item.cita || item.id || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                const claveFull = `${item.tipo || ''}:::${cKey}`;
+                if (citasVistasL2.has(claveFull)) return;
+                citasVistasL2.add(claveFull);
+
                 const opt = document.createElement('option');
                 const lid = item.id || item.varName || '';
                 opt.value = lid;
@@ -2540,8 +2595,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (desdeFb.length > 0) {
                             const todas = obtenerTodasLasLecturasOficioDesdeCatalogo();
                             const mapa = new Map();
-                            todas.forEach(x => { if (x && (x.id || x.varName)) mapa.set(x.id || x.varName, x); });
-                            desdeFb.forEach(x => { if (x && (x.id || x.varName)) mapa.set(x.id || x.varName, x); });
+                            const mapaClaves = new Map();
+                            const generarClave = (x) => {
+                                if (!x) return '';
+                                const citaNorm = String(x.cita || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                                const tipoNorm = String(x.tipo || '').toLowerCase().trim();
+                                if (citaNorm) return `${tipoNorm}:::${citaNorm}`;
+                                return String(x.id || x.varName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                            };
+                            todas.forEach(x => {
+                                if (x && (x.id || x.varName)) {
+                                    const idVal = x.id || x.varName;
+                                    mapa.set(idVal, x);
+                                    const k = generarClave(x);
+                                    if (k) mapaClaves.set(k, idVal);
+                                }
+                            });
+                            desdeFb.forEach(x => {
+                                if (x && (x.id || x.varName)) {
+                                    const idVal = x.id || x.varName;
+                                    const k = generarClave(x);
+                                    if (mapa.has(idVal)) {
+                                        mapa.set(idVal, { ...mapa.get(idVal), ...x });
+                                    } else if (k && mapaClaves.has(k)) {
+                                        const seedId = mapaClaves.get(k);
+                                        mapa.set(seedId, { ...mapa.get(seedId), ...x, id: seedId });
+                                    } else {
+                                        mapa.set(idVal, x);
+                                        if (k) mapaClaves.set(k, idVal);
+                                    }
+                                }
+                            });
                             const combinadas = Array.from(mapa.values());
                             localStorage.setItem('lh_lecturas_cache', JSON.stringify(combinadas));
                             const val1 = selLectura1Oficio ? selLectura1Oficio.value : null;
@@ -3426,13 +3510,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const recomL1 = guardadaCiclo || LecturasDB.obtenerLectura1(tiempoVal, semanaVal, diaVal, esPar);
                     if (recomL1) {
                         const rId = recomL1.id || recomL1.varName || '';
-                        if (rId && !Array.from(selLectura1Oficio.options).some(o => o.value === rId)) {
+                        const citaNorm = String(recomL1.cita || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                        const optExistente = Array.from(selLectura1Oficio.options).find(o => {
+                            if (o.value === rId) return true;
+                            const oCita = String(o.getAttribute('data-cita') || o.textContent || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                            return citaNorm && oCita.includes(citaNorm);
+                        });
+                        if (!optExistente && rId) {
                             const opt = document.createElement('option');
                             opt.value = rId;
+                            opt.setAttribute('data-id', rId);
+                            opt.setAttribute('data-cita', recomL1.cita || '');
                             opt.textContent = `[${esPar ? 'Año Par' : 'Año Impar'}] ${recomL1.cita || rId} - ${recomL1.descripcion ? recomL1.descripcion.slice(0, 45) : ''}...`;
                             selLectura1Oficio.appendChild(opt);
+                            selLectura1Oficio.value = rId;
+                        } else if (optExistente) {
+                            selLectura1Oficio.value = optExistente.value;
                         }
-                        if (rId) selLectura1Oficio.value = rId;
                     }
                 }
 
@@ -3454,13 +3548,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (forzarRecomendado || !selLectura2Oficio.value) {
                     const recomL2 = LecturasDB.obtenerLectura2(tiempoVal, semanaVal, diaVal);
                     if (recomL2) {
-                        if (!Array.from(selLectura2Oficio.options).some(o => o.value === recomL2.id || o.value === recomL2.varName)) {
+                        const r2Id = recomL2.id || recomL2.varName || '';
+                        const citaNorm2 = String(recomL2.cita || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                        const optExistente2 = Array.from(selLectura2Oficio.options).find(o => {
+                            if (o.value === r2Id) return true;
+                            const oCita = String(o.getAttribute('data-cita') || o.textContent || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                            return citaNorm2 && oCita.includes(citaNorm2);
+                        });
+                        if (!optExistente2 && r2Id) {
                             const opt = document.createElement('option');
-                            opt.value = recomL2.id;
+                            opt.value = r2Id;
+                            opt.setAttribute('data-id', r2Id);
+                            opt.setAttribute('data-cita', recomL2.cita || '');
                             opt.textContent = `[Patrística] ${recomL2.cita} - ${recomL2.descripcion ? recomL2.descripcion.slice(0, 45) : ''}...`;
                             selLectura2Oficio.appendChild(opt);
+                            selLectura2Oficio.value = r2Id;
+                        } else if (optExistente2) {
+                            selLectura2Oficio.value = optExistente2.value;
                         }
-                        selLectura2Oficio.value = recomL2.id;
                     }
                 }
 
@@ -4886,13 +4991,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (l1Raw) {
                 if (selLectura1Oficio && l1Raw.id) {
-                    if (!Array.from(selLectura1Oficio.options).some(o => o.value === l1Raw.id)) {
+                    const citaNorm = String(l1Raw.cita || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                    const optExistente = Array.from(selLectura1Oficio.options).find(o => {
+                        if (o.value === l1Raw.id) return true;
+                        const oCita = String(o.getAttribute('data-cita') || o.textContent || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                        return citaNorm && oCita.includes(citaNorm);
+                    });
+                    if (!optExistente) {
                         const opt = document.createElement('option');
                         opt.value = l1Raw.id;
+                        opt.setAttribute('data-id', l1Raw.id);
+                        opt.setAttribute('data-cita', l1Raw.cita || '');
                         opt.textContent = `[${esParRestaurar ? 'Año Par' : 'Año Impar'}] ${l1Raw.cita || l1Raw.id} - ${(l1Raw.descripcion || '').slice(0, 45)}...`;
                         selLectura1Oficio.appendChild(opt);
+                        selLectura1Oficio.value = l1Raw.id;
+                    } else {
+                        selLectura1Oficio.value = optExistente.value;
                     }
-                    selLectura1Oficio.value = l1Raw.id;
                 }
                 aplicarObjetoLectura1EnPreview(l1Raw);
             } else {
@@ -5527,12 +5642,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             texto: (inputOpcionalOficio ? inputOpcionalOficio.value.trim() : '')
         } : null;
 
-        // Recolectar mapa de omisiones activas
+        // Recolectar mapa de omisiones activas (guardando explicitamente true o false para permitir rehabilitar)
         const omisiones = {};
         document.querySelectorAll('.chk-omitir-elemento, .chk-omitir-es').forEach(chk => {
             const target = chk.getAttribute('data-target');
-            if (target && chk.checked) {
-                omisiones[target] = true;
+            if (target) {
+                omisiones[target] = Boolean(chk.checked);
             }
         });
 
@@ -6061,13 +6176,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (l1Ciclo && selLectura1Oficio) {
                 if (l1Ciclo.id) {
-                    if (!Array.from(selLectura1Oficio.options).some(o => o.value === l1Ciclo.id)) {
+                    const citaNorm = String(l1Ciclo.cita || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                    const optExistente = Array.from(selLectura1Oficio.options).find(o => {
+                        if (o.value === l1Ciclo.id) return true;
+                        const oCita = String(o.getAttribute('data-cita') || o.textContent || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                        return citaNorm && oCita.includes(citaNorm);
+                    });
+                    if (!optExistente) {
                         const opt = document.createElement('option');
                         opt.value = l1Ciclo.id;
+                        opt.setAttribute('data-id', l1Ciclo.id);
+                        opt.setAttribute('data-cita', l1Ciclo.cita || '');
                         opt.textContent = `[${esParNuevo ? 'Año Par' : 'Año Impar'}] ${l1Ciclo.cita || l1Ciclo.id} - ${(l1Ciclo.descripcion || '').slice(0, 45)}...`;
                         selLectura1Oficio.appendChild(opt);
+                        selLectura1Oficio.value = l1Ciclo.id;
+                    } else {
+                        selLectura1Oficio.value = optExistente.value;
                     }
-                    selLectura1Oficio.value = l1Ciclo.id;
                     if (typeof selLectura1Oficio._actualizarCustomSelect === 'function') {
                         selLectura1Oficio._actualizarCustomSelect();
                     }

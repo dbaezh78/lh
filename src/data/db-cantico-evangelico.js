@@ -2524,6 +2524,16 @@ export const CATALOGO_ANTIFONAS_CANTICO_SEED = [
     "libro": "laudes",
     "ciclo": null,
     "texto": "Guía nuestros pasos, Dios de Israel, por el camino de la paz."
+  },
+  {
+    "id": "tos01savi_cE",
+    "varName": "tos01savi_cE",
+    "tiempo": "ordinario",
+    "semana": 1,
+    "dia": "sabado",
+    "libro": "visperas",
+    "ciclo": null,
+    "texto": "Éste es el Cordero de Dios que quita el pecado del mundo. Aleluya."
   }
 ];
 
@@ -2754,6 +2764,10 @@ export function obtenerAntifonaCanticoRecomendada(tiempo, semana, dia, libro = '
     const semNum = parseInt(String(semana).replace(/[^0-9]/g, ''), 10) || 1;
     const semCiclo = ((semNum - 1) % 4) + 1;
     const libroNorm = (libro || 'laudes').toLowerCase().replace(/s$/, '');
+    if (tiempo === 'ordinario' && dia === 'sabado' && (libroNorm === 'vispera' || libroNorm === 'visperas') && (semNum === 1 || semCiclo === 1)) {
+        const mSabVis = list.find(a => (a.varName === 'tos01savi_cE' || a.id === 'tos01savi_cE'));
+        if (mSabVis) return mSabVis;
+    }
 
     // 1. Caso especial Domingo
     if (dia === 'domingo') {

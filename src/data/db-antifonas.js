@@ -1352,6 +1352,16 @@ export const CATALOGO_ANTIFONAS_SEED = [
     "libro": "laudes",
     "tipo": "salmodia_3",
     "texto": "De la boca de los niños de pecho, Señor, has sacado una alabanza."
+  },
+  {
+    "id": "ordinario_s1_sabado_visperas_evangelico_tos01savi_cE",
+    "varName": "tos01savi_cE",
+    "tiempo": "ordinario",
+    "semana": 1,
+    "dia": "sabado",
+    "libro": "visperas",
+    "tipo": "evangelico",
+    "texto": "Éste es el Cordero de Dios que quita el pecado del mundo. Aleluya."
   }
 ];
 

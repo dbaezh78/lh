@@ -58,8 +58,8 @@ export const CATALOGO_RESPONSORIOS_SEED = [
         semana: "1",
         dia: "jueves",
         libro: "oficio",
-        v: "Instrúyeme en tu verdad, enséñame.",
-        r: "Porque tú eres mi Dios y Salvador."
+        v: "Ábreme, Señor, los ojos.",
+        r: "Y contemplaré las maravillas de tu voluntad."
     },
     {
         id: "tos01viof_resp",

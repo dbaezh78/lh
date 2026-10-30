@@ -465,11 +465,12 @@ function autogenerarIdYTitulo() {
     const idSugerido = generarIdCanonicoResponsorio(tiempo, semanaVal, dia, libro);
     let tituloSugerido = '';
 
+    const libroNombre = (libro === 'oficio' ? 'Oficio' : libro === 'laudes' ? 'Laudes' : libro === 'visperas' ? 'Vísperas' : libro === 'completas' ? 'Completas' : libro.toUpperCase());
     if (tiempo === 'santos') {
         const optSanto = semanaSel?.selectedOptions[0];
         const nombreSanto = optSanto ? (optSanto.getAttribute('data-nombre') || optSanto.textContent) : 'Santo';
         const fechaSanto = optSanto ? optSanto.getAttribute('data-fecha') : '';
-        tituloSugerido = `Responsorio - ${nombreSanto}${fechaSanto ? ' (' + fechaSanto + ')' : ''} (${libro.charAt(0).toUpperCase() + libro.slice(1)})`;
+        tituloSugerido = `Responsorio - ${nombreSanto}${fechaSanto ? ' (' + fechaSanto + ')' : ''} (${libroNombre})`;
     } else {
         const diaNombre = dia.charAt(0).toUpperCase() + dia.slice(1);
         const tiempoNombre = tiempo.charAt(0).toUpperCase() + tiempo.slice(1);
@@ -482,7 +483,7 @@ function autogenerarIdYTitulo() {
     }
 
     const inputTitulo = document.getElementById('form-titulo');
-    if (inputTitulo && !editandoId) {
+    if (inputTitulo) {
         inputTitulo.value = tituloSugerido;
     }
 }

@@ -579,6 +579,19 @@ export class CintaLiturgica {
 
         // Reproductor de Audio HTML5 (para Evangelio, Lectura 1, Lectura 2 y Rezo de las Horas)
         this.audio = new Audio();
+        this.audio.autoplay = false;
+
+        // Cancelar cualquier locución TTS residual del navegador al iniciar o navegar
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+            try {
+                window.speechSynthesis.cancel();
+            } catch (_) {}
+            window.addEventListener('beforeunload', () => {
+                try {
+                    window.speechSynthesis.cancel();
+                } catch (_) {}
+            });
+        }
 
         // Motor de Texto a Voz (TTS) para el Rezo de las Horas (segundo icono)
         this.ttsState = {
@@ -1106,19 +1119,21 @@ export class CintaLiturgica {
             }
         });
 
-        // Detección automática de error (404 Not Found o fallo de red): fallback inmediato a TTS
+        // Detección automática de error (404 Not Found o fallo de red): fallback silencioso a TTS sin autoplay
         this.audio.addEventListener('error', (e) => {
             const urlFallida = this.audio.src;
             if (urlFallida) {
                 this.audiosFallidos.add(urlFallida);
             }
+            // Solo continuar reproduciendo en TTS si el usuario estaba reproduciendo activamente
+            const estabaSonando = !this.audio.paused && this.audio.currentTime > 0;
             if (this.fuenteActiva === 'audio') {
                 console.warn('[Cinta] Audio de servidor no disponible (404/red), conmutando a TTS:', urlFallida);
                 try {
                     this.audio.removeAttribute('src');
                     this.audio.load();
                 } catch (_) {}
-                this.ejecutarFallbackTTS(this.modoActivo);
+                this.ejecutarFallbackTTS(this.modoActivo, estabaSonando);
             }
         });
 
@@ -1303,7 +1318,7 @@ export class CintaLiturgica {
             this.detenerTTS();
             this.audio.play().catch(err => {
                 console.warn('[Cinta] Error al reanudar audio:', err);
-                this.ejecutarFallbackTTS(this.modoActivo);
+                this.ejecutarFallbackTTS(this.modoActivo, true);
             });
             return;
         }
@@ -1317,7 +1332,7 @@ export class CintaLiturgica {
 
         // Si el usuario activó la opción "Forzar siempre Lector de voz (Texto a voz)"
         if (modo === 'hora' && forzarTTS) {
-            this.ejecutarFallbackTTS(modo);
+            this.ejecutarFallbackTTS(modo, true);
             return;
         }
 
@@ -1359,26 +1374,26 @@ export class CintaLiturgica {
                                     if (sub) sub.textContent = `Rezo de OFICIO`;
                                 }).catch(() => {
                                     this.audiosFallidos.add(urlGenerica);
-                                    this.ejecutarFallbackTTS(modo);
+                                    this.ejecutarFallbackTTS(modo, true);
                                 });
                             });
                             return;
                         }
                     }
 
-                    this.ejecutarFallbackTTS(modo);
+                    this.ejecutarFallbackTTS(modo, true);
                 });
             }).catch(() => {
-                this.ejecutarFallbackTTS(modo);
+                this.ejecutarFallbackTTS(modo, true);
             });
             return;
         }
 
         // Si no hay audio asignado o ya se confirmó que devolvió 404:
-        this.ejecutarFallbackTTS(modo);
+        this.ejecutarFallbackTTS(modo, true);
     }
 
-    ejecutarFallbackTTS(modo) {
+    ejecutarFallbackTTS(modo, autoPlay = false) {
         if (this._conmutandoTTS) return;
         this._conmutandoTTS = true;
         setTimeout(() => { this._conmutandoTTS = false; }, 600);
@@ -1397,9 +1412,13 @@ export class CintaLiturgica {
             const sub = document.getElementById('menu-sub-hora');
             if (sub) sub.textContent = `Lector de voz (${libroNombre})`;
 
-            this.mostrarToastAviso('Audio en servidor no disponible. Leyendo con lector de voz...');
             this.prepararTTS('hora');
-            this.reproducirTTS();
+            if (autoPlay) {
+                this.mostrarToastAviso('Audio en servidor no disponible. Leyendo con lector de voz...');
+                this.reproducirTTS();
+            } else {
+                this.actualizarIconoPlay(false);
+            }
             return;
         }
 
@@ -1409,10 +1428,16 @@ export class CintaLiturgica {
 
         const segs = this.prepararTTS(modo);
         if (segs && segs.length > 0) {
-            this.mostrarToastAviso(`Audio en servidor no disponible. Leyendo con lector de voz...`);
-            this.reproducirTTS();
+            if (autoPlay) {
+                this.mostrarToastAviso(`Audio en servidor no disponible. Leyendo con lector de voz...`);
+                this.reproducirTTS();
+            } else {
+                this.actualizarIconoPlay(false);
+            }
         } else {
-            alert(`No hay archivo de audio ni texto litúrgico disponible para ${MODOS_AUDIO[modo]?.nombre || 'este modo'}.`);
+            if (autoPlay) {
+                alert(`No hay archivo de audio ni texto litúrgico disponible para ${MODOS_AUDIO[modo]?.nombre || 'este modo'}.`);
+            }
         }
     }
 
@@ -2304,7 +2329,7 @@ export class CintaLiturgica {
             if (autoPlay) {
                 this.audio.play().catch(() => {
                     this.audiosFallidos.add(urlCandidata);
-                    this.ejecutarFallbackTTS(nuevoModo);
+                    this.ejecutarFallbackTTS(nuevoModo, autoPlay);
                 });
             }
         } else {
@@ -2351,7 +2376,7 @@ export class CintaLiturgica {
             const sub = document.getElementById('menu-sub-lectura1');
             if (sub && subtitulo) sub.textContent = subtitulo;
             if (this.modoActivo === 'lectura1') {
-                const estabaReproduciendo = !this.audio.paused;
+                const estabaReproduciendo = !this.audio.paused && this.audio.currentTime > 0;
                 if (this.audio.src !== url) {
                     this.audio.src = url;
                     if (estabaReproduciendo) {
@@ -2379,6 +2404,13 @@ export class CintaLiturgica {
     cargarAudios(mapAudios = {}) {
         this.audiosFallidos.clear();
         this.fuenteActiva = null;
+        if (this.audio) {
+            this.audio.pause();
+            this.audio.autoplay = false;
+        }
+        this.detenerTTS();
+        this.actualizarIconoPlay(false);
+
         if (mapAudios.evangelio) this.cargarEvangelio(mapAudios.evangelio, mapAudios.subEvangelio);
         if (mapAudios.hora) this.cargarAudioLibro(mapAudios.hora, mapAudios.subHora);
         if (mapAudios.lectura1) this.cargarLectura1(mapAudios.lectura1, mapAudios.subLectura1);
@@ -2700,6 +2732,14 @@ export class CintaLiturgica {
 
     // Actualización de Información Litúrgica y Botones Activos
     actualizarLiturgiaInfo(tiempo, semana, dia, libro, tiempoSlug = '', diaSlug = '', extras = {}) {
+        // Al actualizar o cambiar la hora litúrgica, pausar reproducciones previas y esperar al usuario
+        if (this.audio) {
+            this.audio.pause();
+            this.audio.autoplay = false;
+        }
+        this.detenerTTS();
+        this.actualizarIconoPlay(false);
+
         this.opciones = {
             ...this.opciones,
             tiempo: tiempo || this.opciones.tiempo,

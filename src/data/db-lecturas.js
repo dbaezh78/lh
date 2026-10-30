@@ -638,8 +638,28 @@ Y lo que Salomón decía, en otro orden de cosas, a vosotros os cuadra admirable
 ];
 
 export class LecturasDB {
+    static _generarClaveLectura(x) {
+        if (!x) return '';
+        const citaNorm = String(x.cita || '').toLowerCase().replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+        const tipoNorm = String(x.tipo || '').toLowerCase().trim();
+        if (citaNorm) {
+            return `${tipoNorm}:::${citaNorm}`;
+        }
+        return String(x.id || x.varName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
     static getCatalogo() {
-        const mapa = new Map(CATALOGO_LECTURAS_SEED.map(x => [x.id, { ...x }]));
+        const mapa = new Map();
+        const mapaClaves = new Map();
+
+        for (const s of CATALOGO_LECTURAS_SEED) {
+            if (!s || (!s.id && !s.varName)) continue;
+            const idVal = s.id || s.varName;
+            mapa.set(idVal, { ...s });
+            const k = this._generarClaveLectura(s);
+            if (k) mapaClaves.set(k, idVal);
+        }
+
         if (typeof localStorage !== 'undefined') {
             const cache = localStorage.getItem('lh_lecturas_cache');
             if (cache) {
@@ -647,14 +667,21 @@ export class LecturasDB {
                     const parsed = JSON.parse(cache);
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         for (const item of parsed) {
-                            if (item && item.id) {
-                                if (mapa.has(item.id)) {
-                                    // Conservar el texto canónico actualizado del seed
-                                    const seedObj = mapa.get(item.id);
-                                    mapa.set(item.id, { ...item, ...seedObj });
-                                } else {
-                                    mapa.set(item.id, item);
-                                }
+                            if (!item || (!item.id && !item.varName)) continue;
+                            const idVal = item.id || item.varName;
+                            const k = this._generarClaveLectura(item);
+
+                            if (mapa.has(idVal)) {
+                                const seedObj = mapa.get(idVal);
+                                mapa.set(idVal, { ...item, ...seedObj });
+                            } else if (k && mapaClaves.has(k)) {
+                                // Mismo contenido/cita pero ID diferente -> fusionar para evitar duplicados
+                                const seedId = mapaClaves.get(k);
+                                const seedObj = mapa.get(seedId);
+                                mapa.set(seedId, { ...seedObj, ...item, id: seedId });
+                            } else {
+                                mapa.set(idVal, item);
+                                if (k) mapaClaves.set(k, idVal);
                             }
                         }
                     }
