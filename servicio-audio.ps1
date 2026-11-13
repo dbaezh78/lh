@@ -100,9 +100,10 @@ switch ($Accion.ToLower()) {
         Write-Host " [2] Reiniciar servicio"
         Write-Host " [3] Parar servicio"
         Write-Host " [4] Consultar estado"
-        Write-Host " [5] Salir"
+        Write-Host " [5] Reparar puertos bloqueados por Windows (Reiniciar WinNAT / Admin)"
+        Write-Host " [6] Salir"
         Write-Host "------------------------------------------------------------------"
-        $op = Read-Host "Seleccione una opción (1-5)"
+        $op = Read-Host "Seleccione una opción (1-6)"
         switch ($op) {
             '1' { Start-ServicioAudio }
             '2' { Restart-ServicioAudio }
@@ -110,6 +111,17 @@ switch ($Accion.ToLower()) {
             '4' { 
                 $check = Get-ServicioStatus
                 if ($check.Online) { Write-Host "[ONLINE] Activo" -ForegroundColor Green } else { Write-Host "[OFFLINE]" -ForegroundColor Red }
+            }
+            '5' {
+                Write-Host "Reiniciando servicio 'winnat' para liberar puertos reservados..." -ForegroundColor Yellow
+                try {
+                    Restart-Service -Name winnat -Force -ErrorAction Stop
+                    Write-Host "[OK] Servicio WinNAT reiniciado. Puertos 4000 y 4001 liberados." -ForegroundColor Green
+                } catch {
+                    Write-Host "[AVISO] Se requieren permisos de Administrador para reiniciar WinNAT." -ForegroundColor Red
+                    Write-Host "Abre PowerShell o CMD como Administrador y ejecuta:" -ForegroundColor Yellow
+                    Write-Host "    net stop winnat; net start winnat" -ForegroundColor Cyan
+                }
             }
             default { Write-Host "Saliendo..." }
         }

@@ -545,6 +545,26 @@ async function requestHandler(req, res) {
 function iniciarServidores() {
     // 1. Iniciar Servidor HTTP en puerto 4000
     const serverHttp = http.createServer(requestHandler);
+
+    serverHttp.on('error', (err) => {
+        if (err.code === 'EACCES') {
+            console.error('\n==================================================================');
+            console.error(` [ERROR EACCES]: Permiso denegado al abrir el puerto HTTP ${PORT_HTTP}.`);
+            console.error(` En Windows, esto ocurre cuando Hyper-V / WSL / WinNAT reserva temporalmente este rango de puertos.`);
+            console.error('');
+            console.error(' >>> CÓMO SOLUCIONARLO EN 10 SEGUNDOS:');
+            console.error(' 1. Abre CMD o PowerShell como Administrador (clic derecho -> "Ejecutar como administrador").');
+            console.error(' 2. Ejecuta el comando:');
+            console.error('       net stop winnat && net start winnat');
+            console.error(' 3. Vuelve a iniciar este servicio (opción 1 de iniciarAudio.bat).');
+            console.error('==================================================================\n');
+        } else if (err.code === 'EADDRINUSE') {
+            console.error(`\n[ERROR]: El puerto ${PORT_HTTP} ya está siendo utilizado por otro proceso.\n`);
+        } else {
+            console.error(`\n[ERROR HTTP]:`, err.message);
+        }
+    });
+
     serverHttp.listen(PORT_HTTP, '0.0.0.0', () => {
         console.log(`==================================================================`);
         console.log(` SERVICIO LOCAL DE AUDIO LITÚRGICO (GOOGLE TTS -> MP3)`);
@@ -564,6 +584,15 @@ function iniciarServidores() {
             const ca = fs.existsSync(caPath) ? fs.readFileSync(caPath) : undefined;
 
             const serverHttps = https.createServer({ cert, key, ca }, requestHandler);
+
+            serverHttps.on('error', (err) => {
+                if (err.code === 'EACCES') {
+                    console.warn(`[HTTPS] Puerto ${PORT_HTTPS} bloqueado por exclusión de puertos de Windows.`);
+                } else {
+                    console.warn(`[HTTPS] Error en servidor HTTPS:`, err.message);
+                }
+            });
+
             serverHttps.listen(PORT_HTTPS, '0.0.0.0', () => {
                 console.log(` HTTPS:  https://lh.laantillana.com:${PORT_HTTPS}`);
                 console.log(` Estado: https://lh.laantillana.com:${PORT_HTTPS}/status`);

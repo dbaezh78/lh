@@ -24,16 +24,18 @@ echo   [1] Iniciar servicio (dejar corriendo en ventana propia)
 echo   [2] Reiniciar servicio (apaga el actual y vuelve a encender)
 echo   [3] Parar / Detener servicio (cierra cualquier proceso activo)
 echo   [4] Ver estado y verificar conexion
-echo   [5] Salir
+echo   [5] Reparar puertos bloqueados por Windows (Reiniciar WinNAT / Admin)
+echo   [6] Salir
 echo ==================================================================
 echo.
-set /p opcion="Seleccione una opcion (1-5): "
+set /p opcion="Seleccione una opcion (1-6): "
 
 if "%opcion%"=="1" goto iniciar
 if "%opcion%"=="2" goto reiniciar
 if "%opcion%"=="3" goto parar
 if "%opcion%"=="4" goto estado
-if "%opcion%"=="5" goto fin
+if "%opcion%"=="5" goto reparar
+if "%opcion%"=="6" goto fin
 
 echo.
 echo Opcion no valida.
@@ -90,6 +92,32 @@ goto menu
 echo.
 echo Verificando conexion con http://127.0.0.1:4000/status ...
 powershell -Command "try { $r = Invoke-RestMethod -Uri 'http://127.0.0.1:4000/status' -TimeoutSec 3; Write-Host '[OK] Servicio activo:' ($r | ConvertTo-Json -Compress) -ForegroundColor Green } catch { Write-Host '[OFFLINE] El servicio no responde o esta apagado.' -ForegroundColor Red }"
+echo.
+pause
+goto menu
+
+:reparar
+echo.
+echo ==================================================================
+echo   REPARAR PUERTOS BLOQUEADOS POR WINDOWS (WinNAT / Hyper-V)
+echo ==================================================================
+echo Reiniciando servicio 'winnat' para liberar puertos del rango dinamico...
+echo.
+net stop winnat
+if %ERRORLEVEL% EQU 0 (
+    net start winnat
+    echo.
+    echo [OK] Servicio WinNAT reiniciado exitosamente.
+    echo Los puertos 4000 y 4001 han sido liberados.
+    echo Ahora puedes presionar [1] para iniciar el servicio.
+) else (
+    echo.
+    echo [AVISO] Se requieren permisos de Administrador para reiniciar WinNAT.
+    echo Por favor haz clic derecho sobre este archivo .bat y selecciona:
+    echo    "Ejecutar como administrador"
+    echo O abre CMD como Administrador y ejecuta manualmente:
+    echo    net stop winnat ^&^& net start winnat
+)
 echo.
 pause
 goto menu
