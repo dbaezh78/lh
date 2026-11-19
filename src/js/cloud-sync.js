@@ -66,8 +66,23 @@
 
     function setSantosLocales(lista) {
         if (!Array.isArray(lista)) return;
-        localStorage.setItem(KEYS.SANTOS, JSON.stringify(lista));
-        // Guardar también en IndexedDB si existe
+        try {
+            localStorage.setItem(KEYS.SANTOS, JSON.stringify(lista));
+        } catch (e) {
+            if (e.name === 'QuotaExceededError' || e.code === 22) {
+                try {
+                    const listaLigera = lista.map(s => {
+                        if (s && s.imagen && s.imagen.length > 500) {
+                            const { imagen, ...resto } = s;
+                            return { ...resto, imagen: '' };
+                        }
+                        return s;
+                    });
+                    localStorage.setItem(KEYS.SANTOS, JSON.stringify(listaLigera));
+                } catch (_) {}
+            }
+        }
+        // Guardar lista completa con imágenes en IndexedDB
         if (window.indexedDB) {
             try {
                 const req = indexedDB.open('LH_Santos_DB', 2);
@@ -390,9 +405,22 @@
                                 const reg = localMap.get(slug);
                                 const tCloud = sCloud.ultimaActualizacion ? new Date(sCloud.ultimaActualizacion).getTime() : 0;
                                 const tLocal = reg.santo.ultimaActualizacion ? new Date(reg.santo.ultimaActualizacion).getTime() : 0;
-                                if (tCloud > tLocal + 2000) {
-                                    localSantos[reg.idx] = { ...reg.santo, ...sCloud };
+                                const cloudTieneFoto = !!(sCloud.imagen && sCloud.imagen.trim().length > 0);
+                                const localTieneFoto = !!(reg.santo.imagen && reg.santo.imagen.trim().length > 0);
+
+                                if ((cloudTieneFoto && !localTieneFoto) || tCloud >= tLocal) {
+                                    localSantos[reg.idx] = { 
+                                        ...reg.santo, 
+                                        ...sCloud, 
+                                        imagen: sCloud.imagen || reg.santo.imagen || '' 
+                                    };
                                     actualizadosSantos++;
+                                } else if (localTieneFoto && !cloudTieneFoto) {
+                                    localSantos[reg.idx] = {
+                                        ...sCloud,
+                                        ...reg.santo,
+                                        imagen: reg.santo.imagen
+                                    };
                                 }
                             }
                         });

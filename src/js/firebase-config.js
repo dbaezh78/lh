@@ -373,7 +373,9 @@ window.firebaseAPI = {
                         return userSnap.data()[seccion];
                     }
                 } catch (eUser) {
-                    console.warn("⚠️ Aviso al leer ajustes por usuario en Firestore:", eUser);
+                    if (eUser?.code !== 'unavailable' && !eUser?.message?.includes('offline')) {
+                        console.warn("⚠️ Aviso al leer ajustes por usuario en Firestore:", eUser);
+                    }
                 }
             }
             // Si no o como respaldo, leer del documento compartido de la sección

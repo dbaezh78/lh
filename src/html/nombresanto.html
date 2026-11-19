@@ -962,7 +962,8 @@
             if (nuevosAgregados > 0) {
                 console.log(`✨ Incorporando ${nuevosAgregados} nuevos santos preconfigurados.`);
             }
-            guardarSantosLocal(Array.from(mapaInit.values()));
+            santosMemoria = Array.from(mapaInit.values());
+            intentarGuardarLocalStorage(santosMemoria);
         }
 
         integrarCatalogoInicial();
@@ -970,8 +971,32 @@
         // Carga asíncrona desde IndexedDB para asegurar disponibilidad de imágenes completas
         cargarDeIndexedDB().then((santosIDB) => {
             if (santosIDB && Array.isArray(santosIDB) && santosIDB.length > 0) {
-                santosMemoria = santosIDB;
-                integrarCatalogoInicial();
+                const mapaIDB = new Map();
+                santosIDB.forEach(s => {
+                    if (s && s.nombre) mapaIDB.set(s.nombre.toLowerCase().trim(), s);
+                });
+
+                let fotosRecuperadas = 0;
+                santosMemoria.forEach((sLocal, idx) => {
+                    const clave = (sLocal.nombre || '').toLowerCase().trim();
+                    if (mapaIDB.has(clave)) {
+                        const sIDB = mapaIDB.get(clave);
+                        if (sIDB.imagen && (!sLocal.imagen || sLocal.imagen.trim().length === 0)) {
+                            santosMemoria[idx] = { ...sLocal, imagen: sIDB.imagen };
+                            fotosRecuperadas++;
+                        }
+                    }
+                });
+
+                mapaIDB.forEach((sIDB, clave) => {
+                    if (!santosMemoria.some(s => (s.nombre || '').toLowerCase().trim() === clave)) {
+                        santosMemoria.push(sIDB);
+                    }
+                });
+
+                if (fotosRecuperadas > 0) {
+                    console.log(`🖼️ [IndexedDB] Se restauraron ${fotosRecuperadas} imágenes de santos desde la base de datos local.`);
+                }
                 renderTablaRegistrados();
             }
         });
@@ -1311,7 +1336,7 @@
                                 const eliminadosSet = new Set(obtenerEliminados().map(n => n.toLowerCase().trim()));
                                 let cambios = false;
                                 const localMap = new Map();
-                                catalogoSantos.forEach((s, idx) => {
+                                santosMemoria.forEach((s, idx) => {
                                     if (s && s.nombre) localMap.set(s.nombre.toLowerCase().trim(), idx);
                                 });
 
@@ -1326,26 +1351,36 @@
                                         continue;
                                     }
 
-                                    // Solo agregar si no existe localmente o si en la nube es más reciente
+                                    // Solo agregar si no existe localmente o si en la nube es más reciente o trae foto
                                     if (!localMap.has(clave)) {
-                                        catalogoSantos.push(s);
-                                        localMap.set(clave, catalogoSantos.length - 1);
+                                        santosMemoria.push(s);
+                                        localMap.set(clave, santosMemoria.length - 1);
                                         cambios = true;
                                     } else {
                                         const idx = localMap.get(clave);
+                                        const localSanto = santosMemoria[idx];
+                                        const remotoTieneFoto = !!(s.imagen && s.imagen.trim().length > 0);
+                                        const localTieneFoto = !!(localSanto.imagen && localSanto.imagen.trim().length > 0);
                                         const tRemoto = s.ultimaActualizacion ? new Date(s.ultimaActualizacion).getTime() : 0;
-                                        const tLocal = catalogoSantos[idx].ultimaActualizacion ? new Date(catalogoSantos[idx].ultimaActualizacion).getTime() : 0;
-                                        if (tRemoto > tLocal + 2000) {
-                                            catalogoSantos[idx] = { ...catalogoSantos[idx], ...s };
+                                        const tLocal = localSanto.ultimaActualizacion ? new Date(localSanto.ultimaActualizacion).getTime() : 0;
+
+                                        if ((remotoTieneFoto && !localTieneFoto) || tRemoto >= tLocal) {
+                                            santosMemoria[idx] = { 
+                                                ...localSanto, 
+                                                ...s,
+                                                imagen: s.imagen || localSanto.imagen || ''
+                                            };
                                             cambios = true;
+                                        } else if (localTieneFoto && !remotoTieneFoto) {
+                                            santosMemoria[idx].imagen = localSanto.imagen;
                                         }
                                     }
                                 }
                                 if (cambios) {
-                                    guardarSantosLocal(catalogoSantos);
-                                    console.log(`☁️ [Firestore] Catálogo actualizado con novedades de la nube (${catalogoSantos.length} santos).`);
+                                    guardarSantosLocal(santosMemoria);
+                                    console.log(`☁️ [Firestore] Catálogo e imágenes actualizados (${santosMemoria.length} santos).`);
                                     actualizarTotalSantos();
-                                    mostrarPagina(paginaActual);
+                                    renderTablaRegistrados();
                                 }
                             }
                         } catch (err) {
