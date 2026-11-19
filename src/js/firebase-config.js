@@ -13,6 +13,7 @@ import {
 
 import { 
     getFirestore,
+    initializeFirestore,
     collection,
     doc,
     setDoc,
@@ -35,7 +36,18 @@ const firebaseConfig = {
 // Inicializar instancia de Firebase
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// Inicializar Firestore forzando HTTP Long Polling para evitar que firestore.googleapis.com
+// se congele o lance "Could not reach Cloud Firestore backend. Backend didn't respond within 10 seconds"
+let firestoreDb;
+try {
+    firestoreDb = initializeFirestore(app, {
+        experimentalForceLongPolling: true
+    });
+} catch (_) {
+    firestoreDb = getFirestore(app);
+}
+export const db = firestoreDb;
 export const provider = new GoogleAuthProvider();
 
 provider.setCustomParameters({
@@ -107,8 +119,34 @@ window.firebaseAPI = {
 
         console.log("📦 [Firebase] Subiendo documentos en lotes optimizados...");
         
-        // Para evitar [resource-exhausted]: Write stream exhausted maximum allowed queued writes
-        // usamos lotes moderados de 25 documentos y una breve pausa entre lotes.
+        // Primero, obtener mapa de fotos existentes en Firestore para jamás sobrescribir una foto con string vacío
+        const mapaFotosExistentes = new Map();
+        try {
+            const querySnapshot = await getDocs(collection(db, "santos"));
+            querySnapshot.forEach((d) => {
+                const data = d.data();
+                if (data && data.nombre && data.imagen && data.imagen.trim().length > 0) {
+                    mapaFotosExistentes.set(data.nombre.toLowerCase().trim(), data.imagen);
+                }
+            });
+        } catch (_) {}
+
+        // También revisar en catalogo/santos
+        try {
+            const docLegacy = await getDoc(doc(db, "catalogo", "santos"));
+            if (docLegacy.exists()) {
+                const leg = docLegacy.data().lista || [];
+                leg.forEach(s => {
+                    if (s && s.nombre && s.imagen && s.imagen.trim().length > 0) {
+                        const clave = s.nombre.toLowerCase().trim();
+                        if (!mapaFotosExistentes.has(clave)) {
+                            mapaFotosExistentes.set(clave, s.imagen);
+                        }
+                    }
+                });
+            }
+        } catch (_) {}
+
         const BATCH_SIZE = 25;
         let count = 0;
         
@@ -118,15 +156,21 @@ window.firebaseAPI = {
             
             for (const s of chunk) {
                 if (!s || !s.nombre) continue;
+                const clave = s.nombre.toLowerCase().trim();
                 const docId = s.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
                 const docRef = doc(db, "santos", docId);
-                batch.set(docRef, { ...s, ultimaActualizacion: new Date().toISOString() });
+
+                // Proteger imagen: si el objeto no trae foto o viene vacía, pero la base de datos ya tenía foto, PRESERVARLA
+                const imagenFinal = (s.imagen && s.imagen.trim().length > 0) 
+                    ? s.imagen 
+                    : (mapaFotosExistentes.get(clave) || '');
+
+                batch.set(docRef, { ...s, imagen: imagenFinal, ultimaActualizacion: new Date().toISOString() });
                 count++;
             }
             
             await batch.commit();
             console.log(`✅ [Firebase] Lote guardado: ${count}/${listaSantos.length} santos.`);
-            // Pausa de 250ms para que el flujo de escritura (webchannel stream) vacíe su cola
             await new Promise(res => setTimeout(res, 250));
         }
 
@@ -135,9 +179,22 @@ window.firebaseAPI = {
     guardarUnSantoFirestore: async (santo) => {
         if (!auth.currentUser) return;
         if (!santo || !santo.nombre) return;
+        const clave = santo.nombre.toLowerCase().trim();
         const docId = santo.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
         const docRef = doc(db, "santos", docId);
-        await setDoc(docRef, { ...santo, ultimaActualizacion: new Date().toISOString() });
+
+        let imagenFinal = santo.imagen || '';
+        // Si no trae foto, comprobar si el doc existente en Firestore tiene una foto para no perderla
+        if (!imagenFinal || imagenFinal.trim().length === 0) {
+            try {
+                const prev = await getDoc(docRef);
+                if (prev.exists() && prev.data().imagen) {
+                    imagenFinal = prev.data().imagen;
+                }
+            } catch (_) {}
+        }
+
+        await setDoc(docRef, { ...santo, imagen: imagenFinal, ultimaActualizacion: new Date().toISOString() });
         console.log(`☁️ [Firebase] Documento '${docId}' guardado individualmente en Firestore.`);
     },
     eliminarSantoFirestore: async (nombreSanto) => {
@@ -149,20 +206,57 @@ window.firebaseAPI = {
         console.log(`🗑️ [Firebase] Documento '${docId}' eliminado de Firestore.`);
     },
     cargarSantosFirestore: async () => {
-        const querySnapshot = await getDocs(collection(db, "santos"));
-        if (!querySnapshot.empty) {
-            const lista = [];
-            querySnapshot.forEach((doc) => {
-                lista.push(doc.data());
-            });
-            return lista;
+        try {
+            const mapaResult = new Map();
+
+            // 1. Cargar catálogo legado (catalogo/santos) donde residen imágenes originales
+            try {
+                const docRef = doc(db, "catalogo", "santos");
+                const snapshot = await getDoc(docRef);
+                if (snapshot.exists()) {
+                    const legacyList = snapshot.data().lista || [];
+                    legacyList.forEach(s => {
+                        if (s && s.nombre) {
+                            mapaResult.set(s.nombre.toLowerCase().trim(), s);
+                        }
+                    });
+                    console.log(`📦 [Firebase] Cargados ${legacyList.length} santos desde catalogo/santos legado.`);
+                }
+            } catch (errLegacy) {
+                console.warn("⚠️ [Firebase] Aviso al leer catalogo/santos:", errLegacy);
+            }
+
+            // 2. Cargar colección granular (santos) y fusionar preservando todas las fotos
+            try {
+                const querySnapshot = await getDocs(collection(db, "santos"));
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach((d) => {
+                        const s = d.data();
+                        if (!s || !s.nombre) return;
+                        const clave = s.nombre.toLowerCase().trim();
+                        if (!mapaResult.has(clave)) {
+                            mapaResult.set(clave, s);
+                        } else {
+                            const existente = mapaResult.get(clave);
+                            // FUSIONAR: si el nuevo documento en la colección no tiene foto pero el legado sí, preservar foto
+                            const foto = (s.imagen && s.imagen.trim().length > 0) ? s.imagen : (existente.imagen || '');
+                            mapaResult.set(clave, { ...existente, ...s, imagen: foto });
+                        }
+                    });
+                    console.log(`📦 [Firebase] Fusionados con colección 'santos' (${querySnapshot.size} docs). Total combinados: ${mapaResult.size}`);
+                }
+            } catch (errCol) {
+                console.warn("⚠️ [Firebase] Aviso al leer colección santos:", errCol);
+            }
+
+            if (mapaResult.size > 0) {
+                return Array.from(mapaResult.values());
+            }
+            return null;
+        } catch (err) {
+            console.error("❌ [Firebase] Error en cargarSantosFirestore:", err);
+            return null;
         }
-        const docRef = doc(db, "catalogo", "santos");
-        const snapshot = await getDoc(docRef);
-        if (snapshot.exists()) {
-            return snapshot.data().lista || null;
-        }
-        return null;
     },
     // Métodos para sincronizar Asignaciones del Calendario Anual
     guardarAsignacionesFirestore: async (asignaciones) => {

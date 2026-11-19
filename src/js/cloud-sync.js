@@ -121,15 +121,40 @@
                 } catch (_) {}
             }
         }
-        // Guardar lista completa con imágenes en IndexedDB
+        // Guardar lista completa con imágenes en IndexedDB preservando siempre fotos existentes
         if (window.indexedDB) {
             try {
                 const req = indexedDB.open('LH_Santos_DB', 2);
                 req.onsuccess = (e) => {
                     const db = e.target.result;
                     if (db.objectStoreNames.contains('catalogo')) {
-                        const tx = db.transaction('catalogo', 'readwrite');
-                        tx.objectStore('catalogo').put(lista, 'santos');
+                        const txR = db.transaction('catalogo', 'readonly');
+                        const sReq = txR.objectStore('catalogo').get('santos');
+                        sReq.onsuccess = () => {
+                            const existentes = sReq.result || [];
+                            const mapaFotos = new Map();
+                            if (Array.isArray(existentes)) {
+                                existentes.forEach(s => {
+                                    if (s && s.nombre && s.imagen && s.imagen.trim().length > 0) {
+                                        mapaFotos.set(s.nombre.toLowerCase().trim(), s.imagen);
+                                    }
+                                });
+                            }
+                            const listaProtegida = lista.map(s => {
+                                if (!s || !s.nombre) return s;
+                                const clave = s.nombre.toLowerCase().trim();
+                                if ((!s.imagen || s.imagen.trim().length === 0) && mapaFotos.has(clave)) {
+                                    return { ...s, imagen: mapaFotos.get(clave) };
+                                }
+                                return s;
+                            });
+                            const txW = db.transaction('catalogo', 'readwrite');
+                            txW.objectStore('catalogo').put(listaProtegida, 'santos');
+                        };
+                        sReq.onerror = () => {
+                            const txW = db.transaction('catalogo', 'readwrite');
+                            txW.objectStore('catalogo').put(lista, 'santos');
+                        };
                     }
                 };
             } catch (_) {}
@@ -446,20 +471,17 @@
                                 const tLocal = reg.santo.ultimaActualizacion ? new Date(reg.santo.ultimaActualizacion).getTime() : 0;
                                 const cloudTieneFoto = !!(sCloud.imagen && sCloud.imagen.trim().length > 0);
                                 const localTieneFoto = !!(reg.santo.imagen && reg.santo.imagen.trim().length > 0);
+                                const fotoFinal = cloudTieneFoto ? sCloud.imagen : (localTieneFoto ? reg.santo.imagen : '');
 
                                 if ((cloudTieneFoto && !localTieneFoto) || tCloud >= tLocal) {
                                     localSantos[reg.idx] = { 
                                         ...reg.santo, 
                                         ...sCloud, 
-                                        imagen: sCloud.imagen || reg.santo.imagen || '' 
+                                        imagen: fotoFinal
                                     };
                                     actualizadosSantos++;
-                                } else if (localTieneFoto && !cloudTieneFoto) {
-                                    localSantos[reg.idx] = {
-                                        ...sCloud,
-                                        ...reg.santo,
-                                        imagen: reg.santo.imagen
-                                    };
+                                } else if (localTieneFoto) {
+                                    localSantos[reg.idx].imagen = reg.santo.imagen;
                                 }
                             }
                         });

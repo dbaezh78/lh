@@ -272,6 +272,9 @@
                     <button type="button" id="btn-sincronizar-firebase" class="btn-auth-action" onclick="subirCatalogoAFirebaseDirecto()" title="Subir catálogo completo a la base de datos de Firebase">
                         ☁️ Sincronizar / Subir a Firebase
                     </button>
+                    <button type="button" id="btn-descargar-firebase" class="btn-auth-action" style="background: #e3f2fd; color: #0277bd; border-color: #81d4fa;" onclick="restaurarFotosYDatosDeFirebase()" title="Descargar y restaurar todas las fotos y datos desde Firebase Cloud">
+                        🔄 Restaurar Fotos de Firebase
+                    </button>
                 </div>
                 <div class="admin-bar" style="margin-bottom: 0;">
                     <div class="auth-badge-container" id="auth-status-container-ns">
@@ -515,12 +518,18 @@
             });
         }
 
+        // ==========================================
+        // BÓVEDA PERMANENTE DE FOTOS (Memoria + IndexedDB)
+        // Garantiza que las imágenes de los santos NUNCA se pierdan ni se borren por límites de LocalStorage
+        // ==========================================
+        const bovedaFotos = new Map();
+
         async function guardarEnIndexedDB(lista) {
             try {
                 const db = await abrirIndexedDB();
                 if (!db || !db.objectStoreNames.contains(IDB_STORE)) return false;
 
-                // Proteger contra pérdida de imágenes: preservar fotos existentes en IndexedDB si la lista trae campos vacíos
+                // 1. Proteger contra pérdida de imágenes: preservar fotos existentes en IndexedDB y en la bóveda
                 let listaAGuardar = lista;
                 try {
                     const existentes = await new Promise(res => {
@@ -530,22 +539,26 @@
                         reqR.onerror = () => res([]);
                     });
                     if (Array.isArray(existentes) && existentes.length > 0) {
-                        const mapaFotos = new Map();
                         existentes.forEach(s => {
                             if (s && s.nombre && s.imagen && s.imagen.trim().length > 0) {
-                                mapaFotos.set(s.nombre.toLowerCase().trim(), s.imagen);
+                                const clave = s.nombre.toLowerCase().trim();
+                                bovedaFotos.set(clave, s.imagen);
                             }
                         });
-                        if (mapaFotos.size > 0) {
-                            listaAGuardar = lista.map(s => {
-                                if (!s || !s.nombre) return s;
-                                const clave = s.nombre.toLowerCase().trim();
-                                if ((!s.imagen || s.imagen.trim().length === 0) && mapaFotos.has(clave)) {
-                                    return { ...s, imagen: mapaFotos.get(clave) };
-                                }
+                    }
+                    if (bovedaFotos.size > 0) {
+                        listaAGuardar = lista.map(s => {
+                            if (!s || !s.nombre) return s;
+                            const clave = s.nombre.toLowerCase().trim();
+                            if (s.imagen && s.imagen.trim().length > 0) {
+                                bovedaFotos.set(clave, s.imagen);
                                 return s;
-                            });
-                        }
+                            }
+                            if (bovedaFotos.has(clave)) {
+                                return { ...s, imagen: bovedaFotos.get(clave) };
+                            }
+                            return s;
+                        });
                     }
                 } catch (_) {}
 
@@ -730,6 +743,76 @@
             } catch (err) {
                 alert("⚠️ Error al subir a Firebase: " + (err.message || err));
                 console.error("Firestore Upload Error:", err);
+            }
+        };
+
+        window.restaurarFotosYDatosDeFirebase = async function() {
+            if (!window.firebaseAPI || !window.firebaseAPI.cargarSantosFirestore) {
+                alert("⚠️ Firebase aún no ha cargado los módulos. Reintenta en unos segundos.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-descargar-firebase');
+            const textoOriginal = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '⏳ Descargando fotos...';
+                btn.disabled = true;
+            }
+
+            try {
+                console.log("🔄 [RestaurarFotos] Descargando catálogo y fotos desde Firebase Firestore...");
+                const santosRemotos = await window.firebaseAPI.cargarSantosFirestore();
+                if (!santosRemotos || !Array.isArray(santosRemotos) || santosRemotos.length === 0) {
+                    alert("⚠️ No se encontraron registros de santos en Firebase Cloud.");
+                    return;
+                }
+
+                let fotosRestauradas = 0;
+                const localMap = new Map();
+                santosMemoria.forEach((s, idx) => {
+                    if (s && s.nombre) localMap.set(s.nombre.toLowerCase().trim(), idx);
+                });
+
+                santosRemotos.forEach(sRemoto => {
+                    if (!sRemoto || !sRemoto.nombre) return;
+                    const clave = sRemoto.nombre.toLowerCase().trim();
+                    const tieneFotoRemota = !!(sRemoto.imagen && sRemoto.imagen.trim().length > 0);
+
+                    if (tieneFotoRemota) {
+                        bovedaFotos.set(clave, sRemoto.imagen);
+                    }
+
+                    if (localMap.has(clave)) {
+                        const idx = localMap.get(clave);
+                        const sLocal = santosMemoria[idx];
+                        const fotoFinal = tieneFotoRemota 
+                            ? sRemoto.imagen 
+                            : (sLocal.imagen || bovedaFotos.get(clave) || '');
+
+                        santosMemoria[idx] = {
+                            ...sLocal,
+                            ...sRemoto,
+                            imagen: fotoFinal
+                        };
+                        if (tieneFotoRemota) fotosRestauradas++;
+                    } else {
+                        santosMemoria.push(sRemoto);
+                        localMap.set(clave, santosMemoria.length - 1);
+                        if (tieneFotoRemota) fotosRestauradas++;
+                    }
+                });
+
+                guardarSantosLocal(santosMemoria);
+                renderTablaRegistrados();
+                alert(`🎉 ¡Restauración exitosa! Se han sincronizado y asegurado ${fotosRestauradas} fotos de santos desde Firebase.`);
+            } catch (err) {
+                console.error("❌ Error al restaurar desde Firebase:", err);
+                alert("❌ Error al restaurar fotos desde Firebase: " + (err.message || err));
+            } finally {
+                if (btn) {
+                    btn.innerHTML = textoOriginal;
+                    btn.disabled = false;
+                }
             }
         };
 
@@ -1008,7 +1091,13 @@
             if (santosIDB && Array.isArray(santosIDB) && santosIDB.length > 0) {
                 const mapaIDB = new Map();
                 santosIDB.forEach(s => {
-                    if (s && s.nombre) mapaIDB.set(s.nombre.toLowerCase().trim(), s);
+                    if (s && s.nombre) {
+                        const clave = s.nombre.toLowerCase().trim();
+                        mapaIDB.set(clave, s);
+                        if (s.imagen && s.imagen.trim().length > 0) {
+                            bovedaFotos.set(clave, s.imagen);
+                        }
+                    }
                 });
 
                 let fotosRecuperadas = 0;
@@ -1020,6 +1109,9 @@
                             santosMemoria[idx] = { ...sLocal, imagen: sIDB.imagen };
                             fotosRecuperadas++;
                         }
+                    } else if (bovedaFotos.has(clave) && (!sLocal.imagen || sLocal.imagen.trim().length === 0)) {
+                        santosMemoria[idx] = { ...sLocal, imagen: bovedaFotos.get(clave) };
+                        fotosRecuperadas++;
                     }
                 });
 
@@ -1396,6 +1488,13 @@
                                         const localSanto = santosMemoria[idx];
                                         const remotoTieneFoto = !!(s.imagen && s.imagen.trim().length > 0);
                                         const localTieneFoto = !!(localSanto.imagen && localSanto.imagen.trim().length > 0);
+                                        const bovedaTieneFoto = bovedaFotos.has(clave);
+                                        const fotoFinal = remotoTieneFoto ? s.imagen : (localTieneFoto ? localSanto.imagen : (bovedaTieneFoto ? bovedaFotos.get(clave) : ''));
+
+                                        if (fotoFinal) {
+                                            bovedaFotos.set(clave, fotoFinal);
+                                        }
+
                                         const tRemoto = s.ultimaActualizacion ? new Date(s.ultimaActualizacion).getTime() : 0;
                                         const tLocal = localSanto.ultimaActualizacion ? new Date(localSanto.ultimaActualizacion).getTime() : 0;
 
@@ -1403,11 +1502,14 @@
                                             santosMemoria[idx] = { 
                                                 ...localSanto, 
                                                 ...s,
-                                                imagen: s.imagen || localSanto.imagen || ''
+                                                imagen: fotoFinal
                                             };
                                             cambios = true;
-                                        } else if (localTieneFoto && !remotoTieneFoto) {
-                                            santosMemoria[idx].imagen = localSanto.imagen;
+                                        } else {
+                                            santosMemoria[idx] = {
+                                                ...localSanto,
+                                                imagen: fotoFinal
+                                            };
                                         }
                                     }
                                 }
@@ -2470,9 +2572,18 @@
                     accionesHtml = '<span style="color:#b0bec5; font-size:0.8rem;">Sin permiso eliminar</span>';
                 }
 
+                let fotoActiva = (s.imagen && s.imagen.trim().length > 0) ? s.imagen.trim() : '';
+                if (!fotoActiva && s.nombre) {
+                    const claveFoto = s.nombre.toLowerCase().trim();
+                    if (bovedaFotos.has(claveFoto)) {
+                        fotoActiva = bovedaFotos.get(claveFoto);
+                        s.imagen = fotoActiva;
+                    }
+                }
+
                 let imgHtml = '';
-                if (s.imagen && s.imagen.trim().length > 0) {
-                    let srcImg = s.imagen.trim();
+                if (fotoActiva.length > 0) {
+                    let srcImg = fotoActiva;
                     if (srcImg.startsWith('src/img/')) {
                         srcImg = '../img/' + srcImg.substring(8);
                     }
@@ -3409,9 +3520,10 @@
             document.getElementById('historia').value = s.historia || '';
             document.getElementById('detalle').value = s.detalle || '';
 
-            if (s.imagen) {
-                imgBase64Input.value = s.imagen;
-                imgPreview.src = s.imagen;
+            const fotoEditar = s.imagen || (s.nombre ? bovedaFotos.get(s.nombre.toLowerCase().trim()) : '') || '';
+            if (fotoEditar) {
+                imgBase64Input.value = fotoEditar;
+                imgPreview.src = fotoEditar;
                 previewContainer.style.display = 'flex';
                 pasteZone.style.display = 'none';
             } else {
@@ -3530,6 +3642,12 @@
             const rawCelebracion = getVal('celebracion');
             const fechaCelebracionFinal = formatearCelebracionMostrar(rawCelebracion);
 
+            let fotoSantoForm = (imgBase64Input ? imgBase64Input.value : '') || '';
+            const claveSantoSubmit = nombre.toLowerCase().trim();
+            if (fotoSantoForm) {
+                bovedaFotos.set(claveSantoSubmit, fotoSantoForm);
+            }
+
             const nuevoSanto = {
                 nombre: nombre,
                 nacimiento: getVal('nacimiento'),
@@ -3541,7 +3659,7 @@
                 realidad: getVal('realidad'),
                 historia: getVal('historia'),
                 detalle: getVal('detalle'),
-                imagen: (imgBase64Input ? imgBase64Input.value : '') || '',
+                imagen: fotoSantoForm,
                 hijos: hijos
             };
 
@@ -3572,6 +3690,13 @@
                 if (santoAnterior && santoAnterior.audios && !nuevoSanto.audios) {
                     nuevoSanto.audios = santoAnterior.audios;
                     nuevoSanto.audioBasePath = santoAnterior.audioBasePath;
+                }
+                // Si no se modificó la foto durante la edición, preservar la foto anterior
+                if (!nuevoSanto.imagen && santoAnterior && santoAnterior.imagen && previewContainer.style.display !== 'none') {
+                    nuevoSanto.imagen = santoAnterior.imagen;
+                    bovedaFotos.set(claveSantoSubmit, nuevoSanto.imagen);
+                } else if (!nuevoSanto.imagen && bovedaFotos.has(claveSantoSubmit) && previewContainer.style.display !== 'none') {
+                    nuevoSanto.imagen = bovedaFotos.get(claveSantoSubmit);
                 }
                 const nombreViejo = santoAnterior ? santoAnterior.nombre : '';
                 if (nombreViejo && nombreViejo.toLowerCase().trim() !== nuevoSanto.nombre.toLowerCase().trim()) {
@@ -3645,7 +3770,7 @@
                 ? s.hijos.filter(h => h && typeof h === 'string' && h.trim().length > 0 && h.trim() !== '—')
                 : [];
 
-            let srcModal = (s.imagen || '').trim();
+            let srcModal = (s.imagen || (s.nombre ? bovedaFotos.get(s.nombre.toLowerCase().trim()) : '') || '').trim();
             if (srcModal.startsWith('src/img/')) {
                 srcModal = '../img/' + srcModal.substring(8);
             }
