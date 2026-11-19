@@ -14,6 +14,7 @@ import {
 import { 
     getFirestore,
     initializeFirestore,
+    setLogLevel,
     collection,
     doc,
     setDoc,
@@ -32,6 +33,11 @@ const firebaseConfig = {
     messagingSenderId: "555982117149",
     appId: "1:555982117149:web:216aa062e2f6ed41d729f4"
 };
+
+// Silenciar advertencias ruidosas de conexión lenta (10s timeout / offline mode) del SDK
+try {
+    setLogLevel('error');
+} catch (_) {}
 
 // Inicializar instancia de Firebase
 export const app = initializeApp(firebaseConfig);
