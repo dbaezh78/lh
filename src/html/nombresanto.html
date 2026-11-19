@@ -761,7 +761,9 @@
 
             try {
                 console.log("🔄 [RestaurarFotos] Descargando catálogo y fotos desde Firebase Firestore...");
-                const santosRemotos = await window.firebaseAPI.cargarSantosFirestore();
+                const santosRemotos = (window.firebaseAPI && window.firebaseAPI.cargarSantosFirestoreREST)
+                    ? await window.firebaseAPI.cargarSantosFirestoreREST()
+                    : await window.firebaseAPI.cargarSantosFirestore();
                 if (!santosRemotos || !Array.isArray(santosRemotos) || santosRemotos.length === 0) {
                     alert("⚠️ No se encontraron registros de santos en Firebase Cloud.");
                     return;
@@ -1127,6 +1129,42 @@
                 renderTablaRegistrados();
             }
         });
+
+        // Autocarga y reparación garantizada de fotos vía REST API directa
+        // (Funciona incluso si el SDK de Firebase entra en modo 'offline' o arroja 'failed to get document')
+        setTimeout(async () => {
+            const fb = window.firebaseAPI;
+            if (fb && fb.cargarSantosFirestoreREST) {
+                try {
+                    const remotos = await fb.cargarSantosFirestoreREST();
+                    if (Array.isArray(remotos) && remotos.length > 0) {
+                        let fotosCargadas = 0;
+                        remotos.forEach(s => {
+                            if (s && s.nombre && s.imagen && s.imagen.trim().length > 0) {
+                                const clave = s.nombre.toLowerCase().trim();
+                                bovedaFotos.set(clave, s.imagen);
+                                fotosCargadas++;
+                            }
+                        });
+                        let recuperados = 0;
+                        santosMemoria.forEach((sLocal, idx) => {
+                            const clave = (sLocal.nombre || '').toLowerCase().trim();
+                            if ((!sLocal.imagen || sLocal.imagen.trim().length === 0) && bovedaFotos.has(clave)) {
+                                santosMemoria[idx] = { ...sLocal, imagen: bovedaFotos.get(clave) };
+                                recuperados++;
+                            }
+                        });
+                        if (recuperados > 0) {
+                            guardarSantosLocal(santosMemoria);
+                            renderTablaRegistrados();
+                            console.log(`🎉 [Autocarga REST] ¡${recuperados} fotos de santos restauradas automáticamente desde Firebase REST!`);
+                        }
+                    }
+                } catch (eRest) {
+                    console.warn("Aviso en autocarga REST:", eRest);
+                }
+            }
+        }, 500);
 
         window.eliminarFila = function(btn) {
             const tbody = document.getElementById('tbody-hijos');

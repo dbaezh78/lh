@@ -205,6 +205,82 @@ window.firebaseAPI = {
         await deleteDoc(docRef);
         console.log(`🗑️ [Firebase] Documento '${docId}' eliminado de Firestore.`);
     },
+    cargarSantosFirestoreREST: async () => {
+        try {
+            console.log("🌐 [Firebase REST] Descargando directamente vía HTTPS REST API...");
+            const parseVal = (v) => {
+                if (!v) return null;
+                if (v.stringValue !== undefined) return v.stringValue;
+                if (v.integerValue !== undefined) return parseInt(v.integerValue, 10);
+                if (v.doubleValue !== undefined) return parseFloat(v.doubleValue);
+                if (v.booleanValue !== undefined) return v.booleanValue;
+                if (v.timestampValue !== undefined) return v.timestampValue;
+                if (v.arrayValue) return (v.arrayValue.values || []).map(parseVal);
+                if (v.mapValue) {
+                    const res = {};
+                    const f = v.mapValue.fields || {};
+                    for (const k in f) res[k] = parseVal(f[k]);
+                    return res;
+                }
+                return null;
+            };
+            const parseDoc = (d) => {
+                const res = {};
+                const f = d.fields || {};
+                for (const k in f) res[k] = parseVal(f[k]);
+                return res;
+            };
+
+            const mapa = new Map();
+
+            // 1. Catálogo legado (catalogo/santos) donde residen 19 fotos originales
+            try {
+                const resLegacy = await fetch('https://firestore.googleapis.com/v1/projects/liturgia-de-la-hora/databases/(default)/documents/catalogo/santos');
+                if (resLegacy.ok) {
+                    const dLegacy = await resLegacy.json();
+                    const objLegacy = parseDoc(dLegacy);
+                    const legList = objLegacy.lista || [];
+                    legList.forEach(s => {
+                        if (s && s.nombre) mapa.set(s.nombre.toLowerCase().trim(), s);
+                    });
+                    console.log(`🌐 [Firebase REST] ${legList.length} santos leídos de catalogo/santos.`);
+                }
+            } catch (e1) {
+                console.warn("Aviso REST catalogo/santos:", e1);
+            }
+
+            // 2. Colección granular de santos (198 documentos)
+            try {
+                const resCol = await fetch('https://firestore.googleapis.com/v1/projects/liturgia-de-la-hora/databases/(default)/documents/santos?pageSize=300');
+                if (resCol.ok) {
+                    const dCol = await resCol.json();
+                    const docs = (dCol.documents || []).map(parseDoc);
+                    docs.forEach(s => {
+                        if (!s || !s.nombre) return;
+                        const clave = s.nombre.toLowerCase().trim();
+                        if (!mapa.has(clave)) {
+                            mapa.set(clave, s);
+                        } else {
+                            const exist = mapa.get(clave);
+                            const foto = (s.imagen && s.imagen.trim().length > 0) ? s.imagen : (exist.imagen || '');
+                            mapa.set(clave, { ...exist, ...s, imagen: foto });
+                        }
+                    });
+                    console.log(`🌐 [Firebase REST] ${docs.length} documentos leídos de colección santos.`);
+                }
+            } catch (e2) {
+                console.warn("Aviso REST santos:", e2);
+            }
+
+            if (mapa.size > 0) {
+                console.log(`🎉 [Firebase REST] Total unificados exitosamente: ${mapa.size} santos con fotos.`);
+                return Array.from(mapa.values());
+            }
+        } catch (eRest) {
+            console.error("❌ [Firebase REST] Error en fallback REST:", eRest);
+        }
+        return null;
+    },
     cargarSantosFirestore: async () => {
         try {
             const mapaResult = new Map();
@@ -252,10 +328,13 @@ window.firebaseAPI = {
             if (mapaResult.size > 0) {
                 return Array.from(mapaResult.values());
             }
-            return null;
+            
+            // Si el SDK falló por 'client is offline' o timeout, usar el fallback REST instantáneo
+            console.log("ℹ️ [Firebase] Activando fallback REST por indisponibilidad del SDK...");
+            return await window.firebaseAPI.cargarSantosFirestoreREST();
         } catch (err) {
-            console.error("❌ [Firebase] Error en cargarSantosFirestore:", err);
-            return null;
+            console.warn("⚠️ [Firebase] SDK no disponible, recurriendo a REST:", err);
+            return await window.firebaseAPI.cargarSantosFirestoreREST();
         }
     },
     // Métodos para sincronizar Asignaciones del Calendario Anual
