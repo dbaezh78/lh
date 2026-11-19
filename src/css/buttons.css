@@ -539,3 +539,234 @@
 @media (max-width: 384px) {
         .btn-pill {width: 40%;}
 }
+
+
+/* =========================================================================
+   MODAL DE DETALLE DEL SANTO (VIDA / HISTORIA / AUDIOS)
+   ========================================================================= */
+.modal-overlay-santo {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    box-sizing: border-box;
+    backdrop-filter: blur(2px);
+}
+
+.modal-content-santo {
+    background: #ffffff;
+    border-radius: 14px;
+    max-width: 760px;
+    width: 95%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 22px 24px;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.28);
+    position: relative;
+    box-sizing: border-box;
+    animation: fadeInModalSanto 0.22s ease-out;
+}
+
+@keyframes fadeInModalSanto {
+    from { opacity: 0; transform: scale(0.96) translateY(-8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-santo-header {
+    position: relative;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 2px solid #e1f5fe;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modal-santo-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.modal-santo-header h2 {
+    margin: 0;
+    color: #0277bd;
+    font-size: 1.3rem;
+    flex: 1;
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+.modal-santo-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.modal-close-santo {
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: #78909c;
+    line-height: 1;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, transform 0.15s;
+    border: none;
+    background: transparent;
+}
+
+.modal-close-santo:hover {
+    color: #37474f;
+    transform: scale(1.15);
+}
+
+.btn-nav-arrow {
+    background: transparent;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    color: #455a64;
+    cursor: pointer;
+    padding: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.btn-nav-arrow:hover {
+    background: #eceff1;
+}
+
+.btn-tts-santo {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #0277bd;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s, color 0.2s, background-color 0.2s;
+    line-height: 1;
+    position: relative;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.btn-tts-santo:hover {
+    background-color: #e1f5fe;
+    transform: scale(1.08);
+}
+
+.btn-tts-santo.speaking {
+    color: #d32f2f;
+    background-color: #ffebee;
+}
+
+.btn-modal-pencil,
+.btn-modal-download {
+    color: #0277bd;
+}
+
+.btn-modal-download:hover {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.btn-tts-santo.cargando-tts .material-symbols-outlined {
+    animation: pulso-carga-santo 0.8s ease-in-out infinite;
+}
+
+@keyframes pulso-carga-santo {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.18); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+@keyframes pulso-voz-santo {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.22); }
+    100% { transform: scale(1); }
+}
+
+/* Anillo Circular TTS */
+.tts-circular-ring {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.tts-circular-bg {
+    fill: none;
+    stroke: #e1f5fe;
+    stroke-width: 3.2px;
+}
+
+.tts-circular-bar {
+    fill: none;
+    stroke: #0288d1;
+    stroke-width: 3.2px;
+    stroke-linecap: round;
+    stroke-dasharray: 109.96;
+    stroke-dashoffset: 109.96;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 0.05s linear;
+}
+
+/* Barra de Progreso de Lectura / Audio */
+.speech-progress-track {
+    width: 100%;
+    height: 7px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: visible;
+    cursor: pointer;
+    position: relative;
+    margin-top: 6px;
+}
+
+.speech-progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: #10b981;
+    border-radius: 4px;
+    position: relative;
+    transition: width 0.08s linear;
+}
+
+.speech-progress-thumb {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background-color: #047857;
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+
+.tag-hijo {
+    display: inline-block;
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin: 2px 4px 2px 0;
+}

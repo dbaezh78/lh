@@ -433,6 +433,9 @@
                         </svg>
                         <span class="material-symbols-outlined" id="icono-leer-voz">play_arrow</span>
                     </button>
+                    <button type="button" id="btn-descargar-audio-santo" class="btn-tts-santo btn-modal-download" onclick="window.descargarAudioSantoActual()" title="Descargar audio de la vida/historia del santo (santo.mp3)" aria-label="Descargar audio">
+                        <span class="material-symbols-outlined">download</span>
+                    </button>
                     <button type="button" id="btn-modal-editar-santo" class="btn-tts-santo btn-modal-pencil" onclick="editarSantoDesdeModal()" title="Editar este santo" aria-label="Editar">
                         <span class="material-symbols-outlined">edit</span>
                     </button>
@@ -454,8 +457,10 @@
 
     <script src="../js/accesscontrol.js" type="module"></script>
     <script src="../js/navigator.js" type="module"></script>
-    <script src="../js/tts-santo.js?v=1789427000" type="module"></script>
-    <script src="../js/nombresanto.js?v=1790603500" type="module"></script>
+    <script src="../data/santosCarpetas.js?v=1.0.02" type="module"></script>
+    <script src="../js/dbaudiodescarga.js?v=1.0.10" type="module"></script>
+    <script src="../js/tts-santo.js?v=1.0.10" type="module"></script>
+    <script src="../js/nombresanto.js?v=1.0.10" type="module"></script>
     <script type="module">
         import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
         import { SANTOS_CARPETAS_GITHUB } from '../data/santosCarpetas.js';
@@ -514,11 +519,41 @@
             try {
                 const db = await abrirIndexedDB();
                 if (!db || !db.objectStoreNames.contains(IDB_STORE)) return false;
+
+                // Proteger contra pérdida de imágenes: preservar fotos existentes en IndexedDB si la lista trae campos vacíos
+                let listaAGuardar = lista;
+                try {
+                    const existentes = await new Promise(res => {
+                        const txR = db.transaction(IDB_STORE, 'readonly');
+                        const reqR = txR.objectStore(IDB_STORE).get('santos');
+                        reqR.onsuccess = () => res(reqR.result || []);
+                        reqR.onerror = () => res([]);
+                    });
+                    if (Array.isArray(existentes) && existentes.length > 0) {
+                        const mapaFotos = new Map();
+                        existentes.forEach(s => {
+                            if (s && s.nombre && s.imagen && s.imagen.trim().length > 0) {
+                                mapaFotos.set(s.nombre.toLowerCase().trim(), s.imagen);
+                            }
+                        });
+                        if (mapaFotos.size > 0) {
+                            listaAGuardar = lista.map(s => {
+                                if (!s || !s.nombre) return s;
+                                const clave = s.nombre.toLowerCase().trim();
+                                if ((!s.imagen || s.imagen.trim().length === 0) && mapaFotos.has(clave)) {
+                                    return { ...s, imagen: mapaFotos.get(clave) };
+                                }
+                                return s;
+                            });
+                        }
+                    }
+                } catch (_) {}
+
                 return new Promise((resolve) => {
                     try {
                         const tx = db.transaction(IDB_STORE, 'readwrite');
                         const store = tx.objectStore(IDB_STORE);
-                        store.put(lista, 'santos');
+                        store.put(listaAGuardar, 'santos');
                         tx.oncomplete = () => resolve(true);
                         tx.onerror = () => resolve(false);
                     } catch (_) {
@@ -1379,9 +1414,11 @@
                                 if (cambios) {
                                     guardarSantosLocal(santosMemoria);
                                     console.log(`☁️ [Firestore] Catálogo e imágenes actualizados (${santosMemoria.length} santos).`);
-                                    actualizarTotalSantos();
-                                    renderTablaRegistrados();
                                 }
+                                if (typeof window.actualizarContadorNavegacion === 'function') {
+                                    window.actualizarContadorNavegacion();
+                                }
+                                renderTablaRegistrados();
                             }
                         } catch (err) {
                             console.warn("⚠️ No se pudo descargar desde Cloud Firestore (usando copia local):", err);
@@ -2435,9 +2472,14 @@
 
                 let imgHtml = '';
                 if (s.imagen && s.imagen.trim().length > 0) {
-                    imgHtml = `<img src="${s.imagen}" class="img-avatar-tabla" alt="${s.nombre}" title="${s.nombre}">`;
+                    let srcImg = s.imagen.trim();
+                    if (srcImg.startsWith('src/img/')) {
+                        srcImg = '../img/' + srcImg.substring(8);
+                    }
+                    const nomEsc = (s.nombre || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    imgHtml = `<img src="${srcImg}" class="img-avatar-tabla" loading="lazy" decoding="async" alt="${nomEsc}" title="${nomEsc}" onclick="verDetalleSanto(${idx})" onerror="this.onerror=null; this.outerHTML='<span class=\\'material-symbols-outlined icon-avatar-sin-foto\\' title=\\'Buscar imagen de ${nomEsc} en Google\\' onclick=\\'buscarOVerImagenSanto(${idx}, event)\\'>account_circle</span>';">`;
                 } else {
-                    imgHtml = `<span class="material-symbols-outlined icon-avatar-sin-foto" title="Buscar imagen de ${s.nombre} en Google" onclick="buscarOVerImagenSanto(${idx}, event)">account_circle</span>`;
+                    imgHtml = `<span class="material-symbols-outlined icon-avatar-sin-foto" title="Buscar imagen de ${(s.nombre || '').replace(/"/g, '&quot;')} en Google" onclick="buscarOVerImagenSanto(${idx}, event)">account_circle</span>`;
                 }
 
                 const fechaCelebracion = s.celebracion || s.fechaFestividad || '';
@@ -3603,8 +3645,13 @@
                 ? s.hijos.filter(h => h && typeof h === 'string' && h.trim().length > 0 && h.trim() !== '—')
                 : [];
 
-            const imgModal = s.imagen 
-                ? `<div style="text-align:center; margin-bottom:12px;"><img src="${s.imagen}" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${s.nombre}"></div>` 
+            let srcModal = (s.imagen || '').trim();
+            if (srcModal.startsWith('src/img/')) {
+                srcModal = '../img/' + srcModal.substring(8);
+            }
+            const nomModalEsc = (s.nombre || '').replace(/"/g, '&quot;');
+            const imgModal = srcModal 
+                ? `<div style="text-align:center; margin-bottom:12px;"><img src="${srcModal}" loading="lazy" decoding="async" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${nomModalEsc}"></div>` 
                 : '';
 
             const ocultas = (window.columnasOcultas instanceof Set) 

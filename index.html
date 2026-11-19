@@ -4,40 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liturgia de las Horas</title>
-    <LINK rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
+    <link rel="icon" href="src/img/ico-laudes.ico" type="image/x-icon">
 
     <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- Material Symbols (local) -->
-    <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/main.css?v=1.0.02">
 
     <!-- Sistema de Botones Unificado -->
-    <link rel="stylesheet" href="src/css/buttons.css?v=1790602400">
+    <link rel="stylesheet" href="src/css/buttons.css?v=1.0.17">
 </head>
 <body>
 
-    <!--
-    
-    <script>
-        // Verificamos si el usuario está entrando estrictamente por el subdominio deseado
-        if (window.location.hostname === "lh.resucito.do") {
-            // Si viene de ahí, redirige a los salterios
-            window.location.replace("https://dbaezh78.github.io/salterios/");
-        } else {
-            // Si entra por otro lado (ej. la URL de GitHub Pages directa), muestra mantenimiento
-            document.write("<h1>Sitio en mantenimiento</h1><p>Estamos trabajando en esta sección. Por favor, vuelva más tarde.</p>");
-        }
-    </script>
-    -->
-    
     <div id="app"></div>
 
-    <script src="src/js/tts-santo.js?v=1790602400" type="module"></script>
-    <script src="src/js/main.js?v=1790602400" type="module"></script>
-    <script src="src/js/navigator.js" type="module"></script>
+    <!-- Modal Lectura Detalle del Santo (Vida / Historia) -->
+    <div class="modal-overlay-santo" id="modal-detalle-santo" onclick="if(event.target===this) window.cerrarModalDetalleSanto()">
+        <div class="modal-content-santo">
+            <div class="modal-santo-header">
+                <div class="modal-santo-header-top">
+                    <h2 id="modal-santo-nombre"></h2>
+                    <div class="modal-santo-header-actions">
+                        <div class="modal-santo-nav" style="display: inline-flex; align-items: center; gap: 4px; margin-right: 4px;">
+                            <button type="button" id="btn-modal-prev" class="btn-nav-arrow" onclick="window.navegarSantoAnterior()" title="Santo anterior">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                            </button>
+                            <span id="modal-santo-contador" style="font-size: 0.82rem; font-weight: 700; color: #546e7a; min-width: 65px; text-align: center; user-select: none;">1 de 1</span>
+                            <button type="button" id="btn-modal-next" class="btn-nav-arrow" onclick="window.navegarSantoSiguiente()" title="Santo siguiente">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                            </button>
+                        </div>
+                        <button type="button" id="btn-leer-voz-santo" class="btn-tts-santo" onclick="window.toggleLeerSantoVoz()" title="Reproducir lectura / audio">
+                            <svg class="tts-circular-ring" viewBox="0 0 42 42">
+                                <circle class="tts-circular-bg" cx="21" cy="21" r="17.5"></circle>
+                                <circle class="tts-circular-bar" id="tts-circular-bar" cx="21" cy="21" r="17.5"></circle>
+                            </svg>
+                            <span class="material-symbols-outlined" id="icono-leer-voz">play_arrow</span>
+                        </button>
+                        <button type="button" id="btn-descargar-audio-santo" class="btn-tts-santo btn-modal-download" onclick="window.descargarAudioSantoActual()" title="Descargar audio de la vida/historia del santo (santo.mp3)">
+                            <span class="material-symbols-outlined">download</span>
+                        </button>
+                        <button type="button" id="btn-modal-editar-santo" class="btn-tts-santo btn-modal-pencil" onclick="window.editarSantoDesdeModal()" title="Editar este santo" aria-label="Editar">
+                            <span class="material-symbols-outlined">edit</span>
+                        </button>
+                        <span class="modal-close-santo" onclick="window.cerrarModalDetalleSanto()" title="Cerrar">&times;</span>
+                    </div>
+                </div>
+                <!-- Barra Interactiva de Progreso de Lectura -->
+                <div id="santo-speech-progress-track" class="speech-progress-track" title="Haz clic o arrastra para adelantar o retroceder la lectura">
+                    <div id="santo-speech-progress-bar" class="speech-progress-bar">
+                        <div id="santo-speech-progress-thumb" class="speech-progress-thumb"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="modal-santo-cuerpo" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.93rem; color: #37474f;"></div>
+        </div>
+    </div>
+
+    <script src="src/data/santosCarpetas.js?v=1.0.02" type="module"></script>
+    <script src="src/js/dbaudiodescarga.js?v=1.0.10" type="module"></script>
+    <script src="src/js/tts-santo.js?v=1.0.10" type="module"></script>
+    <script src="src/js/main.js?v=1.0.10" type="module"></script>
+    <script src="src/js/navigator.js"></script>
 </body>
 </html>
-
-
-

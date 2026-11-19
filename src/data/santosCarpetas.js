@@ -1116,3 +1116,69 @@ export const SANTOS_CARPETAS_GITHUB = [
         "hasLecs": true
     }
 ];
+
+export function autodetectarCarpetaSanto(nombreSanto, fechaCelebracion) {
+    const MESES_NOMBRES_AUDIO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const fechaStr = (fechaCelebracion || '').trim();
+    const partes = fechaStr.match(/(\d+)\/(\d+)/);
+    if (!partes) return null;
+    const diaNum = parseInt(partes[1], 10);
+    const mesNum = parseInt(partes[2], 10);
+    if (mesNum < 1 || mesNum > 12) return null;
+
+    const mesNombre = MESES_NOMBRES_AUDIO[mesNum - 1];
+
+    // 1. Buscar en las carpetas existentes de santos.resucito.do
+    const carpetas = (typeof window !== 'undefined' && window.SANTOS_CARPETAS_GITHUB) ? window.SANTOS_CARPETAS_GITHUB : SANTOS_CARPETAS_GITHUB;
+    if (Array.isArray(carpetas)) {
+        const coincidenciasFecha = carpetas.filter(f => f.mesNum === mesNum && f.dia === diaNum);
+        if (coincidenciasFecha.length === 1) {
+            const match = coincidenciasFecha[0];
+            return {
+                folder: match.folder,
+                subRuta: match.subRuta,
+                basePath: `https://santos.resucito.do/${encodeURI(match.subRuta)}/`,
+                origen: 'santos_carpetas'
+            };
+        }
+        if (coincidenciasFecha.length > 1) {
+            const cleanStr = str => (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, ' ');
+            const palabrasSanto = cleanStr(nombreSanto).split(/\s+/).filter(w => w.length > 3 && w !== 'santa' && w !== 'santo' && w !== 'virgen');
+            let mejorMatch = coincidenciasFecha[0];
+            let maxPuntos = -1;
+            coincidenciasFecha.forEach(f => {
+                const fWords = cleanStr(f.folder).split(/\s+/);
+                let puntos = 0;
+                fWords.forEach(fw => {
+                    if (palabrasSanto.some(sw => sw.includes(fw) || fw.includes(sw))) puntos++;
+                });
+                if (puntos > maxPuntos) {
+                    maxPuntos = puntos;
+                    mejorMatch = f;
+                }
+            });
+            return {
+                folder: mejorMatch.folder,
+                subRuta: mejorMatch.subRuta,
+                basePath: `https://santos.resucito.do/${encodeURI(mejorMatch.subRuta)}/`,
+                origen: 'santos_carpetas'
+            };
+        }
+    }
+
+    // 2. Ruta canónica estándar si no tiene carpeta física aún
+    const slugMayus = (nombreSanto || 'SANTO').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const folderEst = `${String(diaNum).padStart(2, '0')}-${slugMayus}`;
+    const subRutaEst = `${mesNombre}/${folderEst}`;
+    return {
+        folder: folderEst,
+        subRuta: subRutaEst,
+        basePath: `https://santos.resucito.do/${encodeURI(subRutaEst)}/`,
+        origen: 'estandar'
+    };
+}
+
+if (typeof window !== 'undefined') {
+    window.SANTOS_CARPETAS_GITHUB = SANTOS_CARPETAS_GITHUB;
+    window.autodetectarCarpetaSanto = autodetectarCarpetaSanto;
+}

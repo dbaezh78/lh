@@ -1877,6 +1877,22 @@ export const catalogoSantosAnual = [
         ]
     },
     {
+        "fechaFestividad": "19/11",
+        "nombre": "Santa María Virgen, Madre de la Divina Providencia",
+        "nacimiento": "01/01/0001",
+        "muerte": "—",
+        "pais": "Israel,Palestina",
+        "ciudad": "Nazaret",
+        "realidad": "Advocación mariana universal; espiritualidad de los Padres Barnabitas y Patrona Principal de Puerto Rico",
+        "historia": "Advocación mariana vinculada al primer milagro público de Jesús en las Bodas de Caná. Devoción histórica de la Orden de los Clérigos Regulares de San Pablo / Barnabitas y patronato nacional.",
+        "detalle": "Su altar con indulgencias perpetuas. La devoción cruzó el Atlántico hacia el Caribe en 1851, cuando el obispo catalán Gil Esteve y Tomás, recién nombrado obispo de Puerto Rico, halló la Catedral de San Juan Bautista en estado ruinoso y sin recursos.",
+        "hijos": [
+            "Jesús",
+            "Juan",
+            "Los apostoles"
+        ]
+    },
+    {
         "fechaFestividad": "21/11",
         "nombre": "La Presentación de la Santísima Virgen María",
         "nacimiento": "—",

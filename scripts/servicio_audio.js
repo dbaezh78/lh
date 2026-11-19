@@ -474,7 +474,20 @@ async function requestHandler(req, res) {
         }
 
         try {
-            let buf = await descargarChunkGoogle(text, lang);
+            let buf;
+            if (text.length > 130) {
+                const subFrases = dividirEnFrases(text, 130);
+                const subBufs = [];
+                for (const sf of subFrases) {
+                    if (!sf.trim()) continue;
+                    const b = await descargarChunkGoogle(sf.trim(), lang);
+                    subBufs.push(b);
+                    await new Promise(r => setTimeout(r, 25));
+                }
+                buf = Buffer.concat(subBufs);
+            } else {
+                buf = await descargarChunkGoogle(text, lang);
+            }
             if (voice) {
                 buf = await transcodificarA40k(buf, '40k', voice);
             }
@@ -567,11 +580,14 @@ async function requestHandler(req, res) {
                     payload = Object.fromEntries(parsedUrl.searchParams.entries());
                 }
 
-                const texto = payload.text || '';
+                const texto = payload.text || payload.textoLiturgico || '';
                 const filename = payload.filename || 'audio.mp3';
                 const semana = payload.semana || '';
                 const dia = payload.dia || '';
                 const lang = payload.lang || 'es-US';
+                const tiempo = payload.tiempo || '';
+                const folder = payload.folder || '';
+                const voice = payload.voice || 'hombre';
 
                 if (!texto.trim()) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -588,8 +604,8 @@ async function requestHandler(req, res) {
                     return;
                 }
 
-                if (semana && dia) {
-                    guardarEnReposLocales(filename, semana, dia, mp3Buffer);
+                if (semana || dia || folder || tiempo) {
+                    guardarEnReposLocales(filename, semana, dia, mp3Buffer, '', voice, tiempo, folder);
                 }
 
                 res.writeHead(200, {
@@ -608,35 +624,40 @@ async function requestHandler(req, res) {
         return;
     }
 
-    // 5. Servir archivos estáticos del repositorio si aplica (incluye repositorios de audio to y tordinario)
+    // 5. Servir archivos estáticos del repositorio si aplica (incluye repositorios de audio to, tordinario, santos y ev)
     const searchDirs = [
         path.resolve(__dirname, '..'),
         path.resolve('C:/db/Github/to'),
-        path.resolve('C:/db/Github/tordinario')
+        path.resolve('C:/db/Github/tordinario'),
+        path.resolve('C:/db/Github/santos'),
+        path.resolve('C:/db/Github/ev')
     ];
     let reqPath = parsedUrl.pathname === '/' ? '/salterios.html' : parsedUrl.pathname;
+    const reqPathVariants = [reqPath, reqPath.replace(/^\/(?:santos|ev)\//i, '/')];
     try {
         for (const baseDir of searchDirs) {
             if (!fs.existsSync(baseDir)) continue;
-            const safePath = path.normalize(path.join(baseDir, decodeURIComponent(reqPath)));
-            if (safePath.startsWith(path.normalize(baseDir)) && fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
-                const ext = path.extname(safePath).toLowerCase();
-                const mimeTypes = {
-                    '.html': 'text/html; charset=utf-8',
-                    '.htm': 'text/html; charset=utf-8',
-                    '.js': 'application/javascript; charset=utf-8',
-                    '.mjs': 'application/javascript; charset=utf-8',
-                    '.json': 'application/json; charset=utf-8',
-                    '.css': 'text/css; charset=utf-8',
-                    '.png': 'image/png',
-                    '.jpg': 'image/jpeg',
-                    '.svg': 'image/svg+xml',
-                    '.mp3': 'audio/mpeg'
-                };
-                const cType = mimeTypes[ext] || 'application/octet-stream';
-                res.writeHead(200, { 'Content-Type': cType });
-                fs.createReadStream(safePath).pipe(res);
-                return;
+            for (const rP of reqPathVariants) {
+                const safePath = path.normalize(path.join(baseDir, decodeURIComponent(rP)));
+                if (safePath.startsWith(path.normalize(baseDir)) && fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
+                    const ext = path.extname(safePath).toLowerCase();
+                    const mimeTypes = {
+                        '.html': 'text/html; charset=utf-8',
+                        '.htm': 'text/html; charset=utf-8',
+                        '.js': 'application/javascript; charset=utf-8',
+                        '.mjs': 'application/javascript; charset=utf-8',
+                        '.json': 'application/json; charset=utf-8',
+                        '.css': 'text/css; charset=utf-8',
+                        '.png': 'image/png',
+                        '.jpg': 'image/jpeg',
+                        '.svg': 'image/svg+xml',
+                        '.mp3': 'audio/mpeg'
+                    };
+                    const cType = mimeTypes[ext] || 'application/octet-stream';
+                    res.writeHead(200, { 'Content-Type': cType });
+                    fs.createReadStream(safePath).pipe(res);
+                    return;
+                }
             }
         }
     } catch (_) {}

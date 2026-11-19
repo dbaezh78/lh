@@ -269,11 +269,19 @@ export class DbAudioDescarga {
             textoLiturgico = '',
             semana = '1',
             dia = 'lunes',
+            tiempo = '',
+            folder = '',
             cinta = null
         } = options;
 
-        const tActual = document.getElementById('cinta-tiempo-actual');
-        const tTotal = document.getElementById('cinta-tiempo-total');
+        const tActual = document.getElementById('cinta-tiempo-actual') || document.getElementById('portada-tiempo-actual');
+        const tTotal = document.getElementById('cinta-tiempo-total') || document.getElementById('portada-tiempo-total');
+        const portadaBarra = document.getElementById('portada-barra-progreso-top');
+        const barraModalSanto = document.getElementById('santo-speech-progress-bar');
+        const ringModalSanto = document.getElementById('tts-circular-bar');
+        const contadorModalSanto = document.getElementById('modal-santo-contador');
+        const btnModalDescarga = document.getElementById('btn-descargar-audio-santo');
+        const textoOriginalContador = contadorModalSanto ? contadorModalSanto.textContent : '';
 
         const actualizarReloj = (pct, info) => {
             if (tActual) {
@@ -283,6 +291,22 @@ export class DbAudioDescarga {
             if (tTotal) {
                 tTotal.classList.add('descargando-audio');
                 tTotal.textContent = info || 'Descargando...';
+            }
+            if (portadaBarra && portadaBarra.style.display === 'none') {
+                portadaBarra.style.display = 'flex';
+            }
+            if (barraModalSanto) {
+                barraModalSanto.style.width = `${pct}%`;
+            }
+            if (ringModalSanto) {
+                const dashoffset = 110 - (110 * pct) / 100;
+                ringModalSanto.style.strokeDashoffset = dashoffset;
+            }
+            if (contadorModalSanto) {
+                contadorModalSanto.textContent = `${pct}%`;
+            }
+            if (btnModalDescarga) {
+                btnModalDescarga.title = `Descargando: ${pct}% (${info || ''})`;
             }
         };
 
@@ -296,6 +320,23 @@ export class DbAudioDescarga {
                 if (tTotal) tTotal.classList.remove('descargando-audio');
                 if (cinta && typeof cinta.actualizarProgreso === 'function') {
                     cinta.actualizarProgreso();
+                }
+                if (contadorModalSanto && textoOriginalContador) {
+                    contadorModalSanto.textContent = textoOriginalContador;
+                }
+                if (barraModalSanto) {
+                    barraModalSanto.style.width = '0%';
+                }
+                if (ringModalSanto) {
+                    ringModalSanto.style.strokeDashoffset = 110;
+                }
+                if (btnModalDescarga) {
+                    btnModalDescarga.disabled = false;
+                    btnModalDescarga.classList.remove('cargando-tts');
+                    btnModalDescarga.innerHTML = '<span class="material-symbols-outlined" style="color: #10b981;">done</span>';
+                    setTimeout(() => {
+                        btnModalDescarga.innerHTML = '<span class="material-symbols-outlined">download</span>';
+                    }, 3500);
                 }
             }, 1200);
         };
@@ -417,7 +458,7 @@ export class DbAudioDescarga {
                 // Paso 3a: Comprobar si ya existe un audio generado a 40kbps para este EXACTO texto y voz
                 if (hashTexto) {
                     try {
-                        const rCheck = await fetch(`${activeBaseUrl}/api/check-audio?filename=${encodeURIComponent(filename)}&semana=${encodeURIComponent(semana)}&dia=${encodeURIComponent(dia)}&textHash=${encodeURIComponent(hashTexto)}&voice=${encodeURIComponent(voiceKey)}&_cb=${Date.now()}`);
+                        const rCheck = await fetch(`${activeBaseUrl}/api/check-audio?filename=${encodeURIComponent(filename)}&semana=${encodeURIComponent(semana)}&dia=${encodeURIComponent(dia)}&tiempo=${encodeURIComponent(tiempo)}&folder=${encodeURIComponent(folder)}&textHash=${encodeURIComponent(hashTexto)}&voice=${encodeURIComponent(voiceKey)}&_cb=${Date.now()}`);
                         if (rCheck.ok) {
                             const checkJson = await rCheck.json();
                             if (checkJson.cached && checkJson.url) {
@@ -441,19 +482,63 @@ export class DbAudioDescarga {
                 }
 
                 // Paso 3b: Si no está en caché o el texto/voz cambió, sintetizar en vivo los fragmentos
-                if (partes.length > 0) {
-                    actualizarReloj(0, `0/${partes.length} partes`);
+                // Subdividir fragmentos largos (> 130 caracteres) para que Google Translate TTS nunca falle con error 400
+                const partesSeguras = [];
+                for (const p of partes) {
+                    if (!p || !p.trim()) continue;
+                    const str = p.trim();
+                    if (str.length <= 130) {
+                        partesSeguras.push(str);
+                    } else {
+                        const subPartes = str.match(/[^,;:]+[,;:]*|\s+/g) || [str];
+                        let subCur = '';
+                        for (const sp of subPartes) {
+                            if ((subCur.length + sp.length) > 130 && subCur.trim().length > 0) {
+                                partesSeguras.push(subCur.trim());
+                                subCur = sp;
+                            } else {
+                                subCur += sp;
+                            }
+                        }
+                        if (subCur.trim().length > 0) {
+                            if (subCur.trim().length > 130) {
+                                const palabras = subCur.trim().split(/\s+/);
+                                let pCur = '';
+                                for (const w of palabras) {
+                                    if ((pCur.length + w.length + 1) > 120 && pCur.length > 0) {
+                                        partesSeguras.push(pCur.trim());
+                                        pCur = w;
+                                    } else {
+                                        pCur += (pCur ? ' ' : '') + w;
+                                    }
+                                }
+                                if (pCur.trim()) partesSeguras.push(pCur.trim());
+                            } else {
+                                partesSeguras.push(subCur.trim());
+                            }
+                        }
+                    }
+                }
+                const listaPartesFinal = partesSeguras.length > 0 ? partesSeguras : (partes.length > 0 ? partes : [texto.substring(0, 120)]);
+
+                if (listaPartesFinal.length > 0) {
+                    actualizarReloj(0, `0/${listaPartesFinal.length} partes`);
                     if (cinta && typeof cinta.mostrarToastAviso === 'function') {
-                        cinta.mostrarToastAviso(`Generando audio '${filename}' (${partes.length} fragmentos a 40kbps)...`, 3500);
+                        cinta.mostrarToastAviso(`Generando audio '${filename}' (${listaPartesFinal.length} fragmentos a 40kbps)...`, 3500);
                     }
 
                     const buffers = [];
-                    for (let i = 0; i < partes.length; i++) {
-                        const pct = Math.max(1, Math.min(99, Math.round(((i + 1) / partes.length) * 100)));
-                        actualizarReloj(pct, `${i + 1}/${partes.length} partes`);
+                    for (let i = 0; i < listaPartesFinal.length; i++) {
+                        const pct = Math.max(1, Math.min(99, Math.round(((i + 1) / listaPartesFinal.length) * 100)));
+                        actualizarReloj(pct, `${i + 1}/${listaPartesFinal.length} partes`);
 
-                        const chunkUrl = `${activeBaseUrl}/api/tts-chunk?text=${encodeURIComponent(partes[i])}&lang=${encodeURIComponent(langDescarga)}&voice=${encodeURIComponent(cfgVoz.genero)}`;
-                        const resChunk = await fetch(chunkUrl);
+                        const chunkUrl = `${activeBaseUrl}/api/tts-chunk?text=${encodeURIComponent(listaPartesFinal[i])}&lang=${encodeURIComponent(langDescarga)}&voice=${encodeURIComponent(cfgVoz.genero)}`;
+                        let resChunk = await fetch(chunkUrl);
+                        if (!resChunk.ok) {
+                            // Reintentar sin voice si el transcodificador tuvo algún inconveniente
+                            const fallbackUrl = `${activeBaseUrl}/api/tts-chunk?text=${encodeURIComponent(listaPartesFinal[i].substring(0, 120))}&lang=es-ES`;
+                            resChunk = await fetch(fallbackUrl);
+                        }
                         if (!resChunk.ok) throw new Error(`HTTP ${resChunk.status}`);
                         const ab = await resChunk.arrayBuffer();
                         if (ab && ab.byteLength > 0) buffers.push(ab);
@@ -465,7 +550,7 @@ export class DbAudioDescarga {
                         let blobFinalDescarga = rawBlob;
 
                         try {
-                            const resSave = await fetch(`${activeBaseUrl}/api/save-audio?filename=${encodeURIComponent(filename)}&semana=${encodeURIComponent(semana)}&dia=${encodeURIComponent(dia)}&textHash=${encodeURIComponent(hashTexto)}&voice=${encodeURIComponent(voiceKey)}&returnAudio=1`, {
+                            const resSave = await fetch(`${activeBaseUrl}/api/save-audio?filename=${encodeURIComponent(filename)}&semana=${encodeURIComponent(semana)}&dia=${encodeURIComponent(dia)}&tiempo=${encodeURIComponent(tiempo)}&folder=${encodeURIComponent(folder)}&textHash=${encodeURIComponent(hashTexto)}&voice=${encodeURIComponent(voiceKey)}&returnAudio=1`, {
                                 method: 'POST',
                                 body: rawBlob,
                                 headers: { 'Content-Type': 'audio/mpeg' }
@@ -499,6 +584,8 @@ export class DbAudioDescarga {
                 const semPad = String(semana).padStart(2, '0');
                 const urlsAProbar = [
                     url,
+                    (tiempo === 'santos' || folder) ? `https://santos.resucito.do/${folder}/${filename}` : null,
+                    (tiempo === 'santos' || folder) ? `http://santos.resucito.do/${folder}/${filename}` : null,
                     `https://to.resucito.do/s${semPad}/${dia}/${filename}`
                 ].filter(Boolean);
 

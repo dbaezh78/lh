@@ -276,7 +276,15 @@ function cargarPortada() {
 
         // Buscar imagen del santo
         if (textoBotonSanto) {
-            const santoEncontrado = mapaCatalogo.get(textoBotonSanto.toLowerCase().trim());
+            let santoEncontrado = mapaCatalogo.get(textoBotonSanto.toLowerCase().trim());
+            if (!santoEncontrado) {
+                const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                const tNorm = norm(textoBotonSanto);
+                santoEncontrado = Array.from(mapaCatalogo.values()).find(s => {
+                    const sn = norm(s?.nombre);
+                    return sn === tNorm || (tNorm.length > 5 && (sn.includes(tNorm) || tNorm.includes(sn)));
+                });
+            }
             if (santoEncontrado) {
                 window.santoDelDiaObjeto = santoEncontrado;
                 if (santoEncontrado.imagen && santoEncontrado.imagen.trim()) {
@@ -430,6 +438,10 @@ function cargarPortada() {
 
             <!-- ===== SUB-BOTONES DESPLEGABLES (Horas Litúrgicas del Santo - En Blanco) ===== -->
             <div class="sub-horas-container" id="sub-horas-santo-lista">
+                <a href="javascript:void(0)" class="btn-flat btn-blanco btn-vida-historia-santo-portada" onclick="window.abrirModalVidaHistoriaSantoPortada ? window.abrirModalVidaHistoriaSantoPortada() : (window.abrirModalVidaHistoriaSanto ? window.abrirModalVidaHistoriaSanto() : null)" title="Ver biografía, vida e historia de ${textoBotonSanto}">
+                    <span class="btn-flat-label">Vida / Historia</span>
+                    <span class="btn-flat-icon"><span class="material-symbols-outlined">menu_book</span></span>
+                </a>
                 <a href="salterios.html?libro=oficio&id=${codigoSantoOficio}" class="btn-flat btn-blanco">
                     <span class="btn-flat-label">Oficio de Lectura</span>
                     <span class="btn-flat-icon"><span class="material-symbols-outlined">menu_book</span></span>
@@ -1713,6 +1725,21 @@ export function toggleReproducirEvangelioPortada() {
     }
 }
 window.toggleReproducirEvangelioPortada = toggleReproducirEvangelioPortada;
+
+export function abrirModalVidaHistoriaSantoPortada() {
+    let s = window.santoDelDiaObjeto || (typeof window.obtenerSantoParaVistaActual === 'function' ? window.obtenerSantoParaVistaActual() : null);
+    if (!s && typeof window.santoActualDetalle === 'object') {
+        s = window.santoActualDetalle;
+    }
+    if (typeof window.abrirModalVidaHistoriaSanto === 'function') {
+        window.abrirModalVidaHistoriaSanto(s);
+    } else if (typeof window.verDetalleSanto === 'function') {
+        window.verDetalleSanto(s);
+    } else {
+        console.warn("Módulo de detalle de santos aún no disponible");
+    }
+}
+window.abrirModalVidaHistoriaSantoPortada = abrirModalVidaHistoriaSantoPortada;
 
 if (typeof window !== 'undefined') {
     window.addEventListener('lh-calendario-config-changed', () => {

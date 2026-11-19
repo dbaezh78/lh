@@ -64,6 +64,45 @@
         return [];
     }
 
+    async function getSantosLocalesAsync() {
+        let arr = getSantosLocales();
+        if (window.indexedDB) {
+            try {
+                const arrIDB = await new Promise(res => {
+                    const req = indexedDB.open('LH_Santos_DB', 2);
+                    req.onsuccess = (e) => {
+                        const db = e.target.result;
+                        if (db.objectStoreNames.contains('catalogo')) {
+                            const tx = db.transaction('catalogo', 'readonly');
+                            const sReq = tx.objectStore('catalogo').get('santos');
+                            sReq.onsuccess = () => res(sReq.result || null);
+                            sReq.onerror = () => res(null);
+                        } else res(null);
+                    };
+                    req.onerror = () => res(null);
+                });
+                if (Array.isArray(arrIDB) && arrIDB.length > 0) {
+                    const mapFotos = new Map();
+                    arrIDB.forEach(s => {
+                        if (s && s.nombre && s.imagen && s.imagen.trim().length > 0) {
+                            mapFotos.set(normalizarSlug(s.nombre), s.imagen);
+                        }
+                    });
+                    if (mapFotos.size > 0) {
+                        arr = arr.map(s => {
+                            const slug = normalizarSlug(s?.nombre);
+                            if ((!s.imagen || s.imagen.trim().length === 0) && mapFotos.has(slug)) {
+                                return { ...s, imagen: mapFotos.get(slug) };
+                            }
+                            return s;
+                        });
+                    }
+                }
+            } catch (_) {}
+        }
+        return arr;
+    }
+
     function setSantosLocales(lista) {
         if (!Array.isArray(lista)) return;
         try {
@@ -190,7 +229,7 @@
             const infoAuth = cloudSyncAPI.getUsuarioAuth();
 
             // 1.1 Santos
-            const localSantos = getSantosLocales();
+            const localSantos = await getSantosLocalesAsync();
             const localSantosMap = new Map();
             localSantos.forEach(s => {
                 const slug = normalizarSlug(s.nombre);
@@ -383,7 +422,7 @@
                 if (fb.cargarSantosFirestore) {
                     const cloudSantos = await fb.cargarSantosFirestore();
                     if (Array.isArray(cloudSantos) && cloudSantos.length > 0) {
-                        const localSantos = getSantosLocales();
+                        const localSantos = await getSantosLocalesAsync();
                         const localMap = new Map();
                         localSantos.forEach((s, idx) => {
                             const slug = normalizarSlug(s.nombre);
@@ -759,7 +798,7 @@
                 const fb = window.firebaseAPI;
                 let subidos = 0;
 
-                const santos = getSantosLocales();
+                const santos = await getSantosLocalesAsync();
                 if (santos.length > 0 && fb.guardarSantosFirestore) {
                     await fb.guardarSantosFirestore(santos);
                     subidos += santos.length;

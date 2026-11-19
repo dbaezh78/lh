@@ -341,7 +341,8 @@
         .btn-tts-santo:hover {
             transform: scale(1.06);
         }
-        .btn-modal-pencil {
+        .btn-modal-pencil,
+        .btn-modal-download {
             background: transparent;
             border: none;
             cursor: pointer;
@@ -359,12 +360,18 @@
             flex-shrink: 0;
             box-sizing: border-box;
         }
-        .btn-modal-pencil:hover {
+        .btn-modal-pencil:hover,
+        .btn-modal-download:hover {
             background-color: #e1f5fe;
+            color: #0288d1;
             transform: scale(1.08);
         }
-        .btn-modal-pencil:active {
+        .btn-modal-pencil:active,
+        .btn-modal-download:active {
             transform: scale(0.95);
+        }
+        .btn-modal-download .material-symbols-outlined {
+            font-size: 20px;
         }
         /* Botón de reproducción de voz directamente en la fila de la tabla */
         .btn-tts-tabla {

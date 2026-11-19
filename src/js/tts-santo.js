@@ -5,6 +5,8 @@
  * pausar/continuar, word boundary tracking y configuración de voz/velocidad.
  */
 
+import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+
 // Estado global de reproducción y seguimiento de lectura
 export const currentSpeechState = {
     santoId: null,
@@ -287,6 +289,13 @@ export function detenerLecturaSantoVoz() {
     resetearAnimacionCargaCircular();
     currentSpeechState.currentCharIndex = 0;
     currentSpeechState.currentChunkIndex = 0;
+    if (typeof window !== 'undefined' && window._santoAudioPlayer) {
+        try {
+            window._santoAudioPlayer.pause();
+            window._santoAudioPlayer.currentTime = 0;
+        } catch (_) {}
+        window._santoAudioPlayer = null;
+    }
     const bar = document.getElementById('santo-speech-progress-bar');
     if (bar) bar.style.width = '0%';
     if (typeof window !== 'undefined') {
@@ -300,7 +309,7 @@ export function detenerLecturaSantoVoz() {
  * Divide el texto completo en fragmentos oracionales naturales de tamaño óptimo (<= 170 caracteres).
  * Esto evita el límite de búfer y cuelgues de audio en Chromium para textos extensos.
  */
-export function dividirEnFrasesLectura(texto, maxLen = 170) {
+export function dividirEnFrasesLectura(texto, maxLen = 130) {
     if (!texto || !texto.trim()) return [];
 
     const limpio = texto
@@ -317,11 +326,58 @@ export function dividirEnFrasesLectura(texto, maxLen = 170) {
     let curStart = 0;
     let runningIdx = 0;
 
+    const agregarTrozo = (trozo, start, end) => {
+        trozo = (trozo || '').trim();
+        if (!trozo) return;
+        if (trozo.length <= maxLen) {
+            chunks.push({ text: trozo, start: start, end: end });
+            return;
+        }
+        // Subdividir por comas, dos puntos o punto y coma
+        const subPartes = trozo.match(/[^,;:]+[,;:]*|\s+/g) || [trozo];
+        let subCur = '';
+        let subStart = start;
+        let subRunning = start;
+        for (const sp of subPartes) {
+            const spLen = sp.length;
+            if ((subCur.length + spLen) > maxLen && subCur.trim().length > 0) {
+                agregarTrozo(subCur, subStart, subStart + subCur.length);
+                subStart = subRunning;
+                subCur = sp;
+            } else {
+                if (!subCur) subStart = subRunning;
+                subCur += sp;
+            }
+            subRunning += spLen;
+        }
+        if (subCur.trim().length > 0) {
+            if (subCur.trim().length > maxLen) {
+                // Si aún supera maxLen, dividir por palabras
+                const palabras = subCur.trim().split(/\s+/);
+                let pCur = '';
+                let pStart = subStart;
+                for (const p of palabras) {
+                    if ((pCur.length + p.length + 1) > maxLen && pCur.length > 0) {
+                        chunks.push({ text: pCur.trim(), start: pStart, end: pStart + pCur.length });
+                        pStart += pCur.length + 1;
+                        pCur = p;
+                    } else {
+                        pCur += (pCur ? ' ' : '') + p;
+                    }
+                }
+                if (pCur.trim()) {
+                    chunks.push({ text: pCur.trim(), start: pStart, end: end });
+                }
+            } else {
+                chunks.push({ text: subCur.trim(), start: subStart, end: end });
+            }
+        }
+    };
+
     for (const seg of oraciones) {
         const segLen = seg.length;
         if (curChunk.length + segLen > maxLen && curChunk.trim().length > 0) {
-            const trimmed = curChunk.trim();
-            chunks.push({ text: trimmed, start: curStart, end: curStart + curChunk.length });
+            agregarTrozo(curChunk, curStart, curStart + curChunk.length);
             curStart = runningIdx;
             curChunk = seg;
         } else {
@@ -332,19 +388,96 @@ export function dividirEnFrasesLectura(texto, maxLen = 170) {
     }
 
     if (curChunk.trim().length > 0) {
-        chunks.push({ text: curChunk.trim(), start: curStart, end: limpio.length });
+        agregarTrozo(curChunk, curStart, limpio.length);
     }
 
     return chunks;
 }
 
 /**
+ * Reproduce un archivo de audio MP3 para el santo (santo.mp3) sincronizado con barra y anillo
+ */
+export function reproducirAudioMP3Santo(url) {
+    if (typeof window === 'undefined') return;
+    if (window._santoAudioPlayer) {
+        try { window._santoAudioPlayer.pause(); } catch (_) {}
+        window._santoAudioPlayer = null;
+    }
+    // Detener cualquier síntesis de voz Web Speech activa
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+    currentSpeechState.isSpeaking = false;
+
+    const audio = new Audio(url);
+    window._santoAudioPlayer = audio;
+    window._santoAudioUrlActual = url;
+
+    const bar = document.getElementById('santo-speech-progress-bar');
+    const track = document.getElementById('santo-speech-progress-track');
+
+    audio.addEventListener('timeupdate', () => {
+        if (audio.duration && !isNaN(audio.duration)) {
+            const pct = Math.min(100, Math.max(0, (audio.currentTime / audio.duration) * 100));
+            if (bar) bar.style.width = `${pct}%`;
+            fijarProgresoCircular(pct);
+        }
+    });
+
+    audio.addEventListener('play', () => {
+        actualizarEstadoIconoVoz(true);
+    });
+
+    audio.addEventListener('pause', () => {
+        actualizarEstadoIconoVoz(false);
+    });
+
+    audio.addEventListener('ended', () => {
+        actualizarEstadoIconoVoz(false);
+        if (bar) bar.style.width = '0%';
+        resetearAnimacionCargaCircular();
+        window._santoAudioPlayer = null;
+    });
+
+    if (track && !track._clickMp3Bound) {
+        track._clickMp3Bound = true;
+        track.addEventListener('click', (e) => {
+            if (!window._santoAudioPlayer || !window._santoAudioPlayer.duration) return;
+            const rect = track.getBoundingClientRect();
+            const clickX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            const frac = clickX / rect.width;
+            window._santoAudioPlayer.currentTime = frac * window._santoAudioPlayer.duration;
+        });
+    }
+
+    iniciarAnimacionCargaCircular(
+        () => {
+            audio.play().catch(err => {
+                console.warn('Auto-play santo.mp3 error:', err);
+                actualizarEstadoIconoVoz(false);
+            });
+        },
+        () => {
+            actualizarEstadoIconoVoz(true);
+        }
+    );
+}
+
+/**
  * Inicia o pausa la lectura en voz alta del santo actual en el modal
  */
-export function toggleLeerSantoVoz() {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-        alert('Tu navegador no soporta la función de lectura por voz (SpeechSynthesis).');
-        return;
+export async function toggleLeerSantoVoz() {
+    // Si hay un reproductor de audio MP3 físico activo
+    if (typeof window !== 'undefined' && window._santoAudioPlayer) {
+        if (!window._santoAudioPlayer.paused) {
+            window._santoAudioPlayer.pause();
+            actualizarEstadoIconoVoz(false);
+            return;
+        } else {
+            window._santoAudioPlayer.play();
+            actualizarEstadoIconoVoz(true);
+            return;
+        }
     }
 
     // Si ya está hablando o en proceso de carga circular, pausar
@@ -353,7 +486,45 @@ export function toggleLeerSantoVoz() {
         return;
     }
 
-    // Si no está hablando, reproducir desde la posición actual
+    // Comprobar si existe el audio MP3 físico del santo antes de recurrir a la voz sintética
+    if (typeof window !== 'undefined') {
+        const s = window.santoActualDetalle;
+        if (s) {
+            const urlsAProbar = [];
+            if (window._santoAudioUrlActual) urlsAProbar.push(window._santoAudioUrlActual);
+            
+            if (typeof window.autodetectarCarpetaSanto === 'function') {
+                const auto = window.autodetectarCarpetaSanto(s.nombre, s.celebracion || s.fechaFestividad);
+                if (auto && auto.basePath) {
+                    urlsAProbar.push(`${auto.basePath}santo.mp3`);
+                }
+                if (auto && auto.subRuta) {
+                    urlsAProbar.push(`http://127.0.0.1:4000/${encodeURI(auto.subRuta)}/santo.mp3`);
+                    urlsAProbar.push(`http://127.0.0.1:4000/santos/${encodeURI(auto.subRuta)}/santo.mp3`);
+                }
+            }
+
+            for (const cand of urlsAProbar) {
+                try {
+                    const ctrl = new AbortController();
+                    const tm = setTimeout(() => ctrl.abort(), 800);
+                    const resp = await fetch(cand, { method: 'HEAD', signal: ctrl.signal });
+                    clearTimeout(tm);
+                    if (resp.ok) {
+                        reproducirAudioMP3Santo(cand);
+                        return;
+                    }
+                } catch (_) {}
+            }
+        }
+    }
+
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+        alert('Tu navegador no soporta la función de lectura por voz (SpeechSynthesis).');
+        return;
+    }
+
+    // Si no está hablando ni hay MP3, reproducir con SpeechSynthesis desde la posición actual
     reproducirVoz();
 }
 
@@ -839,8 +1010,8 @@ export function prepararTextoCompleto() {
 /**
  * Construye una única cadena continua de texto limpio para la locución
  */
-export function construirTextoCompletoSanto() {
-    const frases = construirFrasesLecturaSanto();
+export function construirTextoCompletoSanto(santoParam = null) {
+    const frases = construirFrasesLecturaSanto(santoParam);
     return frases.join(' ').replace(/\s+/g, ' ').trim();
 }
 
@@ -1027,8 +1198,8 @@ export function obtenerColumnasOcultasActuales() {
  * Extrae y formatea de manera limpia las frases a leer desde el contenido del modal.
  * No incluye campos sin información, '—', campos suprimidos/ocultos ni fechas duplicadas.
  */
-export function construirFrasesLecturaSanto() {
-    const s = window.santoActualDetalle;
+export function construirFrasesLecturaSanto(santoParam = null) {
+    const s = santoParam || (typeof window !== 'undefined' ? (window.santoActualDetalle || window.santoActualSeleccionado || window._santoActualSalterio) : null);
     const frases = [];
 
     if (s && s.nombre) {
@@ -1221,4 +1392,538 @@ if (typeof window !== 'undefined') {
     window.completarAnimacionCargaCircular = completarAnimacionCargaCircular;
     window.resetearAnimacionCargaCircular = resetearAnimacionCargaCircular;
     window.formatearFechaParaLocucion = formatearFechaParaLocucion;
+    window.construirTextoCompletoSanto = construirTextoCompletoSanto;
+    window.dividirEnFrasesLectura = dividirEnFrasesLectura;
+    window.construirFrasesLecturaSanto = construirFrasesLecturaSanto;
+    window.reproducirAudioMP3Santo = reproducirAudioMP3Santo;
+    window.descargarAudioSantoActual = descargarAudioSantoActual;
+}
+
+/**
+ * Sintetiza y descarga el audio completo de la vida/historia del santo actual (santo.mp3)
+ * usando el servicio de audio litúrgico local (o dbAudioDescarga) a 40 kbps.
+ * Guarda en C:\db\Github\santos\<mes>\<carpeta>\santo.mp3 con copia automática si ya existe.
+ */
+export async function descargarAudioSantoActual() {
+    const s = (typeof window !== 'undefined') ? (window.santoActualDetalle || window.santoActualSeleccionado || window._santoActualSalterio) : null;
+    if (!s) {
+        alert('No hay información disponible del santo para descargar su audio.');
+        return;
+    }
+
+    const btnDescarga = document.getElementById('btn-descargar-audio-santo');
+    if (btnDescarga) {
+        btnDescarga.disabled = true;
+        btnDescarga.classList.add('cargando-tts');
+        btnDescarga.innerHTML = '<span class="material-symbols-outlined" style="animation: pulso-carga-santo 0.8s infinite;">sync</span>';
+    }
+
+    try {
+        // 1. Construir texto oracional completo del santo
+        let texto = '';
+        if (typeof construirTextoCompletoSanto === 'function') {
+            texto = construirTextoCompletoSanto(s);
+        } else if (typeof window !== 'undefined' && typeof window.construirTextoCompletoSanto === 'function') {
+            texto = window.construirTextoCompletoSanto(s);
+        }
+        if (!texto) {
+            const partes = [
+                s.nombre,
+                s.celebracion ? `Fecha de celebración: ${s.celebracion}` : '',
+                s.nacimiento ? `Nacimiento: ${s.nacimiento}` : '',
+                s.muerte ? `Mortalidad: ${s.muerte}` : '',
+                s.pais ? `País: ${s.pais}` : '',
+                s.ciudad ? `Ciudad: ${s.ciudad}` : '',
+                s.realidad ? `Realidad: ${s.realidad}` : '',
+                s.historia ? `Historia: ${s.historia}` : '',
+                s.detalle ? `Detalle: ${s.detalle}` : ''
+            ].filter(Boolean);
+            texto = partes.join('. ');
+        }
+
+        // 2. Resolver la carpeta del mes y del santo
+        let subRuta = '';
+        let mes = '';
+        let carpeta = '';
+        let urlWeb = '';
+
+        if (typeof window !== 'undefined' && typeof window.autodetectarCarpetaSanto === 'function') {
+            const auto = window.autodetectarCarpetaSanto(s.nombre, s.celebracion || s.fechaFestividad);
+            if (auto && auto.subRuta) {
+                subRuta = auto.subRuta;
+                const p = subRuta.split('/');
+                mes = p[0];
+                carpeta = p[1] || '';
+                urlWeb = auto.basePath ? `${auto.basePath}santo.mp3` : `https://santos.resucito.do/${encodeURI(subRuta)}/santo.mp3`;
+            }
+        }
+
+        if (!subRuta) {
+            const matchFecha = (s.celebracion || s.fechaFestividad || '').match(/(\d+)\/(\d+)/);
+            const diaNum = matchFecha ? parseInt(matchFecha[1], 10) : 1;
+            const mesNum = matchFecha ? parseInt(matchFecha[2], 10) : 1;
+            const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            mes = MESES[mesNum - 1] || 'enero';
+            const slugMayus = (s.nombre || 'SANTO').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            carpeta = `${String(diaNum).padStart(2, '0')}-${slugMayus}`;
+            subRuta = `${mes}/${carpeta}`;
+            urlWeb = `https://santos.resucito.do/${encodeURI(subRuta)}/santo.mp3`;
+        }
+
+        // 3. Dividir texto en frases para sintetizador TTS (máximo 130 caracteres)
+        let chunks = [];
+        if (typeof dividirEnFrasesLectura === 'function') {
+            chunks = dividirEnFrasesLectura(texto, 130).map(c => c.text).filter(Boolean);
+        } else if (typeof window !== 'undefined' && typeof window.dividirEnFrasesLectura === 'function') {
+            chunks = window.dividirEnFrasesLectura(texto, 130).map(c => c.text).filter(Boolean);
+        }
+        if (chunks.length === 0) {
+            chunks = [texto];
+        }
+
+        // 4. Invocar el motor dbAudioDescarga o fallback directo a servicio_audio
+        const pluginDescarga = (typeof window !== 'undefined') ? window.dbAudioDescarga : null;
+        if (pluginDescarga && typeof pluginDescarga.descargarAudio === 'function') {
+            await pluginDescarga.descargarAudio({
+                url: urlWeb,
+                filename: 'santo.mp3',
+                textoLiturgico: texto,
+                partes: chunks,
+                tiempo: 'santos',
+                folder: subRuta,
+                semana: mes,
+                dia: carpeta
+            });
+            window._santoAudioUrlActual = urlWeb;
+            window._santoAudioExiste = true;
+        } else {
+            // Descarga/síntesis por llamada directa al servicio local en puerto 4000
+            const activeBaseUrl = 'http://127.0.0.1:4000';
+            const res = await fetch(`${activeBaseUrl}/api/tts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: texto,
+                    textoLiturgico: texto,
+                    filename: 'santo.mp3',
+                    semana: mes,
+                    dia: carpeta,
+                    tiempo: 'santos',
+                    folder: subRuta
+                })
+            });
+            if (res.ok) {
+                const blob = await res.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'santo.mp3';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                }, 2000);
+                window._santoAudioUrlActual = urlWeb;
+                window._santoAudioExiste = true;
+                alert('¡Audio de la vida del santo generado y guardado exitosamente en ' + subRuta + '/santo.mp3!');
+            } else {
+                throw new Error('El servicio de audio respondió con código ' + res.status);
+            }
+        }
+    } catch (err) {
+        console.error('Error al descargar audio del santo:', err);
+        alert('Ocurrió un error al generar/descargar el audio: ' + err.message);
+    } finally {
+        if (btnDescarga) {
+            btnDescarga.disabled = false;
+            btnDescarga.classList.remove('cargando-tts');
+            btnDescarga.innerHTML = '<span class="material-symbols-outlined">download</span>';
+        }
+    }
+}
+
+/**
+ * Asegura que el contenedor del modal del detalle del santo exista en el DOM
+ */
+export function asegurarModalSantoEnDOM() {
+    if (typeof document === 'undefined') return null;
+    let modal = document.getElementById('modal-detalle-santo');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.className = 'modal-overlay-santo';
+        modal.id = 'modal-detalle-santo';
+        modal.onclick = function(e) {
+            if (e.target === this) cerrarModalDetalleSanto();
+        };
+        modal.innerHTML = `
+            <div class="modal-content-santo">
+                <div class="modal-santo-header">
+                    <div class="modal-santo-header-top">
+                        <h2 id="modal-santo-nombre"></h2>
+                        <div class="modal-santo-header-actions">
+                            <div class="modal-santo-nav" style="display: inline-flex; align-items: center; gap: 4px; margin-right: 4px;">
+                                <button type="button" id="btn-modal-prev" class="btn-nav-arrow" onclick="window.navegarSantoAnterior()" title="Santo anterior">
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                                </button>
+                                <span id="modal-santo-contador" style="font-size: 0.82rem; font-weight: 700; color: #546e7a; min-width: 65px; text-align: center; user-select: none;">1 de 1</span>
+                                <button type="button" id="btn-modal-next" class="btn-nav-arrow" onclick="window.navegarSantoSiguiente()" title="Santo siguiente">
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                                </button>
+                            </div>
+                            <button type="button" id="btn-leer-voz-santo" class="btn-tts-santo" onclick="window.toggleLeerSantoVoz()" title="Reproducir lectura / audio">
+                                <svg class="tts-circular-ring" viewBox="0 0 42 42">
+                                    <circle class="tts-circular-bg" cx="21" cy="21" r="17.5"></circle>
+                                    <circle class="tts-circular-bar" id="tts-circular-bar" cx="21" cy="21" r="17.5"></circle>
+                                </svg>
+                                <span class="material-symbols-outlined" id="icono-leer-voz">play_arrow</span>
+                            </button>
+                            <button type="button" id="btn-descargar-audio-santo" class="btn-tts-santo btn-modal-download" onclick="window.descargarAudioSantoActual()" title="Descargar audio de la vida/historia del santo (santo.mp3)">
+                                <span class="material-symbols-outlined">download</span>
+                            </button>
+                            <button type="button" id="btn-modal-editar-santo" class="btn-tts-santo btn-modal-pencil" onclick="window.editarSantoDesdeModal()" title="Editar este santo" aria-label="Editar">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                            <span class="modal-close-santo" onclick="window.cerrarModalDetalleSanto()" title="Cerrar">&times;</span>
+                        </div>
+                    </div>
+                    <!-- Barra Interactiva de Progreso de Lectura -->
+                    <div id="santo-speech-progress-track" class="speech-progress-track" title="Haz clic o arrastra para adelantar o retroceder la lectura">
+                        <div id="santo-speech-progress-bar" class="speech-progress-bar">
+                            <div id="santo-speech-progress-thumb" class="speech-progress-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="modal-santo-cuerpo" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.93rem; color: #37474f;"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    return modal;
+}
+
+/**
+ * Retorna la lista activa de santos para navegar en el modal
+ */
+export function obtenerListaSantosModal() {
+    let lista = [];
+    try {
+        const raw = localStorage.getItem('lh_catalogo_nombres_santos');
+        if (raw) lista = JSON.parse(raw);
+    } catch (_) {}
+    if (!Array.isArray(lista) || lista.length === 0) {
+        if (typeof catalogoSantosAnual !== 'undefined' && Array.isArray(catalogoSantosAnual)) {
+            lista = catalogoSantosAnual;
+        } else if (typeof window !== 'undefined' && window.catalogoSantosAnual && Array.isArray(window.catalogoSantosAnual)) {
+            lista = window.catalogoSantosAnual;
+        }
+    }
+    return lista || [];
+}
+
+/**
+ * Abre el modal de vida/historia para el santo indicado o el santo actual
+ */
+export function abrirModalVidaHistoriaSanto(santoParam = null) {
+    let s = santoParam;
+    if (!s && typeof window !== 'undefined') {
+        s = window.santoDelDiaObjeto || window.santoActualDetalle || (typeof window.obtenerSantoParaVistaActual === 'function' ? window.obtenerSantoParaVistaActual() : null);
+    }
+    if (!s) {
+        const lista = obtenerListaSantosModal();
+        s = lista[0] || null;
+    }
+    if (!s) return;
+    verDetalleSanto(s);
+}
+
+/**
+ * Muestra el detalle completo del santo en el modal
+ */
+export function verDetalleSanto(itemOrIndex) {
+    asegurarModalSantoEnDOM();
+    const lista = obtenerListaSantosModal();
+    let s = null;
+    let index = 0;
+
+    if (typeof itemOrIndex === 'number') {
+        s = lista[itemOrIndex];
+        index = itemOrIndex;
+    } else if (itemOrIndex && typeof itemOrIndex === 'object') {
+        s = itemOrIndex;
+        const foundIdx = lista.findIndex(x => (x.nombre || '').trim() === (s.nombre || '').trim());
+        index = foundIdx >= 0 ? foundIdx : 0;
+    }
+
+    if (!s) return;
+
+    if (typeof window !== 'undefined') {
+        window.santoActualDetalle = s;
+        window.indiceSantoActualDetalle = index;
+        if (window.detenerLecturaSantoVoz) {
+            window.detenerLecturaSantoVoz();
+        }
+    }
+
+    const modal = document.getElementById('modal-detalle-santo');
+    if (!modal) return;
+
+    const nomEl = document.getElementById('modal-santo-nombre');
+    if (nomEl) nomEl.textContent = s.nombre || 'Detalle del Santo';
+
+    const contEl = document.getElementById('modal-santo-contador');
+    if (contEl) {
+        contEl.textContent = lista.length > 0 ? `${index + 1} de ${lista.length}` : '1 de 1';
+    }
+
+    const hijosValidos = (s.hijos && Array.isArray(s.hijos))
+        ? s.hijos.filter(h => h && typeof h === 'string' && h.trim().length > 0 && h.trim() !== '—')
+        : [];
+
+    let imgModal = '';
+    if (s.imagen) {
+        let srcImg = s.imagen.trim();
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/src/html/') && srcImg.startsWith('../img/')) {
+            srcImg = 'src/' + srcImg.substring(3);
+        }
+        imgModal = `<div style="text-align:center; margin-bottom:12px;"><img src="${srcImg}" style="max-height:160px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.15);" alt="${s.nombre}"></div>`;
+    }
+
+    const fechaCeleb = (s.celebracion !== undefined && s.celebracion !== null && s.celebracion.trim() !== '')
+        ? s.celebracion.trim()
+        : (s.fechaFestividad || '').trim();
+
+    let cuerpoHtml = imgModal;
+
+    if (fechaCeleb && fechaCeleb !== '—') {
+        cuerpoHtml += `<div><strong>Fecha Celebración:</strong> ${fechaCeleb}</div>`;
+    }
+    if (s.nacimiento && s.nacimiento.trim() && s.nacimiento.trim() !== '—') {
+        cuerpoHtml += `<div><strong>Nacimiento:</strong> ${s.nacimiento.trim()}</div>`;
+    }
+    if (s.muerte && s.muerte.trim() && s.muerte.trim() !== '—') {
+        cuerpoHtml += `<div><strong>Mortalidad:</strong> ${s.muerte.trim()}</div>`;
+    }
+    if (s.pais && s.pais.trim() && s.pais.trim() !== '—') {
+        cuerpoHtml += `<div><strong>País:</strong> ${s.pais.trim()}</div>`;
+    }
+    if (s.ciudad && s.ciudad.trim() && s.ciudad.trim() !== '—') {
+        cuerpoHtml += `<div><strong>Ciudad:</strong> ${s.ciudad.trim()}</div>`;
+    }
+    if (s.realidad && s.realidad.trim() && s.realidad.trim() !== '—') {
+        cuerpoHtml += `<div><strong>Realidad:</strong> ${s.realidad.trim()}</div>`;
+    }
+    if (hijosValidos.length > 0) {
+        const hijosTags = hijosValidos.map(h => `<span class="tag-hijo" style="display:inline-block; background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:12px; font-size:0.8rem; margin:2px 3px 2px 0;">${h.trim()}</span>`).join(' ');
+        cuerpoHtml += `<div><strong>Hijos en la fe:</strong> <div style="margin-top:4px;">${hijosTags}</div></div>`;
+    }
+    if (s.historia && s.historia.trim() && s.historia.trim() !== '—') {
+        cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Historia:</strong><p style="margin: 4px 0 0; line-height: 1.5; text-align: justify;">${s.historia.trim()}</p></div>`;
+    }
+    if (s.detalle && s.detalle.trim() && s.detalle.trim() !== '—') {
+        cuerpoHtml += `<div style="border-top: 1px solid #eceff1; padding-top: 10px;"><strong>Detalle:</strong><p style="margin: 4px 0 0; line-height: 1.5; text-align: justify;">${s.detalle.trim()}</p></div>`;
+    }
+
+    // Liturgias de las Horas Trabajadas
+    const horasConfig = [
+        { key: 'oficio', nombre: 'Oficio de Lectura', icono: 'menu_book' },
+        { key: 'laudes', nombre: 'Laudes', icono: 'wb_sunny' },
+        { key: 'tercia', nombre: 'Tercia', icono: 'schedule' },
+        { key: 'sexta', nombre: 'Sexta', icono: 'wb_sunny' },
+        { key: 'nona', nombre: 'Nona', icono: 'schedule' },
+        { key: 'visperas', nombre: 'Vísperas', icono: 'nights_stay' },
+        { key: 'completas', nombre: 'Completas', icono: 'bedtime' }
+    ];
+
+    let liturgiasModalHtml = '';
+    const codsAsig = s.horasAsignadas || s.codigos || {};
+    horasConfig.forEach(h => {
+        const cod = codsAsig[h.key] || codsAsig[h.key.slice(0, 2)];
+        if (cod) {
+            const codVal = (typeof cod === 'string') ? cod : (cod.codigo || '');
+            if (codVal) {
+                const prefixSalterios = (typeof window !== 'undefined' && window.location.pathname.includes('/src/html/')) ? '../../salterios.html' : 'salterios.html';
+                liturgiasModalHtml += `
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 0.84rem;">
+                        <span style="font-weight: 600; color: #166534; display: flex; align-items: center; gap: 4px;">
+                            <span class="material-symbols-outlined" style="font-size: 16px; color: #16a34a;">${h.icono}</span>
+                            ${h.nombre}
+                        </span>
+                        <span style="font-family: monospace; color: #0f766e; font-weight: 600;">${codVal}</span>
+                        <a href="${prefixSalterios}?libro=${h.key}&id=${encodeURIComponent(codVal)}" target="_blank" style="background: #0288d1; color: white; text-decoration: none; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Abrir</a>
+                    </div>
+                `;
+            }
+        }
+    });
+
+    if (liturgiasModalHtml) {
+        cuerpoHtml += `
+            <div style="border-top: 1.5px solid #bbf7d0; padding-top: 10px; margin-top: 6px;">
+                <strong style="color: #166534; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                    <span class="material-symbols-outlined" style="font-size: 18px; color: #16a34a;">auto_stories</span>
+                    Liturgia de las Horas Asignada:
+                </strong>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    ${liturgiasModalHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // Archivos de Audio Litúrgico / Grabaciones del Santo
+    let basePathModal = (s.audios && s.audios.basePath) ? s.audios.basePath : (s.audioBasePath || '');
+    if (!basePathModal && typeof window !== 'undefined' && typeof window.autodetectarCarpetaSanto === 'function') {
+        const autoModal = window.autodetectarCarpetaSanto(s.nombre, s.celebracion || s.fechaFestividad);
+        if (autoModal) basePathModal = autoModal.basePath;
+    }
+
+    if (basePathModal) {
+        if (!basePathModal.endsWith('/')) basePathModal += '/';
+        const archsModal = (s.audios && s.audios.archivos) ? s.audios.archivos : {
+            lectura1: 'lectura1.mp3',
+            lectura2: 'lectura1.mp3',
+            lecturas: 'lecturas.mp3',
+            santo: 'santo.mp3'
+        };
+
+        const labelsModal = {
+            'lectura1': { label: '1ª Lectura (Impar)', file: archsModal['lectura1'] || 'lectura1.mp3', icon: 'menu_book' },
+            'lecturas': { label: '2ª Lectura Patrística', file: archsModal['lecturas'] || 'lecturas.mp3', icon: 'auto_stories' },
+            'santo': { label: 'Vida / Historia del Santo', file: archsModal['santo'] || 'santo.mp3', icon: 'account_circle' },
+            'oficio': { label: 'Oficio Completo', file: archsModal['oficio'] || 'oficio.mp3', icon: 'hearing' },
+            'laudes': { label: 'Laudes', file: archsModal['laudes'] || 'laudes.mp3', icon: 'wb_sunny' },
+            'visperas': { label: 'Vísperas', file: archsModal['visperas'] || 'visperas.mp3', icon: 'nights_stay' }
+        };
+
+        let audiosItemsHtml = '';
+        ['lectura1', 'lecturas', 'santo', 'oficio', 'laudes', 'visperas'].forEach(k => {
+            const cfg = labelsModal[k];
+            if (cfg && cfg.file) {
+                const urlFile = cfg.file.startsWith('http') ? cfg.file : (basePathModal + encodeURI(cfg.file));
+                const esVidaSanto = (k === 'santo');
+                audiosItemsHtml += `
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; background: ${esVidaSanto ? '#f0fdf4' : '#f0f9ff'}; border: 1px solid ${esVidaSanto ? '#bbf7d0' : '#bae6fd'}; border-radius: 6px; font-size: 0.82rem;">
+                        <span style="font-weight: 600; color: ${esVidaSanto ? '#166534' : '#0369a1'}; display: flex; align-items: center; gap: 4px;">
+                            <span class="material-symbols-outlined" style="font-size: 16px; color: ${esVidaSanto ? '#16a34a' : '#0284c7'};">${cfg.icon}</span>
+                            ${cfg.label}
+                        </span>
+                        <div style="display: flex; gap: 4px;">
+                            <button type="button" onclick="window.reproducirAudioSantoModal('${urlFile.replace(/'/g, "\\'")}', '${cfg.label.replace(/'/g, "\\'")}', this)" style="background: ${esVidaSanto ? '#16a34a' : '#0284c7'}; color: white; border: none; padding: 2px 8px; border-radius: 4px; font-size: 0.74rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 2px;">
+                                <span class="material-symbols-outlined" style="font-size: 14px;">play_arrow</span> Escuchar
+                            </button>
+                            ${esVidaSanto ? `
+                                <button type="button" onclick="window.descargarAudioSantoActual()" style="background: #0284c7; color: white; border: none; padding: 2px 6px; border-radius: 4px; font-size: 0.74rem; cursor: pointer; display: inline-flex; align-items: center;" title="Descargar / Generar audio (santo.mp3)">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">download</span>
+                                </button>
+                            ` : `
+                                <a href="${urlFile}" target="_blank" download style="background: #e2e8f0; color: #334155; text-decoration: none; padding: 2px 6px; border-radius: 4px; font-size: 0.74rem; display: inline-flex; align-items: center;" title="Descargar / Abrir MP3">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span>
+                                </a>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        if (audiosItemsHtml) {
+            const prefixOficio = (typeof window !== 'undefined' && window.location.pathname.includes('/src/html/')) ? 'oficiodelectura.html' : 'src/html/oficiodelectura.html';
+            cuerpoHtml += `
+                <div style="border-top: 1.5px solid #bae6fd; padding-top: 10px; margin-top: 8px;">
+                    <strong style="color: #0369a1; display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px;">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px; color: #0284c7;">headphones</span>
+                            Archivos de Audio Litúrgico:
+                        </span>
+                        <a href="${prefixOficio}" target="_blank" style="font-size: 0.72rem; color: #8B0000; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 2px;">
+                            Catálogo Oficio
+                        </a>
+                    </strong>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        ${audiosItemsHtml}
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    const cuerpoEl = document.getElementById('modal-santo-cuerpo');
+    if (cuerpoEl) cuerpoEl.innerHTML = cuerpoHtml;
+
+    modal.style.display = 'flex';
+
+    if (window.prepararBarraProgresoSanto) {
+        window.prepararBarraProgresoSanto(s);
+    }
+}
+
+export function cerrarModalDetalleSanto() {
+    const modal = document.getElementById('modal-detalle-santo');
+    if (modal) modal.style.display = 'none';
+    if (typeof window !== 'undefined' && window.detenerLecturaSantoVoz) {
+        window.detenerLecturaSantoVoz();
+    }
+}
+
+export function navegarSantoAnterior() {
+    const lista = obtenerListaSantosModal();
+    if (!lista || lista.length === 0) return;
+    let idx = (typeof window !== 'undefined' ? window.indiceSantoActualDetalle : 0) || 0;
+    idx = (idx - 1 + lista.length) % lista.length;
+    verDetalleSanto(idx);
+}
+
+export function navegarSantoSiguiente() {
+    const lista = obtenerListaSantosModal();
+    if (!lista || lista.length === 0) return;
+    let idx = (typeof window !== 'undefined' ? window.indiceSantoActualDetalle : 0) || 0;
+    idx = (idx + 1) % lista.length;
+    verDetalleSanto(idx);
+}
+
+export function editarSantoDesdeModal() {
+    const s = typeof window !== 'undefined' ? window.santoActualDetalle : null;
+    const nom = s ? (s.nombre || '') : '';
+    const prefixEdicion = (typeof window !== 'undefined' && window.location.pathname.includes('/src/html/')) ? 'nombresanto.html' : 'src/html/nombresanto.html';
+    window.open(`${prefixEdicion}?nombre=${encodeURIComponent(nom)}`, '_blank');
+}
+
+export function reproducirAudioSantoModal(url, titulo, btn) {
+    if (!url) return;
+    if (typeof window === 'undefined') return;
+    if (window._audioModalPlayer && window._audioModalPlayer.src === url && !window._audioModalPlayer.paused) {
+        window._audioModalPlayer.pause();
+        if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 14px;">play_arrow</span> Escuchar';
+        return;
+    }
+    if (window._audioModalPlayer) {
+        try { window._audioModalPlayer.pause(); } catch (_) {}
+    }
+    const a = new Audio(url);
+    window._audioModalPlayer = a;
+    if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 14px;">pause</span> Pausa';
+    a.addEventListener('ended', () => {
+        if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 14px;">play_arrow</span> Escuchar';
+        window._audioModalPlayer = null;
+    });
+    a.addEventListener('pause', () => {
+        if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 14px;">play_arrow</span> Escuchar';
+    });
+    a.play().catch(err => {
+        console.warn('Error al reproducir audio modal:', err);
+        if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 14px;">play_arrow</span> Escuchar';
+    });
+}
+
+// Asignaciones en window para disponibilidad global en cualquier página
+if (typeof window !== 'undefined') {
+    window.asegurarModalSantoEnDOM = asegurarModalSantoEnDOM;
+    window.obtenerListaSantosModal = obtenerListaSantosModal;
+    window.abrirModalVidaHistoriaSanto = abrirModalVidaHistoriaSanto;
+    window.verDetalleSanto = verDetalleSanto;
+    window.cerrarModalDetalleSanto = cerrarModalDetalleSanto;
+    window.navegarSantoAnterior = navegarSantoAnterior;
+    window.navegarSantoSiguiente = navegarSantoSiguiente;
+    window.editarSantoDesdeModal = editarSantoDesdeModal;
+    window.reproducirAudioSantoModal = reproducirAudioSantoModal;
 }
