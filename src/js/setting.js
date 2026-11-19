@@ -1222,6 +1222,16 @@ window.cambioEnExpandir = false;
             ]
         },
         // ==========================================
+        // MODULO: TAB CLOUD (SINCRONIZACIÓN Y CACHÉ)
+        // ==========================================
+        {
+            id: 'tab-cloud',
+            label: 'Cloud',
+            icon: 'cloud_sync',
+            customRender: () => (window.renderModuloCloudSync ? window.renderModuloCloudSync() : '<div class="cloud-dashboard-container"><p style="padding:20px; text-align:center;">Cargando panel de sincronización...</p></div>'),
+            secciones: []
+        },
+        // ==========================================
         // MODULO: TAB CHAT (ASISTENCIA Y SOPORTE)
         // ==========================================
         {
@@ -1551,8 +1561,11 @@ window.cambioEnExpandir = false;
                 }).join('');
 
                 contenidoPanel = subtabsBar + subtabsContent;
+            } else if (typeof tab.customRender === 'function') {
+                // Caso 2: Pestaña con renderizado personalizado (Cloud Sync Dashboard)
+                contenidoPanel = tab.customRender();
             } else if (tab.secciones) {
-                // Caso 2: Pestaña estándar directa con secciones (TTS, Columnas, Calendario)
+                // Caso 3: Pestaña estándar directa con secciones (TTS, Columnas, Calendario)
                 contenidoPanel = renderizarListaSecciones(tab.secciones);
             }
 
@@ -1680,6 +1693,12 @@ window.cambioEnExpandir = false;
         if(targetTab) targetTab.classList.add('active');
         if(window.event && window.event.currentTarget) window.event.currentTarget.classList.add('active');
         localStorage.setItem('pref-active-tab', tabId);
+
+        if (tabId === 'tab-cloud' && window.cloudSyncAPI) {
+            if (typeof window.cloudSyncAPI.actualizarUICloudTab === 'function') {
+                window.cloudSyncAPI.actualizarUICloudTab();
+            }
+        }
     };
 
     window.ejecutarAccionTabs = (id, valor, esManual = false) => {

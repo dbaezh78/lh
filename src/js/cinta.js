@@ -742,13 +742,16 @@ export class CintaLiturgica {
 
         this.contenedor.innerHTML = `
             <div class="cinta-top-bar" id="cinta-top-bar">
-                <!-- Fila 1: Metadatos, Zoom y Selector de Iglesia -->
+                <!-- Fila 1: Metadatos (Izquierda) y Controles Prioritarios / Selector de Iglesia (Derecha) -->
                 <div class="cinta-fila-sup">
                     <div class="cinta-sup-izq">
                         <button type="button" class="cinta-badge-tiempo tiempo-${slugTiempo}" id="btn-toggle-tiempo" title="Toca para ocultar o mostrar el reproductor y las horas">
                             ${this.formatearTextoTiempo(tiempo)}
                         </button>
-                        <span class="cinta-texto-metadatos" id="cinta-texto-metadatos" title="Toca para seleccionar semana o celebración">${this.formatearTextoMetadatos(semana, dia)}</span>
+                        <span class="cinta-texto-metadatos" id="cinta-texto-metadatos" title="${this.formatearTextoMetadatos(semana, dia)}">${this.formatearTextoMetadatos(semana, dia)}</span>
+                    </div>
+
+                    <div class="cinta-sup-der">
                         <div class="cinta-zoom-controles">
                             <button type="button" class="cinta-btn-zoom" id="btn-zoom-menos" title="Disminuir tamaño de letra">−</button>
                             <button type="button" class="cinta-btn-zoom" id="btn-zoom-mas" title="Aumentar tamaño de letra">+</button>
@@ -770,9 +773,6 @@ export class CintaLiturgica {
                                 <span class="material-symbols-outlined">arrow_downward</span>
                             </button>
                         </div>
-                    </div>
-
-                    <div class="cinta-sup-der">
                         <button type="button" class="cinta-btn-ciclo-anio ${libro.toLowerCase() === 'oficio' ? 'visible' : ''}" id="btn-ciclo-anio" title="${this.cicloAnio === 'par' ? 'Año II (Par) - Toca para cambiar a Año I (Impar)' : 'Año I (Impar) - Toca para cambiar a Año II (Par)'}">${this.cicloAnio === 'par' ? 'II' : 'I'}</button>
                         <button type="button" class="cinta-btn-iglesia" id="btn-iglesia-selector" title="Seleccionar fuente de audio">
                             <span class="material-symbols-outlined">church</span>
@@ -1378,6 +1378,28 @@ export class CintaLiturgica {
                                 });
                             });
                             return;
+                        }
+                    }
+
+                    // Si era evangelio de santo (ej: 19-marzo-sjose.mp3) y falló, probar con el nombre corto directo (ej: sjose.mp3)
+                    if (modo === 'evangelio' && urlAudio.includes('/santos/')) {
+                        const mNombreCorto = urlAudio.match(/\/santos\/\d{1,2}-[a-z]+-([a-z0-9_-]+)\.mp3$/i);
+                        if (mNombreCorto && mNombreCorto[1]) {
+                            const urlCorta = urlAudio.replace(/\/santos\/[^\/]+$/, `/santos/${mNombreCorto[1]}.mp3`);
+                            if (!this.audiosFallidos.has(urlCorta)) {
+                                offlineAudioLh.getPlayableAudioUrl(urlCorta).then(playableCorta => {
+                                    this.audio.src = playableCorta;
+                                    this.audio.load();
+                                    this.audio.play().then(() => {
+                                        const sub = document.getElementById(`menu-sub-${modo}`);
+                                        if (sub) sub.textContent = `Evangelio del Santo`;
+                                    }).catch(() => {
+                                        this.audiosFallidos.add(urlCorta);
+                                        this.ejecutarFallbackTTS(modo, true);
+                                    });
+                                });
+                                return;
+                            }
                         }
                     }
 
@@ -2761,6 +2783,7 @@ export class CintaLiturgica {
         }
         if (txtMetadatos) {
             txtMetadatos.innerHTML = this.formatearTextoMetadatos(this.opciones.semana, this.opciones.dia);
+            txtMetadatos.title = txtMetadatos.textContent.trim();
             txtMetadatos.classList.remove('activo');
         }
 

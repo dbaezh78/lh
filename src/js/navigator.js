@@ -16,6 +16,7 @@
         { src: `/src/js/dbaudiodescarga.js?v=${v}`, type: 'module' },
         { src: `/src/js/firebase-config.js?v=${v}`, type: 'module' },
         { src: `/src/js/accesscontrol.js?v=${v}`, type: 'module' },
+        { src: `/src/js/cloud-sync.js?v=${v}`, type: 'text/javascript' },
         { src: `/src/js/setting.js?v=${v}`, type: 'text/javascript' }
     ];
 

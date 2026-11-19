@@ -33,13 +33,17 @@
     justify-content: space-between;
     gap: 8px;
     width: 100%;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .cinta-sup-izq {
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex-wrap: nowrap;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
 }
 
 /* Píldora del Tiempo Litúrgico (Clickeable para colapsar/expandir fila 2) */
@@ -118,12 +122,16 @@
     color: #ffffff;
 }
 
-/* Texto de Metadatos (Semana X • Día) */
+/* Texto de Metadatos (Semana X • Día / Santo) */
 .cinta-texto-metadatos {
     color: #ffffff;
     font-weight: 700;
     font-size: 0.95rem;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1 1 auto;
     letter-spacing: 0.2px;
     cursor: pointer;
     padding: 2px 5px;
@@ -383,6 +391,9 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    flex-shrink: 0;
+    margin-left: auto;
+    white-space: nowrap;
 }
 
 /* Botón Conmutador de Ciclo de Lecturas (Año I Impar / Año II Par en Oficio) */
@@ -1143,17 +1154,22 @@ color: red !important;
     }
 
     .cinta-fila-sup {
-        gap: 0 !important;
+        gap: 4px !important;
+        width: 100% !important;
+        overflow: hidden !important;
     }
 
     .cinta-sup-izq {
-        gap: 0 !important;
-        flex: 1 1 auto;
-        min-width: 0;
+        gap: 4px !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
     }
 
     .cinta-sup-der {
-        flex-shrink: 0;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+        gap: 2px !important;
     }
 
     .cinta-btn-ciclo-anio {
@@ -1161,28 +1177,32 @@ color: red !important;
         height: 22px;
         font-size: 0.78rem;
         border-width: 1.5px;
+        flex-shrink: 0 !important;
     }
 
     .cinta-btn-iglesia {
         padding: 0 1px;
-        flex-shrink: 0;
+        flex-shrink: 0 !important;
     }
 
     .cinta-btn-iglesia .material-symbols-outlined {
-        font-size: 32px;
+        font-size: 30px;
     }
 
     .cinta-badge-tiempo {
         font-size: 0.70rem;
         padding: 2px 5px;
-        flex-shrink: 0;
+        flex-shrink: 0 !important;
     }
 
     .cinta-texto-metadatos {
-        font-size: 0.82rem;
-        margin: 0 3px;
-        white-space: nowrap;
-        flex-shrink: 0;
+        font-size: 0.80rem;
+        margin: 0 2px;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
     }
 
     /* En celulares muestra SEM en vez de Semana para que quepa todo y se pueda ver el icono de la iglesia */
@@ -1206,24 +1226,24 @@ color: red !important;
     .cinta-zoom-controles {
         gap: 0 !important;
         margin-left: 1px;
-        flex-shrink: 0;
+        flex-shrink: 0 !important;
     }
 
     .cinta-btn-zoom {
-        padding: 0 6px;
-        font-size: 1.5rem;
+        padding: 0 4px;
+        font-size: 1.3rem;
     }
 
     .cinta-zoom-valor {
-        font-size: 10px;
+        font-size: 9px;
         margin-left: 1px;
-        min-width: 22px;
+        min-width: 20px;
     }
 
     .cinta-scroll-controles {
         gap: 0 !important;
-        margin-left: 2px;
-        flex-shrink: 0;
+        margin-left: 1px;
+        flex-shrink: 0 !important;
     }
 
     .cinta-btn-scroll {
@@ -1231,7 +1251,7 @@ color: red !important;
     }
 
     .cinta-btn-scroll .material-symbols-outlined {
-        font-size: 18px;
+        font-size: 17px;
     }
 }
 
@@ -1242,21 +1262,32 @@ color: red !important;
     }
 
     .cinta-fila-sup {
-        gap: 0 !important;
+        gap: 2px !important;
     }
 
     .cinta-sup-izq {
-        gap: 0 !important;
+        gap: 2px !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .cinta-sup-der {
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+        gap: 1px !important;
     }
 
     .cinta-zoom-controles {
         gap: 0 !important;
         margin-left: 0;
+        flex-shrink: 0 !important;
     }
 
     .cinta-scroll-controles {
         gap: 0 !important;
         margin-left: 1px;
+        flex-shrink: 0 !important;
     }
 
     .cinta-btn-scroll {
@@ -1271,15 +1302,21 @@ color: red !important;
         font-size: 0.68rem;
         padding: 2px 4px;
         letter-spacing: 0;
+        flex-shrink: 0 !important;
     }
     
     .cinta-texto-metadatos {
-        font-size: 0.78rem;
-        margin: 0 2px;
+        font-size: 0.74rem;
+        margin: 0 1px;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
     }
     
     .cinta-btn-iglesia .material-symbols-outlined {
-        font-size: 30px;
+        font-size: 28px;
     }
 }
 

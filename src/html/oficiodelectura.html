@@ -7,7 +7,7 @@
     <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="../css/buttons.css">
-    <link rel="stylesheet" href="../css/oficiodelectura.css">
+    <link rel="stylesheet" href="../css/oficiodelectura.css?v=1.0.14">
 </head>
 <body>
 
@@ -44,12 +44,13 @@
                     <option value="">Todos los Tiempos</option>
                     <option value="Adviento">Adviento (ta)</option>
                     <option value="Navidad">Navidad (tn)</option>
-                    <option value="Tiempo Ordinario">Tiempo Ordinario (to)</option>
+                    <option value="Ordinario">Tiempo Ordinario (to)</option>
                     <option value="Cuaresma">Cuaresma (tc)</option>
                     <option value="Pascua">Pascua (tp)</option>
+                    <option value="Santos">Santos (santos)</option>
                 </select>
 
-                <label for="filtro-semana" style="font-weight: 600;">Semana:</label>
+                <label for="filtro-semana" id="label-filtro-semana" style="font-weight: 600;">Semana:</label>
                 <select id="filtro-semana" class="select-filtro">
                     <option value="">Todas las Semanas</option>
                 </select>
@@ -64,6 +65,12 @@
                     </label>
                     <span id="label-servidor-activo" style="color: #16a34a;">Servidor: Principal (resucito.do)</span>
                 </div>
+
+                <!-- Botón de Configuración de Servidor / Rutas -->
+                <button type="button" class="btn-config-servidor" id="btn-config-servidor" title="Configurar dominios de servidor o ver rutas editadas">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">tune</span>
+                    <span>Rutas Servidor</span>
+                </button>
             </div>
 
             <div>
@@ -76,14 +83,14 @@
             <table id="tabla-oficio-lectura">
                 <thead>
                     <tr>
-                        <th style="width: 130px;">Tiempo</th>
-                        <th style="width: 75px;">Semana</th>
-                        <th style="width: 95px;">Día</th>
-                        <th>Celebración / Ubicación en Servidor</th>
-                        <th style="width: 145px;">1ª Lectura (Impar)</th>
-                        <th style="width: 145px;">1ª Lectura (Par)</th>
-                        <th style="width: 145px;">2ª Lectura (Patrística)</th>
-                        <th style="width: 50px; text-align: center;">Rezar</th>
+                        <th style="width: 80px;">Tiempo</th>
+                        <th style="width: 75px;">Semana / Mes</th>
+                        <th style="width: 85px;">Día / Fecha</th>
+                        <th style="width: 260px;">Celebración / Ubicación en Servidor</th>
+                        <th style="width: 120px;">1ª Lectura (Impar)</th>
+                        <th style="width: 120px;">1ª Lectura (Par)</th>
+                        <th style="width: 125px;">2ª Lectura (Patrística)</th>
+                        <th style="width: 45px; text-align: center;">Rezar</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpo-tabla">
@@ -92,6 +99,133 @@
             </table>
         </div>
     </div>
+
+    <!-- Modal: Editar Ruta de Servidor de Celebración -->
+    <div class="modal-overlay-oficio" id="modal-editar-ruta" style="display: none;">
+        <div class="modal-contenido-oficio">
+            <div class="modal-header-oficio">
+                <div class="modal-titulo-box">
+                    <span class="material-symbols-outlined" style="color: #8B0000; font-size: 26px;">dns</span>
+                    <h2 id="modal-ruta-titulo">Editar Ubicación en Servidor</h2>
+                </div>
+                <button type="button" class="btn-cerrar-modal" id="btn-cerrar-modal-ruta" title="Cerrar ventana">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body-oficio">
+                <div class="modal-info-celeb">
+                    <div id="modal-ruta-celeb-nombre" style="font-weight: 700; font-size: 1.05rem; color: #1e293b;"></div>
+                    <div id="modal-ruta-celeb-detalle" style="font-size: 0.85rem; color: #64748b; margin-top: 2px;"></div>
+                </div>
+
+                <div class="campo-grupo-modal">
+                    <label for="input-modal-basepath" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                        Ruta o Carpeta Base en el Servidor:
+                    </label>
+                    <input type="text" id="input-modal-basepath" class="input-modal-ruta" placeholder="https://santos.resucito.do/.../">
+                    <div class="ayuda-modal">
+                        Escribe la URL completa de la carpeta donde se alojan los audios (debe terminar en <code>/</code>).
+                    </div>
+                </div>
+
+                <!-- Presets Rápidos -->
+                <div class="campo-grupo-modal" id="caja-presets-ruta">
+                    <span style="font-size: 0.82rem; font-weight: 600; color: #475569;">Atajos / Formatos rápidos:</span>
+                    <div class="presets-botones-box" id="contenedor-botones-preset"></div>
+                </div>
+
+                <!-- Previsualización en Vivo de Archivos -->
+                <div class="preview-archivos-box">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                        Previsualización de los 3 Archivos Resultantes:
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">1ª Lectura (Impar):</span>
+                        <code id="preview-url-impar" class="preview-code">...</code>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">1ª Lectura (Par):</span>
+                        <code id="preview-url-par" class="preview-code">...</code>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">2ª Lectura (Patrística):</span>
+                        <code id="preview-url-segunda" class="preview-code">...</code>
+                    </div>
+                </div>
+
+                <!-- Comprobar Conexión con Audio -->
+                <div class="comprobar-box">
+                    <button type="button" class="btn-probar-audio" id="btn-probar-audio-modal">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">volume_up</span>
+                        Probar Reproducción
+                    </button>
+                    <span id="resultado-prueba-audio" style="font-size: 0.82rem; color: #64748b;"></span>
+                </div>
+            </div>
+            <div class="modal-footer-oficio">
+                <button type="button" class="btn-modal-secundario" id="btn-reset-ruta-modal" style="display: none;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">restart_alt</span>
+                    Restaurar por Defecto
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-modal-cancelar" id="btn-cancelar-modal-ruta">Cancelar</button>
+                    <button type="button" class="btn-modal-guardar" id="btn-guardar-modal-ruta">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">save</span>
+                        Guardar Ubicación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Configuración Global de Servidores y Rutas Editadas -->
+    <div class="modal-overlay-oficio" id="modal-config-servidor-box" style="display: none;">
+        <div class="modal-contenido-oficio">
+            <div class="modal-header-oficio">
+                <div class="modal-titulo-box">
+                    <span class="material-symbols-outlined" style="color: #8B0000; font-size: 26px;">tune</span>
+                    <h2>Configuración de Servidores y Rutas</h2>
+                </div>
+                <button type="button" class="btn-cerrar-modal" id="btn-cerrar-config-servidor" title="Cerrar ventana">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body-oficio">
+                <div class="campo-grupo-modal">
+                    <label for="cfg-dominio-santos" style="font-weight: 600; display: block; margin-bottom: 4px;">
+                        Servidor Principal para Santos y Fiestas:
+                    </label>
+                    <input type="text" id="cfg-dominio-santos" class="input-modal-ruta" placeholder="https://santos.resucito.do">
+                    <div class="ayuda-modal">
+                        Por defecto: <code>https://santos.resucito.do</code> (o tu servidor local / personalizado).
+                    </div>
+                </div>
+
+                <div class="campo-grupo-modal" style="margin-top: 14px;">
+                    <span style="font-weight: 600; display: block; margin-bottom: 6px;">Rutas Personalizadas Guardadas:</span>
+                    <div id="lista-rutas-personalizadas" class="lista-rutas-box">
+                        <div style="color: #64748b; font-size: 0.85rem; padding: 10px;">No hay rutas editadas manualmente todavía.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer-oficio">
+                <button type="button" class="btn-modal-secundario" id="btn-limpiar-todas-rutas" style="display: none;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">delete_sweep</span>
+                    Restaurar Todas
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-modal-cancelar" id="btn-cancelar-config-servidor">Cerrar</button>
+                    <button type="button" class="btn-modal-guardar" id="btn-guardar-config-servidor">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">save</span>
+                        Guardar Servidor
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificación Toast Flotante -->
+    <div id="toast-notificacion-oficio" class="toast-oficio" style="display: none;"></div>
 
     <!-- Barra Flotante de Reproducción -->
     <div class="reproductor-barra-oficio" id="reproductor-barra-oficio">
@@ -108,7 +242,7 @@
     </div>
 
     <script src="../js/accesscontrol.js" type="module"></script>
-    <script src="../js/oficiodelectura.js" type="module"></script>
+    <script src="../js/oficiodelectura.js?v=1.0.14" type="module"></script>
     <script src="../js/navigator.js"></script>
 </body>
 </html>

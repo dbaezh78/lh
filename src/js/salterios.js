@@ -10,7 +10,7 @@ import { PrecesDB } from '../data/db-preces.js';
 import { ResponsoriosDB } from '../data/db-responsorios.js';
 import { LecturasDB } from '../data/db-lecturas.js';
 import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
-import { construirRutaOficioLectura } from './oficiodelectura.js';
+import { construirRutaOficioLectura, resolverSubRutaSanto } from './oficiodelectura.js';
 import { obtenerCicloDominical } from './datos.js';
 import { 
     obtenerLiturgiaHora, 
@@ -926,15 +926,24 @@ function montarOActualizarVista(params, datos) {
     // Cargar los 4 audios en la cinta litúrgica
     const esPar = obtenerEsParActual();
 
+    // Detección y resolución precisa del santo / celebración
+    const nombreSanto = celebracionNombre || datos?.santo || datos?.celebracion || textoCelebracion;
+    const fechaSanto = params?.fecha || datos?.fecha;
+    const subRutaSanto = esCelebracion ? (datos?.subRuta || resolverSubRutaSanto(nombreSanto, fechaSanto, params.codigoCompleto || dia)) : null;
+
     const rutasOficio = construirRutaOficioLectura({
-        tiempo: tiempo,
+        tiempo: esCelebracion ? 'santos' : tiempo,
         semana: semana,
-        dia: dia
+        dia: dia,
+        santo: nombreSanto,
+        fecha: fechaSanto,
+        subRutaPersonalizada: subRutaSanto,
+        clave: subRutaSanto ? `santos_${subRutaSanto}` : null
     });
 
-    const urlEvangelio = obtenerAudioPropio(`evangelio_${dia}`) || construirUrlEvangelio(tiempo, semana, dia);
+    const urlEvangelio = obtenerAudioPropio(`evangelio_${dia}`) || construirUrlEvangelio(tiempo, semana, dia, params, datos);
     const audioHoraPropio = obtenerAudioPropio(datos.codigo || datos.id || `${tiempo}_${semana}_${dia}_${libro}`);
-    const urlAudioHora = audioHoraPropio || datos.audioLibro || construirUrlAudioHora(tiempo, semana, dia, libro, esPar);
+    const urlAudioHora = audioHoraPropio || datos.audioLibro || construirUrlAudioHora(tiempo, semana, dia, libro, esPar, rutasOficio, esCelebracion);
     
     const idL1 = datos?.lecturasOficio?.primera?.id || (esPar ? 'lectura1_par' : 'lectura1_impar');
     const audioL1Propio = obtenerAudioPropio(idL1) || (datos?.lecturasOficio?.primera?.audioUrl);
@@ -950,9 +959,9 @@ function montarOActualizarVista(params, datos) {
         hora: urlAudioHora,
         subHora: `Rezo de ${(libro === 'tercia' || libro === 'sexta' || libro === 'nona') ? `HORA ${libro.toUpperCase()}` : libro.toUpperCase()}`,
         lectura1: urlLectura1,
-        subLectura1: `${esPar ? 'Año Par' : 'Año Impar'}`,
+        subLectura1: `${esCelebracion ? 'Lectura bíblica oficial' : (esPar ? 'Año Par' : 'Año Impar')}`,
         lectura2: urlLectura2,
-        subLectura2: 'Lectura patrística'
+        subLectura2: `${esCelebracion ? 'Lectura patrística del Santo' : 'Lectura patrística'}`
     });
 
     // Si es Oficio de Lectura, asegurar que la 1ª lectura corresponda estrictamente al ciclo del año activo (Par / Impar)
@@ -1215,7 +1224,16 @@ function ensamblarHoraPorDefecto(tiempo, semana, dia, libro, fecha, santo, docId
 
     // Calcular URLs de audio para Oficio de Lectura (Par vs Impar)
     const esPar = obtenerEsParActual();
-    const rutaOficio = construirRutaOficioLectura({ tiempo, semana, dia });
+    const esSantoDef = (tiempo === 'santos' || (typeof dia === 'string' && dia.startsWith('sa')) || !!santo);
+    const subRutaDef = esSantoDef ? resolverSubRutaSanto(santo || dia, fecha || dia, dia) : null;
+    const rutaOficio = construirRutaOficioLectura({
+        tiempo: esSantoDef ? 'santos' : tiempo,
+        semana,
+        dia,
+        santo,
+        fecha,
+        subRutaPersonalizada: subRutaDef
+    });
     const audioLectura1 = esPar ? rutaOficio.lecturaPar : rutaOficio.lecturaImpar;
     const audioLectura2 = rutaOficio.segundaLectura;
 
@@ -2279,10 +2297,16 @@ function inicializarEventosInteractivos() {
         // 1. Obtener la 1ª lectura correspondiente al nuevo ciclo (priorizando la guardada en Firebase para ese ciclo)
         const ldb = (typeof window !== 'undefined' && window.LecturasDB) || LecturasDB;
 
+        const esSantoAct = (tiempoAct === 'santos' || (typeof diaAct === 'string' && diaAct.startsWith('sa')) || !!horaActualDatos?.santo || !!params?.santo);
+        const subRutaAct = esSantoAct ? (horaActualDatos?.subRuta || resolverSubRutaSanto(horaActualDatos?.santo || params?.santo || diaAct, params?.fecha || horaActualDatos?.fecha, diaAct)) : null;
+
         const rutasOficio = construirRutaOficioLectura({
-            tiempo: tiempoAct,
+            tiempo: esSantoAct ? 'santos' : tiempoAct,
             semana: semanaAct,
-            dia: diaAct
+            dia: diaAct,
+            santo: horaActualDatos?.santo || params?.santo,
+            fecha: params?.fecha || horaActualDatos?.fecha,
+            subRutaPersonalizada: subRutaAct
         });
         const nuevoAudioL1 = esPar ? rutasOficio.lecturaPar : rutasOficio.lecturaImpar;
 
@@ -2540,13 +2564,75 @@ function poblarFormularioConstructor() {
 }
 
 // Helpers para construir URLs de audio litúrgico
-function construirUrlEvangelio(tiempo, semana, dia) {
+export function construirUrlEvangelio(tiempo, semana, dia, params = null, datos = null) {
+    const tSlug = String(tiempo || 'ordinario').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const esCelebracion = tSlug === 'santos' || tSlug === 'solemnidades' || tSlug === 'fiestas' || 
+                          (params && (params.santo || params.fiesta || params.formato === 'santo' || params.formato === 'solemnidad')) ||
+                          (datos && (datos.santo || datos.celebracion)) ||
+                          (typeof dia === 'string' && dia.startsWith('sa'));
+
+    if (esCelebracion) {
+        // Evangelio de Santos en https://ev.resucito.do/santos/
+        // Formato oficial: [numero]-[mes]-[nombresanto].mp3 (ej: 19-marzo-sjose.mp3)
+        const nomSanto = params?.santo || datos?.santo || datos?.celebracion || '';
+        const fechaSanto = params?.fecha || datos?.fecha || '';
+        const subRuta = resolverSubRutaSanto(nomSanto, fechaSanto, params?.codigoCompleto || dia);
+
+        let diaNum = null, mesTexto = '';
+        if (subRuta && subRuta.includes('/')) {
+            const partes = subRuta.split('/');
+            mesTexto = partes[0].toLowerCase();
+            const mDia = partes[1].match(/^(\d{1,2})/);
+            if (mDia) diaNum = parseInt(mDia[1], 10);
+        } else if (fechaSanto) {
+            const mF = fechaSanto.match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
+            if (mF) {
+                diaNum = parseInt(mF[1], 10);
+                const mNum = parseInt(mF[2], 10);
+                const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+                mesTexto = (mNum >= 1 && mNum <= 12) ? meses[mNum - 1] : 'enero';
+            }
+        }
+
+        // Obtener slug de nombre simplificado para el audio
+        let slugSanto = 'santo';
+        const cleanNom = (nomSanto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+        if (cleanNom.includes('jose')) {
+            slugSanto = 'sjose';
+        } else if (cleanNom.includes('providencia')) {
+            slugSanto = 'divinaprovidencia';
+        } else if (cleanNom.includes('pedroy') || cleanNom.includes('pedropablo')) {
+            slugSanto = 'pedroypablo';
+        } else {
+            const stopwords = new Set(['santa', 'santo', 'san', 'virgen', 'madre', 'padre', 'del', 'de', 'la', 'los', 'el', 'y']);
+            const tokens = (nomSanto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/).filter(w => w.length > 2 && !stopwords.has(w));
+            slugSanto = tokens.slice(0, 3).join('') || 'santo';
+        }
+
+        if (diaNum && mesTexto) {
+            return `https://ev.resucito.do/santos/${diaNum}-${mesTexto}-${slugSanto}.mp3`;
+        }
+        return `https://ev.resucito.do/santos/`;
+    }
+
     const diaMap = { domingo: 'domingo', lunes: 'lunes', martes: 'martes', miercoles: 'miercoles', jueves: 'jueves', viernes: 'viernes', sabado: 'sabado' };
     const diaRuta = diaMap[dia] || 'domingo';
-    return `https://ev.resucito.do/to/${semana}/${diaRuta}.mp3`;
+    let subdominio = 'to';
+    if (tSlug.includes('adviento') || tSlug === 'ta') subdominio = 'ta';
+    else if (tSlug.includes('navidad') || tSlug === 'tn') subdominio = 'tn';
+    else if (tSlug.includes('cuaresma') || tSlug === 'tc') subdominio = 'tc';
+    else if (tSlug.includes('pascua') || tSlug === 'tp') subdominio = 'tp';
+
+    return `https://ev.resucito.do/${subdominio}/${semana}/${diaRuta}.mp3`;
 }
 
-function construirUrlAudioHora(tiempo, semana, dia, libro, esPar = null) {
+function construirUrlAudioHora(tiempo, semana, dia, libro, esPar = null, rutasOficio = null, esCelebracion = false) {
+    const libroNorm = String(libro || 'laudes').toLowerCase().trim();
+
+    if (esCelebracion && rutasOficio && rutasOficio.basePath) {
+        return `${rutasOficio.basePath}${libroNorm}.mp3`;
+    }
+
     const tSlug = String(tiempo || 'ordinario').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     let subdominio = 'to';
     if (tSlug.includes('adviento') || tSlug === 'ta') subdominio = 'ta';
@@ -2554,7 +2640,6 @@ function construirUrlAudioHora(tiempo, semana, dia, libro, esPar = null) {
     else if (tSlug.includes('cuaresma') || tSlug === 'tc') subdominio = 'tc';
     else if (tSlug.includes('pascua') || tSlug === 'tp') subdominio = 'tp';
 
-    const libroNorm = String(libro || 'laudes').toLowerCase().trim();
     const esCompletasOrdinario = (subdominio === 'to' && libroNorm === 'completas');
 
     // Para completas del tiempo ordinario, siempre se utiliza el audio grabado en la semana 1 (s01)

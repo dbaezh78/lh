@@ -7,7 +7,7 @@
     <link rel="icon" href="../img/ico-laudes.ico" type="image/x-icon">
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/buttons.css">
-    <link rel="stylesheet" href="../css/nombresanto.css">
+    <link rel="stylesheet" href="../css/nombresanto.css?v=1.0.14">
 
 </head>
 <body>
@@ -110,6 +110,122 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- SECCIÓN: ARCHIVOS DE AUDIO DEL SANTO (LECTURAS Y HORAS) -->
+            <div class="seccion-audios-santo" id="seccion-audios-santo">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid #bae6fd; padding-bottom: 8px;">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; color: #0369a1; font-size: 1.05rem;">
+                        <span class="material-symbols-outlined" style="font-size: 22px; color: #0284c7;">headphones</span>
+                        Archivos de Audio Litúrgico / Lecturas
+                    </h3>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.8rem; color: #0284c7; font-weight: 600;">Servidor santos.resucito.do</span>
+                        <a href="oficiodelectura.html" target="_blank" style="font-size: 0.78rem; color: #8B0000; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 2px;">
+                            <span class="material-symbols-outlined" style="font-size: 15px;">menu_book</span> Catálogo Oficio
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Carpeta o Ubicación Base del Servidor -->
+                <div style="margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                        <label for="santo-audio-basepath" style="font-size: 0.85rem; font-weight: 600; color: #334155;">
+                            Carpeta o URL Base en Servidor Web:
+                        </label>
+                        <span id="badge-estado-carpeta-audio" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; font-weight: 700; background: #e0f2fe; color: #0369a1;">
+                            Sin configurar
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="text" id="santo-audio-basepath" class="input-santo-audio-base" style="flex: 1; min-width: 260px; padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-family: monospace; font-size: 0.88rem;" placeholder="https://santos.resucito.do/mes/00-NOMBRE_SANTO/">
+                        <button type="button" id="btn-autodetectar-audio-santo" title="Buscar carpeta correspondiente en el servidor según fecha y nombre del santo" style="background: #0284c7; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">travel_explore</span>
+                            Autodetectar
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;" id="presets-audio-santo">
+                        <!-- Presets rápidos generados dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Contenedor de Archivos de Audio -->
+                <div id="contenedor-audios-santo" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
+                    <!-- Rellenado dinámicamente según el santo -->
+                </div>
+
+                <!-- Panel de Referencia y Ubicación del Evangelio del Santo -->
+                <div id="panel-evangelio-santo-ref" class="panel-evangelio-santo-box">
+                    <div class="panel-evangelio-header">
+                        <div style="display: flex; align-items: center; gap: 7px;">
+                            <span class="material-symbols-outlined" style="font-size: 22px; color: #b45309;">church</span>
+                            <span style="font-weight: 700; color: #92400e; font-size: 0.92rem;">Evangelio del Santo (Ubicación Web y Local)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <span class="badge-evangelio-servidor" title="Servidor oficial de Evangelios">https://ev.resucito.do/santos/</span>
+                            <button type="button" id="btn-agregar-audio-extra" style="background: #ffffff; color: #0284c7; border: 1px solid #7dd3fc; padding: 5px 10px; border-radius: 6px; font-size: 0.80rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+                                Agregar otro audio (Himno, Hora, etc.)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="panel-evangelio-body">
+                        <!-- Fila 1: Archivo y URL Web con controles -->
+                        <div class="panel-evangelio-fila">
+                            <div style="flex: 1; min-width: 260px;">
+                                <div style="font-size: 0.74rem; font-weight: 600; color: #475569; margin-bottom: 3px;">
+                                    Archivo MP3 / URL Web del Evangelio:
+                                </div>
+                                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                    <input type="text" id="santo-evangelio-archivo" class="input-audio-archivo input-evangelio-archivo" data-tipo="evangelio" placeholder="ej. 19-marzo-sjose.mp3" style="font-weight: 600; color: #1e293b; flex: 1; min-width: 220px;">
+                                    <button type="button" class="btn-play-audio-santo" id="btn-play-evangelio-santo" data-url="" data-titulo="Evangelio del Santo" style="background: #b45309; padding: 5px 9px;">
+                                        <span class="material-symbols-outlined" style="font-size: 16px;">play_arrow</span> Escuchar
+                                    </button>
+                                    <a id="link-evangelio-santo" href="https://ev.resucito.do/santos/" target="_blank" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 5px 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" title="Abrir enlace MP3">
+                                        <span class="material-symbols-outlined" style="font-size: 15px;">open_in_new</span>
+                                    </a>
+                                    <button type="button" id="btn-copiar-url-evangelio" class="btn-copiar-ruta-santo" title="Copiar URL Web completa al portapapeles">
+                                        <span class="material-symbols-outlined" style="font-size: 15px;">content_copy</span> Copiar URL Web
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fila 2: Ruta en PC para Grabación / Servidor local -->
+                        <div class="panel-evangelio-ruta-pc">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="material-symbols-outlined" style="font-size: 16px; color: #475569;">folder_open</span>
+                                    <span style="font-size: 0.74rem; font-weight: 700; color: #334155;">Carpeta en PC (para subir o grabar):</span>
+                                    <code id="txt-ruta-pc-evangelio" class="codigo-ruta-pc">C:\db\Github\ev\santos\...</code>
+                                </div>
+                                <button type="button" id="btn-copiar-pc-evangelio" class="btn-copiar-ruta-santo" title="Copiar ruta local de Windows al portapapeles">
+                                    <span class="material-symbols-outlined" style="font-size: 15px;">content_copy</span> Copiar Ruta PC
+                                </button>
+                            </div>
+                            <div style="font-size: 0.71rem; color: #64748b; margin-top: 3px;">
+                                💡 Convención oficial: <code>numero-mes-nombresanto.mp3</code> (ej: <code>19-marzo-sjose.mp3</code>). Al grabar desde el servicio de audio en esta carpeta, se protege automáticamente agregando <code>(copia)</code> para no sobreescribir.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Reproductor Integrado -->
+                <div id="mini-reproductor-santo" style="margin-top: 12px; padding: 10px 14px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: none; align-items: center; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+                    <button type="button" id="btn-play-mini-santo" style="background: #0284c7; color: white; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <span class="material-symbols-outlined">play_arrow</span>
+                    </button>
+                    <div style="flex: 1; overflow: hidden;">
+                        <div id="mini-reproductor-titulo" style="font-size: 0.84rem; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Reproduciendo...</div>
+                        <div id="mini-reproductor-tiempo" style="font-size: 0.75rem; color: #64748b; font-family: monospace;">0:00 / 0:00</div>
+                    </div>
+                    <button type="button" id="btn-cerrar-mini-reproductor" title="Detener y cerrar reproductor" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- SECCIÓN: LITURGIAS TRABAJADAS / CÓDIGOS ASIGNADOS -->
             <div class="seccion-codigos-santo" id="seccion-codigos-santo" style="margin: 18px 0; padding: 16px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid #bbf7d0; padding-bottom: 8px;">
@@ -342,6 +458,7 @@
     <script src="../js/nombresanto.js?v=1790603500" type="module"></script>
     <script type="module">
         import { catalogoSantosAnual } from '../data/catalogoSantosAnual.js';
+        import { SANTOS_CARPETAS_GITHUB } from '../data/santosCarpetas.js';
 
         const STORAGE_KEY = 'lh_catalogo_nombres_santos';
         const ELIMINADOS_KEY = 'lh_santos_eliminados';
@@ -1192,7 +1309,12 @@
                             const datosRemotos = await window.firebaseAPI.cargarSantosFirestore();
                             if (datosRemotos && Array.isArray(datosRemotos) && datosRemotos.length > 0) {
                                 const eliminadosSet = new Set(obtenerEliminados().map(n => n.toLowerCase().trim()));
-                                const datosValidos = [];
+                                let cambios = false;
+                                const localMap = new Map();
+                                catalogoSantos.forEach((s, idx) => {
+                                    if (s && s.nombre) localMap.set(s.nombre.toLowerCase().trim(), idx);
+                                });
+
                                 for (const s of datosRemotos) {
                                     if (!s || !s.nombre) continue;
                                     const clave = s.nombre.toLowerCase().trim();
@@ -1201,12 +1323,30 @@
                                         if (modoAdmin && window.firebaseAPI.eliminarSantoFirestore) {
                                             window.firebaseAPI.eliminarSantoFirestore(s.nombre).catch(() => {});
                                         }
+                                        continue;
+                                    }
+
+                                    // Solo agregar si no existe localmente o si en la nube es más reciente
+                                    if (!localMap.has(clave)) {
+                                        catalogoSantos.push(s);
+                                        localMap.set(clave, catalogoSantos.length - 1);
+                                        cambios = true;
                                     } else {
-                                        datosValidos.push(s);
+                                        const idx = localMap.get(clave);
+                                        const tRemoto = s.ultimaActualizacion ? new Date(s.ultimaActualizacion).getTime() : 0;
+                                        const tLocal = catalogoSantos[idx].ultimaActualizacion ? new Date(catalogoSantos[idx].ultimaActualizacion).getTime() : 0;
+                                        if (tRemoto > tLocal + 2000) {
+                                            catalogoSantos[idx] = { ...catalogoSantos[idx], ...s };
+                                            cambios = true;
+                                        }
                                     }
                                 }
-                                guardarSantosLocal(datosValidos);
-                                console.log(`☁️ [Firestore] Catálogo sincronizado desde la nube (${datosValidos.length} santos).`);
+                                if (cambios) {
+                                    guardarSantosLocal(catalogoSantos);
+                                    console.log(`☁️ [Firestore] Catálogo actualizado con novedades de la nube (${catalogoSantos.length} santos).`);
+                                    actualizarTotalSantos();
+                                    mostrarPagina(paginaActual);
+                                }
                             }
                         } catch (err) {
                             console.warn("⚠️ No se pudo descargar desde Cloud Firestore (usando copia local):", err);
@@ -2499,6 +2639,609 @@
             return codigos;
         }
 
+        // =========================================================================
+        // GESTIÓN DE ARCHIVOS DE AUDIO DEL SANTO (LECTURAS Y HORAS)
+        // =========================================================================
+        const MESES_NOMBRES_AUDIO = [
+            'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+            'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+        ];
+        let reproductorAudioSanto = new Audio();
+        let audioBtnActivo = null;
+        let listaAudiosAdicionalesSanto = [];
+        let santoActualAudios = null;
+
+        function autodetectarCarpetaSanto(nombreSanto, fechaCelebracion) {
+            const fechaStr = (fechaCelebracion || '').trim();
+            const partes = fechaStr.match(/(\d+)\/(\d+)/);
+            if (!partes) return null;
+            const diaNum = parseInt(partes[1], 10);
+            const mesNum = parseInt(partes[2], 10);
+            if (mesNum < 1 || mesNum > 12) return null;
+
+            const mesNombre = MESES_NOMBRES_AUDIO[mesNum - 1];
+
+            // 1. Buscar en las 93 carpetas existentes de santos.resucito.do
+            if (typeof SANTOS_CARPETAS_GITHUB !== 'undefined' && Array.isArray(SANTOS_CARPETAS_GITHUB)) {
+                const coincidenciasFecha = SANTOS_CARPETAS_GITHUB.filter(f => f.mesNum === mesNum && f.dia === diaNum);
+                if (coincidenciasFecha.length === 1) {
+                    const match = coincidenciasFecha[0];
+                    return {
+                        folder: match.folder,
+                        subRuta: match.subRuta,
+                        basePath: `https://santos.resucito.do/${encodeURI(match.subRuta)}/`,
+                        origen: 'santos_carpetas'
+                    };
+                }
+                if (coincidenciasFecha.length > 1) {
+                    const cleanStr = str => (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, ' ');
+                    const palabrasSanto = cleanStr(nombreSanto).split(/\s+/).filter(w => w.length > 3 && w !== 'santa' && w !== 'santo' && w !== 'virgen');
+                    let mejorMatch = coincidenciasFecha[0];
+                    let maxPuntos = -1;
+                    coincidenciasFecha.forEach(f => {
+                        const fWords = cleanStr(f.folder).split(/\s+/);
+                        let puntos = 0;
+                        fWords.forEach(fw => {
+                            if (palabrasSanto.some(sw => sw.includes(fw) || fw.includes(sw))) puntos++;
+                        });
+                        if (puntos > maxPuntos) {
+                            maxPuntos = puntos;
+                            mejorMatch = f;
+                        }
+                    });
+                    return {
+                        folder: mejorMatch.folder,
+                        subRuta: mejorMatch.subRuta,
+                        basePath: `https://santos.resucito.do/${encodeURI(mejorMatch.subRuta)}/`,
+                        origen: 'santos_carpetas'
+                    };
+                }
+            }
+
+            // 2. Ruta canónica estándar si no tiene carpeta física aún
+            const slugMayus = (nombreSanto || 'SANTO').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            const folderEst = `${String(diaNum).padStart(2, '0')}-${slugMayus}`;
+            const subRutaEst = `${mesNombre}/${folderEst}`;
+            return {
+                folder: folderEst,
+                subRuta: subRutaEst,
+                basePath: `https://santos.resucito.do/${encodeURI(subRutaEst)}/`,
+                origen: 'estandar'
+            };
+        }
+
+        function renderAudiosSanto(santo) {
+            santoActualAudios = santo;
+            const inputBase = document.getElementById('santo-audio-basepath');
+            const badgeEstado = document.getElementById('badge-estado-carpeta-audio');
+            const presetsCont = document.getElementById('presets-audio-santo');
+            const contAudios = document.getElementById('contenedor-audios-santo');
+            const btnAuto = document.getElementById('btn-autodetectar-audio-santo');
+            const btnAddExtra = document.getElementById('btn-agregar-audio-extra');
+            const btnPlayMini = document.getElementById('btn-play-mini-santo');
+            const btnCerrarMini = document.getElementById('btn-cerrar-mini-reproductor');
+
+            if (!contAudios) return;
+
+            // Inicializar eventos de controles una sola vez
+            if (btnAuto && !btnAuto._bound) {
+                btnAuto._bound = true;
+                btnAuto.addEventListener('click', () => {
+                    const nom = document.getElementById('nombre')?.value || '';
+                    const cel = document.getElementById('celebracion')?.value || '';
+                    const auto = autodetectarCarpetaSanto(nom, cel);
+                    if (auto && inputBase) {
+                        inputBase.value = auto.basePath;
+                        if (badgeEstado) {
+                            badgeEstado.textContent = 'Autodetectada';
+                            badgeEstado.style.background = '#dcfce7';
+                            badgeEstado.style.color = '#166534';
+                        }
+                        renderCardsAudiosSanto();
+                    } else {
+                        alert('No se pudo autodetectar la carpeta automáticamente. Ingresa la ruta manualmente.');
+                    }
+                });
+            }
+
+            if (btnAddExtra && !btnAddExtra._bound) {
+                btnAddExtra._bound = true;
+                btnAddExtra.addEventListener('click', () => {
+                    if (!Array.isArray(listaAudiosAdicionalesSanto)) listaAudiosAdicionalesSanto = [];
+                    listaAudiosAdicionalesSanto.push({ nombre: 'Nuevo Audio', archivo: 'audio.mp3' });
+                    renderCardsAudiosSanto();
+                });
+            }
+
+            if (btnPlayMini && !btnPlayMini._bound) {
+                btnPlayMini._bound = true;
+                btnPlayMini.addEventListener('click', () => {
+                    if (!reproductorAudioSanto.src) return;
+                    if (reproductorAudioSanto.paused) {
+                        reproductorAudioSanto.play();
+                        btnPlayMini.innerHTML = '<span class="material-symbols-outlined">pause</span>';
+                    } else {
+                        reproductorAudioSanto.pause();
+                        btnPlayMini.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
+                    }
+                });
+            }
+
+            if (btnCerrarMini && !btnCerrarMini._bound) {
+                btnCerrarMini._bound = true;
+                btnCerrarMini.addEventListener('click', () => {
+                    detenerMiniReproductor();
+                });
+            }
+
+            if (inputBase && !inputBase._bound) {
+                inputBase._bound = true;
+                inputBase.addEventListener('input', () => {
+                    renderCardsAudiosSanto();
+                });
+            }
+
+            if (!santo) {
+                if (inputBase) inputBase.value = '';
+                if (badgeEstado) {
+                    badgeEstado.textContent = 'Sin configurar';
+                    badgeEstado.style.background = '#e0f2fe';
+                    badgeEstado.style.color = '#0369a1';
+                }
+                if (presetsCont) presetsCont.innerHTML = '';
+                contAudios.innerHTML = '<div style="grid-column: 1 / -1; color: #64748b; font-style: italic; font-size: 0.9rem; padding: 10px;">Selecciona o edita un santo para ver y gestionar sus archivos de audio litúrgico.</div>';
+                listaAudiosAdicionalesSanto = [];
+                detenerMiniReproductor();
+                actualizarReferenciaEvangelioSanto(null);
+                return;
+            }
+
+            // Obtener o autodetectar la base del santo
+            let basePath = '';
+            let subRuta = '';
+            let esPersonalizada = false;
+
+            if (santo.audios && santo.audios.basePath) {
+                basePath = santo.audios.basePath;
+                subRuta = santo.audios.subRuta || '';
+                esPersonalizada = true;
+            } else if (santo.audioBasePath) {
+                basePath = santo.audioBasePath;
+                esPersonalizada = true;
+            }
+
+            // Comprobar si hay una ruta personalizada en localStorage
+            if (!basePath) {
+                try {
+                    const rutasGuardadas = JSON.parse(localStorage.getItem('lh_oficio_rutas_personalizadas') || '{}');
+                    const cKey1 = `santos_${santo.nombre}`;
+                    if (rutasGuardadas[cKey1]) {
+                        basePath = rutasGuardadas[cKey1];
+                        esPersonalizada = true;
+                    }
+                } catch (_) {}
+            }
+
+            // Si aún no tiene base, autodetectarla
+            if (!basePath) {
+                const auto = autodetectarCarpetaSanto(santo.nombre, santo.celebracion || santo.fechaFestividad);
+                if (auto) {
+                    basePath = auto.basePath;
+                    subRuta = auto.subRuta;
+                } else {
+                    basePath = 'https://santos.resucito.do/enero/01-SANTAMAR%C3%8DAMADREDEDIOS/';
+                }
+            }
+
+            if (!basePath.endsWith('/')) basePath += '/';
+            if (inputBase) inputBase.value = basePath;
+
+            // Actualizar badge de estado
+            if (badgeEstado) {
+                if (esPersonalizada) {
+                    badgeEstado.textContent = 'Ruta Personalizada';
+                    badgeEstado.style.background = '#dbeafe';
+                    badgeEstado.style.color = '#1e40af';
+                } else {
+                    badgeEstado.textContent = 'Carpeta Oficial Detectada';
+                    badgeEstado.style.background = '#dcfce7';
+                    badgeEstado.style.color = '#166534';
+                }
+            }
+
+            // Botones de presets rápidos
+            if (presetsCont) {
+                presetsCont.innerHTML = '';
+                const partesRuta = basePath.split('/').filter(Boolean);
+                const subCarpeta = partesRuta.length >= 4 ? partesRuta.slice(3).join('/') : '';
+
+                const presets = [
+                    { label: 'santos.resucito.do', base: `https://santos.resucito.do/${subCarpeta}/`.replace(/([^:]\/)\/+/g, "$1") },
+                    { label: 'GitHub Mirror', base: `http://dbaezh78.github.io/santos/${subCarpeta}/`.replace(/([^:]\/)\/+/g, "$1") },
+                    { label: 'Localhost (4000)', base: `http://localhost:4000/santos/${subCarpeta}/`.replace(/([^:]\/)\/+/g, "$1") }
+                ];
+
+                presets.forEach(p => {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'btn-preset-audio-santo';
+                    b.textContent = p.label;
+                    b.title = p.base;
+                    b.addEventListener('click', () => {
+                        if (inputBase) {
+                            inputBase.value = p.base;
+                            renderCardsAudiosSanto();
+                        }
+                    });
+                    presetsCont.appendChild(b);
+                });
+            }
+
+            // Guardar lista de adicionales si existen
+            listaAudiosAdicionalesSanto = (santo.audios && Array.isArray(santo.audios.adicionales))
+                ? [...santo.audios.adicionales]
+                : [];
+
+            // Renderizar las cards de audio y la referencia del evangelio
+            renderCardsAudiosSanto();
+            actualizarReferenciaEvangelioSanto(santo);
+        }
+
+        function renderCardsAudiosSanto() {
+            const contAudios = document.getElementById('contenedor-audios-santo');
+            const inputBase = document.getElementById('santo-audio-basepath');
+            if (!contAudios) return;
+
+            let basePath = (inputBase ? inputBase.value.trim() : '') || 'https://santos.resucito.do/';
+            if (!basePath.endsWith('/')) basePath += '/';
+
+            // Archivos principales
+            const audiosConfigurados = (santoActualAudios && santoActualAudios.audios && santoActualAudios.audios.archivos) ? santoActualAudios.audios.archivos : {};
+
+            const audiosPrincipales = [
+                { id: 'lectura1', nombre: '1ª Lectura Bíblica (Año Impar)', archivo: audiosConfigurados['lectura1'] || 'lectura1.mp3', icono: 'menu_book', desc: 'Lectura bíblica oficial' },
+                { id: 'lectura2', nombre: '1ª Lectura Bíblica (Año Par - Común)', archivo: audiosConfigurados['lectura2'] || 'lectura1.mp3', icono: 'menu_book', desc: 'Misma lectura bíblica (sin año par/impar)' },
+                { id: 'lecturas', nombre: '2ª Lectura Patrística', archivo: audiosConfigurados['lecturas'] || 'lecturas.mp3', icono: 'auto_stories', desc: 'Lectura de los Santos Padres' },
+                { id: 'oficio', nombre: 'Oficio de Lectura Completo', archivo: audiosConfigurados['oficio'] || 'oficio.mp3', icono: 'hearing', desc: 'Hora completa de Oficio' },
+                { id: 'laudes', nombre: 'Laudes del Santo', archivo: audiosConfigurados['laudes'] || 'laudes.mp3', icono: 'wb_sunny', desc: 'Hora mayor de la mañana' },
+                { id: 'visperas', nombre: 'Vísperas del Santo', archivo: audiosConfigurados['visperas'] || 'visperas.mp3', icono: 'nights_stay', desc: 'Hora mayor del atardecer' }
+            ];
+
+            let html = '';
+            audiosPrincipales.forEach(item => {
+                const urlCompleta = item.archivo.startsWith('http') ? item.archivo : `${basePath}${item.archivo}`;
+                html += `
+                    <div class="card-audio-santo">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-weight: 700; color: #0369a1; font-size: 0.86rem; display: flex; align-items: center; gap: 5px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px; color: #0284c7;">${item.icono}</span>
+                                ${item.nombre}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.73rem; color: #64748b;">${item.desc}</div>
+                        <input type="text" class="input-audio-archivo" data-tipo="${item.id}" value="${item.archivo}" placeholder="${item.archivo}">
+                        <div style="display: flex; gap: 6px; margin-top: auto; padding-top: 4px;">
+                            <button type="button" class="btn-play-audio-santo" data-url="${urlCompleta}" data-titulo="${item.nombre}">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">play_arrow</span> Escuchar
+                            </button>
+                            <a href="${urlCompleta}" target="_blank" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 5px 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" title="Abrir enlace MP3">
+                                <span class="material-symbols-outlined" style="font-size: 15px;">open_in_new</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Audios adicionales agregados por el usuario
+            if (Array.isArray(listaAudiosAdicionalesSanto)) {
+                listaAudiosAdicionalesSanto.forEach((extra, idx) => {
+                    const urlCompleta = extra.archivo.startsWith('http') ? extra.archivo : `${basePath}${extra.archivo}`;
+                    html += `
+                        <div class="card-audio-santo" style="border-color: #f59e0b;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <input type="text" class="input-audio-extra-nombre" data-idx="${idx}" value="${extra.nombre || 'Audio Extra'}" style="font-weight: 700; color: #b45309; font-size: 0.86rem; border: none; background: transparent; padding: 0;">
+                                <button type="button" onclick="eliminarAudioExtraSanto(${idx})" style="background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 2px;" title="Eliminar este audio">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+                                </button>
+                            </div>
+                            <input type="text" class="input-audio-archivo-extra" data-idx="${idx}" value="${extra.archivo || ''}" placeholder="archivo.mp3 o URL completa">
+                            <div style="display: flex; gap: 6px; margin-top: auto; padding-top: 4px;">
+                                <button type="button" class="btn-play-audio-santo" data-url="${urlCompleta}" data-titulo="${extra.nombre}">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">play_arrow</span> Escuchar
+                                </button>
+                                <a href="${urlCompleta}" target="_blank" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 5px 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;" title="Abrir enlace MP3">
+                                    <span class="material-symbols-outlined" style="font-size: 15px;">open_in_new</span>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            contAudios.innerHTML = html;
+
+            // Binds de reproducción
+            contAudios.querySelectorAll('.btn-play-audio-santo').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const u = btn.getAttribute('data-url');
+                    const t = btn.getAttribute('data-titulo');
+                    reproducirAudioSanto(u, t, btn);
+                });
+            });
+
+            // Binds de inputs para actualizar enlaces al cambiar
+            contAudios.querySelectorAll('.input-audio-archivo').forEach(inp => {
+                inp.addEventListener('input', () => {
+                    const card = inp.closest('.card-audio-santo');
+                    if (!card) return;
+                    const val = inp.value.trim();
+                    const urlComp = val.startsWith('http') ? val : `${basePath}${val}`;
+                    const btnPlay = card.querySelector('.btn-play-audio-santo');
+                    const aOpen = card.querySelector('a');
+                    if (btnPlay) btnPlay.setAttribute('data-url', urlComp);
+                    if (aOpen) aOpen.setAttribute('href', urlComp);
+                });
+            });
+        }
+
+        function reproducirAudioSanto(url, titulo, btn = null) {
+            if (!url) return;
+            const miniRep = document.getElementById('mini-reproductor-santo');
+            const miniTit = document.getElementById('mini-reproductor-titulo');
+            const miniPlayBtn = document.getElementById('btn-play-mini-santo');
+            const miniTiempo = document.getElementById('mini-reproductor-tiempo');
+
+            if (reproductorAudioSanto.src === url && !reproductorAudioSanto.paused) {
+                reproductorAudioSanto.pause();
+                if (miniPlayBtn) miniPlayBtn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
+                if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">play_arrow</span> Escuchar';
+                return;
+            }
+
+            reproductorAudioSanto.src = url;
+            reproductorAudioSanto.play().then(() => {
+                if (miniRep) miniRep.style.display = 'flex';
+                if (miniTit) miniTit.textContent = `${titulo} • ${url}`;
+                if (miniPlayBtn) miniPlayBtn.innerHTML = '<span class="material-symbols-outlined">pause</span>';
+                if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">pause</span> Pausar';
+                audioBtnActivo = btn;
+            }).catch(err => {
+                console.warn('Error reproduciendo audio:', err);
+                alert(`No se pudo reproducir el audio: ${url}\n(Verifica que el archivo exista o esté publicado en el servidor).`);
+            });
+
+            reproductorAudioSanto.ontimeupdate = () => {
+                if (miniTiempo && reproductorAudioSanto.duration) {
+                    const c = Math.floor(reproductorAudioSanto.currentTime);
+                    const d = Math.floor(reproductorAudioSanto.duration);
+                    miniTiempo.textContent = `${Math.floor(c/60)}:${String(c%60).padStart(2,'0')} / ${Math.floor(d/60)}:${String(d%60).padStart(2,'0')}`;
+                }
+            };
+
+            reproductorAudioSanto.onended = () => {
+                if (miniPlayBtn) miniPlayBtn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
+                if (audioBtnActivo) audioBtnActivo.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">play_arrow</span> Escuchar';
+            };
+        }
+
+        function detenerMiniReproductor() {
+            if (reproductorAudioSanto) {
+                reproductorAudioSanto.pause();
+                reproductorAudioSanto.src = '';
+            }
+            const miniRep = document.getElementById('mini-reproductor-santo');
+            if (miniRep) miniRep.style.display = 'none';
+            if (audioBtnActivo) {
+                audioBtnActivo.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">play_arrow</span> Escuchar';
+            }
+        }
+
+        function calcularEvangelioSanto(santo) {
+            const nomSanto = santo?.nombre || document.getElementById('nombre')?.value || '';
+            const fechaSanto = santo?.celebracion || santo?.fechaFestividad || document.getElementById('celebracion')?.value || '';
+
+            let diaNum = null;
+            let mesNum = null;
+            let mesTexto = '';
+            const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+            if (fechaSanto) {
+                const m = fechaSanto.match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
+                if (m) {
+                    diaNum = parseInt(m[1], 10);
+                    mesNum = parseInt(m[2], 10);
+                    if (mesNum >= 1 && mesNum <= 12) {
+                        mesTexto = meses[mesNum - 1];
+                    }
+                }
+            }
+
+            if (!diaNum || !mesTexto) {
+                if (typeof autodetectarCarpetaSanto === 'function') {
+                    const auto = autodetectarCarpetaSanto(nomSanto, fechaSanto);
+                    if (auto && auto.subRuta && auto.subRuta.includes('/')) {
+                        const partes = auto.subRuta.split('/');
+                        mesTexto = partes[0].toLowerCase();
+                        const mDia = partes[1].match(/^(\d{1,2})/);
+                        if (mDia) diaNum = parseInt(mDia[1], 10);
+                    }
+                }
+            }
+
+            let slugSanto = 'santo';
+            const cleanNom = (nomSanto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+            if (cleanNom.includes('jose')) {
+                slugSanto = 'sjose';
+            } else if (cleanNom.includes('providencia')) {
+                slugSanto = 'divinaprovidencia';
+            } else if (cleanNom.includes('pedroy') || cleanNom.includes('pedropablo')) {
+                slugSanto = 'pedroypablo';
+            } else {
+                const stopwords = new Set(['santa', 'santo', 'san', 'virgen', 'madre', 'padre', 'del', 'de', 'la', 'los', 'el', 'y', 'reina', 'apostol', 'martir', 'obispo']);
+                const tokens = (nomSanto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/).filter(w => w.length > 2 && !stopwords.has(w));
+                slugSanto = tokens.slice(0, 3).join('') || 'santo';
+            }
+
+            const diaStr = diaNum ? String(diaNum).padStart(2, '0') : '00';
+            const mesStr = mesTexto || 'mes';
+            const archivoSugerido = `${diaStr}-${mesStr}-${slugSanto}.mp3`;
+            const webUrl = `https://ev.resucito.do/santos/${archivoSugerido}`;
+            const localPath = `C:\\db\\Github\\ev\\santos\\${archivoSugerido}`;
+
+            return {
+                diaNum,
+                mesTexto,
+                slugSanto,
+                archivoSugerido,
+                webUrl,
+                localPath
+            };
+        }
+
+        function actualizarReferenciaEvangelioSanto(santo) {
+            const panel = document.getElementById('panel-evangelio-santo-ref');
+            const inpArchivo = document.getElementById('santo-evangelio-archivo');
+            const btnPlay = document.getElementById('btn-play-evangelio-santo');
+            const linkWeb = document.getElementById('link-evangelio-santo');
+            const txtPc = document.getElementById('txt-ruta-pc-evangelio');
+            const btnCopiarWeb = document.getElementById('btn-copiar-url-evangelio');
+            const btnCopiarPc = document.getElementById('btn-copiar-pc-evangelio');
+
+            if (!panel) return;
+            if (!santo) {
+                panel.style.display = 'none';
+                return;
+            }
+            panel.style.display = 'block';
+
+            const evInfo = calcularEvangelioSanto(santo);
+            const audiosConfigurados = (santo.audios && santo.audios.archivos) ? santo.audios.archivos : {};
+            let archivoActual = audiosConfigurados['evangelio'] || (evInfo ? evInfo.archivoSugerido : 'evangelio.mp3');
+
+            function refrescarVistasEvangelio(nomArchivo) {
+                const nombreLimpio = (nomArchivo || '').trim() || (evInfo ? evInfo.archivoSugerido : 'evangelio.mp3');
+                const urlCompleta = nombreLimpio.startsWith('http') ? nombreLimpio : `https://ev.resucito.do/santos/${nombreLimpio}`;
+                const rutaPcCompleta = `C:\\db\\Github\\ev\\santos\\${nombreLimpio}`;
+
+                if (inpArchivo && inpArchivo.value !== nombreLimpio) {
+                    inpArchivo.value = nombreLimpio;
+                }
+                if (btnPlay) {
+                    btnPlay.setAttribute('data-url', urlCompleta);
+                    btnPlay.setAttribute('data-titulo', `Evangelio de ${santo.nombre || 'Santo'}`);
+                }
+                if (linkWeb) {
+                    linkWeb.href = urlCompleta;
+                }
+                if (txtPc) {
+                    txtPc.textContent = rutaPcCompleta;
+                    txtPc.title = rutaPcCompleta;
+                }
+            }
+
+            refrescarVistasEvangelio(archivoActual);
+
+            if (inpArchivo && !inpArchivo._evBound) {
+                inpArchivo._evBound = true;
+                inpArchivo.addEventListener('input', () => {
+                    refrescarVistasEvangelio(inpArchivo.value.trim());
+                });
+            }
+
+            if (btnPlay && !btnPlay._evBound) {
+                btnPlay._evBound = true;
+                btnPlay.addEventListener('click', () => {
+                    const u = btnPlay.getAttribute('data-url');
+                    const t = btnPlay.getAttribute('data-titulo') || 'Evangelio';
+                    reproducirAudioSanto(u, t, btnPlay);
+                });
+            }
+
+            if (btnCopiarWeb && !btnCopiarWeb._evBound) {
+                btnCopiarWeb._evBound = true;
+                btnCopiarWeb.addEventListener('click', () => {
+                    const u = linkWeb ? linkWeb.href : '';
+                    if (u && navigator.clipboard) {
+                        navigator.clipboard.writeText(u);
+                        btnCopiarWeb.innerHTML = '<span class="material-symbols-outlined" style="font-size: 15px; color: #16a34a;">check</span> ¡Copiado!';
+                        setTimeout(() => {
+                            btnCopiarWeb.innerHTML = '<span class="material-symbols-outlined" style="font-size: 15px;">content_copy</span> URL Web';
+                        }, 1800);
+                    }
+                });
+            }
+
+            if (btnCopiarPc && !btnCopiarPc._evBound) {
+                btnCopiarPc._evBound = true;
+                btnCopiarPc.addEventListener('click', () => {
+                    const p = txtPc ? txtPc.textContent : '';
+                    if (p && navigator.clipboard) {
+                        navigator.clipboard.writeText(p);
+                        btnCopiarPc.innerHTML = '<span class="material-symbols-outlined" style="font-size: 15px; color: #16a34a;">check</span> ¡Copiado!';
+                        setTimeout(() => {
+                            btnCopiarPc.innerHTML = '<span class="material-symbols-outlined" style="font-size: 15px;">content_copy</span> Copiar Ruta PC';
+                        }, 1800);
+                    }
+                });
+            }
+        }
+
+        window.reproducirAudioSanto = reproducirAudioSanto;
+        window.detenerMiniReproductor = detenerMiniReproductor;
+        window.renderAudiosSanto = renderAudiosSanto;
+        window.actualizarReferenciaEvangelioSanto = actualizarReferenciaEvangelioSanto;
+
+        window.eliminarAudioExtraSanto = function(idx) {
+            if (Array.isArray(listaAudiosAdicionalesSanto) && idx >= 0 && idx < listaAudiosAdicionalesSanto.length) {
+                listaAudiosAdicionalesSanto.splice(idx, 1);
+                renderCardsAudiosSanto();
+            }
+        };
+
+        function recolectarAudiosDelFormulario() {
+            const inputBase = document.getElementById('santo-audio-basepath');
+            if (!inputBase || !inputBase.value.trim()) return null;
+
+            let basePath = inputBase.value.trim();
+            if (!basePath.endsWith('/')) basePath += '/';
+
+            const archivos = {};
+            document.querySelectorAll('.input-audio-archivo').forEach(inp => {
+                const tipo = inp.getAttribute('data-tipo');
+                const val = inp.value.trim();
+                if (tipo && val) archivos[tipo] = val;
+            });
+
+            const adicionales = [];
+            const cardsExtras = document.querySelectorAll('.card-audio-santo[style*="f59e0b"]');
+            cardsExtras.forEach((c, i) => {
+                const inpNom = c.querySelector('.input-audio-extra-nombre');
+                const inpArch = c.querySelector('.input-audio-archivo-extra');
+                if (inpArch && inpArch.value.trim()) {
+                    adicionales.push({
+                        nombre: inpNom ? inpNom.value.trim() : `Audio ${i + 1}`,
+                        archivo: inpArch.value.trim()
+                    });
+                }
+            });
+
+            let subRuta = '';
+            try {
+                const partes = basePath.replace(/^https?:\/\/[^\/]+\//i, '').replace(/\/+$/, '').split('/');
+                subRuta = decodeURI(partes.join('/'));
+            } catch (_) {
+                subRuta = basePath;
+            }
+
+            return {
+                basePath: basePath,
+                subRuta: subRuta,
+                clave: `santos_${subRuta}`,
+                archivos: archivos,
+                adicionales: adicionales
+            };
+        }
+
         function renderLiturgiasTrabajadasSanto(santo) {
             const container = document.getElementById('contenedor-liturgias-santo');
             if (!container) return;
@@ -2617,6 +3360,9 @@
             // Renderizar las liturgias trabajadas y códigos asignados de este santo
             renderLiturgiasTrabajadasSanto(s);
 
+            // Renderizar archivos de audio del santo (lecturas y horas)
+            renderAudiosSanto(s);
+
             document.getElementById('btn-submit-form').textContent = 'Actualizar Santo';
             document.getElementById('btn-cancelar-edicion').style.display = 'inline-block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2629,6 +3375,8 @@
             quitarImagen();
             document.getElementById('tbody-hijos').innerHTML = '<tr><td><input type="text" class="input-hijo" name="hijo_en_la_fe" placeholder="Nombre del hijo en la fe" aria-label="Nombre del hijo en la fe"></td><td style="text-align: center;"><button type="button" class="btn-delete-row" onclick="eliminarFila(this)">Borrar</button></td></tr>';
             renderLiturgiasTrabajadasSanto(null);
+            renderAudiosSanto(null);
+            detenerMiniReproductor();
             document.getElementById('btn-submit-form').textContent = 'Guardar Santo';
             document.getElementById('btn-cancelar-edicion').style.display = 'none';
 
@@ -2720,6 +3468,22 @@
                 hijos: hijos
             };
 
+            // Recolectar configuración de audios del formulario
+            const audiosConfig = recolectarAudiosDelFormulario();
+            if (audiosConfig) {
+                nuevoSanto.audios = audiosConfig;
+                nuevoSanto.audioBasePath = audiosConfig.basePath;
+                // Sincronizar en localStorage para que oficiodelectura.html y demás módulos lo usen inmediatamente
+                try {
+                    const rutasGuardadas = JSON.parse(localStorage.getItem('lh_oficio_rutas_personalizadas') || '{}');
+                    const cKey = audiosConfig.clave || `santos_${audiosConfig.subRuta}`;
+                    if (cKey && audiosConfig.basePath) {
+                        rutasGuardadas[cKey] = audiosConfig.basePath;
+                        localStorage.setItem('lh_oficio_rutas_personalizadas', JSON.stringify(rutasGuardadas));
+                    }
+                } catch (_) {}
+            }
+
             const santos = obtenerSantos();
             const editIdx = parseInt(document.getElementById('edit-index').value, 10);
 
@@ -2727,6 +3491,10 @@
                 const santoAnterior = santos[editIdx];
                 if (santoAnterior && (santoAnterior.codigosLiturgia || santoAnterior.liturgias)) {
                     nuevoSanto.codigosLiturgia = santoAnterior.codigosLiturgia || santoAnterior.liturgias;
+                }
+                if (santoAnterior && santoAnterior.audios && !nuevoSanto.audios) {
+                    nuevoSanto.audios = santoAnterior.audios;
+                    nuevoSanto.audioBasePath = santoAnterior.audioBasePath;
                 }
                 const nombreViejo = santoAnterior ? santoAnterior.nombre : '';
                 if (nombreViejo && nombreViejo.toLowerCase().trim() !== nuevoSanto.nombre.toLowerCase().trim()) {
@@ -2748,6 +3516,10 @@
                 if (idxExistente >= 0) {
                     if (santos[idxExistente].codigosLiturgia || santos[idxExistente].liturgias) {
                         nuevoSanto.codigosLiturgia = santos[idxExistente].codigosLiturgia || santos[idxExistente].liturgias;
+                    }
+                    if (santos[idxExistente].audios && !nuevoSanto.audios) {
+                        nuevoSanto.audios = santos[idxExistente].audios;
+                        nuevoSanto.audioBasePath = santos[idxExistente].audioBasePath;
                     }
                     santos[idxExistente] = nuevoSanto;
                 } else {
@@ -2889,6 +3661,96 @@
                 `;
             }
 
+            // Audios Litúrgicos / Grabaciones del Santo (Lecturas y Horas)
+            const audiosSantoModal = s.audios;
+            let basePathModal = (audiosSantoModal && audiosSantoModal.basePath) ? audiosSantoModal.basePath : (s.audioBasePath || '');
+            if (!basePathModal) {
+                const autoModal = autodetectarCarpetaSanto(s.nombre, s.celebracion || s.fechaFestividad);
+                if (autoModal) basePathModal = autoModal.basePath;
+            }
+            if (basePathModal) {
+                if (!basePathModal.endsWith('/')) basePathModal += '/';
+                const archsModal = (audiosSantoModal && audiosSantoModal.archivos) ? audiosSantoModal.archivos : {
+                    lectura1: 'lectura1.mp3',
+                    lectura2: 'lectura1.mp3',
+                    lecturas: 'lecturas.mp3'
+                };
+                const labelsModal = {
+                    'lectura1': { label: '1ª Lectura (Impar)', file: archsModal['lectura1'] || 'lectura1.mp3', icon: 'menu_book' },
+                    'lecturas': { label: '2ª Lectura Patrística', file: archsModal['lecturas'] || 'lecturas.mp3', icon: 'auto_stories' },
+                    'oficio': { label: 'Oficio Completo', file: archsModal['oficio'] || 'oficio.mp3', icon: 'hearing' },
+                    'laudes': { label: 'Laudes', file: archsModal['laudes'] || 'laudes.mp3', icon: 'wb_sunny' },
+                    'visperas': { label: 'Vísperas', file: archsModal['visperas'] || 'visperas.mp3', icon: 'nights_stay' }
+                };
+
+                let audiosItemsHtml = '';
+                ['lectura1', 'lecturas', 'oficio', 'laudes', 'visperas'].forEach(k => {
+                    const cfg = labelsModal[k];
+                    if (cfg && cfg.file) {
+                        const urlFile = cfg.file.startsWith('http') ? cfg.file : (basePathModal + encodeURI(cfg.file));
+                        audiosItemsHtml += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; font-size: 0.82rem;">
+                                <span style="font-weight: 600; color: #0369a1; display: flex; align-items: center; gap: 4px;">
+                                    <span class="material-symbols-outlined" style="font-size: 16px; color: #0284c7;">${cfg.icon}</span>
+                                    ${cfg.label}
+                                </span>
+                                <div style="display: flex; gap: 4px;">
+                                    <button type="button" onclick="window.reproducirAudioSanto('${urlFile.replace(/'/g, "\\'")}', '${cfg.label.replace(/'/g, "\\'")}', this)" style="background: #0284c7; color: white; border: none; padding: 2px 8px; border-radius: 4px; font-size: 0.74rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 2px;">
+                                        <span class="material-symbols-outlined" style="font-size: 14px;">play_arrow</span> Escuchar
+                                    </button>
+                                    <a href="${urlFile}" target="_blank" download style="background: #e2e8f0; color: #334155; text-decoration: none; padding: 2px 6px; border-radius: 4px; font-size: 0.74rem; display: inline-flex; align-items: center;" title="Descargar / Abrir MP3">
+                                        <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span>
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                if (audiosSantoModal && Array.isArray(audiosSantoModal.adicionales)) {
+                    audiosSantoModal.adicionales.forEach(ad => {
+                        if (ad && ad.archivo) {
+                            const urlFile = ad.archivo.startsWith('http') ? ad.archivo : (basePathModal + encodeURI(ad.archivo));
+                            audiosItemsHtml += `
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; font-size: 0.82rem;">
+                                    <span style="font-weight: 600; color: #b45309; display: flex; align-items: center; gap: 4px;">
+                                        <span class="material-symbols-outlined" style="font-size: 16px; color: #f59e0b;">audio_file</span>
+                                        ${ad.nombre || ad.archivo}
+                                    </span>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button type="button" onclick="window.reproducirAudioSanto('${urlFile.replace(/'/g, "\\'")}', '${(ad.nombre || ad.archivo).replace(/'/g, "\\'")}', this)" style="background: #d97706; color: white; border: none; padding: 2px 8px; border-radius: 4px; font-size: 0.74rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 2px;">
+                                            <span class="material-symbols-outlined" style="font-size: 14px;">play_arrow</span> Escuchar
+                                        </button>
+                                        <a href="${urlFile}" target="_blank" download style="background: #e2e8f0; color: #334155; text-decoration: none; padding: 2px 6px; border-radius: 4px; font-size: 0.74rem; display: inline-flex; align-items: center;">
+                                            <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+
+                if (audiosItemsHtml) {
+                    cuerpoHtml += `
+                        <div style="border-top: 1.5px solid #bae6fd; padding-top: 10px; margin-top: 8px;">
+                            <strong style="color: #0369a1; display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px;">
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="material-symbols-outlined" style="font-size: 18px; color: #0284c7;">headphones</span>
+                                    Archivos de Audio Litúrgico:
+                                </span>
+                                <a href="oficiodelectura.html" target="_blank" style="font-size: 0.72rem; color: #8B0000; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 2px;">
+                                    Catálogo Oficio
+                                </a>
+                            </strong>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                ${audiosItemsHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
             document.getElementById('modal-santo-cuerpo').innerHTML = cuerpoHtml;
             document.getElementById('modal-detalle-santo').style.display = 'flex';
             if (window.prepararBarraProgresoSanto) window.prepararBarraProgresoSanto(s);
@@ -2897,6 +3759,7 @@
         window.cerrarModalDetalleSanto = function() {
             document.getElementById('modal-detalle-santo').style.display = 'none';
             if (window.detenerLecturaSantoVoz) window.detenerLecturaSantoVoz();
+            if (typeof detenerMiniReproductor === 'function') detenerMiniReproductor();
             window.actualizarContadorNavegacion();
         };
 

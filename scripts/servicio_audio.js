@@ -187,8 +187,111 @@ async function sintetizarTextoCompleto(texto, lang = 'es-US', onProgreso = null)
     return await transcodificarA40k(rawConcat, '40k');
 }
 
-function guardarEnReposLocales(filename, semana, dia, mp3Buffer, textHash = '', voice = 'hombre') {
-    if (!semana || !dia || !mp3Buffer || mp3Buffer.length === 0) return;
+function guardarEnReposLocales(filename, semana, dia, mp3Buffer, textHash = '', voice = 'hombre', tiempo = '', folder = '') {
+    if (!mp3Buffer || mp3Buffer.length === 0) return;
+
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const esSanto = (tiempo && tiempo.toLowerCase().includes('santo')) || 
+                    (semana && meses.includes(semana.toLowerCase().trim())) ||
+                    (folder && meses.some(m => folder.toLowerCase().startsWith(m))) ||
+                    (dia && typeof dia === 'string' && dia.startsWith('sa'));
+
+    // CASO 1: Es un santo -> Guardar en C:\db\Github\santos o C:\db\Github\ev\santos
+    if (esSanto) {
+        try {
+            // Sub-caso A: Evangelio de Santos -> C:\db\Github\ev\santos
+            const esEvangelio = filename.toLowerCase().includes('evangelio') || 
+                                (folder && folder.toLowerCase().includes('ev')) || 
+                                filename.toLowerCase().startsWith('ev_') || 
+                                /^\d{1,2}-[a-z]+-.*\.mp3$/i.test(filename);
+
+            if (esEvangelio) {
+                const evSantosBase = 'C:/db/Github/ev/santos';
+                if (fs.existsSync(evSantosBase)) {
+                    let destFileName = filename;
+                    let destFilePath = path.join(evSantosBase, destFileName);
+
+                    if (fs.existsSync(destFilePath)) {
+                        const ext = path.extname(filename);
+                        const baseName = path.basename(filename, ext);
+                        let copiaIdx = 1;
+                        let candidato = `${baseName} copia${ext}`;
+                        while (fs.existsSync(path.join(evSantosBase, candidato))) {
+                            copiaIdx++;
+                            candidato = `${baseName} copia ${copiaIdx}${ext}`;
+                        }
+                        destFileName = candidato;
+                        destFilePath = path.join(evSantosBase, destFileName);
+                        console.log(`[Santos Evangelio Auto-Save] Audio original existente. Guardando copia segura como: ${destFileName}`);
+                    }
+
+                    fs.writeFileSync(destFilePath, mp3Buffer);
+                    console.log(`[Santos Evangelio Auto-Save] Guardado en: ${destFilePath} (${Math.round(mp3Buffer.length / 1024)} KB) @ 40kbps [${voice}]`);
+                    return;
+                }
+            }
+
+            // Sub-caso B: Lecturas y Horas del Santo -> C:\db\Github\santos
+            const santosBase = 'C:/db/Github/santos';
+            if (fs.existsSync(santosBase)) {
+                let mesFolder = semana && meses.includes(semana.toLowerCase().trim()) ? semana.toLowerCase().trim() : '';
+                let celebFolder = folder || dia || '';
+
+                if (celebFolder.includes('/')) {
+                    const partes = celebFolder.split('/');
+                    if (meses.includes(partes[0].toLowerCase())) {
+                        mesFolder = partes[0].toLowerCase();
+                        celebFolder = partes.slice(1).join('/');
+                    }
+                }
+
+                if (!mesFolder && celebFolder) {
+                    // Buscar en qué mes existe esta carpeta en C:\db\Github\santos
+                    for (const m of meses) {
+                        const testPath = path.join(santosBase, m, celebFolder);
+                        if (fs.existsSync(testPath)) {
+                            mesFolder = m;
+                            break;
+                        }
+                    }
+                }
+
+                if (!mesFolder) mesFolder = 'enero';
+                const destFolder = celebFolder ? path.join(santosBase, mesFolder, celebFolder) : path.join(santosBase, mesFolder);
+
+                if (!fs.existsSync(destFolder)) {
+                    fs.mkdirSync(destFolder, { recursive: true });
+                }
+
+                // SI EXISTE EL AUDIO DEL SANTO, PONER 'copia' PARA NO SOBREESCRIBIRLO
+                let destFileName = filename;
+                let destFilePath = path.join(destFolder, destFileName);
+
+                if (fs.existsSync(destFilePath)) {
+                    const ext = path.extname(filename);
+                    const baseName = path.basename(filename, ext);
+                    let copiaIdx = 1;
+                    let candidato = `${baseName} copia${ext}`;
+                    while (fs.existsSync(path.join(destFolder, candidato))) {
+                        copiaIdx++;
+                        candidato = `${baseName} copia ${copiaIdx}${ext}`;
+                    }
+                    destFileName = candidato;
+                    destFilePath = path.join(destFolder, destFileName);
+                    console.log(`[Santos Audio Auto-Save] Audio original existente. Guardando copia segura como: ${destFileName}`);
+                }
+
+                fs.writeFileSync(destFilePath, mp3Buffer);
+                console.log(`[Santos Audio Auto-Save] Guardado en: ${destFilePath} (${Math.round(mp3Buffer.length / 1024)} KB) @ 40kbps [${voice}]`);
+                return;
+            }
+        } catch (err) {
+            console.warn('[Santos Audio Auto-Save] Error guardando en C:/db/Github/santos:', err.message);
+        }
+    }
+
+    // CASO 2: Tiempos Litúrgicos Ordinarios
+    if (!semana || !dia) return;
     const semPadded = semana.startsWith('s') ? semana.toLowerCase() : ('s' + semana.padStart(2, '0'));
     const diaNorm = dia.toLowerCase().trim();
 
@@ -394,6 +497,8 @@ async function requestHandler(req, res) {
         const filename = parsedUrl.searchParams.get('filename') || req.headers['x-filename'] || 'audio.mp3';
         const semana = parsedUrl.searchParams.get('semana') || req.headers['x-semana'] || '';
         const dia = parsedUrl.searchParams.get('dia') || req.headers['x-dia'] || '';
+        const tiempo = parsedUrl.searchParams.get('tiempo') || req.headers['x-tiempo'] || '';
+        const folder = parsedUrl.searchParams.get('folder') || req.headers['x-folder'] || '';
         const returnAudio = parsedUrl.searchParams.get('returnAudio') === '1' || parsedUrl.searchParams.get('download') === '1';
         const textHash = parsedUrl.searchParams.get('textHash') || req.headers['x-text-hash'] || '';
         const voice = parsedUrl.searchParams.get('voice') || req.headers['x-voice'] || 'hombre';
@@ -406,9 +511,7 @@ async function requestHandler(req, res) {
             if (fullBuf.length > 0) {
                 // Transcodificar a 40 kbps garantizado con ffmpeg modulando voz masculina si aplica
                 bufFinal = await transcodificarA40k(fullBuf, '40k', voice);
-                if (semana && dia) {
-                    guardarEnReposLocales(filename, semana, dia, bufFinal, textHash, voice);
-                }
+                guardarEnReposLocales(filename, semana, dia, bufFinal, textHash, voice, tiempo, folder);
             }
 
             if (returnAudio && bufFinal.length > 0) {
@@ -545,8 +648,17 @@ async function requestHandler(req, res) {
 function iniciarServidores() {
     // 1. Iniciar Servidor HTTP en puerto 4000
     const serverHttp = http.createServer(requestHandler);
+    let intentoFallback = false;
 
     serverHttp.on('error', (err) => {
+        if (err.code === 'EACCES' && !intentoFallback) {
+            intentoFallback = true;
+            console.warn(`[HTTP] Puerto ${PORT_HTTP} bloqueado en 0.0.0.0. Reintentando en 127.0.0.1...`);
+            try {
+                serverHttp.listen(PORT_HTTP, '127.0.0.1');
+                return;
+            } catch (_) {}
+        }
         if (err.code === 'EACCES') {
             console.error('\n==================================================================');
             console.error(` [ERROR EACCES]: Permiso denegado al abrir el puerto HTTP ${PORT_HTTP}.`);
