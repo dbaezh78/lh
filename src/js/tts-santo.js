@@ -1459,11 +1459,25 @@ export async function descargarAudioSantoActual() {
         }
 
         if (!subRuta) {
-            const matchFecha = (s.celebracion || s.fechaFestividad || '').match(/(\d+)\/(\d+)/);
-            const diaNum = matchFecha ? parseInt(matchFecha[1], 10) : 1;
-            const mesNum = matchFecha ? parseInt(matchFecha[2], 10) : 1;
+            let diaNum = 1;
+            let mesNum = 1;
+            const fechaRaw = (s.celebracion || s.fechaFestividad || '').trim();
+            const matchFecha = fechaRaw.match(/^(\d{1,2})\/(\d{1,2})/);
+            if (matchFecha) {
+                diaNum = parseInt(matchFecha[1], 10);
+                mesNum = parseInt(matchFecha[2], 10);
+            } else {
+                const matchTexto = fechaRaw.match(/^(\d{1,2})(?:\/|\s+de\s+|\s+)([a-zA-ZáéíóúñÁÉÍÓÚÑ]+)/i);
+                if (matchTexto) {
+                    diaNum = parseInt(matchTexto[1], 10);
+                    const mTxt = matchTexto[2].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    const MESES_AUDIO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+                    const idx = MESES_AUDIO.findIndex(m => m.startsWith(mTxt) || mTxt.startsWith(m));
+                    if (idx >= 0) mesNum = idx + 1;
+                }
+            }
             const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-            mes = MESES[mesNum - 1] || 'enero';
+            mes = MESES[mesNum - 1] || 'noviembre';
             const slugMayus = (s.nombre || 'SANTO').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
             carpeta = `${String(diaNum).padStart(2, '0')}-${slugMayus}`;
             subRuta = `${mes}/${carpeta}`;

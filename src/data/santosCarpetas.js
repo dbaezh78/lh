@@ -998,6 +998,18 @@ export const SANTOS_CARPETAS_GITHUB = [
     {
         "mes": "noviembre",
         "mesNum": 11,
+        "dia": 23,
+        "folder": "23-San Clemente I",
+        "subRuta": "noviembre/23-San Clemente I",
+        "nombre": "San Clemente I",
+        "tipo": "Memoria",
+        "hasLec1": true,
+        "hasLec2": true,
+        "hasLecs": true
+    },
+    {
+        "mes": "noviembre",
+        "mesNum": 11,
         "dia": 24,
         "folder": "24-SANTOS ANDRÉS DUNG-LAC, presbítero, y compañeros, mártires",
         "subRuta": "noviembre/24-SANTOS ANDRÉS DUNG-LAC, presbítero, y compañeros, mártires",
@@ -1120,11 +1132,31 @@ export const SANTOS_CARPETAS_GITHUB = [
 export function autodetectarCarpetaSanto(nombreSanto, fechaCelebracion) {
     const MESES_NOMBRES_AUDIO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     const fechaStr = (fechaCelebracion || '').trim();
-    const partes = fechaStr.match(/(\d+)\/(\d+)/);
-    if (!partes) return null;
-    const diaNum = parseInt(partes[1], 10);
-    const mesNum = parseInt(partes[2], 10);
-    if (mesNum < 1 || mesNum > 12) return null;
+    let diaNum = null;
+    let mesNum = null;
+
+    // Soportar "23/11", "23/Noviembre", "23 de noviembre", "2026-11-23"
+    const partesSlash = fechaStr.match(/^(\d{1,2})\/(\d{1,2})/);
+    if (partesSlash) {
+        diaNum = parseInt(partesSlash[1], 10);
+        mesNum = parseInt(partesSlash[2], 10);
+    } else {
+        const partesMesTexto = fechaStr.match(/^(\d{1,2})(?:\/|\s+de\s+|\s+)([a-zA-ZáéíóúñÁÉÍÓÚÑ]+)/i);
+        if (partesMesTexto) {
+            diaNum = parseInt(partesMesTexto[1], 10);
+            const mesNombreTexto = partesMesTexto[2].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const idxMes = MESES_NOMBRES_AUDIO.findIndex(m => m.startsWith(mesNombreTexto) || mesNombreTexto.startsWith(m));
+            if (idxMes >= 0) mesNum = idxMes + 1;
+        } else {
+            const partesIso = fechaStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (partesIso) {
+                diaNum = parseInt(partesIso[3], 10);
+                mesNum = parseInt(partesIso[2], 10);
+            }
+        }
+    }
+
+    if (!diaNum || !mesNum || mesNum < 1 || mesNum > 12) return null;
 
     const mesNombre = MESES_NOMBRES_AUDIO[mesNum - 1];
 
