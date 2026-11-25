@@ -685,6 +685,24 @@ export class CintaLiturgica {
         return `<span class="lbl-semana-larga">Semana</span><span class="lbl-semana-corta">SEM</span> ${numSemana} • ${dia}`;
     }
 
+    formatearTextoMetadatosPlano(semana, dia) {
+        if (this.opciones.textoMetadatos) {
+            return String(this.opciones.textoMetadatos).replace(/<[^>]*>/g, '').trim();
+        }
+        const slugT = (this.opciones.tiempoSlug || '').toLowerCase();
+        const tiempoStr = (this.opciones.tiempo || '').toLowerCase();
+        const celebracionesSlugs = ['santos', 'solemnidades', 'fiestas'];
+        if (celebracionesSlugs.includes(slugT) || celebracionesSlugs.includes(tiempoStr)) {
+            if (dia) return dia;
+            if (slugT === 'solemnidades' || tiempoStr === 'solemnidades') return 'Solemnidades';
+            if (slugT === 'fiestas' || tiempoStr === 'fiestas') return 'Fiestas';
+            return 'Santos';
+        }
+        if (!semana) return dia || '';
+        const numSemana = String(semana).replace(/^semana\s*/i, '').replace(/^sem\s*/i, '').trim();
+        return `Semana ${numSemana} • ${dia}`;
+    }
+
     formatearTextoTiempo(tiempo) {
         const t = (tiempo || 'Tiempo Ordinario').toString().trim();
         const tUpper = t.toUpperCase();
@@ -748,7 +766,7 @@ export class CintaLiturgica {
                         <button type="button" class="cinta-badge-tiempo tiempo-${slugTiempo}" id="btn-toggle-tiempo" title="Toca para ocultar o mostrar el reproductor y las horas">
                             ${this.formatearTextoTiempo(tiempo)}
                         </button>
-                        <span class="cinta-texto-metadatos" id="cinta-texto-metadatos" title="${this.formatearTextoMetadatos(semana, dia)}">${this.formatearTextoMetadatos(semana, dia)}</span>
+                        <span class="cinta-texto-metadatos" id="cinta-texto-metadatos" title="${this.formatearTextoMetadatosPlano(semana, dia)}">${this.formatearTextoMetadatos(semana, dia)}</span>
                     </div>
 
                     <div class="cinta-sup-der">
@@ -1018,14 +1036,38 @@ export class CintaLiturgica {
 
         if (btnIglesia && menuAudios) {
             btnIglesia.addEventListener('click', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                menuAudios.classList.toggle('abierto');
+
+                // Cerrar popover de velocidad si estuviese abierto
+                const popoverVelocidad = document.getElementById('cinta-velocidad-popover');
+                const btnVelocidad = document.getElementById('btn-cinta-velocidad');
+                if (popoverVelocidad) popoverVelocidad.classList.remove('abierto');
+                if (btnVelocidad) btnVelocidad.classList.remove('abierto');
+
+                // Cerrar selector de semanas si estuviese abierto
+                const selectorSemanas = document.getElementById('cinta-selector-semanas');
+                if (selectorSemanas) {
+                    selectorSemanas.classList.remove('desplegado', 'abierto');
+                }
+
+                const abierto = menuAudios.classList.toggle('abierto');
+                btnIglesia.classList.toggle('activo', abierto);
             });
 
             // Cerrar menú al hacer clic fuera
             document.addEventListener('click', (e) => {
                 if (!menuAudios.contains(e.target) && !btnIglesia.contains(e.target)) {
                     menuAudios.classList.remove('abierto');
+                    btnIglesia.classList.remove('activo');
+                }
+            });
+
+            // Cerrar menú con tecla Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    menuAudios.classList.remove('abierto');
+                    btnIglesia.classList.remove('activo');
                 }
             });
 
@@ -1038,6 +1080,7 @@ export class CintaLiturgica {
                     if (modo) {
                         this.cambiarModoAudio(modo, true);
                         menuAudios.classList.remove('abierto');
+                        btnIglesia.classList.remove('activo');
                     }
                 });
             });
